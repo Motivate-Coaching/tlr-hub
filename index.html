@@ -971,23 +971,32 @@ const currentFeature = document.getElementById('building-momentum');
 const currentHeader = document.getElementById('current-feature-header');
 currentHeader.addEventListener('click', () => { currentFeature.classList.toggle('collapsed'); setActive('building-momentum'); });
 
-/* ── SCROLL SPY (sidebar dot follows scroll) */
+/* ── SMOOTH SCROLL + DOT UPDATE ON CLICK ── */
 const themeIds = ['building-momentum', 'energy-and-drive', 'boundaries', 'autopilot', 'decision-fatigue'];
-const sidebarLinks = document.querySelectorAll('.sidebar-nav li');
 
-const scrollObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => { if (entry.isIntersecting) setActive(entry.target.id); });
-}, { rootMargin: '-15% 0px -70% 0px' });
-
-themeIds.forEach(id => { const el = document.getElementById(id); if (el) scrollObserver.observe(el); });
-
-/* ── SMOOTH SCROLL ──────────────────────── */
 document.querySelectorAll('a[href^="#"]').forEach(link => {
   link.addEventListener('click', e => {
-    const target = document.querySelector(link.getAttribute('href'));
-    if (target) { e.preventDefault(); window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 110, behavior: 'smooth' }); }
+    const href = link.getAttribute('href');
+    const target = document.querySelector(href);
+    if (target) {
+      e.preventDefault();
+      window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 110, behavior: 'smooth' });
+      const id = href.replace('#', '');
+      if (themeIds.includes(id)) setActive(id);
+    }
   });
 });
+
+/* ── SCROLL SPY ─────────────────────────── */
+window.addEventListener('scroll', () => {
+  const scrollPos = window.scrollY + 200;
+  let current = 'building-momentum';
+  themeIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop <= scrollPos) current = id;
+  });
+  setActive(current);
+}, { passive: true });
 </script>
 </body>
 </html>
