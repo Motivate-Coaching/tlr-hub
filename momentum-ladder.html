@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Momentum Ladder — The Living Room</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #F5F1EB;
+  color: #1A1A1A;
+  line-height: 1.7;
+  font-size: 18px;
+  min-height: 100vh;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  background: #F5F1EB;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  padding: 0.75rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.back-link {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.35);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: color 0.15s;
+}
+.back-link:hover { color: #C9930A; }
+.tlr-logo {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.3);
+}
+.theme-pill {
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #C9930A;
+  font-weight: 600;
+}
+
+/* ── PAGE ── */
+.page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 3rem 2rem 5rem;
+}
+
+/* ── HEADER ── */
+.page-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: start;
+  margin-bottom: 3rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.header-left h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.8rem, 6vw, 4rem);
+  font-weight: 400;
+  line-height: 1.05;
+  color: #1A1A1A;
+  margin-bottom: 1rem;
+}
+.gold-rule {
+  width: 36px;
+  height: 2px;
+  background: #C9930A;
+  margin-bottom: 1.25rem;
+}
+.header-tagline {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1A1A1A;
+  line-height: 1.5;
+  margin-bottom: 0.6rem;
+}
+.header-tagline-gold {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #C9930A;
+  line-height: 1.55;
+  margin-bottom: 1.5rem;
+}
+.header-desc {
+  font-size: 1rem;
+  color: rgba(0,0,0,0.5);
+  line-height: 1.8;
+  font-weight: 300;
+}
+
+/* Instructions */
+.instructions { }
+.instructions-label {
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.35);
+  font-weight: 600;
+  margin-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  padding-bottom: 0.5rem;
+}
+.instruction-step {
+  display: flex;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+  align-items: flex-start;
+}
+.step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid #C9930A;
+  color: #C9930A;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.step-text {
+  font-size: 1rem;
+  color: rgba(0,0,0,0.6);
+  line-height: 1.6;
+}
+.step-text strong { color: #1A1A1A; font-weight: 600; }
+
+/* ── LADDER SECTION ── */
+.ladder-section {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 3rem;
+  align-items: center;
+  margin-bottom: 3rem;
+}
+
+/* Ladder SVG + inputs */
+.ladder-container {
+  position: relative;
+}
+.ladder-label {
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+.ladder-label-text {
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.4);
+  font-weight: 600;
+}
+.ladder-label-sub {
+  font-size: 1rem;
+  color: #C9930A;
+  font-style: italic;
+  font-family: 'Playfair Display', serif;
+}
+.ladder-arrow-top {
+  text-align: center;
+  font-size: 0.85rem;
+  color: rgba(0,0,0,0.3);
+  letter-spacing: 0.04em;
+  margin-bottom: 0.5rem;
+}
+
+.ladder-wrap {
+  position: relative;
+  width: 100%;
+}
+
+/* CSS Ladder */
+.ladder {
+  display: flex;
+  gap: 0;
+  justify-content: center;
+  position: relative;
+  padding: 0 40px;
+}
+.rail {
+  width: 14px;
+  background: linear-gradient(to bottom, #D4B896, #C4A070, #B8905A);
+  border-radius: 7px;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.12), inset -1px 0 2px rgba(255,255,255,0.3);
+  flex-shrink: 0;
+}
+.rungs-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+.rung-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  position: relative;
+}
+.rung-bar {
+  width: 100%;
+  height: 11px;
+  background: linear-gradient(to bottom, #E8D0B0, #D4B882, #C4A060);
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.4);
+  flex-shrink: 0;
+  margin: 0 -2px;
+  z-index: 2;
+}
+.rung-input-wrap {
+  width: 100%;
+  padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
+}
+.rung-input {
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1.5px dashed rgba(0,0,0,0.15);
+  padding: 0.4rem 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 300;
+  color: #1A1A1A;
+  outline: none;
+  text-align: center;
+  transition: border-color 0.15s;
+  resize: none;
+  overflow: hidden;
+  rows: 1;
+  display: block;
+  line-height: 1.6;
+  min-height: 2rem;
+}
+.rung-input:focus { border-bottom-color: #C9930A; }
+.rung-input::placeholder { color: rgba(0,0,0,0.22); font-style: italic; }
+.rung-input.top-rung { font-weight: 500; font-size: 1.1rem; }
+.rung-input.bottom-rung { color: #C9930A; font-weight: 600; }
+.rung-input.bottom-rung::placeholder { color: rgba(201,147,10,0.35); }
+
+.ladder-bottom-label {
+  text-align: center;
+  margin-top: 0.75rem;
+}
+
+/* Right side of ladder section */
+.ladder-right { }
+.compass-icon {
+  width: 56px;
+  height: 56px;
+  border: 1.5px solid rgba(0,0,0,0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  color: rgba(0,0,0,0.3);
+}
+
+/* ── COMMIT SECTION ── */
+.commit-section {
+  background: #EDE8DF;
+  border-radius: 10px;
+  padding: 1.75rem 2rem;
+  margin-bottom: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+.commit-label {
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.4);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.commit-question {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1A1A1A;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+.commit-input {
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1.5px solid rgba(0,0,0,0.2);
+  padding: 0.4rem 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 300;
+  color: #1A1A1A;
+  outline: none;
+  transition: border-color 0.15s;
+  resize: none;
+  overflow: hidden;
+  display: block;
+  line-height: 1.6;
+  min-height: 2rem;
+}
+.commit-input:focus { border-bottom-color: #C9930A; }
+.commit-input::placeholder { color: rgba(0,0,0,0.2); }
+
+/* Likelihood scale */
+.likelihood-label {
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.4);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.likelihood-q {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1A1A1A;
+  line-height: 1.5;
+  margin-bottom: 0.85rem;
+}
+.scale-circles {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+.scale-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,0.2);
+  background: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(0,0,0,0.4);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.scale-btn:hover { border-color: #C9930A; color: #C9930A; }
+.scale-btn.selected { background: #C9930A; border-color: #C9930A; color: white; }
+.scale-hint {
+  font-size: 0.9rem;
+  color: rgba(0,0,0,0.4);
+  font-style: italic;
+  margin-top: 0.6rem;
+  min-height: 1.2em;
+  transition: all 0.2s;
+}
+.scale-hint.warning { color: #C9930A; font-style: normal; font-weight: 500; }
+
+/* ── COMPLETE BTN ── */
+.complete-wrap {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+.complete-btn {
+  background: #1A1A1A;
+  color: #F5F1EB;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 1.1rem 3rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.complete-btn:hover { background: #333; }
+.complete-btn:active { transform: scale(0.98); }
+
+/* ── FOOTER ── */
+.page-footer {
+  border-top: 1px solid rgba(0,0,0,0.1);
+  padding-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.footer-theme {
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #1A1A1A;
+  padding-right: 1.5rem;
+  border-right: 2px solid #C9930A;
+  line-height: 1.4;
+}
+.footer-quote {
+  font-size: 1rem;
+  color: rgba(0,0,0,0.5);
+  font-weight: 300;
+  line-height: 1.5;
+}
+.footer-quote em { color: #C9930A; font-style: italic; font-weight: 400; }
+
+/* ── COMPLETION STATE ── */
+#completionView {
+  display: none;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 3rem 2rem 5rem;
+}
+#completionView.show { display: block; }
+
+.completion-top {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.check-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid #C9930A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.completion-heading {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: #1A1A1A;
+  margin-bottom: 0.2rem;
+}
+.completion-meta {
+  font-size: 0.7rem;
+  color: rgba(0,0,0,0.35);
+  letter-spacing: 0.06em;
+}
+
+/* Summary ladder */
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+.summary-card {
+  background: #EDE8DF;
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+}
+.summary-card-label {
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.35);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.summary-card-label.gold { color: #C9930A; }
+.summary-card-text {
+  font-size: 1.05rem;
+  color: #1A1A1A;
+  line-height: 1.6;
+  font-weight: 300;
+}
+.summary-card-text.bold { font-family: 'Playfair Display', serif; font-style: italic; font-size: 0.95rem; }
+
+.summary-steps {
+  background: white;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
+}
+.summary-steps-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.35);
+  font-weight: 600;
+  margin-bottom: 0.85rem;
+}
+.summary-step-row {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  font-size: 1rem;
+  color: rgba(0,0,0,0.6);
+  font-weight: 300;
+}
+.summary-step-row:last-child { border-bottom: none; }
+.step-arrow { color: #C9930A; flex-shrink: 0; }
+
+.completion-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+.action-btn {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.action-dark { background: #1A1A1A; color: #F5F1EB; border: none; }
+.action-dark:hover { background: #333; }
+.action-outline { background: none; color: rgba(0,0,0,0.45); border: 1.5px solid rgba(0,0,0,0.15); }
+.action-outline:hover { border-color: rgba(0,0,0,0.35); color: #1A1A1A; }
+
+.next-week-hint {
+  background: #EDE8DF;
+  border-left: 3px solid #C9930A;
+  padding: 1.25rem 1.5rem;
+  border-radius: 0 6px 6px 0;
+  font-size: 1rem;
+  color: rgba(0,0,0,0.55);
+  line-height: 1.6;
+}
+.next-week-hint strong { color: #1A1A1A; font-weight: 600; }
+
+/* ── KEEP YOUR MOMENTUM SECTION ── */
+.momentum-section {
+  margin-bottom: 2rem;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 10px;
+  padding: 1.5rem 1.75rem;
+  background: rgba(255,255,255,0.55);
+}
+.momentum-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.35);
+  margin-bottom: 1.1rem;
+}
+.momentum-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 0;
+}
+.momentum-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.9rem 0.5rem 0.85rem;
+  background: #F5F1EB;
+  border: 1.5px solid rgba(0,0,0,0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.momentum-btn:hover {
+  background: #EDE8DF;
+  border-color: #C9930A;
+  color: #C9930A;
+}
+.momentum-btn:hover .mbtn-icon { color: #C9930A; }
+.mbtn-icon {
+  color: rgba(0,0,0,0.45);
+  display: flex;
+  transition: color 0.15s;
+}
+.mbtn-label {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.45);
+  line-height: 1.3;
+  transition: color 0.15s;
+}
+.momentum-btn:hover .mbtn-label { color: #C9930A; }
+.momentum-btn.copied .mbtn-label { color: #3B6D11; }
+.momentum-btn.copied .mbtn-icon { color: #3B6D11; }
+
+/* Calendar panel */
+.cal-panel {
+  display: none;
+  margin-top: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  background: white;
+  border: 1.5px solid rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+.cal-panel.open { display: block; }
+.cal-panel-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  color: #1A1A1A;
+  margin-bottom: 1rem;
+}
+.cal-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+}
+.cal-field { display: flex; flex-direction: column; gap: 0.35rem; }
+.cal-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.4);
+}
+.cal-input {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  padding: 0.55rem 0.75rem;
+  border: 1.5px solid rgba(0,0,0,0.15);
+  border-radius: 6px;
+  background: #F9F7F2;
+  color: #1A1A1A;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.cal-input:focus { border-color: #C9930A; }
+.cal-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+.cal-add-btn {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.65rem 1.3rem;
+  background: #1A1A1A;
+  color: #F5F1EB;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background 0.15s;
+}
+.cal-add-btn:hover { background: #333; }
+.cal-cancel-btn {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: rgba(0,0,0,0.4);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem 0.5rem;
+  transition: color 0.15s;
+}
+.cal-cancel-btn:hover { color: #1A1A1A; }
+.cal-hint {
+  font-size: 0.72rem;
+  color: rgba(0,0,0,0.35);
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .page-header { grid-template-columns: 1fr; gap: 2rem; }
+  .ladder-section { grid-template-columns: 1fr; }
+  .ladder-right { display: none; }
+  .commit-section { grid-template-columns: 1fr; gap: 1.25rem; }
+  .summary-grid { grid-template-columns: 1fr; }
+  .momentum-actions { grid-template-columns: repeat(2, 1fr); }
+  .cal-fields { grid-template-columns: 1fr; }
+}
+
+/* ── PRINT PDF BUTTON ── */
+.print-option {
+  margin-top: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: rgba(0,0,0,0.35);
+}
+.print-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: none;
+  border: 1.5px solid rgba(0,0,0,0.15);
+  border-radius: 4px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: rgba(0,0,0,0.45);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Inter', sans-serif;
+}
+.print-btn:hover { border-color: rgba(0,0,0,0.35); color: #1A1A1A; }
+
+@media print {
+  /* Hide interactive chrome */
+  .topbar,
+  .complete-wrap,
+  .completion-actions,
+  #completionView,
+  .ladder-right { display: none !important; }
+
+  /* Clean white page */
+  body { background: white !important; font-size: 13px; }
+  .page { padding: 1.5cm 1.5cm 2cm; max-width: 100%; }
+
+  /* Header stays clean */
+  .page-header { grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 1.5rem; padding-bottom: 1.25rem; }
+  .header-left h1 { font-size: 2.8rem; }
+  .header-tagline { font-size: 0.95rem; }
+  .header-tagline-gold { font-size: 0.95rem; }
+  .header-desc { font-size: 0.85rem; }
+  .step-text { font-size: 0.85rem; }
+
+  /* Ladder section - full width */
+  .ladder-section { grid-template-columns: 1fr; }
+
+  /* Ladder rails: warm wood tone still looks great in greyscale print */
+  .rail { background: #C4A060 !important; box-shadow: none !important; }
+  .rung-bar { background: #D4B882 !important; box-shadow: none !important; }
+
+  /* Rung inputs: just show clean underlines, placeholder text hidden */
+  .rung-input { font-size: 0.95rem; border-bottom: 1px solid #999 !important; }
+  .rung-input::placeholder { color: transparent !important; }
+  .rung-input.bottom-rung { color: #C9930A !important; }
+
+  /* Commit section: no fill */
+  .commit-section { background: #F5F5F5 !important; border: 1px solid #ddd; }
+  .commit-input { font-size: 0.95rem; border-bottom: 1px solid #999 !important; }
+  .commit-input::placeholder { color: transparent !important; }
+  .scale-circles { gap: 0.25rem; }
+  .scale-btn { width: 28px; height: 28px; font-size: 0.75rem; }
+  .scale-hint { display: none; }
+
+  /* Footer */
+  .page-footer { margin-top: 1.5rem; }
+  .footer-quote { font-size: 0.88rem; }
+
+  /* Print watermark / attribution */
+  .page::after {
+    content: "motivate-coaching.com/thelivingroom";
+    display: block;
+    text-align: center;
+    font-size: 0.65rem;
+    color: #aaa;
+    letter-spacing: 0.08em;
+    margin-top: 2rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="back-link">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8 1L3 6l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Resource Library
+  </a>
+  <div class="theme-pill">Building Momentum &nbsp;·&nbsp; Week 1 of 4</div>
+  <div class="tlr-logo">TLR &nbsp;The Living Room</div>
+</div>
+
+<!-- ═══ FORM VIEW ═══ -->
+<div class="page" id="formView">
+
+  <div class="page-header">
+    <div class="header-left">
+      <h1>The Momentum<br>Ladder</h1>
+      <div class="gold-rule"></div>
+      <div class="header-tagline">Momentum rarely comes from motivation.</div>
+      <div class="header-tagline-gold">It usually comes from making the first step small enough to begin.</div>
+      <div class="header-desc">Use this tool to break down what matters most into a single step small enough that it feels almost impossible not to take.</div>
+    </div>
+    <div class="instructions">
+      <div class="instructions-label">How to use this tool</div>
+      <div class="instruction-step">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>Start at the top.</strong> Write down what matters most to you right now.</div>
+      </div>
+      <div class="instruction-step">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>Break it down.</strong> Fill in the rungs — each one a smaller step toward the top.</div>
+      </div>
+      <div class="instruction-step">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>Make the bottom step tiny.</strong> Small enough it feels almost impossible not to do.</div>
+      </div>
+      <div class="instruction-step">
+        <div class="step-num">4</div>
+        <div class="step-text"><strong>Take that step.</strong> Momentum begins there.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LADDER -->
+  <div class="ladder-section">
+    <div class="ladder-container">
+      <div class="ladder-label">
+        <div class="ladder-label-text">What matters most</div>
+        <div class="ladder-label-sub">to me right now?</div>
+      </div>
+      <div class="ladder-arrow-top">▼</div>
+
+      <div class="ladder-wrap">
+        <div class="ladder">
+          <div class="rail" id="railLeft"></div>
+          <div class="rungs-col" id="rungsCol">
+            <!-- Top rung input -->
+            <div class="rung-input-wrap">
+              <textarea class="rung-input top-rung" id="rung-top" rows="1" placeholder="What I most want to move toward…"></textarea>
+            </div>
+            <div class="rung-row"><div class="rung-bar"></div></div>
+            <div class="rung-input-wrap">
+              <textarea class="rung-input" id="rung-1" rows="1" placeholder="A step toward that…"></textarea>
+            </div>
+            <div class="rung-row"><div class="rung-bar"></div></div>
+            <div class="rung-input-wrap">
+              <textarea class="rung-input" id="rung-2" rows="1" placeholder="Smaller still…"></textarea>
+            </div>
+            <div class="rung-row"><div class="rung-bar"></div></div>
+            <div class="rung-input-wrap">
+              <textarea class="rung-input" id="rung-3" rows="1" placeholder="Even smaller…"></textarea>
+            </div>
+            <div class="rung-row"><div class="rung-bar"></div></div>
+            <div class="rung-input-wrap">
+              <textarea class="rung-input" id="rung-4" rows="1" placeholder="Getting tiny now…"></textarea>
+            </div>
+            <div class="rung-row"><div class="rung-bar"></div></div>
+            <div class="rung-input-wrap">
+              <textarea class="rung-input bottom-rung" id="rung-bottom" rows="1" placeholder="The smallest step I could take today…"></textarea>
+            </div>
+          </div>
+          <div class="rail" id="railRight"></div>
+        </div>
+      </div>
+
+      <div class="ladder-bottom-label">
+        <div class="ladder-label-text">The smallest step</div>
+        <div class="ladder-label-sub">I could take today.</div>
+      </div>
+    </div>
+
+    <div class="ladder-right">
+      <div class="compass-icon">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="11" stroke="currentColor" stroke-width="1.3"/><path d="M13 7v2M13 17v2M7 13H9M17 13h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M10.5 10.5l5 5M15.5 10.5l-5 5" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.4"/><circle cx="13" cy="13" r="1.5" fill="currentColor"/></svg>
+      </div>
+      <div class="header-tagline" style="font-size:0.9rem;margin-bottom:0.5rem;">The rungs in the middle are yours to fill.</div>
+      <div class="header-desc" style="margin-bottom:1.5rem;">There is no right number of steps. The only rule is that the bottom rung must be small enough to feel almost too easy.</div>
+      <div class="header-desc"><em style="color:#C9930A;font-family:'Playfair Display',serif;font-size:0.9rem;">"Momentum isn't found. It's built."</em></div>
+    </div>
+  </div>
+
+  <!-- COMMIT -->
+  <div class="commit-section">
+    <div>
+      <div class="commit-label">Which step will I commit to today?</div>
+      <div class="commit-question">Write it here — your one commitment.</div>
+      <textarea class="commit-input" id="commitStep" rows="1" placeholder="I will…"></textarea>
+    </div>
+    <div>
+      <div class="likelihood-label">How likely am I to do it?</div>
+      <div class="likelihood-q">Be honest. Rate 1–10.</div>
+      <div class="scale-circles" id="scaleCircles">
+        <button class="scale-btn" onclick="rate(this,1)">1</button>
+        <button class="scale-btn" onclick="rate(this,2)">2</button>
+        <button class="scale-btn" onclick="rate(this,3)">3</button>
+        <button class="scale-btn" onclick="rate(this,4)">4</button>
+        <button class="scale-btn" onclick="rate(this,5)">5</button>
+        <button class="scale-btn" onclick="rate(this,6)">6</button>
+        <button class="scale-btn" onclick="rate(this,7)">7</button>
+        <button class="scale-btn" onclick="rate(this,8)">8</button>
+        <button class="scale-btn" onclick="rate(this,9)">9</button>
+        <button class="scale-btn" onclick="rate(this,10)">10</button>
+      </div>
+      <div class="scale-hint" id="scaleHint"></div>
+    </div>
+  </div>
+
+  <div class="complete-wrap">
+    <button class="complete-btn" onclick="complete()">Complete this tool</button>
+    <div class="print-option">
+      <span>Prefer pen and paper?</span>
+      <button class="print-btn" onclick="window.print()">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="3" y="1" width="9" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M3 8H2a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5v-4A.5.5 0 0 0 13 8h-1" stroke="currentColor" stroke-width="1.3"/><rect x="4" y="9.5" width="7" height="4" rx=".5" stroke="currentColor" stroke-width="1.3"/><path d="M5 4h5M5 6h3" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.4"/></svg>
+        Print blank worksheet
+      </button>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-theme">Building<br>Momentum</div>
+    <div class="footer-quote">Momentum isn't found. <em>It's built.</em></div>
+  </div>
+
+</div>
+
+<!-- ═══ COMPLETION VIEW ═══ -->
+<div id="completionView">
+
+  <div class="completion-top">
+    <div class="check-circle">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10l4.5 4.5L16 6" stroke="#C9930A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div>
+      <div class="completion-heading">Rung climbed.</div>
+      <div class="completion-meta" id="compMeta"></div>
+    </div>
+    <div style="margin-left:auto; text-align:right;">
+      <div class="tlr-logo" style="font-size:0.55rem; color:rgba(0,0,0,0.3);">TLR &nbsp;The Living Room</div>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-card-label gold">What matters most</div>
+      <div class="summary-card-text bold" id="s-top"></div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-label gold">My commitment</div>
+      <div class="summary-card-text bold" id="s-commit"></div>
+      <div style="margin-top:0.5rem;"><span id="s-when" style="font-size:0.68rem;color:#C9930A;background:rgba(201,147,10,0.1);border:1px solid rgba(201,147,10,0.2);padding:0.18rem 0.6rem;border-radius:10px;"></span></div>
+    </div>
+  </div>
+
+  <div class="summary-steps">
+    <div class="summary-steps-label">Your ladder — top to bottom</div>
+    <div id="s-rungs"></div>
+  </div>
+
+  <!-- Primary save -->
+  <div class="completion-actions">
+    <button class="action-btn action-dark" onclick="window.print()">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="2" y="1" width="9" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M2 7H1a.5.5 0 0 0-.5.5v3.5a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V7.5A.5.5 0 0 0 12 7h-1" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="8" width="7" height="3.5" rx=".5" stroke="currentColor" stroke-width="1.3"/></svg>
+      Save to compendium
+    </button>
+    <button class="action-btn action-outline" onclick="startOver()">Start again</button>
+    <a href="index.html" class="action-btn action-outline">Back to library</a>
+  </div>
+
+  <!-- Keep your momentum -->
+  <div class="momentum-section">
+    <div class="momentum-label">Keep your momentum</div>
+    <div class="momentum-actions">
+
+      <button class="momentum-btn" onclick="emailToSelf()" title="Email yourself your ladder">
+        <span class="mbtn-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="4" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 5.5l7 5 7-5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </span>
+        <span class="mbtn-label">Email to myself</span>
+      </button>
+
+      <button class="momentum-btn" onclick="shareWhatsApp()" title="Send to WhatsApp">
+        <span class="mbtn-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7.5" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 6.5C5.5 6.5 6 8 7.5 9.5S11.5 12.5 11.5 12.5l1-1.5-1.5-1-.75.75S9.5 10 8.5 9s-1.75-1.75-1.75-1.75L7.5 6.5 6 5l-1.5 1.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="mbtn-label">WhatsApp</span>
+      </button>
+
+      <button class="momentum-btn" id="calBtn" onclick="toggleCalPanel()" title="Add commitment to calendar">
+        <span class="mbtn-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3.5" width="14" height="12" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 7.5h14" stroke="currentColor" stroke-width="1.4"/><path d="M6 2v3M12 2v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M6 11h2m2 0h2M6 13.5h1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </span>
+        <span class="mbtn-label">Add to calendar</span>
+      </button>
+
+      <button class="momentum-btn" id="copyBtn" onclick="copyCommitment()" title="Copy commitment to clipboard">
+        <span class="mbtn-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="6" y="4" width="9" height="11" rx="1.2" stroke="currentColor" stroke-width="1.4"/><path d="M4 14V3.5A1.5 1.5 0 0 1 5.5 2H12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </span>
+        <span class="mbtn-label" id="copyLabel">Copy commitment</span>
+      </button>
+
+    </div>
+
+    <!-- Calendar picker panel -->
+    <div class="cal-panel" id="calPanel">
+      <div class="cal-panel-title">Schedule your commitment</div>
+      <div class="cal-fields">
+        <div class="cal-field">
+          <label class="cal-label">Date</label>
+          <input type="date" id="calDate" class="cal-input">
+        </div>
+        <div class="cal-field">
+          <label class="cal-label">Time</label>
+          <input type="time" id="calTime" class="cal-input" value="09:00">
+        </div>
+        <div class="cal-field">
+          <label class="cal-label">Repeat</label>
+          <select id="calRepeat" class="cal-input">
+            <option value="none">No repeat</option>
+            <option value="DAILY">Every day</option>
+            <option value="WEEKLY">Every week</option>
+            <option value="MONTHLY">Every month</option>
+          </select>
+        </div>
+      </div>
+      <div class="cal-actions">
+        <button class="cal-add-btn" onclick="downloadICS()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v8M3 6l3.5 3.5L10 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 11h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Add to my calendar
+        </button>
+        <button class="cal-cancel-btn" onclick="toggleCalPanel()">Cancel</button>
+      </div>
+      <div class="cal-hint">Downloads a .ics file that opens in Apple Calendar, Google Calendar, Outlook — any calendar app.</div>
+    </div>
+
+  </div>
+
+  <div class="next-week-hint">
+    <strong>Next week — The Compound Effect:</strong> you'll look at the small consistent actions that, over time, either move you forward or keep you stuck. The step you committed to today is exactly the kind of action that compounds.
+  </div>
+
+</div>
+
+<script>
+let currentRating = 0;
+
+function rate(btn, val) {
+  document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  currentRating = val;
+  const hint = document.getElementById('scaleHint');
+  if (val < 8) {
+    hint.textContent = 'If your answer is below an 8, make the first step smaller.';
+    hint.className = 'scale-hint warning';
+  } else {
+    hint.textContent = val === 10 ? 'Perfect. That step is ready to take.' : 'Good. You\'re ready for this step.';
+    hint.className = 'scale-hint';
+  }
+}
+
+function getRungs() {
+  return [
+    document.getElementById('rung-top').value.trim(),
+    document.getElementById('rung-1').value.trim(),
+    document.getElementById('rung-2').value.trim(),
+    document.getElementById('rung-3').value.trim(),
+    document.getElementById('rung-4').value.trim(),
+    document.getElementById('rung-bottom').value.trim(),
+  ];
+}
+
+function complete() {
+  const top = document.getElementById('rung-top').value.trim();
+  const bottom = document.getElementById('rung-bottom').value.trim();
+  const commit = document.getElementById('commitStep').value.trim();
+
+  if (!bottom) {
+    document.getElementById('rung-bottom').focus();
+    document.getElementById('rung-bottom').style.borderBottomColor = '#C9930A';
+    return;
+  }
+
+  // Populate completion view
+  document.getElementById('s-top').textContent = top || '—';
+  document.getElementById('s-commit').textContent = commit || bottom;
+  document.getElementById('s-when').textContent = currentRating >= 8 ? 'Ready to go' : currentRating > 0 ? 'Consider making the step smaller' : '';
+
+  const rungs = getRungs().filter(r => r);
+  const rungsEl = document.getElementById('s-rungs');
+  rungsEl.innerHTML = rungs.map((r, i) => `
+    <div class="summary-step-row">
+      <span class="step-arrow">${i === 0 ? '★' : i === rungs.length - 1 ? '→' : '↓'}</span>
+      <span>${r}</span>
+    </div>
+  `).join('');
+
+  const now = new Date();
+  document.getElementById('compMeta').textContent =
+    'Completed ' + now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) +
+    '  ·  Building Momentum, Week 1';
+
+  document.getElementById('formView').style.display = 'none';
+  const cv = document.getElementById('completionView');
+  cv.classList.add('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function startOver() {
+  ['rung-top','rung-1','rung-2','rung-3','rung-4','rung-bottom','commitStep'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = '';
+    el.style.height = 'auto';
+  });
+  document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('scaleHint').textContent = '';
+  currentRating = 0;
+  document.getElementById('formView').style.display = 'block';
+  document.getElementById('completionView').classList.remove('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Auto-expand textareas as user types
+function autoExpand(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+  sizeRails();
+}
+document.querySelectorAll('.rung-input, .commit-input').forEach(el => {
+  el.addEventListener('input', () => autoExpand(el));
+});
+
+// Size the rails to match the rung column height
+function sizeRails() {
+  const col = document.getElementById('rungsCol');
+  if (!col) return;
+  const h = col.offsetHeight;
+  document.getElementById('railLeft').style.height = h + 'px';
+  document.getElementById('railRight').style.height = h + 'px';
+}
+window.addEventListener('load', sizeRails);
+window.addEventListener('resize', sizeRails);
+
+// ── MOMENTUM ACTIONS ──────────────────────────────────────
+
+function getLadderSummary() {
+  const commit = document.getElementById('commitStep').value.trim()
+    || document.getElementById('rung-bottom').value.trim();
+  const top = document.getElementById('rung-top').value.trim();
+  const rungs = getRungs().filter(r => r);
+  return { commit, top, rungs };
+}
+
+// Email to myself
+function emailToSelf() {
+  const { commit, top, rungs } = getLadderSummary();
+  const subject = encodeURIComponent('My Momentum Ladder — The Living Room');
+  const body = encodeURIComponent(
+    'MY MOMENTUM LADDER\n' +
+    'The Living Room — Building Momentum\n' +
+    '────────────────────────────────────\n\n' +
+    (top ? 'What I most want to move toward:\n' + top + '\n\n' : '') +
+    (rungs.length > 1 ? 'My steps:\n' + rungs.map((r, i) => (i + 1) + '. ' + r).join('\n') + '\n\n' : '') +
+    'My commitment:\n' + commit + '\n\n' +
+    '────────────────────────────────────\n' +
+    'Completed with The Living Room — motivate-coaching.com/thelivingroom'
+  );
+  window.location.href = `mailto:?subject=${subject}&body=${body}`;
+}
+
+// WhatsApp share
+function shareWhatsApp() {
+  const { commit, top } = getLadderSummary();
+  const text = encodeURIComponent(
+    'From my Momentum Ladder:\n\n' +
+    (top ? 'Moving toward: ' + top + '\n\n' : '') +
+    'My commitment: ' + commit + '\n\n' +
+    '(The Living Room — motivate-coaching.com/thelivingroom)'
+  );
+  window.open('https://wa.me/?text=' + text, '_blank');
+}
+
+// Calendar panel toggle
+function toggleCalPanel() {
+  const panel = document.getElementById('calPanel');
+  const btn = document.getElementById('calBtn');
+  const isOpen = panel.classList.contains('open');
+  if (!isOpen) {
+    // Set default date to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('calDate').value = tomorrow.toISOString().split('T')[0];
+    panel.classList.add('open');
+    btn.style.borderColor = '#C9930A';
+    btn.querySelector('.mbtn-label').style.color = '#C9930A';
+    btn.querySelector('.mbtn-icon').style.color = '#C9930A';
+  } else {
+    panel.classList.remove('open');
+    btn.style.borderColor = '';
+    btn.querySelector('.mbtn-label').style.color = '';
+    btn.querySelector('.mbtn-icon').style.color = '';
+  }
+}
+
+// Download .ics calendar file
+function downloadICS() {
+  const { commit, top } = getLadderSummary();
+  const dateVal = document.getElementById('calDate').value;
+  const timeVal = document.getElementById('calTime').value || '09:00';
+  const repeat = document.getElementById('calRepeat').value;
+
+  if (!dateVal) {
+    document.getElementById('calDate').focus();
+    return;
+  }
+
+  const [year, month, day] = dateVal.split('-').map(Number);
+  const [hour, min] = timeVal.split(':').map(Number);
+
+  // Format for ICS: YYYYMMDDTHHMMSS
+  const pad = n => String(n).padStart(2, '0');
+  const dtStart = `${year}${pad(month)}${pad(day)}T${pad(hour)}${pad(min)}00`;
+  const endHour = hour + 1 > 23 ? 23 : hour + 1;
+  const dtEnd = `${year}${pad(month)}${pad(day)}T${pad(endHour)}${pad(min)}00`;
+
+  const uid = `tlr-momentum-${Date.now()}@motivate-coaching.com`;
+  const summary = 'My commitment: ' + commit;
+  const description = (top ? 'Moving toward: ' + top + '\\n\\n' : '') +
+    'Step: ' + commit + '\\n\\nFrom your Momentum Ladder — The Living Room.';
+
+  let rrule = '';
+  if (repeat !== 'none') {
+    rrule = `RRULE:FREQ=${repeat};COUNT=52\n`;
+  }
+
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//The Living Room//Momentum Ladder//EN',
+    'BEGIN:VEVENT',
+    `UID:${uid}`,
+    `DTSTART:${dtStart}`,
+    `DTEND:${dtEnd}`,
+    `SUMMARY:${summary}`,
+    `DESCRIPTION:${description}`,
+    rrule.trim(),
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].filter(Boolean).join('\r\n');
+
+  const blob = new Blob([ics], { type: 'text/calendar' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'momentum-commitment.ics';
+  a.click();
+  URL.revokeObjectURL(a.href);
+
+  // Close the panel
+  toggleCalPanel();
+}
+
+// Copy commitment to clipboard
+function copyCommitment() {
+  const { commit, top } = getLadderSummary();
+  const text = (top ? 'Moving toward: ' + top + '\n\n' : '') + 'My commitment: ' + commit;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    const label = document.getElementById('copyLabel');
+    btn.classList.add('copied');
+    label.textContent = 'Copied!';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      label.textContent = 'Copy commitment';
+    }, 2200);
+  });
+}
+</script>
+</body>
+</html>
