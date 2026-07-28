@@ -8,10 +8,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --navy: #1C2B3A;
-  --navy-mid: #263648;
-  --gold: #C9943A;
-  --gold-light: #E8C97A;
+  --navy: #0F1215;
+  --navy-mid: #1C2B3A;
+  --gold: #E8A800;
+  --gold-light: #F5C842;
   --cream: #F9F7F2;
   --cream-dark: #EFE9DF;
   --white: #FFFFFF;
@@ -127,6 +127,8 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .t-focus { font-size: 0.77rem; color: var(--text-mid); line-height: 1.6; margin-bottom: 0.65rem; }
 .tool-btn { display: inline-flex; align-items: center; gap: 0.4rem; background: var(--navy); color: var(--white); font-size: 0.67rem; font-weight: 600; letter-spacing: 0.03em; padding: 0.32rem 0.8rem; border-radius: 4px; text-decoration: none; transition: background 0.15s; }
 .tool-btn:hover { background: var(--navy-mid); }
+.tool-btn-interactive { background: var(--gold); color: var(--navy); }
+.tool-btn-interactive:hover { background: var(--gold-light); }
 .tool-soon { font-size: 0.7rem; color: var(--text-muted); font-style: italic; }
 .t-preview { width: 76px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 0.65rem 0.8rem; }
 .t-preview-img { width: 56px; height: 78px; object-fit: cover; border-radius: 3px; border: 1px solid var(--border); display: block; box-shadow: 0 2px 8px rgba(28,43,58,0.13); }
@@ -867,7 +869,7 @@ footer a { color: var(--gold); text-decoration: none; }
 <script>
 /* ── DATA ───────────────────────────────── */
 const currentTopics = [
-  { n: 1, topic: 'The Momentum Myth', focus: 'Why waiting to feel motivated is the surest way to stay stuck, and what actually creates momentum in real life.', tool: { name: 'The Momentum Ladder', file: 'tools/m5-momentum-ladder.pdf', preview: 'images/tools/m5-momentum-ladder.jpg' } },
+  { n: 1, topic: 'The Momentum Myth', focus: 'Why waiting to feel motivated is the surest way to stay stuck, and what actually creates momentum in real life.', tool: { name: 'The Momentum Ladder', file: 'momentum-ladder.html', interactive: true, preview: 'images/tools/m5-momentum-ladder.jpg' } },
   { n: 2, topic: 'The Compound Effect', focus: 'How the small things we do each day accumulate into meaningful progress over time.', tool: { name: 'The Compound Effect', file: 'tools/m5-compound-effect.pdf', preview: 'images/tools/m5-compound-effect.jpg' } },
   { n: 3, topic: 'Breaking the Stop-Start Cycle', focus: 'Most people do not struggle because they never start. They struggle because they keep stopping. Why it happens and how to resume faster.', tool: { name: 'The Momentum Loop', file: 'tools/m5-momentum-loop.pdf', preview: 'images/tools/m5-momentum-loop.jpg' } },
   { n: 4, topic: 'Momentum That Lasts', focus: 'Real momentum is not about constant progress or pushing harder. It is about creating an approach that keeps working through busy seasons and setbacks.', tool: null },
@@ -916,9 +918,14 @@ function previewHTML(tool) {
 }
 
 function topicRowHTML(t) {
-  const toolHTML = t.tool
-    ? `<a class="tool-btn" href="${t.tool.file}" target="_blank"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 5l3 3 3-3M1 10h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>${t.tool.name}</a>`
-    : `<span class="tool-soon">Tool coming soon</span>`;
+  let toolHTML;
+  if (!t.tool) {
+    toolHTML = `<span class="tool-soon">Tool coming soon</span>`;
+  } else if (t.tool.interactive) {
+    toolHTML = `<a class="tool-btn tool-btn-interactive" href="${t.tool.file}"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 4l4 2-4 2V4z" fill="currentColor"/></svg>${t.tool.name}</a>`;
+  } else {
+    toolHTML = `<a class="tool-btn" href="${t.tool.file}" target="_blank"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 5l3 3 3-3M1 10h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>${t.tool.name}</a>`;
+  }
   return `<div class="topic-row"><div class="t-label">Topic ${t.n}</div><div class="t-body"><div class="t-topic">${t.topic}</div><div class="t-focus">${t.focus}</div>${toolHTML}</div>${previewHTML(t.tool)}</div>`;
 }
 
