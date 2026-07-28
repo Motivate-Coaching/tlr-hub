@@ -108,6 +108,11 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .feature-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 400; color: var(--white); margin-bottom: 0.15rem; }
 .feature-door { font-size: 0.83rem; color: rgba(255,255,255,0.45); font-style: italic; }
 .feature-week-badge { background: var(--gold); color: var(--navy); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.28rem 0.75rem; border-radius: 20px; white-space: nowrap; flex-shrink: 0; margin-top: 3px; }
+.feature-header { cursor: pointer; }
+.feature-header-right { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+.feature-collapse-arrow { color: rgba(255,255,255,0.4); font-size: 0.85rem; transition: transform 0.25s; display: inline-block; }
+.current-feature.collapsed .feature-collapse-arrow { transform: rotate(-90deg); }
+.current-feature.collapsed .feature-body { display: none; }
 .feature-body { padding: 1.75rem; }
 .feature-intro { font-size: 0.85rem; color: var(--text-mid); line-height: 1.8; max-width: 640px; margin-bottom: 1.75rem; padding-left: 1rem; border-left: 3px solid var(--gold); }
 
@@ -543,13 +548,16 @@ footer a { color: var(--gold); text-decoration: none; }
       <div class="section-label">Current theme</div>
 
       <div id="building-momentum" class="current-feature">
-        <div class="feature-header">
+        <div class="feature-header" id="current-feature-header">
           <div>
             <div class="feature-tag">Current theme</div>
             <div class="feature-title">Building Momentum</div>
             <div class="feature-door">"I know what I need to do. I just can't seem to keep it going."</div>
           </div>
-          <div class="feature-week-badge">Topic 5 of 5</div>
+          <div class="feature-header-right">
+            <div class="feature-week-badge">Topic 5 of 5</div>
+            <span class="feature-collapse-arrow">&#9660;</span>
+          </div>
         </div>
         <div class="feature-body">
           <p class="feature-intro">Starting is rarely the problem. The challenge is maintaining momentum once life gets busy, motivation fades, or progress feels slower than expected. This theme explores what creates lasting momentum, why we lose it, and how small consistent actions lead to meaningful change over time.</p>
@@ -950,6 +958,27 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 });
+
+/* ── CURRENT THEME COLLAPSE ─────────────── */
+const currentFeature = document.getElementById('building-momentum');
+const currentHeader = document.getElementById('current-feature-header');
+currentHeader.addEventListener('click', () => { currentFeature.classList.toggle('collapsed'); });
+
+/* ── SCROLL SPY (sidebar dot follows scroll) */
+const themeIds = ['building-momentum', 'energy-and-drive', 'boundaries', 'autopilot', 'decision-fatigue'];
+const sidebarLinks = document.querySelectorAll('.sidebar-nav li');
+
+const setActive = (id) => {
+  sidebarLinks.forEach(li => li.classList.remove('active'));
+  const link = document.querySelector(`.sidebar-nav li a[href="#${id}"]`);
+  if (link) link.closest('li').classList.add('active');
+};
+
+const scrollObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => { if (entry.isIntersecting) setActive(entry.target.id); });
+}, { rootMargin: '-15% 0px -70% 0px' });
+
+themeIds.forEach(id => { const el = document.getElementById(id); if (el) scrollObserver.observe(el); });
 
 /* ── SMOOTH SCROLL ──────────────────────── */
 document.querySelectorAll('a[href^="#"]').forEach(link => {
