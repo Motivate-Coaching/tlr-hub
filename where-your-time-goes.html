@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Where Your Time Goes | TLR</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0F1215; --navy-mid:#1C2B3A;
+  --cream:#F5F1EB; --cream-dark:#EDE8DF;
+  --text-dark:#1A1A1A; --text-mid:#4A4A4A; --text-muted:#888880;
+  --border:rgba(0,0,0,0.09); --white:#FFFFFF;
+  --font-body:'Poppins',sans-serif; --font-display:'Playfair Display',serif;
+  --accent:#8C4A2F; --accent-pale:#8C4A2F18;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);line-height:1.7}
+.topbar{position:sticky;top:0;z-index:100;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.5rem;gap:1rem}
+.topbar a.back{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.8rem;transition:color .2s}
+.topbar a.back:hover{color:#fff}
+.topbar .logo{color:#fff;font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.04em}
+.topbar .theme-pill{background:var(--accent);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.25rem 0.75rem;border-radius:20px}
+.page{max-width:820px;margin:0 auto;padding:3rem 2rem 5rem}
+.eyebrow{font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.75rem}
+h1{font-family:var(--font-display);font-size:2.2rem;line-height:1.25;margin-bottom:0.75rem;color:var(--text-dark)}
+.subtitle{font-size:0.9rem;color:var(--text-muted);margin-bottom:1.5rem;max-width:620px}
+.topic-tag{font-size:0.8rem;color:var(--text-muted);padding-bottom:1rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border)}
+.intro-quote{border-left:3px solid var(--accent);background:var(--accent-pale);padding:1rem 1.25rem;border-radius:0 8px 8px 0;margin-bottom:2rem;font-style:italic;color:var(--text-mid);font-size:0.95rem}
+textarea{font-family:var(--font-body);font-size:0.9rem;color:var(--text-dark);background:var(--white);border:1px solid var(--border);border-radius:8px;padding:0.75rem 1rem;width:100%;resize:none;overflow:hidden;outline:none;transition:border-color .2s,box-shadow .2s;line-height:1.6}
+textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale)}
+textarea::placeholder{color:var(--text-muted)}
+label.q-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-mid);margin-bottom:0.4rem}
+.q-block{margin-bottom:1.5rem}
+.complete-wrap{margin-top:2.5rem;text-align:center}
+.complete-btn{background:var(--navy);color:#fff;border:none;padding:0.9rem 2.5rem;border-radius:8px;font-family:var(--font-body);font-size:0.95rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+.complete-btn:hover{opacity:0.85}
+#completionView{display:none}
+.completion-header{text-align:center;padding:2.5rem 1rem 1.5rem;border-bottom:1px solid var(--border);margin-bottom:2rem}
+.completion-icon{font-size:2.5rem;margin-bottom:0.75rem}
+.completion-header h2{font-family:var(--font-display);font-size:1.8rem;color:var(--text-dark);margin-bottom:0.5rem}
+.completion-tagline{font-size:0.9rem;color:var(--text-muted)}
+.summary-section{margin-bottom:2rem}
+.summary-section h3{font-size:0.8rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+.summary-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:0.75rem}
+.summary-card .card-label{font-size:0.75rem;font-weight:600;color:var(--text-muted);margin-bottom:0.25rem}
+.summary-card .card-value{font-size:0.9rem;color:var(--text-dark);white-space:pre-wrap}
+.momentum-section{background:var(--navy);border-radius:12px;padding:1.5rem;margin-bottom:2rem}
+.momentum-section h3{color:rgba(255,255,255,0.6);font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem}
+.momentum-btns{display:flex;flex-wrap:wrap;gap:0.6rem}
+.m-btn{background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);padding:0.6rem 1.1rem;border-radius:6px;font-family:var(--font-body);font-size:0.82rem;cursor:pointer;transition:background .2s}
+.m-btn:hover{background:rgba(255,255,255,0.15)}
+.cal-panel{display:none;background:rgba(255,255,255,0.06);border-radius:8px;padding:1rem;margin-top:0.75rem}
+.cal-panel.open{display:block}
+.cal-panel label{color:rgba(255,255,255,0.7);font-size:0.8rem;display:block;margin-bottom:0.25rem;margin-top:0.75rem}
+.cal-panel label:first-child{margin-top:0}
+.cal-panel input,.cal-panel select{width:100%;padding:0.5rem 0.75rem;border-radius:6px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-family:var(--font-body);font-size:0.85rem}
+.cal-panel input[type=date],.cal-panel input[type=time]{color-scheme:dark}
+.cal-panel .dl-btn{margin-top:0.75rem;background:var(--accent);color:#fff;border:none;padding:0.55rem 1rem;border-radius:6px;font-family:var(--font-body);font-size:0.82rem;cursor:pointer;width:100%}
+.closing-quote{border-left:3px solid var(--accent);background:var(--accent-pale);padding:1rem 1.25rem;border-radius:0 8px 8px 0;font-style:italic;color:var(--text-mid);font-size:0.95rem;margin-bottom:2rem}
+.completion-actions{display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:2rem}
+.ca-btn{border:1px solid var(--border);background:var(--white);color:var(--text-mid);padding:0.6rem 1.1rem;border-radius:6px;font-family:var(--font-body);font-size:0.82rem;cursor:pointer;transition:all .2s}
+.ca-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+.time-tracker{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:2rem}
+.time-tracker h3{font-size:0.8rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:1.25rem}
+.time-row{display:grid;grid-template-columns:130px 70px 1fr;gap:0.75rem;align-items:center;margin-bottom:0.85rem}
+.time-row-label{font-size:0.88rem;font-weight:600;color:var(--text-mid)}
+.time-row input[type=number]{font-family:var(--font-body);font-size:0.9rem;padding:0.5rem 0.6rem;border:1px solid var(--border);border-radius:6px;width:100%;outline:none;background:var(--cream);color:var(--text-dark);text-align:center}
+.time-row input[type=number]:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-pale)}
+.bar-wrap{height:12px;background:var(--cream-dark);border-radius:6px;overflow:hidden}
+.bar-fill{height:100%;background:var(--accent);border-radius:6px;transition:width .4s ease;min-width:4px}
+.total-row{display:flex;justify-content:space-between;align-items:center;padding-top:1rem;border-top:1px solid var(--border);margin-top:0.5rem;font-size:0.82rem;color:var(--text-muted)}
+.total-num{font-weight:700;color:var(--text-dark)}
+.reflect-card{background:var(--cream-dark);border-radius:12px;padding:1.5rem;margin-bottom:2rem}
+.reflect-card h3{font-size:0.8rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:1.25rem}
+
+@media print{
+  .topbar,.complete-wrap,#completionView,.completion-actions{display:none!important}
+  #toolView{display:block!important}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html" class="back">← Resource Library</a>
+  <span class="logo">TLR</span>
+  <span class="theme-pill">Theme 3: Boundaries</span>
+</div>
+<div class="page" id="toolView">
+  <div class="eyebrow">Topic 1 of 4</div>
+  <h1>Where Your Time Goes</h1>
+  <p class="subtitle">Before you can reclaim your time, you need to see it clearly.</p>
+  <div class="topic-tag">Theme: Boundaries · Where Your Time Goes</div>
+  <div class="intro-quote">We do not lose time to laziness as often as we lose it to obligation, habit, and other people's urgency.</div>
+  <div class="time-tracker">
+    <h3>Hours per week (approximate)</h3>
+  <div class="time-row">
+    <div class="time-row-label">💼 Work</div>
+    <input type="number" id="hrs0" min="0" max="168" value="0" oninput="updateBars()">
+    <div class="bar-wrap"><div class="bar-fill" id="bar0" style="width:0%"></div></div>
+  </div>
+  <div class="time-row">
+    <div class="time-row-label">👨‍👩‍👧 Family</div>
+    <input type="number" id="hrs1" min="0" max="168" value="0" oninput="updateBars()">
+    <div class="bar-wrap"><div class="bar-fill" id="bar1" style="width:0%"></div></div>
+  </div>
+  <div class="time-row">
+    <div class="time-row-label">📋 Admin</div>
+    <input type="number" id="hrs2" min="0" max="168" value="0" oninput="updateBars()">
+    <div class="bar-wrap"><div class="bar-fill" id="bar2" style="width:0%"></div></div>
+  </div>
+  <div class="time-row">
+    <div class="time-row-label">🤝 Social</div>
+    <input type="number" id="hrs3" min="0" max="168" value="0" oninput="updateBars()">
+    <div class="bar-wrap"><div class="bar-fill" id="bar3" style="width:0%"></div></div>
+  </div>
+  <div class="time-row">
+    <div class="time-row-label">🏃 Health</div>
+    <input type="number" id="hrs4" min="0" max="168" value="0" oninput="updateBars()">
+    <div class="bar-wrap"><div class="bar-fill" id="bar4" style="width:0%"></div></div>
+  </div>
+  <div class="time-row">
+    <div class="time-row-label">📚 Personal growth</div>
+    <input type="number" id="hrs5" min="0" max="168" value="0" oninput="updateBars()">
+    <div class="bar-wrap"><div class="bar-fill" id="bar5" style="width:0%"></div></div>
+  </div>
+  <div class="time-row">
+    <div class="time-row-label">😴 Rest</div>
+    <input type="number" id="hrs6" min="0" max="168" value="0" oninput="updateBars()">
+    <div class="bar-wrap"><div class="bar-fill" id="bar6" style="width:0%"></div></div>
+  </div>
+  <div class="time-row">
+    <div class="time-row-label">... Other</div>
+    <input type="number" id="hrs7" min="0" max="168" value="0" oninput="updateBars()">
+    <div class="bar-wrap"><div class="bar-fill" id="bar7" style="width:0%"></div></div>
+  </div>
+
+    <div class="total-row">
+      <span>Total hours tracked</span>
+      <span class="total-num" id="totalHrs">0 / 168</span>
+    </div>
+  </div>
+  <div class="reflect-card">
+    <h3>Reflection</h3>
+    <div class="q-block">
+      <label class="q-label">Looking at this, what stands out — where is time going that feels out of alignment with what matters to you?</label>
+      <textarea id="r1" rows="1" placeholder="Write your reflection..."></textarea>
+    </div>
+    <div class="q-block">
+      <label class="q-label">What would you most like to do less of — and what has been stopping you?</label>
+      <textarea id="r2" rows="1" placeholder="Be honest..."></textarea>
+    </div>
+    <div class="q-block">
+      <label class="q-label">What is currently getting no time that deserves more?</label>
+      <textarea id="r3" rows="1" placeholder="What has fallen away?"></textarea>
+    </div>
+    <div class="q-block" style="margin-bottom:0">
+      <label class="q-label">What is one shift you will make this week?</label>
+      <textarea id="r4" rows="1" placeholder="Specific and small is fine..."></textarea>
+    </div>
+  </div>
+  <div class="complete-wrap">
+    <button class="complete-btn" onclick="showCompletion()">I've completed this tool</button>
+  </div>
+
+</div>
+<div id="completionView" style="max-width:820px;margin:0 auto;padding:2rem 2rem 5rem">
+  <div class="completion-header">
+    <div class="completion-icon">⏱</div>
+    <h2>Now you can see it.</h2>
+    <p class="completion-tagline">Seeing is the beginning. Choosing is what comes next.</p>
+  </div>
+  <div class="summary-section">
+    <h3>What you reflected on</h3>
+    <div class="summary-card">
+      <div class="card-label">What stands out about where time is going</div>
+      <div class="card-value" id="s_r1"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">What I want to do less of</div>
+      <div class="card-value" id="s_r2"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">What deserves more time</div>
+      <div class="card-value" id="s_r3"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">The shift I will make this week</div>
+      <div class="card-value" id="s_r4"></div>
+    </div>
+  </div>
+  <div class="momentum-section">
+    <h3>Keep your momentum</h3>
+    <div class="momentum-btns">
+      <button class="m-btn" onclick="emailToSelf()">📧 Email to myself</button>
+      <button class="m-btn" onclick="shareWhatsApp()">💬 WhatsApp</button>
+      <button class="m-btn" onclick="toggleCalPanel()">📅 Add to calendar</button>
+      <button class="m-btn" onclick="copyCommitment()">📋 Copy commitment</button>
+    </div>
+    <div class="cal-panel" id="calPanel">
+      <label>Date</label>
+      <input type="date" id="calDate">
+      <label>Time</label>
+      <input type="time" id="calTime" value="09:00">
+      <label>Repeat</label>
+      <select id="calRepeat">
+        <option value="none">No repeat</option>
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+      </select>
+      <button class="dl-btn" onclick="downloadICS()">Download .ics file</button>
+    </div>
+  </div>
+  <div class="closing-quote">You cannot manage time. You can only choose what you do with it.</div>
+  <div class="completion-actions">
+    <button class="ca-btn" onclick="window.print()">🖨 Print blank worksheet</button>
+    <button class="ca-btn" onclick="startAgain()">↩ Start again</button>
+    <button class="ca-btn" onclick="location.href='index.html'">← Back to library</button>
+  </div>
+</div>
+<script>
+
+function autoExpand(el){el.style.height='auto';el.style.height=el.scrollHeight+'px'}
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('textarea').forEach(t=>{
+    t.addEventListener('input',()=>autoExpand(t));
+    autoExpand(t);
+  });
+  const d=new Date();
+  const iso=d.toISOString().split('T')[0];
+  const el=document.getElementById('calDate');
+  if(el) el.value=iso;
+});
+function getSummaryText(){
+  const cards=document.querySelectorAll('#completionView .summary-card');
+  let out=[];
+  cards.forEach(c=>{
+    const lbl=c.querySelector('.card-label')?.textContent||'';
+    const val=c.querySelector('.card-value')?.textContent||'';
+    if(val.trim()) out.push(lbl+': '+val);
+  });
+  return out.join('\n\n');
+}
+function emailToSelf(){
+  const body=encodeURIComponent(getSummaryText());
+  const sub=encodeURIComponent('My TLR reflection');
+  window.location.href='mailto:?subject='+sub+'&body='+body;
+}
+function shareWhatsApp(){
+  const text=encodeURIComponent(getSummaryText());
+  window.open('https://wa.me/?text='+text,'_blank');
+}
+function toggleCalPanel(){
+  document.getElementById('calPanel').classList.toggle('open');
+}
+function downloadICS(){
+  const date=document.getElementById('calDate').value||new Date().toISOString().split('T')[0];
+  const time=document.getElementById('calTime').value||'09:00';
+  const repeat=document.getElementById('calRepeat').value;
+  const dtStart=date.replace(/-/g,'')+'T'+time.replace(':','')+'00';
+  const dtEnd=date.replace(/-/g,'')+'T'+(function(){
+    const [h,m]=time.split(':').map(Number);
+    const eh=String(h+1).padStart(2,'0');
+    return eh+m.toString().padStart(2,'0')+'00';
+  })();
+  let rrule='';
+  if(repeat==='daily') rrule='\nRRULE:FREQ=DAILY';
+  else if(repeat==='weekly') rrule='\nRRULE:FREQ=WEEKLY';
+  else if(repeat==='monthly') rrule='\nRRULE:FREQ=MONTHLY';
+  const ics=`BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART:${dtStart}\nDTEND:${dtEnd}\nSUMMARY:TLR Reflection${rrule}\nEND:VEVENT\nEND:VCALENDAR`;
+  const blob=new Blob([ics],{type:'text/calendar'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='tlr-reflection.ics';
+  a.click();
+}
+function copyCommitment(){
+  const text=getSummaryText();
+  navigator.clipboard.writeText(text).then(()=>alert('Copied to clipboard!')).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('Copied!');
+  });
+}
+function startAgain(){
+  document.getElementById('toolView').style.display='block';
+  document.getElementById('completionView').style.display='none';
+  document.querySelectorAll('#toolView textarea').forEach(t=>{t.value='';autoExpand(t);});
+}
+
+function showCompletion(){
+  document.getElementById('s_r1') && (document.getElementById('s_r1').textContent=document.getElementById('r1').value||'—');
+  document.getElementById('s_r2') && (document.getElementById('s_r2').textContent=document.getElementById('r2').value||'—');
+  document.getElementById('s_r3') && (document.getElementById('s_r3').textContent=document.getElementById('r3').value||'—');
+  document.getElementById('s_r4') && (document.getElementById('s_r4').textContent=document.getElementById('r4').value||'—');
+  document.getElementById('toolView').style.display='none';
+  document.getElementById('completionView').style.display='block';
+  window.scrollTo(0,0);
+}
+
+function updateBars(){
+  const ids=['hrs0','hrs1','hrs2','hrs3','hrs4','hrs5','hrs6','hrs7'];
+  let total=0;
+  ids.forEach(id=>{total+=parseInt(document.getElementById(id).value)||0;});
+  ids.forEach((id,i)=>{
+    const v=parseInt(document.getElementById(id).value)||0;
+    const pct=Math.min(v/Math.max(total,1)*100,100);
+    document.getElementById('bar'+i).style.width=pct+'%';
+  });
+  document.getElementById('totalHrs').textContent=total+' / 168';
+}
+
+</script>
+</body>
+</html>

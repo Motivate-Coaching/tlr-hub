@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Momentum Playbook | TLR</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0F1215; --navy-mid:#1C2B3A;
+  --cream:#F5F1EB; --cream-dark:#EDE8DF;
+  --text-dark:#1A1A1A; --text-mid:#4A4A4A; --text-muted:#888880;
+  --border:rgba(0,0,0,0.09); --white:#FFFFFF;
+  --font-body:'Poppins',sans-serif; --font-display:'Playfair Display',serif;
+  --accent:#C9930A; --accent-pale:#C9930A18;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);line-height:1.7}
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:100;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.5rem;gap:1rem}
+.topbar a.back{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.8rem;letter-spacing:0.01em;transition:color .2s}
+.topbar a.back:hover{color:#fff}
+.topbar .logo{color:#fff;font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.04em}
+.topbar .theme-pill{background:var(--accent);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.25rem 0.75rem;border-radius:20px}
+/* PAGE */
+.page{max-width:820px;margin:0 auto;padding:3rem 2rem 5rem}
+/* EYEBROW */
+.eyebrow{font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.75rem}
+h1{font-family:var(--font-display);font-size:2.2rem;line-height:1.25;margin-bottom:0.75rem;color:var(--text-dark)}
+.subtitle{font-size:0.9rem;color:var(--text-muted);margin-bottom:1.5rem;max-width:620px}
+.topic-tag{font-size:0.8rem;color:var(--text-muted);padding-bottom:1rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border)}
+.intro-quote{border-left:3px solid var(--accent);background:var(--accent-pale);padding:1rem 1.25rem;border-radius:0 8px 8px 0;margin-bottom:2rem;font-style:italic;color:var(--text-mid);font-size:0.95rem}
+/* INPUTS */
+textarea{font-family:var(--font-body);font-size:0.9rem;color:var(--text-dark);background:var(--white);border:1px solid var(--border);border-radius:8px;padding:0.75rem 1rem;width:100%;resize:none;overflow:hidden;outline:none;transition:border-color .2s,box-shadow .2s;line-height:1.6}
+textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale)}
+textarea::placeholder{color:var(--text-muted)}
+label.q-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-mid);margin-bottom:0.4rem}
+.q-block{margin-bottom:1.5rem}
+/* COMPLETE BUTTON */
+.complete-wrap{margin-top:2.5rem;text-align:center}
+.complete-btn{background:var(--navy);color:#fff;border:none;padding:0.9rem 2.5rem;border-radius:8px;font-family:var(--font-body);font-size:0.95rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+.complete-btn:hover{opacity:0.85}
+/* COMPLETION SCREEN */
+#completionView{display:none}
+.completion-header{text-align:center;padding:2.5rem 1rem 1.5rem;border-bottom:1px solid var(--border);margin-bottom:2rem}
+.completion-icon{font-size:2.5rem;margin-bottom:0.75rem}
+.completion-header h2{font-family:var(--font-display);font-size:1.8rem;color:var(--text-dark);margin-bottom:0.5rem}
+.completion-tagline{font-size:0.9rem;color:var(--text-muted)}
+.summary-section{margin-bottom:2rem}
+.summary-section h3{font-size:0.8rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+.summary-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:0.75rem}
+.summary-card .card-label{font-size:0.75rem;font-weight:600;color:var(--text-muted);margin-bottom:0.25rem}
+.summary-card .card-value{font-size:0.9rem;color:var(--text-dark);white-space:pre-wrap}
+/* MOMENTUM ACTIONS */
+.momentum-section{background:var(--navy);border-radius:12px;padding:1.5rem;margin-bottom:2rem}
+.momentum-section h3{color:rgba(255,255,255,0.6);font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem}
+.momentum-btns{display:flex;flex-wrap:wrap;gap:0.6rem}
+.m-btn{background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);padding:0.6rem 1.1rem;border-radius:6px;font-family:var(--font-body);font-size:0.82rem;cursor:pointer;transition:background .2s}
+.m-btn:hover{background:rgba(255,255,255,0.15)}
+/* CALENDAR PANEL */
+.cal-panel{display:none;background:rgba(255,255,255,0.06);border-radius:8px;padding:1rem;margin-top:0.75rem}
+.cal-panel.open{display:block}
+.cal-panel label{color:rgba(255,255,255,0.7);font-size:0.8rem;display:block;margin-bottom:0.25rem;margin-top:0.75rem}
+.cal-panel label:first-child{margin-top:0}
+.cal-panel input,.cal-panel select{width:100%;padding:0.5rem 0.75rem;border-radius:6px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-family:var(--font-body);font-size:0.85rem}
+.cal-panel input[type=date],.cal-panel input[type=time]{color-scheme:dark}
+.cal-panel .dl-btn{margin-top:0.75rem;background:var(--accent);color:#fff;border:none;padding:0.55rem 1rem;border-radius:6px;font-family:var(--font-body);font-size:0.82rem;cursor:pointer;width:100%}
+/* CLOSING QUOTE */
+.closing-quote{border-left:3px solid var(--accent);background:var(--accent-pale);padding:1rem 1.25rem;border-radius:0 8px 8px 0;font-style:italic;color:var(--text-mid);font-size:0.95rem;margin-bottom:2rem}
+/* COMPLETION ACTIONS */
+.completion-actions{display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:2rem}
+.ca-btn{border:1px solid var(--border);background:var(--white);color:var(--text-mid);padding:0.6rem 1.1rem;border-radius:6px;font-family:var(--font-body);font-size:0.82rem;cursor:pointer;transition:all .2s}
+.ca-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+.week-card{background:var(--navy);border-radius:12px;padding:1.5rem;margin-bottom:1.25rem}
+.week-header{display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem}
+.week-num{background:var(--accent);color:#fff;font-family:var(--font-display);font-size:1.2rem;font-weight:700;width:2.5rem;height:2.5rem;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.week-title{color:#fff;font-size:1rem;font-weight:600}
+.week-card label.q-label{color:rgba(255,255,255,0.6)}
+.week-card textarea{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.12);color:#fff}
+.week-card textarea::placeholder{color:rgba(255,255,255,0.3)}
+.week-card textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(201,147,10,0.25)}
+.synth-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.25rem}
+.synth-title{font-size:0.8rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+
+/* PRINT */
+@media print{
+  .topbar,.complete-wrap,#completionView,.completion-actions{display:none!important}
+  #toolView{display:block!important}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html" class="back">← Resource Library</a>
+  <span class="logo">TLR</span>
+  <span class="theme-pill">Theme 5: Building Momentum</span>
+</div>
+<div class="page" id="toolView">
+  <div class="eyebrow">Topic 5 of 5</div>
+  <h1>My Momentum Playbook</h1>
+  <p class="subtitle">Four weeks of reflection. One pattern emerging.</p>
+  <div class="topic-tag">Theme: Building Momentum · My Momentum Playbook</div>
+  <div class="intro-quote">The playbook is not a plan. It is a record of what you actually did — and what it taught you.</div>
+  <div class="week-card">
+    <div class="week-header">
+      <div class="week-num">1</div>
+      <div class="week-title">Week 1</div>
+    </div>
+    <div class="q-block">
+      <label class="q-label">What I did consistently</label>
+      <textarea id="w1a" rows="1" placeholder="What showed up for you this week..."></textarea>
+    </div>
+    <div class="q-block">
+      <label class="q-label">What I noticed</label>
+      <textarea id="w1b" rows="1" placeholder="Observations, feelings, shifts..."></textarea>
+    </div>
+    <div class="q-block" style="margin-bottom:0">
+      <label class="q-label">What surprised me</label>
+      <textarea id="w1c" rows="1" placeholder="The unexpected..."></textarea>
+    </div>
+  </div>
+  <div class="week-card">
+    <div class="week-header">
+      <div class="week-num">2</div>
+      <div class="week-title">Week 2</div>
+    </div>
+    <div class="q-block">
+      <label class="q-label">What I did consistently</label>
+      <textarea id="w2a" rows="1" placeholder="What showed up for you this week..."></textarea>
+    </div>
+    <div class="q-block">
+      <label class="q-label">What I noticed</label>
+      <textarea id="w2b" rows="1" placeholder="Observations, feelings, shifts..."></textarea>
+    </div>
+    <div class="q-block" style="margin-bottom:0">
+      <label class="q-label">What surprised me</label>
+      <textarea id="w2c" rows="1" placeholder="The unexpected..."></textarea>
+    </div>
+  </div>
+  <div class="week-card">
+    <div class="week-header">
+      <div class="week-num">3</div>
+      <div class="week-title">Week 3</div>
+    </div>
+    <div class="q-block">
+      <label class="q-label">What I did consistently</label>
+      <textarea id="w3a" rows="1" placeholder="What showed up for you this week..."></textarea>
+    </div>
+    <div class="q-block">
+      <label class="q-label">What I noticed</label>
+      <textarea id="w3b" rows="1" placeholder="Observations, feelings, shifts..."></textarea>
+    </div>
+    <div class="q-block" style="margin-bottom:0">
+      <label class="q-label">What surprised me</label>
+      <textarea id="w3c" rows="1" placeholder="The unexpected..."></textarea>
+    </div>
+  </div>
+  <div class="week-card">
+    <div class="week-header">
+      <div class="week-num">4</div>
+      <div class="week-title">Week 4</div>
+    </div>
+    <div class="q-block">
+      <label class="q-label">What I did consistently</label>
+      <textarea id="w4a" rows="1" placeholder="What showed up for you this week..."></textarea>
+    </div>
+    <div class="q-block">
+      <label class="q-label">What I noticed</label>
+      <textarea id="w4b" rows="1" placeholder="Observations, feelings, shifts..."></textarea>
+    </div>
+    <div class="q-block" style="margin-bottom:0">
+      <label class="q-label">What surprised me</label>
+      <textarea id="w4c" rows="1" placeholder="The unexpected..."></textarea>
+    </div>
+  </div>
+
+  <div class="synth-card">
+    <div class="synth-title">Synthesis</div>
+    <div class="q-block">
+      <label class="q-label">My pattern</label>
+      <textarea id="syn1" rows="1" placeholder="What do you see across all four weeks?"></textarea>
+    </div>
+    <div class="q-block">
+      <label class="q-label">What I am taking forward</label>
+      <textarea id="syn2" rows="1" placeholder="The insight you are carrying with you..."></textarea>
+    </div>
+    <div class="q-block" style="margin-bottom:0">
+      <label class="q-label">My next commitment</label>
+      <textarea id="syn3" rows="1" placeholder="What you will do, specifically..."></textarea>
+    </div>
+  </div>
+  <div class="complete-wrap">
+    <button class="complete-btn" onclick="showCompletion()">I've completed this tool</button>
+  </div>
+</div><!-- /page toolView -->
+
+<div id="completionView" style="max-width:820px;margin:0 auto;padding:2rem 2rem 5rem">
+  <div class="completion-header">
+    <div class="completion-icon">📖</div>
+    <h2>Your playbook is written.</h2>
+    <p class="completion-tagline">Four weeks of attention. Now you know your pattern.</p>
+  </div>
+  <div class="summary-section">
+    <h3>What you reflected on</h3>
+    <div class="summary-card">
+      <div class="card-label">Week 1 — What I did consistently</div>
+      <div class="card-value" id="s_w1a"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Week 1 — What I noticed</div>
+      <div class="card-value" id="s_w1b"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Week 1 — What surprised me</div>
+      <div class="card-value" id="s_w1c"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Week 2 — What I did consistently</div>
+      <div class="card-value" id="s_w2a"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Week 2 — What I noticed</div>
+      <div class="card-value" id="s_w2b"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Week 2 — What surprised me</div>
+      <div class="card-value" id="s_w2c"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Week 3 — What I did consistently</div>
+      <div class="card-value" id="s_w3a"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Week 3 — What I noticed</div>
+      <div class="card-value" id="s_w3b"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Week 3 — What surprised me</div>
+      <div class="card-value" id="s_w3c"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Week 4 — What I did consistently</div>
+      <div class="card-value" id="s_w4a"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Week 4 — What I noticed</div>
+      <div class="card-value" id="s_w4b"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Week 4 — What surprised me</div>
+      <div class="card-value" id="s_w4c"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">My pattern</div>
+      <div class="card-value" id="s_syn1"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">What I am taking forward</div>
+      <div class="card-value" id="s_syn2"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">My next commitment</div>
+      <div class="card-value" id="s_syn3"></div>
+    </div>
+  </div>
+  <div class="momentum-section">
+    <h3>Keep your momentum</h3>
+    <div class="momentum-btns">
+      <button class="m-btn" onclick="emailToSelf()">📧 Email to myself</button>
+      <button class="m-btn" onclick="shareWhatsApp()">💬 WhatsApp</button>
+      <button class="m-btn" onclick="toggleCalPanel()">📅 Add to calendar</button>
+      <button class="m-btn" onclick="copyCommitment()">📋 Copy commitment</button>
+    </div>
+    <div class="cal-panel" id="calPanel">
+      <label>Date</label>
+      <input type="date" id="calDate">
+      <label>Time</label>
+      <input type="time" id="calTime" value="09:00">
+      <label>Repeat</label>
+      <select id="calRepeat">
+        <option value="none">No repeat</option>
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+      </select>
+      <button class="dl-btn" onclick="downloadICS()">Download .ics file</button>
+    </div>
+  </div>
+  <div class="closing-quote">The best coaching is the kind you give yourself — by paying attention.</div>
+  <div class="completion-actions">
+    <button class="ca-btn" onclick="window.print()">🖨 Print blank worksheet</button>
+    <button class="ca-btn" onclick="startAgain()">↩ Start again</button>
+    <button class="ca-btn" onclick="location.href='index.html'">← Back to library</button>
+  </div>
+</div>
+<script>
+
+function autoExpand(el){el.style.height='auto';el.style.height=el.scrollHeight+'px'}
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('textarea').forEach(t=>{
+    t.addEventListener('input',()=>autoExpand(t));
+    autoExpand(t);
+  });
+  // set default cal date to today
+  const d=new Date();
+  const iso=d.toISOString().split('T')[0];
+  const el=document.getElementById('calDate');
+  if(el) el.value=iso;
+});
+function getSummaryText(){
+  const cards=document.querySelectorAll('#completionView .summary-card');
+  let out=[];
+  cards.forEach(c=>{
+    const lbl=c.querySelector('.card-label')?.textContent||'';
+    const val=c.querySelector('.card-value')?.textContent||'';
+    if(val.trim()) out.push(lbl+': '+val);
+  });
+  return out.join('\n\n');
+}
+function emailToSelf(){
+  const body=encodeURIComponent(getSummaryText());
+  const sub=encodeURIComponent('My TLR reflection');
+  window.location.href='mailto:?subject='+sub+'&body='+body;
+}
+function shareWhatsApp(){
+  const text=encodeURIComponent(getSummaryText());
+  window.open('https://wa.me/?text='+text,'_blank');
+}
+function toggleCalPanel(){
+  document.getElementById('calPanel').classList.toggle('open');
+}
+function downloadICS(){
+  const date=document.getElementById('calDate').value||new Date().toISOString().split('T')[0];
+  const time=document.getElementById('calTime').value||'09:00';
+  const repeat=document.getElementById('calRepeat').value;
+  const dtStart=date.replace(/-/g,'')+'T'+time.replace(':','')+'00';
+  const dtEnd=date.replace(/-/g,'')+'T'+(function(){
+    const [h,m]=time.split(':').map(Number);
+    const eh=String(h+1).padStart(2,'0');
+    return eh+m.toString().padStart(2,'0')+'00';
+  })();
+  let rrule='';
+  if(repeat==='daily') rrule='\nRRULE:FREQ=DAILY';
+  else if(repeat==='weekly') rrule='\nRRULE:FREQ=WEEKLY';
+  else if(repeat==='monthly') rrule='\nRRULE:FREQ=MONTHLY';
+  const ics=`BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART:${dtStart}\nDTEND:${dtEnd}\nSUMMARY:TLR Reflection${rrule}\nEND:VEVENT\nEND:VCALENDAR`;
+  const blob=new Blob([ics],{type:'text/calendar'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='tlr-reflection.ics';
+  a.click();
+}
+function copyCommitment(){
+  const text=getSummaryText();
+  navigator.clipboard.writeText(text).then(()=>alert('Copied to clipboard!')).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('Copied!');
+  });
+}
+function startAgain(){
+  document.getElementById('toolView').style.display='block';
+  document.getElementById('completionView').style.display='none';
+  document.querySelectorAll('#toolView textarea').forEach(t=>{t.value='';autoExpand(t);});
+}
+
+function showCompletion(){
+  document.getElementById('s_w1a') && (document.getElementById('s_w1a').textContent=document.getElementById('w1a').value||'—');
+document.getElementById('s_w1b') && (document.getElementById('s_w1b').textContent=document.getElementById('w1b').value||'—');
+document.getElementById('s_w1c') && (document.getElementById('s_w1c').textContent=document.getElementById('w1c').value||'—');
+document.getElementById('s_w2a') && (document.getElementById('s_w2a').textContent=document.getElementById('w2a').value||'—');
+document.getElementById('s_w2b') && (document.getElementById('s_w2b').textContent=document.getElementById('w2b').value||'—');
+document.getElementById('s_w2c') && (document.getElementById('s_w2c').textContent=document.getElementById('w2c').value||'—');
+document.getElementById('s_w3a') && (document.getElementById('s_w3a').textContent=document.getElementById('w3a').value||'—');
+document.getElementById('s_w3b') && (document.getElementById('s_w3b').textContent=document.getElementById('w3b').value||'—');
+document.getElementById('s_w3c') && (document.getElementById('s_w3c').textContent=document.getElementById('w3c').value||'—');
+document.getElementById('s_w4a') && (document.getElementById('s_w4a').textContent=document.getElementById('w4a').value||'—');
+document.getElementById('s_w4b') && (document.getElementById('s_w4b').textContent=document.getElementById('w4b').value||'—');
+document.getElementById('s_w4c') && (document.getElementById('s_w4c').textContent=document.getElementById('w4c').value||'—');
+document.getElementById('s_syn1') && (document.getElementById('s_syn1').textContent=document.getElementById('syn1').value||'—');
+document.getElementById('s_syn2') && (document.getElementById('s_syn2').textContent=document.getElementById('syn2').value||'—');
+document.getElementById('s_syn3') && (document.getElementById('s_syn3').textContent=document.getElementById('syn3').value||'—');
+  document.getElementById('toolView').style.display='none';
+  document.getElementById('completionView').style.display='block';
+  window.scrollTo(0,0);
+}
+</script></body></html>

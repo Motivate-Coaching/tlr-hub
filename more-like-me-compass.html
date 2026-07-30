@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The More Like Me Compass | TLR</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0F1215; --navy-mid:#1C2B3A;
+  --cream:#F5F1EB; --cream-dark:#EDE8DF;
+  --text-dark:#1A1A1A; --text-mid:#4A4A4A; --text-muted:#888880;
+  --border:rgba(0,0,0,0.09); --white:#FFFFFF;
+  --font-body:'Poppins',sans-serif; --font-display:'Playfair Display',serif;
+  --accent:#1A6B72; --accent-pale:#1A6B7218;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);line-height:1.7}
+.topbar{position:sticky;top:0;z-index:100;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.5rem;gap:1rem}
+.topbar a.back{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.8rem;letter-spacing:0.01em;transition:color .2s}
+.topbar a.back:hover{color:#fff}
+.topbar .logo{color:#fff;font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.04em}
+.topbar .theme-pill{background:var(--accent);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.25rem 0.75rem;border-radius:20px}
+.page{max-width:820px;margin:0 auto;padding:3rem 2rem 5rem}
+.eyebrow{font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.75rem}
+h1{font-family:var(--font-display);font-size:2.2rem;line-height:1.25;margin-bottom:0.75rem;color:var(--text-dark)}
+.subtitle{font-size:0.9rem;color:var(--text-muted);margin-bottom:1.5rem;max-width:620px}
+.topic-tag{font-size:0.8rem;color:var(--text-muted);padding-bottom:1rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border)}
+.intro-quote{border-left:3px solid var(--accent);background:var(--accent-pale);padding:1rem 1.25rem;border-radius:0 8px 8px 0;margin-bottom:2rem;font-style:italic;color:var(--text-mid);font-size:0.95rem}
+textarea{font-family:var(--font-body);font-size:0.9rem;color:var(--text-dark);background:var(--white);border:1px solid var(--border);border-radius:8px;padding:0.75rem 1rem;width:100%;resize:none;overflow:hidden;outline:none;transition:border-color .2s,box-shadow .2s;line-height:1.6}
+textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale)}
+textarea::placeholder{color:var(--text-muted)}
+label.q-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-mid);margin-bottom:0.4rem}
+.q-block{margin-bottom:1.5rem}
+.complete-wrap{margin-top:2.5rem;text-align:center}
+.complete-btn{background:var(--navy);color:#fff;border:none;padding:0.9rem 2.5rem;border-radius:8px;font-family:var(--font-body);font-size:0.95rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+.complete-btn:hover{opacity:0.85}
+#completionView{display:none}
+.completion-header{text-align:center;padding:2.5rem 1rem 1.5rem;border-bottom:1px solid var(--border);margin-bottom:2rem}
+.completion-icon{font-size:2.5rem;margin-bottom:0.75rem}
+.completion-header h2{font-family:var(--font-display);font-size:1.8rem;color:var(--text-dark);margin-bottom:0.5rem}
+.completion-tagline{font-size:0.9rem;color:var(--text-muted)}
+.summary-section{margin-bottom:2rem}
+.summary-section h3{font-size:0.8rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+.summary-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:0.75rem}
+.summary-card .card-label{font-size:0.75rem;font-weight:600;color:var(--text-muted);margin-bottom:0.25rem}
+.summary-card .card-value{font-size:0.9rem;color:var(--text-dark);white-space:pre-wrap}
+.momentum-section{background:var(--navy);border-radius:12px;padding:1.5rem;margin-bottom:2rem}
+.momentum-section h3{color:rgba(255,255,255,0.6);font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem}
+.momentum-btns{display:flex;flex-wrap:wrap;gap:0.6rem}
+.m-btn{background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);padding:0.6rem 1.1rem;border-radius:6px;font-family:var(--font-body);font-size:0.82rem;cursor:pointer;transition:background .2s}
+.m-btn:hover{background:rgba(255,255,255,0.15)}
+.cal-panel{display:none;background:rgba(255,255,255,0.06);border-radius:8px;padding:1rem;margin-top:0.75rem}
+.cal-panel.open{display:block}
+.cal-panel label{color:rgba(255,255,255,0.7);font-size:0.8rem;display:block;margin-bottom:0.25rem;margin-top:0.75rem}
+.cal-panel label:first-child{margin-top:0}
+.cal-panel input,.cal-panel select{width:100%;padding:0.5rem 0.75rem;border-radius:6px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-family:var(--font-body);font-size:0.85rem}
+.cal-panel input[type=date],.cal-panel input[type=time]{color-scheme:dark}
+.cal-panel .dl-btn{margin-top:0.75rem;background:var(--accent);color:#fff;border:none;padding:0.55rem 1rem;border-radius:6px;font-family:var(--font-body);font-size:0.82rem;cursor:pointer;width:100%}
+.closing-quote{border-left:3px solid var(--accent);background:var(--accent-pale);padding:1rem 1.25rem;border-radius:0 8px 8px 0;font-style:italic;color:var(--text-mid);font-size:0.95rem;margin-bottom:2rem}
+.completion-actions{display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:2rem}
+.ca-btn{border:1px solid var(--border);background:var(--white);color:var(--text-mid);padding:0.6rem 1.1rem;border-radius:6px;font-family:var(--font-body);font-size:0.82rem;cursor:pointer;transition:all .2s}
+.ca-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+.compass-outer{position:relative;width:560px;max-width:100%;margin:0 auto 2rem;aspect-ratio:1}
+.compass-ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--accent);opacity:0.2}
+.compass-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.4rem;z-index:5}
+.seg-card{position:absolute;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:0.6rem 0.7rem;width:160px}
+.seg-card .seg-label{font-size:0.72rem;font-weight:700;color:var(--accent);margin-bottom:0.35rem;letter-spacing:0.04em}
+.seg-card textarea{font-size:0.78rem;padding:0.45rem 0.6rem}
+/* position each card around the compass */
+.seg-0{top:0;left:50%;transform:translateX(-50%)}
+.seg-1{top:10%;right:0}
+.seg-2{top:50%;right:0;transform:translateY(-50%)}
+.seg-3{bottom:10%;right:0}
+.seg-4{bottom:0;left:50%;transform:translateX(-50%)}
+.seg-5{bottom:10%;left:0}
+.seg-6{top:50%;left:0;transform:translateY(-50%)}
+.seg-7{top:10%;left:0}
+.compass-synth{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:2rem}
+.compass-synth h3{font-size:0.8rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+@media(max-width:620px){
+  .compass-outer{display:none}
+  .compass-mobile{display:grid!important;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:2rem}
+}
+.compass-mobile{display:none}
+
+@media print{
+  .topbar,.complete-wrap,#completionView,.completion-actions{display:none!important}
+  #toolView{display:block!important}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html" class="back">← Resource Library</a>
+  <span class="logo">TLR</span>
+  <span class="theme-pill">Theme 4: Energy and Drive</span>
+</div>
+<div class="page" id="toolView">
+  <div class="eyebrow">Topic 2 of 4</div>
+  <h1>The More Like Me Compass</h1>
+  <p class="subtitle">There is a version of you that feels more like you. This tool helps you find the direction.</p>
+  <div class="topic-tag">Theme: Energy and Drive · The More Like Me Compass</div>
+  <div class="intro-quote">The compass does not tell you where to go. It tells you which direction feels true.</div>
+<div class="compass-outer"><div class="compass-ring"></div><div class="compass-center">🧭</div><div class="seg-card seg-0"><div class="seg-label">Energised</div><textarea id="seg0" rows="1" placeholder="I feel more energised when..."></textarea></div><div class="seg-card seg-1"><div class="seg-label">Creative</div><textarea id="seg1" rows="1" placeholder="I feel more creative when..."></textarea></div><div class="seg-card seg-2"><div class="seg-label">Connected</div><textarea id="seg2" rows="1" placeholder="I feel more connected when..."></textarea></div><div class="seg-card seg-3"><div class="seg-label">Grounded</div><textarea id="seg3" rows="1" placeholder="I feel more grounded when..."></textarea></div><div class="seg-card seg-4"><div class="seg-label">Focused</div><textarea id="seg4" rows="1" placeholder="I feel more focused when..."></textarea></div><div class="seg-card seg-5"><div class="seg-label">Playful</div><textarea id="seg5" rows="1" placeholder="I feel more playful when..."></textarea></div><div class="seg-card seg-6"><div class="seg-label">Purposeful</div><textarea id="seg6" rows="1" placeholder="I feel more purposeful when..."></textarea></div><div class="seg-card seg-7"><div class="seg-label">Peaceful</div><textarea id="seg7" rows="1" placeholder="I feel more peaceful when..."></textarea></div></div><div class="compass-mobile">  <div class="seg-card" style="position:relative;inset:auto;transform:none;width:100%">
+    <div class="seg-label">Energised</div>
+    <textarea id="seg0" rows="1" placeholder="I feel more energised when..."></textarea>
+  </div>  <div class="seg-card" style="position:relative;inset:auto;transform:none;width:100%">
+    <div class="seg-label">Creative</div>
+    <textarea id="seg1" rows="1" placeholder="I feel more creative when..."></textarea>
+  </div>  <div class="seg-card" style="position:relative;inset:auto;transform:none;width:100%">
+    <div class="seg-label">Connected</div>
+    <textarea id="seg2" rows="1" placeholder="I feel more connected when..."></textarea>
+  </div>  <div class="seg-card" style="position:relative;inset:auto;transform:none;width:100%">
+    <div class="seg-label">Grounded</div>
+    <textarea id="seg3" rows="1" placeholder="I feel more grounded when..."></textarea>
+  </div>  <div class="seg-card" style="position:relative;inset:auto;transform:none;width:100%">
+    <div class="seg-label">Focused</div>
+    <textarea id="seg4" rows="1" placeholder="I feel more focused when..."></textarea>
+  </div>  <div class="seg-card" style="position:relative;inset:auto;transform:none;width:100%">
+    <div class="seg-label">Playful</div>
+    <textarea id="seg5" rows="1" placeholder="I feel more playful when..."></textarea>
+  </div>  <div class="seg-card" style="position:relative;inset:auto;transform:none;width:100%">
+    <div class="seg-label">Purposeful</div>
+    <textarea id="seg6" rows="1" placeholder="I feel more purposeful when..."></textarea>
+  </div>  <div class="seg-card" style="position:relative;inset:auto;transform:none;width:100%">
+    <div class="seg-label">Peaceful</div>
+    <textarea id="seg7" rows="1" placeholder="I feel more peaceful when..."></textarea>
+  </div></div>
+  <div class="compass-synth">
+    <h3>What the compass tells you</h3>
+    <div class="q-block">
+      <label class="q-label">What does the compass tell you?</label>
+      <textarea id="syn1" rows="1" placeholder="What patterns or themes do you notice?"></textarea>
+    </div>
+    <div class="q-block" style="margin-bottom:0">
+      <label class="q-label">What one shift would move you most toward feeling more like yourself?</label>
+      <textarea id="syn2" rows="1" placeholder="The single most important shift..."></textarea>
+    </div>
+  </div>
+  <div class="complete-wrap">
+    <button class="complete-btn" onclick="showCompletion()">I've completed this tool</button>
+  </div>
+
+</div>
+
+<div id="completionView" style="max-width:820px;margin:0 auto;padding:2rem 2rem 5rem">
+  <div class="completion-header">
+    <div class="completion-icon">🧭</div>
+    <h2>You have your direction.</h2>
+    <p class="completion-tagline">The compass points where it points. You choose whether to follow.</p>
+  </div>
+  <div class="summary-section">
+    <h3>What you reflected on</h3>
+    <div class="summary-card">
+      <div class="card-label">I feel more Energised when...</div>
+      <div class="card-value" id="s_seg0"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">I feel more Creative when...</div>
+      <div class="card-value" id="s_seg1"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">I feel more Connected when...</div>
+      <div class="card-value" id="s_seg2"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">I feel more Grounded when...</div>
+      <div class="card-value" id="s_seg3"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">I feel more Focused when...</div>
+      <div class="card-value" id="s_seg4"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">I feel more Playful when...</div>
+      <div class="card-value" id="s_seg5"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">I feel more Purposeful when...</div>
+      <div class="card-value" id="s_seg6"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">I feel more Peaceful when...</div>
+      <div class="card-value" id="s_seg7"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">What the compass tells me</div>
+      <div class="card-value" id="s_syn1"></div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">The one shift that would move me most</div>
+      <div class="card-value" id="s_syn2"></div>
+    </div>
+  </div>
+  <div class="momentum-section">
+    <h3>Keep your momentum</h3>
+    <div class="momentum-btns">
+      <button class="m-btn" onclick="emailToSelf()">📧 Email to myself</button>
+      <button class="m-btn" onclick="shareWhatsApp()">💬 WhatsApp</button>
+      <button class="m-btn" onclick="toggleCalPanel()">📅 Add to calendar</button>
+      <button class="m-btn" onclick="copyCommitment()">📋 Copy commitment</button>
+    </div>
+    <div class="cal-panel" id="calPanel">
+      <label>Date</label>
+      <input type="date" id="calDate">
+      <label>Time</label>
+      <input type="time" id="calTime" value="09:00">
+      <label>Repeat</label>
+      <select id="calRepeat">
+        <option value="none">No repeat</option>
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+      </select>
+      <button class="dl-btn" onclick="downloadICS()">Download .ics file</button>
+    </div>
+  </div>
+  <div class="closing-quote">Being more like yourself is not selfish. It is the whole point.</div>
+  <div class="completion-actions">
+    <button class="ca-btn" onclick="window.print()">🖨 Print blank worksheet</button>
+    <button class="ca-btn" onclick="startAgain()">↩ Start again</button>
+    <button class="ca-btn" onclick="location.href='index.html'">← Back to library</button>
+  </div>
+</div>
+<script>
+
+function autoExpand(el){el.style.height='auto';el.style.height=el.scrollHeight+'px'}
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('textarea').forEach(t=>{
+    t.addEventListener('input',()=>autoExpand(t));
+    autoExpand(t);
+  });
+  const d=new Date();
+  const iso=d.toISOString().split('T')[0];
+  const el=document.getElementById('calDate');
+  if(el) el.value=iso;
+});
+function getSummaryText(){
+  const cards=document.querySelectorAll('#completionView .summary-card');
+  let out=[];
+  cards.forEach(c=>{
+    const lbl=c.querySelector('.card-label')?.textContent||'';
+    const val=c.querySelector('.card-value')?.textContent||'';
+    if(val.trim()) out.push(lbl+': '+val);
+  });
+  return out.join('\n\n');
+}
+function emailToSelf(){
+  const body=encodeURIComponent(getSummaryText());
+  const sub=encodeURIComponent('My TLR reflection');
+  window.location.href='mailto:?subject='+sub+'&body='+body;
+}
+function shareWhatsApp(){
+  const text=encodeURIComponent(getSummaryText());
+  window.open('https://wa.me/?text='+text,'_blank');
+}
+function toggleCalPanel(){
+  document.getElementById('calPanel').classList.toggle('open');
+}
+function downloadICS(){
+  const date=document.getElementById('calDate').value||new Date().toISOString().split('T')[0];
+  const time=document.getElementById('calTime').value||'09:00';
+  const repeat=document.getElementById('calRepeat').value;
+  const dtStart=date.replace(/-/g,'')+'T'+time.replace(':','')+'00';
+  const dtEnd=date.replace(/-/g,'')+'T'+(function(){
+    const [h,m]=time.split(':').map(Number);
+    const eh=String(h+1).padStart(2,'0');
+    return eh+m.toString().padStart(2,'0')+'00';
+  })();
+  let rrule='';
+  if(repeat==='daily') rrule='\nRRULE:FREQ=DAILY';
+  else if(repeat==='weekly') rrule='\nRRULE:FREQ=WEEKLY';
+  else if(repeat==='monthly') rrule='\nRRULE:FREQ=MONTHLY';
+  const ics=`BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART:${dtStart}\nDTEND:${dtEnd}\nSUMMARY:TLR Reflection${rrule}\nEND:VEVENT\nEND:VCALENDAR`;
+  const blob=new Blob([ics],{type:'text/calendar'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='tlr-reflection.ics';
+  a.click();
+}
+function copyCommitment(){
+  const text=getSummaryText();
+  navigator.clipboard.writeText(text).then(()=>alert('Copied to clipboard!')).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('Copied!');
+  });
+}
+function startAgain(){
+  document.getElementById('toolView').style.display='block';
+  document.getElementById('completionView').style.display='none';
+  document.querySelectorAll('#toolView textarea').forEach(t=>{t.value='';autoExpand(t);});
+}
+
+function showCompletion(){
+  document.getElementById('s_seg0') && (document.getElementById('s_seg0').textContent=document.getElementById('seg0').value||'—');
+  document.getElementById('s_seg1') && (document.getElementById('s_seg1').textContent=document.getElementById('seg1').value||'—');
+  document.getElementById('s_seg2') && (document.getElementById('s_seg2').textContent=document.getElementById('seg2').value||'—');
+  document.getElementById('s_seg3') && (document.getElementById('s_seg3').textContent=document.getElementById('seg3').value||'—');
+  document.getElementById('s_seg4') && (document.getElementById('s_seg4').textContent=document.getElementById('seg4').value||'—');
+  document.getElementById('s_seg5') && (document.getElementById('s_seg5').textContent=document.getElementById('seg5').value||'—');
+  document.getElementById('s_seg6') && (document.getElementById('s_seg6').textContent=document.getElementById('seg6').value||'—');
+  document.getElementById('s_seg7') && (document.getElementById('s_seg7').textContent=document.getElementById('seg7').value||'—');
+  document.getElementById('s_syn1') && (document.getElementById('s_syn1').textContent=document.getElementById('syn1').value||'—');
+  document.getElementById('s_syn2') && (document.getElementById('s_syn2').textContent=document.getElementById('syn2').value||'—');
+  document.getElementById('toolView').style.display='none';
+  document.getElementById('completionView').style.display='block';
+  window.scrollTo(0,0);
+}
+
+</script>
+</body>
+</html>

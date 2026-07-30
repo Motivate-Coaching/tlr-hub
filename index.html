@@ -870,11 +870,11 @@ footer a { color: var(--gold); text-decoration: none; }
 <script>
 /* ── DATA ───────────────────────────────── */
 const currentTopics = [
-  { n: 1, topic: 'The Momentum Myth', focus: 'Why waiting to feel motivated is the surest way to stay stuck, and what actually creates momentum in real life.', tool: { name: 'The Momentum Ladder', file: 'momentum-ladder.html', interactive: true, preview: 'images/tools/m5-momentum-ladder.jpg' } },
-  { n: 2, topic: 'The Compound Effect', focus: 'How the small things we do each day accumulate into meaningful progress over time.', tool: { name: 'The Compound Effect', file: 'tools/m5-compound-effect.pdf', preview: 'images/tools/m5-compound-effect.jpg' } },
-  { n: 3, topic: 'Breaking the Stop-Start Cycle', focus: 'Most people do not struggle because they never start. They struggle because they keep stopping. Why it happens and how to resume faster.', tool: { name: 'The Momentum Loop', file: 'tools/m5-momentum-loop.pdf', preview: 'images/tools/m5-momentum-loop.jpg' } },
-  { n: 4, topic: 'Momentum That Lasts', focus: 'Real momentum is not about constant progress or pushing harder. It is about creating an approach that keeps working through busy seasons and setbacks.', tool: null },
-  { n: 5, topic: 'My Momentum Playbook', focus: 'Bringing the whole theme together into your own personalised guide for building, maintaining and regaining momentum on your terms.', tool: { name: 'The Momentum Playbook', file: 'tools/m5-momentum-playbook.pdf', preview: 'images/tools/m5-momentum-playbook.jpg' } }
+  { n: 1, topic: 'The Momentum Myth', focus: 'Why waiting to feel motivated is the surest way to stay stuck, and what actually creates momentum in real life.', tool: { name: 'The Momentum Ladder', file: 'momentum-ladder.html', interactive: true } },
+  { n: 2, topic: 'The Compound Effect', focus: 'How the small things we do each day accumulate into meaningful progress over time.', tool: { name: 'The Compound Effect', file: 'compound-effect.html', interactive: true } },
+  { n: 3, topic: 'Breaking the Stop-Start Cycle', focus: 'Most people do not struggle because they never start. They struggle because they keep stopping. Why it happens and how to resume faster.', tool: { name: 'The Momentum Loop', file: 'momentum-loop.html', interactive: true } },
+  { n: 4, topic: 'Momentum That Lasts', focus: 'Real momentum is not about constant progress or pushing harder. It is about creating an approach that keeps working through busy seasons and setbacks.', tool: { name: 'Momentum That Lasts', file: 'momentum-that-lasts.html', interactive: true } },
+  { n: 5, topic: 'My Momentum Playbook', focus: 'Bringing the whole theme together into your own personalised guide for building, maintaining and regaining momentum on your terms.', tool: { name: 'My Momentum Playbook', file: 'momentum-playbook.html', interactive: true } }
 ];
 
 const pastThemes = [
@@ -883,33 +883,44 @@ const pastThemes = [
     banner: 'energy-drive.jpg',
     intro: 'A four-topic arc from awareness to action. Identifying what is draining you, reconnecting with what restores you, redirecting your energy intentionally, and building a life that genuinely feels more alive.',
     topics: [
-      { n: 1, topic: 'Where Is Your Energy Going?', focus: 'Becoming aware of what drains and what restores you, including the hidden drains in your everyday environment.', tool: { name: 'The Energy Map', file: 'tools/m4-energy-map.pdf' } },
-      { n: 2, topic: 'Feeling More Like Yourself', focus: 'Reconnecting with the conditions where you feel most yourself, and the patterns that pull you away from that version of you.', tool: { name: 'The More Like Me Compass', file: 'tools/m4-more-like-me-compass.pdf' } },
-      { n: 3, topic: 'Investing Your Energy Intentionally', focus: 'Seeing clearly where your energy goes versus where you want it going, and beginning to redirect it toward what matters most.', tool: { name: 'The Energy Investment Board', file: 'tools/m4-energy-investment-board.pdf' } },
-      { n: 4, topic: 'Finding More Aliveness', focus: 'Bringing energy, identity and momentum together to build a life that feels more exciting, meaningful and fully lived.', tool: { name: 'The Aliveness Blueprint', file: 'tools/m4-aliveness-blueprint.pdf' } }
+      { n: 1, topic: 'Where Is Your Energy Going?', focus: 'Becoming aware of what drains and what restores you, including the hidden drains in your everyday environment.', tool: { name: 'The Energy Map', file: 'energy-map.html', interactive: true } },
+      { n: 2, topic: 'Feeling More Like Yourself', focus: 'Reconnecting with the conditions where you feel most yourself, and the patterns that pull you away from that version of you.', tool: { name: 'The More Like Me Compass', file: 'more-like-me-compass.html', interactive: true } },
+      { n: 3, topic: 'Investing Your Energy Intentionally', focus: 'Seeing clearly where your energy goes versus where you want it going, and beginning to redirect it toward what matters most.', tool: { name: 'The Energy Investment Board', file: 'energy-investment-board.html', interactive: true } },
+      { n: 4, topic: 'Finding More Aliveness', focus: 'Bringing energy, identity and momentum together to build a life that feels more exciting, meaningful and fully lived.', tool: { name: 'Your Aliveness Blueprint', file: 'aliveness-blueprint.html', interactive: true } }
     ], workshop: null
   },
   {
     id: 'boundaries', theme: 'Boundaries &amp; External Pressure', door: "I'm constantly pulled in different directions.",
     banner: 'boundaries.jpg',
     intro: 'Learning to say no without guilt, own your priorities clearly, and reduce the quiet drain of people-pleasing and external pressure.',
-    topics: [], workshop: null
+    topics: [
+      { n: 1, topic: 'Where Your Time Goes', focus: 'Before you can reclaim your time, you need to see it clearly. Mapping where your time actually goes versus where you want it going.', tool: { name: 'Where Your Time Goes', file: 'where-your-time-goes.html', interactive: true } },
+      { n: 2, topic: 'The Gap', focus: 'Between what you wanted to say and what you actually said. That gap is where your boundaries live.', tool: { name: 'The Gap', file: 'the-gap.html', interactive: true } },
+      { n: 3, topic: "What's Actually Mine", focus: 'Not everything that lands on your plate is yours to carry. Sorting what is yours from what belongs to others.', tool: { name: "What's Actually Mine", file: 'whats-actually-mine.html', interactive: true } },
+      { n: 4, topic: 'Clear Response', focus: 'A boundary without a clear response is just a private thought. Turning your boundary into a practice.', tool: { name: 'Clear Response', file: 'clear-response.html', interactive: true } }
+    ], workshop: null
   },
   {
     id: 'autopilot', theme: 'Autopilot &amp; Drift', door: "I'm functioning, but not fully alive.",
     banner: 'autopilot-drift.jpg',
     intro: 'Identifying the unconscious patterns that keep us stuck in routine, breaking cycles of passive living, and reclaiming intentional choice in everyday life.',
-    topics: [], workshop: null
+    topics: [
+      { n: 1, topic: 'Autopilot Awareness', focus: 'You cannot change what you have not noticed. Surfacing the automatic patterns that run beneath the surface.', tool: { name: 'Autopilot Awareness', file: 'autopilot-awareness.html', interactive: true } },
+      { n: 2, topic: 'The Cost of Drift', focus: 'Drift is rarely dramatic. It is a slow accumulation of small moments of not choosing. What it is costing you.', tool: { name: 'The Cost of Drift', file: 'cost-of-drift.html', interactive: true } },
+      { n: 3, topic: 'The Pattern Break', focus: 'Patterns exist because they once served a purpose. Breaking them is about creating a different choice point before the pattern runs.', tool: { name: 'The Pattern Break', file: 'pattern-break.html', interactive: true } },
+      { n: 4, topic: 'Living With Intention', focus: 'Intention is not a plan. It is a direction. Deciding who you want to be before the day decides for you.', tool: { name: 'Living With Intention', file: 'living-with-intention.html', interactive: true } },
+      { n: 5, topic: 'Using Autopilot to Your Advantage', focus: 'The same mechanism that runs your worst habits can run your best ones. Reprogramming autopilot deliberately.', tool: { name: 'Using Autopilot to Your Advantage', file: 'autopilot-advantage.html', interactive: true } }
+    ], workshop: null
   },
   {
     id: 'decision-fatigue', theme: 'Decision Fatigue &amp; Mental Noise', door: 'Why am I so tired from thinking?',
     banner: 'decision-fatigue.jpg',
     intro: 'Many capable adults are not exhausted from doing too much. They are exhausted from thinking about too much. This theme explores the hidden cost of delayed decisions, reducing internal debate, and stopping the replay of choices already made.',
     topics: [
-      { n: 1, topic: 'Where Your Energy Is Leaking', focus: 'Most of us are not drained by big decisions. It is the everyday ones sitting in the background, quietly draining energy before we have even made them.', tool: { name: 'The Decision Audit', file: 'tools/m1-decision-audit.pdf' } },
-      { n: 2, topic: 'Clean Decisions', focus: 'Separating fear from fact, letting go of the search for the perfect answer, and learning to decide with confidence.', tool: null },
-      { n: 3, topic: 'Stopping the Replay', focus: 'Why we re-examine decisions we have already made, and a practical way to break the replay cycle and reclaim that mental space.', tool: null },
-      { n: 4, topic: 'Living with Less Noise', focus: 'Creating the everyday conditions that make clear thinking, and clear deciding, much easier.', tool: null }
+      { n: 1, topic: 'The Decision Audit', focus: 'Most of us are not drained by big decisions. It is the everyday ones sitting in the background, quietly draining energy before we have even made them.', tool: { name: 'The Decision Audit', file: 'decision-audit.html', interactive: true } },
+      { n: 2, topic: 'Clean Decisions', focus: 'Separating fear from fact, letting go of the search for the perfect answer, and learning to decide with confidence.', tool: { name: 'Clean Decisions', file: 'clean-decisions.html', interactive: true } },
+      { n: 3, topic: 'The Cost of the Unmade Decision', focus: 'Every decision you are not making is still costing you something. Naming the price of indecision.', tool: { name: 'The Cost of the Unmade Decision', file: 'cost-of-unmade-decision.html', interactive: true } },
+      { n: 4, topic: 'Building Decision Self-Trust', focus: 'Self-trust is not confidence. It is the accumulated evidence that you can rely on yourself, even when it is uncertain.', tool: { name: 'Building Decision Self-Trust', file: 'decision-self-trust.html', interactive: true } }
     ], workshop: null
   }
 ];

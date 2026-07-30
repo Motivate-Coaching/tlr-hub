@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Compound Effect — The Living Room</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0F1215;--navy-mid:#1C2B3A;
+  --cream:#F5F1EB;--cream-dark:#EDE8DF;--cream-deep:#E5DDD1;
+  --accent:#C9930A;--accent-light:#E8A800;--accent-pale:rgba(201,147,10,0.1);
+  --text-dark:#1A1A1A;--text-mid:#4A4A4A;--text-muted:#888880;
+  --border:rgba(0,0,0,0.09);--white:#FFFFFF;
+  --font-body:'Poppins',sans-serif;--font-display:'Playfair Display',serif;
+}
+html{font-size:17px;scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);line-height:1.7;min-height:100vh}
+
+/* TOPBAR */
+.topbar{background:var(--cream);border-bottom:1px solid var(--border);padding:0.7rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-left{display:flex;align-items:center;gap:0.9rem}
+.back-link{font-size:0.62rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;display:flex;align-items:center;gap:0.4rem}
+.back-link:hover{color:var(--accent)}
+.topbar-logo{font-family:var(--font-display);font-size:1rem;font-weight:600;color:var(--navy);letter-spacing:0.02em}
+.theme-pill{font-size:0.58rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);background:var(--accent-pale);border:1px solid rgba(201,147,10,0.25);padding:0.25rem 0.75rem;border-radius:20px}
+
+/* PAGE */
+.page{max-width:820px;margin:0 auto;padding:3rem 2rem 5rem}
+.eyebrow{font-size:0.6rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:0.75rem}
+h1{font-family:var(--font-display);font-size:clamp(2.4rem,5vw,3.4rem);font-weight:400;line-height:1.05;color:var(--text-dark);margin-bottom:0.6rem}
+.subtitle{font-size:0.9rem;color:var(--text-muted);margin-bottom:0.5rem;max-width:580px;line-height:1.7}
+.topic-tag{font-size:0.6rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:2.5rem;padding-bottom:2rem;border-bottom:1px solid var(--border)}
+
+/* INTRO QUOTE */
+.intro-quote{border-left:3px solid var(--accent);padding:1rem 1.5rem;margin-bottom:2.5rem;background:rgba(201,147,10,0.05);border-radius:0 6px 6px 0}
+.intro-quote p{font-size:0.95rem;color:var(--text-mid);font-style:italic;line-height:1.7}
+
+/* CHART SECTION */
+.chart-section{background:white;border:1px solid var(--border);border-radius:10px;padding:1.75rem;margin-bottom:2rem}
+.section-label{font-size:0.62rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:0.4rem}
+.section-title{font-size:1.05rem;font-weight:600;color:var(--text-dark);margin-bottom:0.25rem}
+.section-desc{font-size:0.8rem;color:var(--text-muted);margin-bottom:1.25rem;line-height:1.6}
+.chart-wrap{position:relative;height:220px;margin-bottom:0.5rem}
+canvas#compoundChart{width:100%;height:100%}
+.chart-note{font-size:0.68rem;color:var(--text-muted);text-align:center;font-style:italic}
+
+/* HABITS GRID */
+.habits-section{margin-bottom:2rem}
+.habits-intro{font-size:0.85rem;color:var(--text-mid);margin-bottom:1.25rem;line-height:1.6}
+.habits-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem}
+.habit-card{background:white;border:1.5px solid var(--border);border-radius:8px;padding:1.1rem 1.25rem;transition:border-color 0.15s}
+.habit-card:focus-within{border-color:var(--accent)}
+.habit-num{font-size:0.58rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem}
+.habit-label{font-size:0.72rem;font-weight:600;color:var(--text-dark);margin-bottom:0.5rem}
+textarea{font-family:var(--font-body);font-size:0.88rem;color:var(--text-dark);background:transparent;border:none;outline:none;width:100%;resize:none;line-height:1.6;overflow:hidden}
+textarea::placeholder{color:var(--text-muted)}
+
+/* COMPOUND VISUAL */
+.compound-visual{background:var(--navy);border-radius:10px;padding:2rem;margin-bottom:2rem;color:white}
+.compound-visual-title{font-family:var(--font-display);font-size:1.3rem;font-weight:400;color:white;margin-bottom:0.35rem}
+.compound-visual-sub{font-size:0.78rem;color:rgba(255,255,255,0.5);margin-bottom:1.75rem}
+.compound-bars{display:flex;align-items:flex-end;gap:0.5rem;height:100px;margin-bottom:0.75rem}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.35rem}
+.bar{width:100%;background:rgba(201,147,10,0.25);border-radius:3px 3px 0 0;transition:height 0.3s;min-height:4px}
+.bar-label{font-size:0.55rem;color:rgba(255,255,255,0.45);letter-spacing:0.06em;text-transform:uppercase;text-align:center}
+.compound-insight{font-size:0.78rem;color:rgba(255,255,255,0.6);line-height:1.6;font-style:italic}
+
+/* FORM SECTIONS */
+.form-section{background:white;border:1px solid var(--border);border-radius:10px;padding:1.75rem;margin-bottom:1.5rem}
+.form-field{margin-bottom:1.25rem}
+.form-field:last-child{margin-bottom:0}
+.field-label{font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.5rem}
+.field-input{font-family:var(--font-body);font-size:0.95rem;color:var(--text-dark);background:var(--cream);border:1.5px solid var(--border);border-radius:6px;padding:0.75rem 1rem;width:100%;resize:none;outline:none;line-height:1.6;overflow:hidden;transition:border-color 0.15s}
+.field-input:focus{border-color:var(--accent)}
+.field-input::placeholder{color:var(--text-muted)}
+
+/* COMPLETE BTN */
+.complete-wrap{margin-top:2.5rem;text-align:center}
+.complete-btn{font-family:var(--font-body);font-size:0.72rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;background:var(--navy);color:white;border:none;padding:1rem 3rem;border-radius:4px;cursor:pointer;transition:background 0.15s}
+.complete-btn:hover{background:#1C2B3A}
+
+/* COMPLETION SCREEN */
+#completionView{display:none;max-width:820px;margin:0 auto;padding:3rem 2rem 5rem}
+.completion-header{text-align:center;margin-bottom:3rem;padding-bottom:2.5rem;border-bottom:1px solid var(--border)}
+.completion-icon{font-size:2.5rem;margin-bottom:1rem}
+.completion-header h2{font-family:var(--font-display);font-size:2.2rem;font-weight:400;color:var(--text-dark);margin-bottom:0.5rem}
+.completion-header p{font-size:0.88rem;color:var(--text-muted)}
+.summary-card{background:white;border:1px solid var(--border);border-radius:10px;padding:1.5rem 1.75rem;margin-bottom:1rem}
+.summary-label{font-size:0.6rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem}
+.summary-text{font-size:0.9rem;color:var(--text-mid);line-height:1.7;white-space:pre-wrap}
+.momentum-section{margin-bottom:2rem;border:1px solid var(--border);border-radius:10px;padding:1.5rem 1.75rem;background:rgba(255,255,255,0.55)}
+.momentum-label{font-size:0.62rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:1rem}
+.momentum-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem}
+.momentum-btn{display:flex;flex-direction:column;align-items:center;gap:0.55rem;padding:0.9rem 0.5rem 0.85rem;background:var(--cream);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-family:var(--font-body);transition:all 0.15s}
+.momentum-btn:hover{background:var(--cream-dark);border-color:var(--accent)}
+.mbtn-icon{font-size:1.3rem}
+.mbtn-label{font-size:0.6rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-mid)}
+.momentum-btn.copied .mbtn-label{color:#3B6D11}
+.cal-panel{display:none;margin-top:1.25rem;padding:1.25rem 1.5rem;background:white;border:1.5px solid var(--border);border-radius:8px}
+.cal-panel.open{display:block}
+.cal-panel-title{font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dark);margin-bottom:1rem}
+.cal-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem}
+.cal-field label{display:block;font-size:0.6rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.4rem}
+.cal-input{font-family:var(--font-body);font-size:0.82rem;padding:0.5rem 0.75rem;border:1.5px solid var(--border);border-radius:5px;width:100%;outline:none;background:var(--cream)}
+.cal-input:focus{border-color:var(--accent)}
+.cal-actions{display:flex;gap:0.75rem}
+.cal-add-btn{font-family:var(--font-body);font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;background:var(--navy);color:white;border:none;padding:0.6rem 1.25rem;border-radius:4px;cursor:pointer}
+.cal-cancel-btn{font-family:var(--font-body);font-size:0.65rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;background:none;color:var(--text-muted);border:1.5px solid var(--border);padding:0.6rem 1rem;border-radius:4px;cursor:pointer}
+.cal-hint{font-size:0.65rem;color:var(--text-muted);margin-top:0.75rem;line-height:1.5}
+.completion-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:2rem}
+.action-btn{font-family:var(--font-body);font-size:0.68rem;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;padding:0.75rem 1.75rem;border-radius:4px;cursor:pointer;border:1.5px solid var(--border);background:none;color:var(--text-mid);transition:all 0.15s}
+.action-btn:hover{border-color:var(--accent);color:var(--accent)}
+.closing-quote{text-align:center;padding:2rem;margin-top:1rem}
+.closing-quote p{font-family:var(--font-display);font-size:1.2rem;font-style:italic;color:var(--text-muted);line-height:1.6}
+
+@media(max-width:600px){
+  .habits-grid{grid-template-columns:1fr}
+  .momentum-actions{grid-template-columns:repeat(2,1fr)}
+  .cal-fields{grid-template-columns:1fr}
+}
+@media print{
+  .topbar,.complete-wrap,#completionView,.completion-actions{display:none!important}
+  #toolView{display:block!important}
+  body{background:white}
+  .form-section,.chart-section,.habits-section{break-inside:avoid}
+  .field-input{border:1px solid #ccc}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="index.html" class="back-link">← Resource Library</a>
+    <span class="topbar-logo">TLR</span>
+  </div>
+  <span class="theme-pill">Building Momentum</span>
+</div>
+
+<div id="toolView">
+<div class="page">
+
+  <div class="eyebrow">Topic 2 of 5</div>
+  <h1>The Compound Effect</h1>
+  <p class="subtitle">The small things you do every day matter far more than the big things you do occasionally.</p>
+  <div class="topic-tag">Theme: Building Momentum &nbsp;·&nbsp; The Compound Effect</div>
+
+  <div class="intro-quote">
+    <p>"You don't rise to the level of your goals. You fall to the level of your systems. Momentum is not built in moments — it is built in the quiet, consistent actions no one else sees."</p>
+  </div>
+
+  <!-- CHART -->
+  <div class="chart-section">
+    <div class="section-label">The compound curve</div>
+    <div class="section-title">Why small actions feel pointless at first</div>
+    <div class="section-desc">The early days of a new habit look almost flat. But the curve is already forming beneath the surface. Every consistent action bends the line — slowly, then dramatically.</div>
+    <div class="chart-wrap">
+      <canvas id="compoundChart"></canvas>
+    </div>
+    <div class="chart-note">Day 1 looks the same as Day 7. Day 30 looks nothing like either.</div>
+  </div>
+
+  <!-- HABITS -->
+  <div class="habits-section">
+    <div class="section-label">Your compound actions</div>
+    <div class="section-title" style="font-size:1.05rem;font-weight:600;color:var(--text-dark);margin-bottom:0.35rem">What are the small, repeatable actions that build your momentum?</div>
+    <p class="habits-intro">Choose actions that are almost embarrassingly small. Small enough that you'd do them even on a hard day. The compound curve does not care about effort — it cares about consistency.</p>
+    <div class="habits-grid">
+      <div class="habit-card">
+        <div class="habit-num">Action 01</div>
+        <div class="habit-label">What I will do</div>
+        <textarea id="h1" rows="1" placeholder="e.g. Write one sentence…" oninput="autoExpand(this)"></textarea>
+        <div class="habit-label" style="margin-top:0.6rem">How often</div>
+        <textarea id="h1f" rows="1" placeholder="e.g. Every morning before coffee…" oninput="autoExpand(this)"></textarea>
+      </div>
+      <div class="habit-card">
+        <div class="habit-num">Action 02</div>
+        <div class="habit-label">What I will do</div>
+        <textarea id="h2" rows="1" placeholder="Something small and repeatable…" oninput="autoExpand(this)"></textarea>
+        <div class="habit-label" style="margin-top:0.6rem">How often</div>
+        <textarea id="h2f" rows="1" placeholder="Daily / weekly / after X…" oninput="autoExpand(this)"></textarea>
+      </div>
+      <div class="habit-card">
+        <div class="habit-num">Action 03</div>
+        <div class="habit-label">What I will do</div>
+        <textarea id="h3" rows="1" placeholder="Even 2 minutes counts…" oninput="autoExpand(this)"></textarea>
+        <div class="habit-label" style="margin-top:0.6rem">How often</div>
+        <textarea id="h3f" rows="1" placeholder="When and how often…" oninput="autoExpand(this)"></textarea>
+      </div>
+      <div class="habit-card">
+        <div class="habit-num">Action 04</div>
+        <div class="habit-label">What I will do</div>
+        <textarea id="h4" rows="1" placeholder="What tiny thing builds you up…" oninput="autoExpand(this)"></textarea>
+        <div class="habit-label" style="margin-top:0.6rem">How often</div>
+        <textarea id="h4f" rows="1" placeholder="Frequency or trigger…" oninput="autoExpand(this)"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPOUND VISUAL -->
+  <div class="compound-visual">
+    <div class="compound-visual-title">Your 30-day picture</div>
+    <div class="compound-visual-sub">If you do these actions consistently for 30 days, here is what accumulates.</div>
+    <div class="compound-bars" id="compoundBars">
+      <div class="bar-wrap"><div class="bar" style="height:8px"></div><div class="bar-label">Wk 1</div></div>
+      <div class="bar-wrap"><div class="bar" style="height:20px"></div><div class="bar-label">Wk 2</div></div>
+      <div class="bar-wrap"><div class="bar" style="height:48px"></div><div class="bar-label">Wk 3</div></div>
+      <div class="bar-wrap"><div class="bar" style="height:95px"></div><div class="bar-label">Wk 4</div></div>
+    </div>
+    <p class="compound-insight">The first week barely shows. The fourth week is six times the first. This is not metaphor — this is arithmetic. Consistency is the cheat code.</p>
+  </div>
+
+  <!-- REFLECTION -->
+  <div class="form-section">
+    <div class="section-label">Reflection</div>
+    <div class="section-title" style="font-size:1.05rem;font-weight:600;color:var(--text-dark);margin-bottom:1.25rem">Where the compound effect is already working in your life</div>
+    <div class="form-field">
+      <label class="field-label">Where have you already seen small, consistent actions create something significant?</label>
+      <textarea class="field-input" id="reflect1" rows="2" placeholder="Think back — something you didn't notice building until it was already there…" oninput="autoExpand(this)"></textarea>
+    </div>
+    <div class="form-field">
+      <label class="field-label">What has been compounding in the wrong direction — and what is one small change?</label>
+      <textarea class="field-input" id="reflect2" rows="2" placeholder="No judgment. Just noticing…" oninput="autoExpand(this)"></textarea>
+    </div>
+  </div>
+
+  <!-- COMMITMENT -->
+  <div class="form-section">
+    <div class="section-label">Your compound commitment</div>
+    <div class="section-title" style="font-size:1.05rem;font-weight:600;color:var(--text-dark);margin-bottom:1.25rem">One sentence that captures what you are building</div>
+    <div class="form-field">
+      <label class="field-label">Complete this sentence</label>
+      <textarea class="field-input" id="commitment" rows="2" placeholder="Every day I will _____ because I am building _____…" oninput="autoExpand(this)"></textarea>
+    </div>
+    <div class="form-field">
+      <label class="field-label">What will you notice in 30 days if you stay consistent?</label>
+      <textarea class="field-input" id="in30" rows="2" placeholder="Be specific. Not 'I'll feel better' — what will actually be different…" oninput="autoExpand(this)"></textarea>
+    </div>
+  </div>
+
+  <div class="complete-wrap">
+    <button class="complete-btn" onclick="showCompletion()">I've completed this tool</button>
+  </div>
+
+</div>
+</div>
+
+<!-- COMPLETION -->
+<div id="completionView">
+  <div class="completion-header">
+    <div class="completion-icon">📈</div>
+    <h2>The curve is already bending.</h2>
+    <p>Your consistent actions are now working — whether you can see it yet or not.</p>
+  </div>
+
+  <div class="summary-card">
+    <div class="summary-label">Your compound commitment</div>
+    <div class="summary-text" id="summaryCommitment"></div>
+  </div>
+  <div class="summary-card">
+    <div class="summary-label">What you are building toward (30 days)</div>
+    <div class="summary-text" id="summaryIn30"></div>
+  </div>
+  <div class="summary-card">
+    <div class="summary-label">Your compound actions</div>
+    <div class="summary-text" id="summaryHabits"></div>
+  </div>
+
+  <div class="momentum-section">
+    <div class="momentum-label">Keep your momentum</div>
+    <div class="momentum-actions">
+      <button class="momentum-btn" onclick="emailToSelf()"><span class="mbtn-icon">📧</span><span class="mbtn-label">Email to myself</span></button>
+      <button class="momentum-btn" onclick="shareWhatsApp()"><span class="mbtn-icon">💬</span><span class="mbtn-label">WhatsApp</span></button>
+      <button class="momentum-btn" id="calBtn" onclick="toggleCalPanel()"><span class="mbtn-icon">📅</span><span class="mbtn-label">Add to calendar</span></button>
+      <button class="momentum-btn" id="copyBtn" onclick="copyCommitment()"><span class="mbtn-icon">📋</span><span class="mbtn-label">Copy commitment</span></button>
+    </div>
+    <div class="cal-panel" id="calPanel">
+      <div class="cal-panel-title">Schedule your check-in</div>
+      <div class="cal-fields">
+        <div class="cal-field"><label>Date</label><input type="date" id="calDate" class="cal-input"></div>
+        <div class="cal-field"><label>Time</label><input type="time" id="calTime" class="cal-input" value="09:00"></div>
+        <div class="cal-field"><label>Repeat</label>
+          <select id="calRepeat" class="cal-input">
+            <option value="none">No repeat</option>
+            <option value="DAILY">Every day</option>
+            <option value="WEEKLY" selected>Every week</option>
+            <option value="MONTHLY">Every month</option>
+          </select>
+        </div>
+      </div>
+      <div class="cal-actions">
+        <button class="cal-add-btn" onclick="downloadICS()">Add to my calendar</button>
+        <button class="cal-cancel-btn" onclick="toggleCalPanel()">Cancel</button>
+      </div>
+      <div class="cal-hint">Downloads a .ics file — opens in Apple Calendar, Google Calendar, Outlook, or any calendar app.</div>
+    </div>
+  </div>
+
+  <div class="closing-quote">
+    <p>"You do not need to be extraordinary. You need to be consistent. The curve takes care of the rest."</p>
+  </div>
+
+  <div class="completion-actions">
+    <button class="action-btn" onclick="window.print()">🖨 Print blank worksheet</button>
+    <button class="action-btn" onclick="startAgain()">Start again</button>
+    <a href="index.html" class="action-btn" style="text-decoration:none;display:inline-flex;align-items:center">← Back to library</a>
+  </div>
+</div>
+
+<script>
+function autoExpand(el){el.style.height='auto';el.style.height=el.scrollHeight+'px'}
+
+function getSummary(){
+  const commit=document.getElementById('commitment').value.trim();
+  const in30=document.getElementById('in30').value.trim();
+  const habits=[
+    {a:document.getElementById('h1').value.trim(),f:document.getElementById('h1f').value.trim()},
+    {a:document.getElementById('h2').value.trim(),f:document.getElementById('h2f').value.trim()},
+    {a:document.getElementById('h3').value.trim(),f:document.getElementById('h3f').value.trim()},
+    {a:document.getElementById('h4').value.trim(),f:document.getElementById('h4f').value.trim()}
+  ].filter(h=>h.a);
+  return{commit,in30,habits};
+}
+
+function showCompletion(){
+  const{commit,in30,habits}=getSummary();
+  document.getElementById('summaryCommitment').textContent=commit||'(not filled in)';
+  document.getElementById('summaryIn30').textContent=in30||'(not filled in)';
+  document.getElementById('summaryHabits').textContent=habits.length?habits.map((h,i)=>`${i+1}. ${h.a}${h.f?' — '+h.f:''}`).join('\n'):'(not filled in)';
+  document.getElementById('toolView').style.display='none';
+  document.getElementById('completionView').style.display='block';
+  window.scrollTo(0,0);
+}
+
+function startAgain(){
+  document.getElementById('toolView').style.display='block';
+  document.getElementById('completionView').style.display='none';
+  window.scrollTo(0,0);
+}
+
+function getFullText(){
+  const{commit,in30,habits}=getSummary();
+  return `THE COMPOUND EFFECT — The Living Room\n\nMy compound commitment:\n${commit||'—'}\n\nWhat I am building toward (30 days):\n${in30||'—'}\n\nMy compound actions:\n${habits.length?habits.map((h,i)=>`${i+1}. ${h.a}${h.f?' ('+h.f+')':''}`).join('\n'):'—'}`;
+}
+
+function emailToSelf(){
+  const body=encodeURIComponent(getFullText());
+  window.location.href=`mailto:?subject=My%20Compound%20Effect%20%E2%80%94%20TLR&body=${body}`;
+}
+
+function shareWhatsApp(){
+  window.open('https://wa.me/?text='+encodeURIComponent(getFullText()),'_blank');
+}
+
+function toggleCalPanel(){
+  const p=document.getElementById('calPanel');
+  p.classList.toggle('open');
+  if(p.classList.contains('open')){
+    const t=new Date();t.setDate(t.getDate()+7);
+    document.getElementById('calDate').value=t.toISOString().split('T')[0];
+  }
+}
+
+function downloadICS(){
+  const{commit}=getSummary();
+  const d=document.getElementById('calDate').value;
+  const t=document.getElementById('calTime').value||'09:00';
+  const rep=document.getElementById('calRepeat').value;
+  if(!d){alert('Please choose a date first.');return;}
+  const dt=d.replace(/-/g,'')+'T'+t.replace(':','')+'00';
+  const uid=Date.now()+'@tlr';
+  let ics=`BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//TLR//EN\nBEGIN:VEVENT\nUID:${uid}\nDTSTAMP:${dt}Z\nDTSTART:${dt}\nDURATION:PT30M\nSUMMARY:Compound Effect check-in — TLR\nDESCRIPTION:${(commit||'My compound commitment').replace(/\n/g,'\\n')}\n`;
+  if(rep!=='none')ics+=`RRULE:FREQ=${rep}\n`;
+  ics+=`END:VEVENT\nEND:VCALENDAR`;
+  const b=new Blob([ics],{type:'text/calendar'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='compound-effect-tlr.ics';a.click();
+}
+
+function copyCommitment(){
+  const txt=getFullText();
+  navigator.clipboard.writeText(txt).then(()=>{
+    const b=document.getElementById('copyBtn');
+    b.classList.add('copied');
+    b.querySelector('.mbtn-label').textContent='Copied!';
+    setTimeout(()=>{b.classList.remove('copied');b.querySelector('.mbtn-label').textContent='Copy commitment';},2500);
+  });
+}
+
+// Draw compound chart
+window.addEventListener('load',()=>{
+  const canvas=document.getElementById('compoundChart');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth*window.devicePixelRatio;
+  canvas.height=canvas.offsetHeight*window.devicePixelRatio;
+  ctx.scale(window.devicePixelRatio,window.devicePixelRatio);
+  const W=canvas.offsetWidth,H=canvas.offsetHeight;
+  const pad={top:20,right:20,bottom:30,left:40};
+  const points=[];
+  for(let i=0;i<=30;i++){points.push({x:i,y:Math.pow(1.08,i)-1});}
+  const maxY=points[points.length-1].y;
+  const toX=x=>pad.left+(x/30)*(W-pad.left-pad.right);
+  const toY=y=>H-pad.bottom-(y/maxY)*(H-pad.top-pad.bottom);
+  // Grid lines
+  ctx.strokeStyle='rgba(0,0,0,0.06)';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){const y=pad.top+i*(H-pad.top-pad.bottom)/4;ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(W-pad.right,y);ctx.stroke();}
+  // Flat line (no action)
+  ctx.strokeStyle='rgba(0,0,0,0.15)';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(toX(0),toY(0));ctx.lineTo(toX(30),toY(0.3));ctx.stroke();ctx.setLineDash([]);
+  // Compound curve
+  const grad=ctx.createLinearGradient(0,pad.top,0,H-pad.bottom);
+  grad.addColorStop(0,'rgba(201,147,10,0.3)');grad.addColorStop(1,'rgba(201,147,10,0.02)');
+  ctx.beginPath();ctx.moveTo(toX(0),toY(0));
+  points.forEach(p=>ctx.lineTo(toX(p.x),toY(p.y)));
+  ctx.lineTo(toX(30),toY(0));ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+  ctx.beginPath();ctx.moveTo(toX(0),toY(0));
+  points.forEach(p=>ctx.lineTo(toX(p.x),toY(p.y)));
+  ctx.strokeStyle='#C9930A';ctx.lineWidth=2.5;ctx.stroke();
+  // Labels
+  ctx.fillStyle='rgba(0,0,0,0.35)';ctx.font='10px Poppins,sans-serif';ctx.textAlign='center';
+  ['Day 1','Day 7','Day 14','Day 21','Day 30'].forEach((l,i)=>{ctx.fillText(l,toX(i*7.5),H-8);});
+  ctx.fillStyle='rgba(0,0,0,0.3)';ctx.font='9px Poppins,sans-serif';ctx.textAlign='left';
+  ctx.fillText('Consistent action',toX(16)+4,toY(Math.pow(1.08,16)-1)-6);
+  ctx.fillStyle='rgba(0,0,0,0.25)';ctx.fillText('No change',toX(20)+4,toY(0.25)-6);
+});
+
+document.querySelectorAll('textarea').forEach(t=>t.addEventListener('input',()=>autoExpand(t)));
+</script>
+</body>
+</html>
