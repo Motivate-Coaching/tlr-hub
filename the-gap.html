@@ -92,7 +92,10 @@ label.q-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-m
 <div class="topbar">
   <a href="index.html" class="back">← Resource Library</a>
   <span class="logo">TLR</span>
-  <span class="theme-pill">Theme 3: Boundaries</span>
+  <span class="theme-pill">Theme 3: Boundaries
+</span>
+</div>
+<span id="saved-badge" style="display:none;align-items:center;gap:0.35rem;font-size:0.72rem;color:rgba(255,255,255,0.5)"><span style="width:6px;height:6px;background:#5CB85C;border-radius:50%;flex-shrink:0;display:inline-block"></span>Progress saved</span>
 </div>
 <div class="page" id="toolView">
   <div class="eyebrow">Topic 2 of 4</div>
@@ -315,7 +318,7 @@ function copyCommitment(){
     ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('Copied!');
   });
 }
-function startAgain(){
+function startAgain(){localStorage.removeItem(STORE_KEY);
   document.getElementById('toolView').style.display='block';
   document.getElementById('completionView').style.display='none';
   document.querySelectorAll('#toolView textarea').forEach(t=>{t.value='';autoExpand(t);});
@@ -344,6 +347,46 @@ function showCompletion(){
   window.scrollTo(0,0);
 }
 
+
+// --- Progress auto-save (localStorage) ---
+const STORE_KEY='tlr-the-gap';
+function saveProgress(){
+  const s={};
+  document.querySelectorAll('textarea[id],input[id]').forEach(el=>{
+    if(el.type==='checkbox'||el.type==='radio') s[el.id]=el.checked;
+    else s[el.id]=el.value;
+  });
+  const badges={};
+  [1,2,3,4,5,6].forEach(i=>{['D','R','A'].forEach(c=>{
+    const b=document.getElementById('badge'+i+c);
+    if(b&&b.classList.contains('active-'+c)) badges[i]=c;
+  })});
+  if(Object.keys(badges).length) s['_badges']=badges;
+  localStorage.setItem(STORE_KEY,JSON.stringify(s));
+  const badge=document.getElementById('saved-badge');
+  if(badge) badge.style.display='flex';
+}
+function restoreProgress(){
+  const raw=localStorage.getItem(STORE_KEY);
+  if(!raw) return;
+  try{
+    const s=JSON.parse(raw);
+    document.querySelectorAll('textarea[id],input[id]').forEach(el=>{
+      if(!(el.id in s)) return;
+      if(el.type==='checkbox'||el.type==='radio') el.checked=s[el.id];
+      else{el.value=s[el.id];if(el.tagName==='TEXTAREA'){el.style.height='auto';el.style.height=el.scrollHeight+'px';}}
+    });
+    if(s['_badges']&&typeof setBadge==='function'){
+      Object.entries(s['_badges']).forEach(([i,c])=>setBadge(Number(i),c));
+    }
+    if(typeof updateBars==='function') updateBars();
+    const hasData=Object.values(s).some(v=>v!==undefined&&v!==''&&v!==false&&v!=='0');
+    if(hasData){const badge=document.getElementById('saved-badge');if(badge)badge.style.display='flex';}
+  }catch(e){}
+}
+document.addEventListener('input',saveProgress);
+document.addEventListener('change',saveProgress);
+document.addEventListener('DOMContentLoaded',restoreProgress);
 </script>
 </body>
 </html>

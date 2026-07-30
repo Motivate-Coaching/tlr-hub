@@ -797,6 +797,7 @@ body {
   </a>
   <div class="theme-pill">Building Momentum &nbsp;·&nbsp; Week 1 of 4</div>
   <div class="tlr-logo">TLR &nbsp;The Living Room</div>
+  <span id="saved-badge" style="display:none;align-items:center;gap:0.35rem;font-size:0.72rem;color:#888"><span style="width:6px;height:6px;background:#5CB85C;border-radius:50%;flex-shrink:0;display:inline-block"></span>Progress saved</span>
 </div>
 
 <!-- ═══ FORM VIEW ═══ -->
@@ -1283,6 +1284,46 @@ function copyCommitment() {
     }, 2200);
   });
 }
+
+// --- Progress auto-save (localStorage) ---
+const STORE_KEY='tlr-momentum-ladder';
+function saveProgress(){
+  const s={};
+  document.querySelectorAll('textarea[id],input[id]').forEach(el=>{
+    if(el.type==='checkbox'||el.type==='radio') s[el.id]=el.checked;
+    else s[el.id]=el.value;
+  });
+  const badges={};
+  [1,2,3,4,5,6].forEach(i=>{['D','R','A'].forEach(c=>{
+    const b=document.getElementById('badge'+i+c);
+    if(b&&b.classList.contains('active-'+c)) badges[i]=c;
+  })});
+  if(Object.keys(badges).length) s['_badges']=badges;
+  localStorage.setItem(STORE_KEY,JSON.stringify(s));
+  const badge=document.getElementById('saved-badge');
+  if(badge) badge.style.display='flex';
+}
+function restoreProgress(){
+  const raw=localStorage.getItem(STORE_KEY);
+  if(!raw) return;
+  try{
+    const s=JSON.parse(raw);
+    document.querySelectorAll('textarea[id],input[id]').forEach(el=>{
+      if(!(el.id in s)) return;
+      if(el.type==='checkbox'||el.type==='radio') el.checked=s[el.id];
+      else{el.value=s[el.id];if(el.tagName==='TEXTAREA'){el.style.height='auto';el.style.height=el.scrollHeight+'px';}}
+    });
+    if(s['_badges']&&typeof setBadge==='function'){
+      Object.entries(s['_badges']).forEach(([i,c])=>setBadge(Number(i),c));
+    }
+    if(typeof updateBars==='function') updateBars();
+    const hasData=Object.values(s).some(v=>v!==undefined&&v!==''&&v!==false&&v!=='0');
+    if(hasData){const badge=document.getElementById('saved-badge');if(badge)badge.style.display='flex';}
+  }catch(e){}
+}
+document.addEventListener('input',saveProgress);
+document.addEventListener('change',saveProgress);
+document.addEventListener('DOMContentLoaded',restoreProgress);
 </script>
 </body>
 </html>
