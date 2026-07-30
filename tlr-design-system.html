@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TLR Design System — The Living Room</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+:root {
+  /* ── BRAND BASE ── */
+  --navy:        #0F1215;
+  --navy-mid:    #1C2B3A;
+  --cream:       #F5F1EB;
+  --cream-dark:  #EDE8DF;
+  --cream-deep:  #E5DDD1;
+  --white:       #FFFFFF;
+  --text-dark:   #1A1A1A;
+  --text-mid:    #4A4A4A;
+  --text-muted:  #888880;
+  --border:      rgba(0,0,0,0.1);
+
+  /* ── MONTH ACCENT COLOURS ── */
+  --m1-slate:    #2B4A6F;
+  --m2-olive:    #5C6B3A;
+  --m3-terra:    #8C4A2F;
+  --m4-teal:     #1A6B72;
+  --m5-amber:    #C9930A;
+
+  /* ── TYPOGRAPHY ── */
+  --font-body:    'Poppins', sans-serif;
+  --font-display: 'Playfair Display', serif;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--cream);
+  color: var(--text-dark);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ── LAYOUT ── */
+.ds-header {
+  background: var(--navy);
+  padding: 3rem 2rem 2.5rem;
+  border-bottom: 4px solid var(--m5-amber);
+}
+.ds-header-inner { max-width: 960px; margin: 0 auto; }
+.ds-eyebrow {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--m5-amber);
+  margin-bottom: 0.75rem;
+}
+.ds-header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 400;
+  color: var(--white);
+  line-height: 1.1;
+  margin-bottom: 0.75rem;
+}
+.ds-header p {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.5);
+  max-width: 540px;
+  line-height: 1.7;
+}
+.ds-meta {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.ds-meta-item { font-size: 0.72rem; color: rgba(255,255,255,0.35); }
+.ds-meta-item strong { color: rgba(255,255,255,0.6); display: block; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.2rem; }
+
+.ds-nav {
+  background: var(--navy-mid);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.ds-nav-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+}
+.ds-nav a {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  text-decoration: none;
+  padding: 0.9rem 1.1rem;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+.ds-nav a:hover { color: var(--m5-amber); border-bottom-color: var(--m5-amber); }
+
+.ds-body { max-width: 960px; margin: 0 auto; padding: 4rem 2rem 6rem; }
+
+/* ── SECTIONS ── */
+.ds-section { margin-bottom: 5rem; }
+.ds-section-title {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 400;
+  color: var(--text-dark);
+  margin-bottom: 0.4rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.ds-section-sub {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 2.5rem;
+  margin-top: 0.5rem;
+}
+.ds-rule { font-size: 0.75rem; color: var(--text-muted); font-style: italic; margin-top: 0.5rem; }
+
+/* ── COLOUR SWATCHES ── */
+.swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; }
+.swatch { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+.swatch-color { height: 72px; }
+.swatch-info { padding: 0.65rem 0.75rem; background: white; }
+.swatch-name { font-size: 0.7rem; font-weight: 600; color: var(--text-dark); }
+.swatch-hex { font-size: 0.65rem; color: var(--text-muted); font-family: monospace; letter-spacing: 0.05em; }
+.swatch-use { font-size: 0.6rem; color: var(--text-muted); margin-top: 0.2rem; line-height: 1.4; }
+
+.month-swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; margin-top: 1.5rem; }
+.month-swatch { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+.month-swatch-color { height: 56px; position: relative; }
+.month-swatch-label {
+  position: absolute;
+  bottom: 0.4rem; left: 0.6rem;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+}
+.month-swatch-info { padding: 0.6rem 0.7rem; background: white; }
+.month-swatch-theme { font-size: 0.68rem; font-weight: 600; color: var(--text-dark); }
+.month-swatch-hex { font-size: 0.6rem; color: var(--text-muted); font-family: monospace; }
+
+/* ── TYPOGRAPHY SPECIMENS ── */
+.type-specimen { margin-bottom: 2rem; padding: 1.75rem; background: white; border-radius: 8px; border: 1px solid var(--border); }
+.type-specimen-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+.type-spec { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.5rem; font-family: monospace; }
+
+/* ── SPACING ── */
+.spacing-row { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 0.75rem; }
+.spacing-block { background: var(--m5-amber); border-radius: 3px; height: 24px; opacity: 0.7; }
+.spacing-label { font-size: 0.72rem; color: var(--text-mid); }
+.spacing-value { font-size: 0.65rem; color: var(--text-muted); font-family: monospace; }
+
+/* ── COMPONENTS ── */
+.component-row { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; margin-bottom: 1.25rem; }
+.comp-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); width: 120px; flex-shrink: 0; }
+
+/* Button specimens */
+.btn-primary {
+  font-family: var(--font-body);
+  font-size: 0.7rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0.9rem 2.5rem;
+  background: var(--navy); color: var(--white);
+  border: none; border-radius: 4px; cursor: pointer;
+}
+.btn-accent {
+  font-family: var(--font-body);
+  font-size: 0.7rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0.9rem 2.5rem;
+  background: var(--m5-amber); color: var(--navy);
+  border: none; border-radius: 4px; cursor: pointer;
+}
+.btn-outline {
+  font-family: var(--font-body);
+  font-size: 0.7rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0.85rem 2.5rem;
+  background: none; color: rgba(0,0,0,0.45);
+  border: 1.5px solid rgba(0,0,0,0.15); border-radius: 4px; cursor: pointer;
+}
+.btn-sm {
+  font-family: var(--font-body);
+  font-size: 0.62rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0.45rem 1rem;
+  background: var(--navy); color: var(--white);
+  border: none; border-radius: 4px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+}
+
+/* Input specimen */
+.input-specimen {
+  font-family: var(--font-body);
+  font-size: 1rem; font-weight: 400;
+  padding: 0.9rem 1.1rem;
+  background: rgba(255,255,255,0.7);
+  border: 1.5px solid rgba(0,0,0,0.12);
+  border-radius: 6px;
+  width: 100%; max-width: 400px;
+  outline: none; color: var(--text-dark);
+  resize: none; line-height: 1.6;
+}
+
+/* Tag specimens */
+.tag { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 0.25rem 0.7rem; border-radius: 20px; }
+.tag-theme { background: var(--cream-dark); color: var(--m5-amber); }
+.tag-current { background: rgba(201,147,10,0.12); color: var(--m5-amber); border: 1px solid var(--m5-amber); }
+
+/* Shell specimen */
+.shell-specimen {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--cream);
+}
+.shell-topbar {
+  background: var(--cream);
+  border-bottom: 1px solid var(--border);
+  padding: 0.65rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.shell-topbar-left { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(0,0,0,0.3); }
+.shell-topbar-pill { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--m5-amber); }
+.shell-body { padding: 1.5rem; }
+.shell-title { font-family: var(--font-display); font-size: 1.6rem; font-weight: 400; color: var(--text-dark); margin-bottom: 0.25rem; }
+.shell-subtitle { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem; }
+.shell-tool-core {
+  background: var(--cream-dark);
+  border-radius: 6px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  border: 1.5px dashed rgba(0,0,0,0.15);
+  margin-bottom: 1rem;
+}
+.shell-completion {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.shell-completion strong { color: var(--text-dark); display: block; margin-bottom: 0.35rem; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* Anatomy diagram */
+.anatomy { position: relative; }
+.anatomy-layer {
+  border: 2px dashed rgba(0,0,0,0.12);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+.anatomy-tag {
+  position: absolute;
+  top: -0.6rem; left: 1rem;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  color: var(--text-muted);
+}
+.anatomy-tag.tier-1 { color: var(--m5-amber); border-color: var(--m5-amber); }
+.anatomy-tag.tier-2 { color: var(--m4-teal); border-color: var(--m4-teal); }
+.anatomy-tag.tier-3 { color: var(--m3-terra); border-color: var(--m3-terra); }
+.anatomy-desc { font-size: 0.75rem; color: var(--text-mid); padding-top: 0.35rem; }
+.anatomy-items { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.anatomy-item { font-size: 0.62rem; background: var(--cream-dark); border-radius: 3px; padding: 0.2rem 0.55rem; color: var(--text-mid); }
+
+/* Rules table */
+.rules-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.rules-table th {
+  text-align: left;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0.6rem 1rem;
+  background: var(--cream-dark);
+  border-bottom: 1px solid var(--border);
+}
+.rules-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-mid);
+  vertical-align: top;
+}
+.rules-table td:first-child { font-weight: 600; color: var(--text-dark); width: 30%; }
+.rules-table tr:last-child td { border-bottom: none; }
+.do { color: #3B6D11; font-weight: 600; }
+.dont { color: #8C2E0A; font-weight: 600; }
+
+/* Tone specimens */
+.tone-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 0.75rem;
+}
+.tone-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.6rem; }
+.tone-label.do-label { color: #3B6D11; }
+.tone-label.dont-label { color: #8C2E0A; }
+.tone-example { font-size: 0.88rem; color: var(--text-mid); font-style: italic; line-height: 1.6; }
+
+/* Tool map */
+.tool-map { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.tool-col-header {
+  padding: 0.75rem 0.5rem;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: white;
+  text-align: center;
+}
+.tool-cell {
+  padding: 0.65rem 0.6rem;
+  font-size: 0.67rem;
+  color: var(--text-mid);
+  border-top: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  line-height: 1.4;
+  text-align: center;
+}
+.tool-cell:last-child { border-right: none; }
+.tool-cell.done { font-weight: 600; color: var(--text-dark); }
+.tool-cell.done::after { content: ' ✓'; color: #3B6D11; }
+
+/* Footer */
+.ds-footer {
+  background: var(--navy);
+  padding: 2rem;
+  text-align: center;
+  border-top: 3px solid var(--m5-amber);
+}
+.ds-footer p { font-size: 0.7rem; color: rgba(255,255,255,0.3); line-height: 1.8; }
+.ds-footer strong { color: rgba(255,255,255,0.55); }
+
+@media (max-width: 640px) {
+  .month-swatches { grid-template-columns: repeat(2, 1fr); }
+  .tool-map { grid-template-columns: 1fr 1fr; }
+  .swatch-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="ds-header">
+  <div class="ds-header-inner">
+    <div class="ds-eyebrow">Brand CI &amp; Design System</div>
+    <h1>The Living Room<br>Design System</h1>
+    <p>The single source of truth for all TLR digital tools, resource library pages, and member-facing communications. Every design decision starts here.</p>
+    <div class="ds-meta">
+      <div class="ds-meta-item"><strong>Version</strong>1.0</div>
+      <div class="ds-meta-item"><strong>Last Updated</strong>July 2026</div>
+      <div class="ds-meta-item"><strong>Maintained by</strong>Stuart Fairbairns, Motivate Coaching</div>
+      <div class="ds-meta-item"><strong>Primary URL</strong>motivate-coaching.github.io/tlr-hub</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ NAV ═══ -->
+<nav class="ds-nav">
+  <div class="ds-nav-inner">
+    <a href="#brand">Brand</a>
+    <a href="#colours">Colours</a>
+    <a href="#typography">Typography</a>
+    <a href="#spacing">Spacing</a>
+    <a href="#components">Components</a>
+    <a href="#tool-anatomy">Tool Anatomy</a>
+    <a href="#tone">Tone of Voice</a>
+    <a href="#tool-map">Tool Map</a>
+  </div>
+</nav>
+
+<div class="ds-body">
+
+  <!-- ═══ BRAND ═══ -->
+  <div class="ds-section" id="brand">
+    <div class="ds-section-title">Brand Foundation</div>
+    <div class="ds-section-sub">What TLR is, and the principles that guide every design decision.</div>
+
+    <table class="rules-table" style="margin-bottom:2rem;">
+      <tr><th>Principle</th><th>What it means in practice</th></tr>
+      <tr><td>Calming</td><td>Generous white space. No clutter. Nothing competing for attention. The page feels like a breath out.</td></tr>
+      <tr><td>Inspiring</td><td>Beautiful typography. Thoughtful copy. Each tool should feel worth opening.</td></tr>
+      <tr><td>Clear</td><td>One instruction at a time. Labels that say exactly what they mean. No jargon without explanation.</td></tr>
+      <tr><td>Impactful</td><td>Tools that produce a real output — something the member can keep, act on, and return to.</td></tr>
+      <tr><td>Satisfying</td><td>The completion moment matters. The dopamine hit of finishing is built into every tool.</td></tr>
+    </table>
+
+    <table class="rules-table">
+      <tr><th>Copy Rule</th><th>Detail</th></tr>
+      <tr><td>No em dashes</td><td>Never use — (em dash). Use a comma, colon, or rewrite the sentence.</td></tr>
+      <tr><td>No unexplained abbreviations</td><td>Always write the full term first: "The Living Room (TLR)" not just "TLR" on first use.</td></tr>
+      <tr><td>No skipped steps</td><td>Every instruction must be complete. Never assume the user knows what to click next.</td></tr>
+      <tr><td>Themes, not months</td><td>Always say "theme" or "topic". Never "month" or "week" in member-facing copy.</td></tr>
+      <tr><td>Sentence case</td><td>Tool names use title case. All other copy uses sentence case. Never all-caps for body text.</td></tr>
+    </table>
+  </div>
+
+  <!-- ═══ COLOURS ═══ -->
+  <div class="ds-section" id="colours">
+    <div class="ds-section-title">Colour System</div>
+    <div class="ds-section-sub">Three tiers: base palette, functional colours, and per-theme accent colours. Never introduce a colour outside this system.</div>
+
+    <p style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:1rem;">Base Palette</p>
+    <div class="swatch-grid" style="margin-bottom:2.5rem;">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#0F1215;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Navy</div>
+          <div class="swatch-hex">#0F1215</div>
+          <div class="swatch-use">Headers, topbar background, primary dark text, footers</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#1C2B3A;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Navy Mid</div>
+          <div class="swatch-hex">#1C2B3A</div>
+          <div class="swatch-use">Secondary dark backgrounds, nav bars, hover states on navy</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#F5F1EB;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Cream</div>
+          <div class="swatch-hex">#F5F1EB</div>
+          <div class="swatch-use">Tool page background. All tools use this as the base.</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#EDE8DF;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Cream Dark</div>
+          <div class="swatch-hex">#EDE8DF</div>
+          <div class="swatch-use">Section backgrounds, card fills, dividers within tools</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#1A1A1A;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Text Dark</div>
+          <div class="swatch-hex">#1A1A1A</div>
+          <div class="swatch-use">All body text, headings on cream backgrounds</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#4A4A4A;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Text Mid</div>
+          <div class="swatch-hex">#4A4A4A</div>
+          <div class="swatch-use">Secondary text, descriptions, supporting copy</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#888880;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Text Muted</div>
+          <div class="swatch-hex">#888880</div>
+          <div class="swatch-use">Labels, metadata, placeholder text, helper copy</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#3B6D11;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Green</div>
+          <div class="swatch-hex">#3B6D11</div>
+          <div class="swatch-use">Success states only: copied, saved, confirmed</div>
+        </div>
+      </div>
+    </div>
+
+    <p style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.5rem;">Per-Theme Accent Colours</p>
+    <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem;">Each theme has one accent colour used consistently across all its tools: numbered steps, section highlights, active states, and the completion button. This creates instant recognition when members revisit past themes.</p>
+
+    <div class="month-swatches">
+      <div class="month-swatch">
+        <div class="month-swatch-color" style="background:#2B4A6F;">
+          <div class="month-swatch-label">Theme 1</div>
+        </div>
+        <div class="month-swatch-info">
+          <div class="month-swatch-theme">Decision Fatigue &amp; Mental Noise</div>
+          <div class="month-swatch-hex">#2B4A6F — Slate Blue</div>
+        </div>
+      </div>
+      <div class="month-swatch">
+        <div class="month-swatch-color" style="background:#5C6B3A;">
+          <div class="month-swatch-label">Theme 2</div>
+        </div>
+        <div class="month-swatch-info">
+          <div class="month-swatch-theme">Autopilot &amp; Drift</div>
+          <div class="month-swatch-hex">#5C6B3A — Olive Sage</div>
+        </div>
+      </div>
+      <div class="month-swatch">
+        <div class="month-swatch-color" style="background:#8C4A2F;">
+          <div class="month-swatch-label">Theme 3</div>
+        </div>
+        <div class="month-swatch-info">
+          <div class="month-swatch-theme">Boundaries &amp; External Pressure</div>
+          <div class="month-swatch-hex">#8C4A2F — Terracotta</div>
+        </div>
+      </div>
+      <div class="month-swatch">
+        <div class="month-swatch-color" style="background:#1A6B72;">
+          <div class="month-swatch-label">Theme 4</div>
+        </div>
+        <div class="month-swatch-info">
+          <div class="month-swatch-theme">Energy &amp; Drive</div>
+          <div class="month-swatch-hex">#1A6B72 — Deep Teal</div>
+        </div>
+      </div>
+      <div class="month-swatch">
+        <div class="month-swatch-color" style="background:#C9930A;">
+          <div class="month-swatch-label">Theme 5</div>
+        </div>
+        <div class="month-swatch-info">
+          <div class="month-swatch-theme">Building Momentum</div>
+          <div class="month-swatch-hex">#C9930A — Amber Gold</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TYPOGRAPHY ═══ -->
+  <div class="ds-section" id="typography">
+    <div class="ds-section-title">Typography</div>
+    <div class="ds-section-sub">Two typefaces only. Poppins for everything functional. Playfair Display for the emotional headline moment — the tool name.</div>
+
+    <div class="type-specimen">
+      <div class="type-specimen-label">Playfair Display — Display / Tool Title only</div>
+      <div style="font-family:'Playfair Display',serif;font-size:3rem;font-weight:400;line-height:1.05;color:var(--text-dark);">The Momentum Ladder</div>
+      <div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:400;font-style:italic;color:var(--text-muted);margin-top:0.5rem;">Italic variant for subheadings</div>
+      <div class="type-spec">font-family: 'Playfair Display', serif | weights: 400 (regular), 600 (semibold) | italic: yes<br>Usage: Tool title (h1) only. Never for body text, labels, or UI copy.</div>
+    </div>
+
+    <div class="type-specimen">
+      <div class="type-specimen-label">Poppins — All UI, body, labels, inputs, buttons</div>
+      <div style="font-family:'Poppins',sans-serif;font-size:1.5rem;font-weight:600;color:var(--text-dark);margin-bottom:0.5rem;">Section Heading — Poppins 600</div>
+      <div style="font-family:'Poppins',sans-serif;font-size:1rem;font-weight:400;color:var(--text-mid);margin-bottom:0.5rem;line-height:1.7;">Body text at 1rem (18px on 18px base). Poppins 400 regular. Clear, readable, warm without being informal. This is the voice of the tool — instructional, supportive, never clinical.</div>
+      <div style="font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:500;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.5rem;">LABEL — POPPINS 500 · 0.78REM · 0.06EM TRACKING · UPPERCASE</div>
+      <div style="font-family:'Poppins',sans-serif;font-size:0.65rem;font-weight:700;color:var(--m5-amber);letter-spacing:0.18em;text-transform:uppercase;">EYEBROW — POPPINS 700 · 0.65REM · 0.18EM TRACKING · ACCENT COLOUR</div>
+      <div class="type-spec">font-family: 'Poppins', sans-serif | weights: 300, 400, 500, 600, 700 | Base font-size: 18px<br>Usage: Everything except the tool title h1.</div>
+    </div>
+
+    <table class="rules-table">
+      <tr><th>Element</th><th>Font</th><th>Size</th><th>Weight</th><th>Notes</th></tr>
+      <tr><td>Tool title (h1)</td><td>Playfair Display</td><td>clamp(2.8rem, 6vw, 4rem)</td><td>400</td><td>Line height 1.05. The only Playfair element.</td></tr>
+      <tr><td>Section heading</td><td>Poppins</td><td>1.1–1.3rem</td><td>600</td><td>Used sparingly within tools.</td></tr>
+      <tr><td>Body / instruction</td><td>Poppins</td><td>1rem (18px base)</td><td>400</td><td>Line height 1.7. Never below 16px.</td></tr>
+      <tr><td>Input text</td><td>Poppins</td><td>1.05rem</td><td>400</td><td>Must feel as large as body text.</td></tr>
+      <tr><td>Labels</td><td>Poppins</td><td>0.72–0.78rem</td><td>500–600</td><td>Uppercase, tracked. Above the input.</td></tr>
+      <tr><td>Buttons</td><td>Poppins</td><td>0.7rem</td><td>600</td><td>Uppercase, 0.08em tracking.</td></tr>
+      <tr><td>Eyebrow / theme pill</td><td>Poppins</td><td>0.65rem</td><td>700</td><td>Uppercase, 0.16–0.18em tracking. Accent colour.</td></tr>
+      <tr><td>Helper / muted text</td><td>Poppins</td><td>0.75–0.82rem</td><td>400</td><td>Text muted colour. Never below 0.65rem.</td></tr>
+    </table>
+  </div>
+
+  <!-- ═══ SPACING ═══ -->
+  <div class="ds-section" id="spacing">
+    <div class="ds-section-title">Spacing System</div>
+    <div class="ds-section-sub">Based on a 4px base unit. Everything is a multiple of 4. Generous spacing is not a luxury — it is how the tools feel calming.</div>
+
+    <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:1.5rem;margin-bottom:2rem;">
+      <div class="spacing-row"><div class="spacing-block" style="width:4px;"></div><div class="spacing-label">4px — xs</div><div class="spacing-value">0.25rem — icon gaps, tight badges</div></div>
+      <div class="spacing-row"><div class="spacing-block" style="width:8px;"></div><div class="spacing-label">8px — sm</div><div class="spacing-value">0.5rem — between label and input</div></div>
+      <div class="spacing-row"><div class="spacing-block" style="width:16px;"></div><div class="spacing-label">16px — md</div><div class="spacing-value">1rem — between form elements</div></div>
+      <div class="spacing-row"><div class="spacing-block" style="width:24px;"></div><div class="spacing-label">24px — lg</div><div class="spacing-value">1.5rem — between sections within a tool</div></div>
+      <div class="spacing-row"><div class="spacing-block" style="width:32px;"></div><div class="spacing-label">32px — xl</div><div class="spacing-value">2rem — page padding (horizontal)</div></div>
+      <div class="spacing-row"><div class="spacing-block" style="width:48px;"></div><div class="spacing-label">48px — 2xl</div><div class="spacing-value">3rem — major section breaks, page top padding</div></div>
+      <div class="spacing-row"><div class="spacing-block" style="width:64px;"></div><div class="spacing-label">64px — 3xl</div><div class="spacing-value">4rem — page bottom padding</div></div>
+    </div>
+
+    <table class="rules-table">
+      <tr><th>Rule</th><th>Value</th></tr>
+      <tr><td>Max content width</td><td>860px on tool pages. 1240px on library/index pages.</td></tr>
+      <tr><td>Page horizontal padding</td><td>2rem (desktop). 1rem (mobile).</td></tr>
+      <tr><td>Input padding</td><td>0.75rem 1rem minimum. Never make inputs feel cramped.</td></tr>
+      <tr><td>Border radius</td><td>4px for buttons. 6px for inputs and cards. 10px for major panels.</td></tr>
+      <tr><td>Border width</td><td>1px for separators. 1.5px for input borders. 3px for accent left-borders.</td></tr>
+    </table>
+  </div>
+
+  <!-- ═══ COMPONENTS ═══ -->
+  <div class="ds-section" id="components">
+    <div class="ds-section-title">Core Components</div>
+    <div class="ds-section-sub">Every component below is reused across all tools. Do not create new variants without updating this document.</div>
+
+    <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:1.75rem;margin-bottom:2rem;">
+      <p style="font-size:0.65rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:1.25rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);">Buttons</p>
+
+      <div class="component-row">
+        <span class="comp-label">Primary</span>
+        <button class="btn-primary">Complete this tool</button>
+        <span class="ds-rule">Navy background. Used for the main completion action only.</span>
+      </div>
+      <div class="component-row">
+        <span class="comp-label">Accent / Interactive</span>
+        <button class="btn-accent">Open tool</button>
+        <span class="ds-rule">Theme accent colour. Used for links to interactive tools in the library.</span>
+      </div>
+      <div class="component-row">
+        <span class="comp-label">Outline / Secondary</span>
+        <button class="btn-outline">Start again</button>
+        <span class="ds-rule">Transparent background. Used for secondary actions on completion screen.</span>
+      </div>
+      <div class="component-row">
+        <span class="comp-label">Small / Action</span>
+        <button class="btn-sm">Email to myself</button>
+        <button class="btn-sm" style="background:var(--m5-amber);color:var(--navy);">Add to calendar</button>
+        <span class="ds-rule">Used in the momentum actions section of the completion screen.</span>
+      </div>
+    </div>
+
+    <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:1.75rem;margin-bottom:2rem;">
+      <p style="font-size:0.65rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:1.25rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);">Text Inputs (all auto-expanding textareas)</p>
+      <textarea class="input-specimen" rows="2" placeholder="What I most want to move toward…"></textarea>
+      <p style="font-size:0.72rem;color:var(--text-muted);margin-top:0.75rem;">All inputs are <code style="background:var(--cream-dark);padding:0.1rem 0.35rem;border-radius:3px;font-size:0.68rem;">&lt;textarea rows="1"&gt;</code> with JS auto-expand. Never use <code style="background:var(--cream-dark);padding:0.1rem 0.35rem;border-radius:3px;font-size:0.68rem;">&lt;input type="text"&gt;</code> — it clips long responses. Placeholder text disappears on print.</p>
+    </div>
+
+    <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:1.75rem;margin-bottom:2rem;">
+      <p style="font-size:0.65rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:1.25rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);">Tags &amp; Pills</p>
+      <div class="component-row">
+        <span class="comp-label">Theme pill</span>
+        <span class="tag tag-theme">Building Momentum</span>
+        <span class="ds-rule">Shown in topbar. Uses theme accent colour.</span>
+      </div>
+      <div class="component-row">
+        <span class="comp-label">Current badge</span>
+        <span class="tag tag-current">Current theme</span>
+      </div>
+    </div>
+
+    <!-- Completion screen spec -->
+    <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:1.75rem;">
+      <p style="font-size:0.65rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:1.25rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);">Completion Screen — Standard (identical on every tool)</p>
+      <div class="shell-completion">
+        <strong>Keep your momentum</strong>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;">
+          <button class="btn-sm">📧 Email to myself</button>
+          <button class="btn-sm">💬 WhatsApp</button>
+          <button class="btn-sm" style="background:var(--m5-amber);color:var(--navy);">📅 Add to calendar</button>
+          <button class="btn-sm">📋 Copy commitment</button>
+        </div>
+        <p style="font-size:0.72rem;color:var(--text-muted);">Below the momentum actions: a summary of what they filled in, then Start again / Back to library / Save to compendium (print). The "next topic" hint is the final element.</p>
+      </div>
+      <p class="ds-rule" style="margin-top:0.75rem;">The completion screen is the same structure on every tool. The content (summary cards, steps summary) adapts to the tool. The actions do not change.</p>
+    </div>
+  </div>
+
+  <!-- ═══ TOOL ANATOMY ═══ -->
+  <div class="ds-section" id="tool-anatomy">
+    <div class="ds-section-title">Tool Anatomy — The Three-Tier System</div>
+    <div class="ds-section-sub">Every tool is built from three layers. Tiers 1 and 2 are identical across tools. Tier 3 is where each tool earns its own identity.</div>
+
+    <div class="anatomy" style="margin-bottom:2.5rem;">
+
+      <div class="anatomy-layer" style="border-color:var(--m5-amber);">
+        <div class="anatomy-tag tier-1">Tier 1 — The Shell (identical on every tool)</div>
+        <div class="anatomy-desc">The outer structure that never changes. Members always know where they are and what to do next.</div>
+        <div class="anatomy-items">
+          <span class="anatomy-item">Topbar (back link + TLR logo + theme pill)</span>
+          <span class="anatomy-item">Cream background #F5F1EB</span>
+          <span class="anatomy-item">Poppins body font</span>
+          <span class="anatomy-item">Playfair Display title</span>
+          <span class="anatomy-item">Auto-expanding textarea inputs</span>
+          <span class="anatomy-item">Print blank worksheet button</span>
+          <span class="anatomy-item">Complete this tool button</span>
+          <span class="anatomy-item">Completion screen structure</span>
+          <span class="anatomy-item">Momentum actions (Email, WhatsApp, Calendar, Copy)</span>
+          <span class="anatomy-item">Next topic hint</span>
+          <span class="anatomy-item">Start again / Back to library</span>
+        </div>
+      </div>
+
+      <div class="anatomy-layer" style="border-color:var(--m4-teal);">
+        <div class="anatomy-tag tier-2">Tier 2 — Theme Identity (one per theme, used across all its tools)</div>
+        <div class="anatomy-desc">The colour accent that says "you're in this theme." Applied to numbered steps, section highlights, and the completion button.</div>
+        <div class="anatomy-items">
+          <span class="anatomy-item">Theme accent colour (one per theme — see colour system)</span>
+          <span class="anatomy-item">Theme name in topbar pill</span>
+          <span class="anatomy-item">Topic number (e.g. "Topic 1 of 4")</span>
+          <span class="anatomy-item">Next topic hint (links forward to next tool)</span>
+        </div>
+      </div>
+
+      <div class="anatomy-layer" style="border-color:var(--m3-terra);">
+        <div class="anatomy-tag tier-3">Tier 3 — Tool Core (unique to each tool)</div>
+        <div class="anatomy-desc">The visual metaphor and interaction model that makes this tool memorable and distinct from every other.</div>
+        <div class="anatomy-items">
+          <span class="anatomy-item">Central visual (ladder, compass, loop, chart, columns...)</span>
+          <span class="anatomy-item">Layout pattern (vertical flow, grid, two-column, radial...)</span>
+          <span class="anatomy-item">Interaction model (rungs, checkboxes, sliders, circle segments...)</span>
+          <span class="anatomy-item">Quote or closing statement (tool-specific)</span>
+        </div>
+      </div>
+
+    </div>
+
+    <table class="rules-table">
+      <tr><th>Tier 3 Examples</th><th>Tool</th><th>Visual Core</th><th>Interaction</th></tr>
+      <tr><td>Momentum Ladder (M5W1)</td><td>CSS ladder with wooden rails</td><td>Type into rungs (top = goal, bottom = today's step)</td><td></td></tr>
+      <tr><td>Compound Effect (M5W2)</td><td>Animated compound growth chart</td><td>List actions, see them plotted on the curve</td><td></td></tr>
+      <tr><td>Momentum Loop (M5W3)</td><td>SVG double-loop diagram</td><td>Fill in the stop and the resume plan</td><td></td></tr>
+      <tr><td>Autopilot Awareness (M2W1)</td><td>3-column grid table</td><td>Row-by-row: automatic behaviour, what it looks like, what you notice</td><td></td></tr>
+      <tr><td>The Gap (M3W2)</td><td>Two-column split layout</td><td>Wanted to say / Actually said — side by side</td><td></td></tr>
+      <tr><td>Energy Map (M4W1)</td><td>Radial mind-map (drains left, restores right)</td><td>Click circles to fill in, one small shift at the bottom</td><td></td></tr>
+    </table>
+  </div>
+
+  <!-- ═══ TONE ═══ -->
+  <div class="ds-section" id="tone">
+    <div class="ds-section-title">Tone of Voice</div>
+    <div class="ds-section-sub">The tools are a coach in text form. Every word should feel like Stuart in a session: direct, warm, non-judgemental, and efficient with people's attention.</div>
+
+    <div class="tone-card">
+      <div class="tone-label do-label">Do — Placeholders and prompts</div>
+      <div class="tone-example">"What I most want to move toward…"<br>"A few words are enough."<br>"What usually knocks me off course?"<br>"Moving forward, I want to be more intentional about ___"</div>
+    </div>
+    <div class="tone-card">
+      <div class="tone-label dont-label">Don't</div>
+      <div class="tone-example">"Please enter your goal here"<br>"Input required"<br>"Write your answer in this box"<br>"N/A"</div>
+    </div>
+    <div class="tone-card">
+      <div class="tone-label do-label">Do — Instructions</div>
+      <div class="tone-example">"Choose one. The one that feels most true right now."<br>"Finish this sentence."<br>"No ideal version — just what actually happened."</div>
+    </div>
+    <div class="tone-card">
+      <div class="tone-label dont-label">Don't</div>
+      <div class="tone-example">"Please complete all fields before proceeding."<br>"Step 1 of 5: Complete the following task."<br>"This field is mandatory."</div>
+    </div>
+    <div class="tone-card">
+      <div class="tone-label do-label">Do — Closing quotes and statements</div>
+      <div class="tone-example">"Momentum isn't built by never stopping. It's built by returning sooner."<br>"You can't change what you haven't seen clearly."<br>"Awareness is the first shift. Intention creates the next."</div>
+    </div>
+    <div class="tone-card">
+      <div class="tone-label dont-label">Don't</div>
+      <div class="tone-example">Generic motivational quotes unrelated to the tool's purpose.<br>Clichés: "You've got this!", "Believe in yourself!", "Keep hustling!"<br>Exclamation marks used more than once per tool.</div>
+    </div>
+  </div>
+
+  <!-- ═══ TOOL MAP ═══ -->
+  <div class="ds-section" id="tool-map">
+    <div class="ds-section-title">Tool Map — All 5 Themes</div>
+    <div class="ds-section-sub">Status of all digital tools across the TLR programme. Each will be built as a standalone HTML file in the tlr-hub GitHub repository.</div>
+
+    <div class="tool-map">
+      <div class="tool-col-header" style="background:#2B4A6F;">Theme 1<br>Decision Fatigue</div>
+      <div class="tool-col-header" style="background:#5C6B3A;">Theme 2<br>Autopilot &amp; Drift</div>
+      <div class="tool-col-header" style="background:#8C4A2F;">Theme 3<br>Boundaries</div>
+      <div class="tool-col-header" style="background:#1A6B72;">Theme 4<br>Energy &amp; Drive</div>
+      <div class="tool-col-header" style="background:#C9930A;">Theme 5<br>Momentum</div>
+
+      <div class="tool-cell">The Decision Audit</div>
+      <div class="tool-cell">Autopilot Awareness</div>
+      <div class="tool-cell">Where Your Time Goes</div>
+      <div class="tool-cell">The Energy Map</div>
+      <div class="tool-cell done">The Momentum Ladder</div>
+
+      <div class="tool-cell">Clean Decisions</div>
+      <div class="tool-cell">The Cost of Drift</div>
+      <div class="tool-cell">The Gap</div>
+      <div class="tool-cell">The More Like Me Compass</div>
+      <div class="tool-cell">The Compound Effect</div>
+
+      <div class="tool-cell">The Cost of the Unmade Decision</div>
+      <div class="tool-cell">The Pattern Break</div>
+      <div class="tool-cell">What's Actually Mine</div>
+      <div class="tool-cell">The Energy Investment Board</div>
+      <div class="tool-cell">The Momentum Loop</div>
+
+      <div class="tool-cell">Building Decision Self-Trust</div>
+      <div class="tool-cell">Living With Intention</div>
+      <div class="tool-cell">Clear Response</div>
+      <div class="tool-cell">Your Aliveness Blueprint</div>
+      <div class="tool-cell">Momentum That Lasts</div>
+
+      <div class="tool-cell" style="border-right:none;"></div>
+      <div class="tool-cell">Using Autopilot to Your Advantage</div>
+      <div class="tool-cell" style="border-right:none;"></div>
+      <div class="tool-cell" style="border-right:none;"></div>
+      <div class="tool-cell">My Momentum Playbook</div>
+    </div>
+    <p style="font-size:0.72rem;color:var(--text-muted);margin-top:0.75rem;">✓ = live on GitHub Pages. All others in production queue.</p>
+  </div>
+
+</div>
+
+<div class="ds-footer">
+  <p><strong>The Living Room — TLR Design System v1.0</strong><br>
+  Motivate Coaching · Stuart Fairbairns PCC · motivate-coaching.com/thelivingroom<br>
+  This document governs all member-facing digital design. Update version number whenever a system change is made.</p>
+</div>
+
+</body>
+</html>
