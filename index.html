@@ -1101,6 +1101,17 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
         setActive(id);
         scrollLocked = true;
         setTimeout(() => { scrollLocked = false; }, 900);
+        // Auto-expand the theme when clicked from sidebar
+        if (id === 'building-momentum') {
+          currentFeature.classList.remove('collapsed');
+        } else {
+          const card = document.getElementById(id);
+          if (card && !card.classList.contains('is-open')) {
+            card.classList.add('is-open');
+            const trig = card.querySelector('.theme-trigger');
+            if (trig) trig.setAttribute('aria-expanded', 'true');
+          }
+        }
       }
       window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 110, behavior: 'smooth' });
     }
