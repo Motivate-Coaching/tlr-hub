@@ -3,398 +3,522 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Momentum Loop — The Living Room</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>The Momentum Loop | TLR</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --navy:#0F1215;--navy-mid:#1C2B3A;
-  --cream:#F5F1EB;--cream-dark:#EDE8DF;
-  --accent:#C9930A;--accent-pale:rgba(201,147,10,0.1);
-  --text-dark:#1A1A1A;--text-mid:#4A4A4A;--text-muted:#888880;
-  --border:rgba(0,0,0,0.09);--white:#FFFFFF;
-  --font-body:'Poppins',sans-serif;--font-display:'Playfair Display',serif;
+  --cream:#F5F1EB;--cream-dark:#EDE8DF;--cream-deeper:#E5DFD5;
+  --text-dark:#1A1A1A;--text-mid:#4A4A4A;--text-muted:#8A8880;
+  --border:rgba(0,0,0,0.08);--white:#FFFFFF;
+  --font-body:'Poppins',sans-serif;
+  --font-display:'Playfair Display',serif;
+  --font-script:'Dancing Script',cursive;
+  --accent:#C9930A;--accent-pale:rgba(201,147,10,0.09);
+  --grey-col:#6B7280;--grey-pale:rgba(107,114,128,0.08);
 }
-html{font-size:17px;scroll-behavior:smooth}
-body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);line-height:1.7;min-height:100vh}
-.topbar{background:var(--cream);border-bottom:1px solid var(--border);padding:0.7rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
-.topbar-left{display:flex;align-items:center;gap:0.9rem}
-.back-link{font-size:0.62rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;display:flex;align-items:center;gap:0.4rem}
-.back-link:hover{color:var(--accent)}
-.topbar-logo{font-family:var(--font-display);font-size:1rem;font-weight:600;color:var(--navy)}
-.theme-pill{font-size:0.58rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);background:var(--accent-pale);border:1px solid rgba(201,147,10,0.25);padding:0.25rem 0.75rem;border-radius:20px}
-.page{max-width:820px;margin:0 auto;padding:3rem 2rem 5rem}
-.eyebrow{font-size:0.6rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:0.75rem}
-h1{font-family:var(--font-display);font-size:clamp(2.4rem,5vw,3.4rem);font-weight:400;line-height:1.05;color:var(--text-dark);margin-bottom:0.6rem}
-.subtitle{font-size:0.9rem;color:var(--text-muted);margin-bottom:0.5rem;max-width:580px;line-height:1.7}
-.topic-tag{font-size:0.6rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:2.5rem;padding-bottom:2rem;border-bottom:1px solid var(--border)}
-.intro-quote{border-left:3px solid var(--accent);padding:1rem 1.5rem;margin-bottom:2.5rem;background:rgba(201,147,10,0.05);border-radius:0 6px 6px 0}
-.intro-quote p{font-size:0.95rem;color:var(--text-mid);font-style:italic;line-height:1.7}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);line-height:1.7;font-size:16px}
 
-/* LOOP DIAGRAM */
-.loop-diagram{background:var(--navy);border-radius:12px;padding:2.5rem 2rem;margin-bottom:2.5rem;text-align:center}
-.loop-title{font-family:var(--font-display);font-size:1.2rem;color:white;font-weight:400;margin-bottom:0.35rem}
-.loop-sub{font-size:0.72rem;color:rgba(255,255,255,0.4);margin-bottom:2rem;letter-spacing:0.04em}
-.loop-svg-wrap{max-width:500px;margin:0 auto}
-svg.loop-svg{width:100%;height:auto}
+/* Topbar */
+.topbar{position:sticky;top:0;z-index:100;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.75rem;gap:1rem}
+.topbar a.back{color:rgba(255,255,255,0.65);text-decoration:none;font-size:0.82rem;transition:color .2s;cursor:pointer}
+.topbar a.back:hover{color:#fff}
+.topbar .logo{color:#fff;font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.04em}
+.topbar .theme-pill{background:var(--accent);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.28rem 0.85rem;border-radius:20px}
+#saved-badge{display:none;align-items:center;gap:0.4rem;font-size:0.72rem;color:rgba(255,255,255,0.5)}
+#saved-badge .dot{width:6px;height:6px;background:#5CB85C;border-radius:50%;display:inline-block}
 
-/* LOOP SECTIONS */
-.loop-section{background:white;border:1px solid var(--border);border-radius:10px;padding:1.75rem;margin-bottom:1.25rem;border-left:4px solid var(--accent)}
-.loop-step-num{font-size:0.58rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:0.4rem}
-.loop-step-title{font-size:1.05rem;font-weight:600;color:var(--text-dark);margin-bottom:0.25rem}
-.loop-step-desc{font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.6}
-.field-label{font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.5rem}
-.field-input{font-family:var(--font-body);font-size:0.95rem;color:var(--text-dark);background:var(--cream);border:1.5px solid var(--border);border-radius:6px;padding:0.75rem 1rem;width:100%;resize:none;outline:none;line-height:1.6;overflow:hidden;transition:border-color 0.15s;margin-bottom:1rem}
-.field-input:last-child{margin-bottom:0}
-.field-input:focus{border-color:var(--accent)}
-.field-input::placeholder{color:var(--text-muted)}
+/* Header */
+.tool-header{background:var(--white);padding:3rem 2rem 2rem;text-align:center;border-bottom:1px solid var(--border)}
+.tool-eyebrow{font-size:0.7rem;font-weight:600;letter-spacing:0.13em;text-transform:uppercase;color:var(--accent);margin-bottom:0.85rem}
+.tool-title{font-family:var(--font-display);font-size:3.2rem;line-height:1.1;color:var(--text-dark);margin-bottom:0.3rem}
+.tool-sub{font-size:0.72rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:1rem}
+.swoosh{display:block;margin:0 auto 1.5rem;width:180px}
+.tool-framing{font-size:1rem;color:var(--text-mid);max-width:520px;margin:0 auto;line-height:1.75}
+.tool-framing em{color:var(--text-dark);font-style:italic;font-weight:500}
 
-/* RESTART PLAN */
-.restart-section{background:var(--cream-dark);border-radius:10px;padding:1.75rem;margin-bottom:2rem}
-.restart-title{font-size:0.62rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:0.35rem}
-.restart-heading{font-size:1.05rem;font-weight:600;color:var(--text-dark);margin-bottom:0.25rem}
-.restart-desc{font-size:0.8rem;color:var(--text-muted);margin-bottom:1.25rem;line-height:1.6}
-.restart-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem}
-.restart-card{background:white;border-radius:8px;padding:1rem 1.1rem;border:1px solid var(--border)}
-.restart-card-label{font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.5rem}
-textarea{font-family:var(--font-body);font-size:0.88rem;color:var(--text-dark);background:transparent;border:none;outline:none;width:100%;resize:none;line-height:1.6;overflow:hidden}
-textarea::placeholder{color:var(--text-muted)}
+/* ─── Diagram section ─── */
+.diagram-section{background:var(--white);padding:2.5rem 1.5rem}
+.diagram-wrap{max-width:860px;margin:0 auto}
 
-.complete-wrap{margin-top:2.5rem;text-align:center}
-.complete-btn{font-family:var(--font-body);font-size:0.72rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;background:var(--navy);color:white;border:none;padding:1rem 3rem;border-radius:4px;cursor:pointer}
-.complete-btn:hover{background:#1C2B3A}
+/* Three-column diagram grid */
+.diagram-cols{display:grid;grid-template-columns:1fr 130px 1fr;gap:0;align-items:start}
 
-/* COMPLETION */
-#completionView{display:none;max-width:820px;margin:0 auto;padding:3rem 2rem 5rem}
-.completion-header{text-align:center;margin-bottom:3rem;padding-bottom:2.5rem;border-bottom:1px solid var(--border)}
-.completion-icon{font-size:2.5rem;margin-bottom:1rem}
-.completion-header h2{font-family:var(--font-display);font-size:2.2rem;font-weight:400;color:var(--text-dark);margin-bottom:0.5rem}
-.completion-header p{font-size:0.88rem;color:var(--text-muted)}
-.summary-card{background:white;border:1px solid var(--border);border-radius:10px;padding:1.5rem 1.75rem;margin-bottom:1rem}
-.summary-label{font-size:0.6rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem}
-.summary-text{font-size:0.9rem;color:var(--text-mid);line-height:1.7;white-space:pre-wrap}
-.momentum-section{margin-bottom:2rem;border:1px solid var(--border);border-radius:10px;padding:1.5rem 1.75rem;background:rgba(255,255,255,0.55)}
-.momentum-label{font-size:0.62rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:1rem}
-.momentum-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem}
-.momentum-btn{display:flex;flex-direction:column;align-items:center;gap:0.55rem;padding:0.9rem 0.5rem 0.85rem;background:var(--cream);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-family:var(--font-body);transition:all 0.15s}
-.momentum-btn:hover{background:var(--cream-dark);border-color:var(--accent)}
-.mbtn-icon{font-size:1.3rem}
-.mbtn-label{font-size:0.6rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-mid)}
-.momentum-btn.copied .mbtn-label{color:#3B6D11}
-.cal-panel{display:none;margin-top:1.25rem;padding:1.25rem 1.5rem;background:white;border:1.5px solid var(--border);border-radius:8px}
+/* Left column (gold) */
+.col-forward{background:rgba(201,147,10,0.04);border:2px solid rgba(201,147,10,0.35);border-radius:18px;padding:1.25rem 1rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:0}
+.col-title{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;text-align:center;margin-bottom:1.1rem;line-height:1.4}
+.col-forward .col-title{color:var(--accent)}
+.col-stop .col-title{color:var(--grey-col)}
+
+/* Right column (grey) */
+.col-stop{background:rgba(107,114,128,0.05);border:2px solid rgba(107,114,128,0.2);border-radius:18px;padding:1.25rem 1rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:0}
+
+/* Step items */
+.step-item{display:flex;flex-direction:column;align-items:center;width:100%}
+.step-circle{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;margin-bottom:0.35rem}
+.col-forward .step-circle{background:rgba(201,147,10,0.12);border:2px solid rgba(201,147,10,0.4)}
+.col-stop .step-circle{background:rgba(107,114,128,0.1);border:2px solid rgba(107,114,128,0.25)}
+.step-text{font-size:0.8rem;color:var(--text-mid);text-align:center;line-height:1.4;margin-bottom:0}
+.col-forward .step-text{color:var(--text-dark)}
+.col-stop .step-text{color:var(--text-mid)}
+
+/* Step arrow (between steps within columns) */
+.step-arrow{font-size:0.85rem;color:rgba(201,147,10,0.5);text-align:center;line-height:1;padding:0.2rem 0;width:100%;display:flex;justify-content:center}
+.col-stop .step-arrow{color:rgba(107,114,128,0.4)}
+
+/* Center column */
+.col-center{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0.5rem 0.5rem;position:relative}
+.life-happens{text-align:center;padding:0.75rem 0.5rem;border:1.5px dashed rgba(107,114,128,0.3);border-radius:10px;background:rgba(107,114,128,0.03);margin-bottom:1rem}
+.life-title{font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-dark);margin-bottom:0.5rem}
+.life-item{font-size:0.65rem;color:var(--text-muted);line-height:1.7;font-style:italic}
+.center-arrow{font-size:1.2rem;color:rgba(107,114,128,0.5);text-align:center;padding:0.5rem 0}
+
+/* Return arrow SVG */
+.return-wrap{text-align:center;padding:1rem 0 0.5rem;position:relative}
+.return-svg{max-width:780px;width:100%;display:block;margin:0 auto;overflow:visible}
+
+/* The Shift */
+.shift-reveal{text-align:center;padding:1.25rem 1.5rem 2rem;background:var(--white)}
+.shift-reveal-inner{max-width:520px;margin:0 auto}
+.shift-label{font-size:0.68rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:var(--accent);margin-bottom:0.35rem}
+.shift-rule{width:36px;height:2px;background:var(--accent);margin:0 auto 0.75rem;border-radius:2px}
+.shift-instead{font-size:0.9rem;color:var(--text-mid);margin-bottom:0.2rem}
+.shift-resume{font-family:var(--font-script);font-size:3rem;color:var(--accent);display:block;line-height:1;margin-bottom:0.6rem}
+.shift-sub{font-size:0.88rem;color:var(--text-mid);line-height:1.65}
+.shift-sub strong{color:var(--text-dark);font-weight:600}
+
+/* ─── Worksheet section ─── */
+.worksheet-section{background:var(--cream);padding:2.5rem 1.5rem}
+.ws-inner{max-width:860px;margin:0 auto}
+.ws-header{text-align:center;margin-bottom:1.75rem}
+.ws-eyebrow{font-size:0.7rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:var(--accent);margin-bottom:0.3rem}
+.ws-title{font-size:1.1rem;font-weight:600;color:var(--text-dark)}
+.ws-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+.ws-panel{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.15rem}
+.ws-panel-num{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:0.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:0.75rem}
+.ws-panel-title{font-size:0.78rem;font-weight:700;color:var(--text-dark);margin-bottom:0.2rem;line-height:1.35}
+.ws-panel-prompt{font-size:0.75rem;color:var(--text-muted);font-style:italic;margin-bottom:0.85rem;line-height:1.45}
+.ws-ta{font-family:var(--font-body);font-size:0.88rem;color:var(--text-dark);background:var(--cream);border:1.5px solid var(--border);border-radius:8px;padding:0.7rem 0.85rem;width:100%;resize:none;overflow:hidden;outline:none;transition:border-color .2s,box-shadow .2s;line-height:1.6;min-height:64px}
+.ws-ta:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale);background:var(--white)}
+.ws-ta::placeholder{color:var(--text-muted);font-size:0.82rem}
+
+/* Checkboxes */
+.ws-check-item{display:flex;align-items:flex-start;gap:0.6rem;padding:0.45rem 0;border-bottom:1px solid rgba(0,0,0,0.05)}
+.ws-check-item:last-child{border-bottom:none}
+.ws-check{flex-shrink:0;width:18px;height:18px;border-radius:4px;border:1.5px solid rgba(201,147,10,0.4);margin-top:0.15rem;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.ws-check.checked{background:var(--accent);border-color:var(--accent)}
+.ws-check.checked::after{content:'✓';color:#fff;font-size:0.65rem;font-weight:700}
+.ws-check-text{font-size:0.78rem;color:var(--text-mid);line-height:1.45}
+
+/* Closing quote */
+.closing-section{background:var(--white);padding:2.5rem 2rem;border-top:1px solid var(--border);text-align:center}
+.closing-inner{max-width:580px;margin:0 auto}
+.closing-line1{font-size:1rem;color:var(--text-mid);margin-bottom:0.2rem}
+.closing-script{font-family:var(--font-script);font-size:1.75rem;color:var(--accent);display:block}
+
+/* Light action */
+.la-section{background:var(--cream);padding:1.75rem 2rem}
+.la-card{max-width:660px;margin:0 auto;background:var(--cream-dark);border-radius:14px;padding:1.5rem 1.75rem;display:flex;align-items:flex-start;gap:1.25rem;border:1px solid var(--cream-deeper)}
+.la-circle{flex-shrink:0;width:40px;height:40px;border-radius:50%;border:2px solid rgba(201,147,10,0.3);cursor:pointer;transition:all .25s;margin-top:0.1rem}
+.la-circle:hover{background:var(--accent-pale);border-color:var(--accent)}
+.la-circle.done{background:var(--accent);border-color:var(--accent)}
+.la-label{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.35rem}
+.la-body{font-size:0.9rem;color:var(--text-mid);line-height:1.65}
+
+/* Complete */
+.complete-section{background:var(--cream);padding:1.5rem 2rem 5rem;text-align:center}
+.complete-btn{background:var(--navy);color:#fff;border:none;padding:1rem 2.75rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s}
+.complete-btn:hover{opacity:0.87;transform:translateY(-1px)}
+
+/* Completion */
+#completionView{display:none;background:var(--cream)}
+.comp-inner{max-width:760px;margin:0 auto;padding:3rem 2rem 7rem}
+.comp-header{text-align:center;padding-bottom:2rem;border-bottom:1px solid var(--border);margin-bottom:2.5rem}
+.comp-icon{font-size:2.75rem;margin-bottom:0.75rem}
+.comp-header h2{font-family:var(--font-display);font-size:2rem;color:var(--text-dark);margin-bottom:0.4rem}
+.comp-tagline{font-size:0.95rem;color:var(--text-muted)}
+.sum-section{margin-bottom:1.5rem}
+.sum-section h3{font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.85rem}
+.sum-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:0.5rem}
+.sum-card .card-label{font-size:0.72rem;font-weight:600;color:var(--text-muted);margin-bottom:0.2rem}
+.sum-card .card-value{font-size:0.9rem;color:var(--text-dark);white-space:pre-wrap;line-height:1.6}
+.momentum-section{background:var(--navy);border-radius:14px;padding:1.75rem;margin-bottom:2rem}
+.momentum-section h3{color:rgba(255,255,255,0.45);font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.1rem}
+.momentum-btns{display:flex;flex-wrap:wrap;gap:0.65rem}
+.m-btn{background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.14);padding:0.65rem 1.2rem;border-radius:8px;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:background .2s}
+.m-btn:hover{background:rgba(255,255,255,0.17)}
+.cal-panel{display:none;background:rgba(255,255,255,0.05);border-radius:10px;padding:1.1rem;margin-top:0.85rem}
 .cal-panel.open{display:block}
-.cal-panel-title{font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dark);margin-bottom:1rem}
-.cal-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem}
-.cal-field label{display:block;font-size:0.6rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.4rem}
-.cal-input{font-family:var(--font-body);font-size:0.82rem;padding:0.5rem 0.75rem;border:1.5px solid var(--border);border-radius:5px;width:100%;outline:none;background:var(--cream)}
-.cal-input:focus{border-color:var(--accent)}
-.cal-actions{display:flex;gap:0.75rem}
-.cal-add-btn{font-family:var(--font-body);font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;background:var(--navy);color:white;border:none;padding:0.6rem 1.25rem;border-radius:4px;cursor:pointer}
-.cal-cancel-btn{font-family:var(--font-body);font-size:0.65rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;background:none;color:var(--text-muted);border:1.5px solid var(--border);padding:0.6rem 1rem;border-radius:4px;cursor:pointer}
-.cal-hint{font-size:0.65rem;color:var(--text-muted);margin-top:0.75rem;line-height:1.5}
-.completion-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:2rem}
-.action-btn{font-family:var(--font-body);font-size:0.68rem;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;padding:0.75rem 1.75rem;border-radius:4px;cursor:pointer;border:1.5px solid var(--border);background:none;color:var(--text-mid);text-decoration:none;display:inline-flex;align-items:center;transition:all 0.15s}
-.action-btn:hover{border-color:var(--accent);color:var(--accent)}
-.closing-quote{text-align:center;padding:2rem;margin-top:1rem}
-.closing-quote p{font-family:var(--font-display);font-size:1.2rem;font-style:italic;color:var(--text-muted);line-height:1.6}
+.cal-panel label{color:rgba(255,255,255,0.6);font-size:0.8rem;display:block;margin-bottom:0.3rem;margin-top:0.85rem}
+.cal-panel label:first-child{margin-top:0}
+.cal-panel input,.cal-panel select{width:100%;padding:0.55rem 0.8rem;border-radius:7px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.09);color:#fff;font-family:var(--font-body);font-size:0.87rem}
+.cal-panel input[type=date],.cal-panel input[type=time]{color-scheme:dark}
+.dl-btn{margin-top:0.85rem;background:var(--accent);color:#fff;border:none;padding:0.6rem 1rem;border-radius:7px;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;width:100%}
+.comp-quote{font-style:italic;color:var(--text-mid);font-size:0.92rem;text-align:center;padding:1.5rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:1.5rem;line-height:1.7}
+.comp-quote strong{color:var(--accent);font-style:normal;display:block;margin-bottom:0.3rem;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase}
+.comp-actions{display:flex;flex-wrap:wrap;gap:0.75rem}
+.ca-btn{border:1px solid var(--border);background:var(--white);color:var(--text-mid);padding:0.65rem 1.25rem;border-radius:8px;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:all .2s}
+.ca-btn:hover{border-color:var(--accent);color:var(--accent)}
 
-@media(max-width:600px){.restart-grid{grid-template-columns:1fr}.momentum-actions{grid-template-columns:repeat(2,1fr)}.cal-fields{grid-template-columns:1fr}}
-@media print{.topbar,.complete-wrap,#completionView,.completion-actions{display:none!important}body{background:white}.loop-diagram{background:#111 !important;-webkit-print-color-adjust:exact}}
+@media(max-width:680px){
+  .tool-title{font-size:2.3rem}
+  .diagram-cols{grid-template-columns:1fr}
+  .col-center{flex-direction:row;justify-content:center;gap:1rem;padding:1rem 0}
+  .life-happens{flex:1}
+  .center-arrow{transform:rotate(90deg)}
+  .ws-grid{grid-template-columns:1fr}
+  .la-card{flex-direction:column;gap:0.75rem}
+}
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="topbar-left">
-    <a href="index.html" class="back-link">← Resource Library</a>
-    <span class="topbar-logo">TLR</span>
-  </div>
+  <a class="back" onclick="history.back()">← Resource Library</a>
+  <span class="logo">TLR</span>
   <span class="theme-pill">Building Momentum</span>
-<span id="saved-badge" style="display:none;align-items:center;gap:0.35rem;font-size:0.72rem;color:#888"><span style="width:6px;height:6px;background:#5CB85C;border-radius:50%;flex-shrink:0;display:inline-block"></span>Progress saved</span>
+  <span id="saved-badge"><span class="dot"></span>Progress saved</span>
 </div>
 
 <div id="toolView">
-<div class="page">
 
-  <div class="eyebrow">Topic 3 of 5</div>
-  <h1>The Momentum Loop</h1>
-  <p class="subtitle">Momentum is not about never stopping. It is about understanding your loop — so you can get back in it faster.</p>
-  <div class="topic-tag">Theme: Building Momentum &nbsp;·&nbsp; The Momentum Loop</div>
-
-  <div class="intro-quote">
-    <p>"Everyone loses momentum. The difference is not who keeps going without stopping — it is who understands their pattern well enough to return to it before it fully unravels."</p>
+  <!-- Header -->
+  <div class="tool-header">
+    <div class="tool-eyebrow">Topic 3 of 5 · Building Momentum</div>
+    <h1 class="tool-title">The Momentum Loop</h1>
+    <span class="tool-sub">Breaking the Stop-Start Cycle</span>
+    <svg class="swoosh" viewBox="0 0 180 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M 10 10 C 40 3 80 14 120 6 C 145 1 165 10 172 8" stroke="#C9930A" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.55"/>
+    </svg>
+    <p class="tool-framing">Progress isn't interrupted by missing a day.<br><em>It's interrupted by believing you've failed.</em></p>
   </div>
 
-  <!-- DIAGRAM -->
-  <div class="loop-diagram">
-    <div class="loop-title">Your Momentum Loop</div>
-    <div class="loop-sub">Two phases — building and returning — that form one continuous cycle</div>
-    <div class="loop-svg-wrap">
-      <svg class="loop-svg" viewBox="0 0 500 280" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Top loop: Building -->
-        <path d="M 80 140 C 80 60 420 60 420 140" stroke="#C9930A" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <!-- Bottom loop: Returning -->
-        <path d="M 420 140 C 420 220 80 220 80 140" stroke="rgba(201,147,10,0.4)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-dasharray="8 5"/>
-        <!-- Center node -->
-        <circle cx="250" cy="140" r="36" fill="rgba(201,147,10,0.12)" stroke="#C9930A" stroke-width="2"/>
-        <text x="250" y="135" text-anchor="middle" fill="white" font-family="Playfair Display,serif" font-size="13" font-style="italic">You</text>
-        <text x="250" y="152" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-family="Poppins,sans-serif" font-size="9">in motion</text>
-        <!-- Left node -->
-        <circle cx="80" cy="140" r="24" fill="rgba(201,147,10,0.15)" stroke="rgba(201,147,10,0.5)" stroke-width="1.5"/>
-        <text x="80" y="137" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-family="Poppins,sans-serif" font-size="9" font-weight="600">START</text>
-        <text x="80" y="149" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-family="Poppins,sans-serif" font-size="8">/ RETURN</text>
-        <!-- Right node -->
-        <circle cx="420" cy="140" r="24" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
-        <text x="420" y="137" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-family="Poppins,sans-serif" font-size="9" font-weight="600">STOP</text>
-        <text x="420" y="149" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-family="Poppins,sans-serif" font-size="8">/ PAUSE</text>
-        <!-- Top label -->
-        <text x="250" y="52" text-anchor="middle" fill="#C9930A" font-family="Poppins,sans-serif" font-size="10" font-weight="600" letter-spacing="2">BUILDING</text>
-        <!-- Bottom label -->
-        <text x="250" y="238" text-anchor="middle" fill="rgba(201,147,10,0.55)" font-family="Poppins,sans-serif" font-size="10" font-weight="600" letter-spacing="2">RETURNING</text>
-        <!-- Arrows top -->
-        <path d="M 295 74 L 305 68 L 298 78" fill="#C9930A" opacity="0.8"/>
-        <!-- Arrows bottom -->
-        <path d="M 205 216 L 195 222 L 202 212" fill="rgba(201,147,10,0.5)" opacity="0.8"/>
-      </svg>
+  <!-- Diagram -->
+  <div class="diagram-section">
+    <div class="diagram-wrap">
+      <div class="diagram-cols">
+
+        <!-- Left: Moving Forward -->
+        <div class="col-forward">
+          <div class="col-title">When I'm<br>Moving Forward</div>
+
+          <div class="step-item">
+            <div class="step-circle">✓</div>
+            <div class="step-text">I take action.</div>
+          </div>
+          <div class="step-arrow">↓</div>
+
+          <div class="step-item">
+            <div class="step-circle">📈</div>
+            <div class="step-text">I notice progress.</div>
+          </div>
+          <div class="step-arrow">↓</div>
+
+          <div class="step-item">
+            <div class="step-circle">👤</div>
+            <div class="step-text">My confidence grows.</div>
+          </div>
+          <div class="step-arrow">↓</div>
+
+          <div class="step-item">
+            <div class="step-circle">→</div>
+            <div class="step-text">Momentum builds.</div>
+          </div>
+        </div>
+
+        <!-- Center: Life Happens -->
+        <div class="col-center">
+          <div class="life-happens">
+            <div class="life-title">Life Happens</div>
+            <div class="life-item">( holiday )</div>
+            <div class="life-item">( busy period )</div>
+            <div class="life-item">( illness )</div>
+            <div class="life-item">( low energy )</div>
+            <div class="life-item">( other priorities )</div>
+          </div>
+          <div class="center-arrow">→</div>
+        </div>
+
+        <!-- Right: What Often Happens Next -->
+        <div class="col-stop">
+          <div class="col-title">What Often<br>Happens Next</div>
+
+          <div class="step-item">
+            <div class="step-circle">✗</div>
+            <div class="step-text">I've fallen behind.</div>
+          </div>
+          <div class="step-arrow">↓</div>
+
+          <div class="step-item">
+            <div class="step-circle">📅</div>
+            <div class="step-text">I'll restart Monday.</div>
+          </div>
+          <div class="step-arrow">↓</div>
+
+          <div class="step-item">
+            <div class="step-circle">⏸</div>
+            <div class="step-text">Nothing happens.</div>
+          </div>
+          <div class="step-arrow">↓</div>
+
+          <div class="step-item">
+            <div class="step-circle">↓</div>
+            <div class="step-text">Confidence drops.</div>
+          </div>
+          <div class="step-arrow">↓</div>
+
+          <div class="step-item">
+            <div class="step-circle">🔄</div>
+            <div class="step-text">Starting feels harder.</div>
+          </div>
+        </div>
+
+      </div><!-- /diagram-cols -->
+
+      <!-- Return arrow -->
+      <div class="return-wrap">
+        <svg class="return-svg" viewBox="0 0 780 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrowL" markerWidth="9" markerHeight="7" refX="1" refY="3.5" orient="auto">
+              <polygon points="9 0, 0 3.5, 9 7" fill="rgba(201,147,10,0.6)"/>
+            </marker>
+          </defs>
+          <path d="M 720,10 C 720,42 60,42 60,10" stroke="rgba(201,147,10,0.45)" stroke-width="1.8" stroke-dasharray="6,4" fill="none" marker-end="url(#arrowL)"/>
+        </svg>
+      </div>
+
+    </div><!-- /diagram-wrap -->
+  </div><!-- /diagram-section -->
+
+  <!-- The Shift -->
+  <div class="shift-reveal">
+    <div class="shift-reveal-inner">
+      <div class="shift-label">The Shift</div>
+      <div class="shift-rule"></div>
+      <div class="shift-instead">Instead of restarting...</div>
+      <span class="shift-resume">Resume.</span>
+      <div class="shift-sub">You do not need another perfect beginning.<br><strong>You only need the next small action.</strong></div>
     </div>
   </div>
 
-  <!-- BUILDING LOOP -->
-  <div class="loop-section">
-    <div class="loop-step-num">Part 1 — Building</div>
-    <div class="loop-step-title">What does your momentum actually feel like when it is working?</div>
-    <div class="loop-step-desc">Not the result — the feeling. The texture of days when you are in your loop.</div>
-    <label class="field-label">When I am in momentum, I notice</label>
-    <textarea class="field-input" id="inMomentum" rows="2" placeholder="I feel clear, I start things without negotiating with myself, I follow through…" oninput="autoExpand(this)"></textarea>
-    <label class="field-label">The actions that keep me in momentum</label>
-    <textarea class="field-input" id="keepActions" rows="2" placeholder="The small consistent things that, when I do them, everything else flows…" oninput="autoExpand(this)"></textarea>
+  <!-- Worksheet section -->
+  <div class="worksheet-section">
+    <div class="ws-inner">
+      <div class="ws-header">
+        <div class="ws-eyebrow">When Momentum Stops...</div>
+        <div class="ws-title">Use this to find your way back</div>
+      </div>
+      <div class="ws-grid">
+
+        <!-- Panel 1 -->
+        <div class="ws-panel">
+          <div class="ws-panel-num">1</div>
+          <div class="ws-panel-title">Instead of saying:</div>
+          <div class="ws-panel-prompt">"I've failed." — What are you actually saying to yourself?</div>
+          <textarea class="ws-ta" id="ws1" rows="2" placeholder="Write what your inner voice says when you stop…"></textarea>
+        </div>
+
+        <!-- Panel 2 -->
+        <div class="ws-panel">
+          <div class="ws-panel-num">2</div>
+          <div class="ws-panel-title">Try asking:</div>
+          <div class="ws-panel-prompt">Tick the question that feels most useful right now.</div>
+          <div class="ws-check-item" onclick="toggleCheck(this)">
+            <div class="ws-check"></div>
+            <div class="ws-check-text">What's the smallest step I could take today?</div>
+          </div>
+          <div class="ws-check-item" onclick="toggleCheck(this)">
+            <div class="ws-check"></div>
+            <div class="ws-check-text">What would count as getting back into motion?</div>
+          </div>
+          <div class="ws-check-item" onclick="toggleCheck(this)">
+            <div class="ws-check"></div>
+            <div class="ws-check-text">What expectation do I need to let go of?</div>
+          </div>
+        </div>
+
+        <!-- Panel 3 -->
+        <div class="ws-panel">
+          <div class="ws-panel-num">3</div>
+          <div class="ws-panel-title">This period...</div>
+          <div class="ws-panel-prompt">If life interrupts my progress, I will simply:</div>
+          <textarea class="ws-ta" id="ws3a" rows="2" placeholder="I will…"></textarea>
+          <textarea class="ws-ta" id="ws3b" rows="2" placeholder="And remind myself that…" style="margin-top:0.65rem"></textarea>
+        </div>
+
+      </div>
+    </div>
+  </div><!-- /worksheet-section -->
+
+  <!-- Closing quote -->
+  <div class="closing-section">
+    <div class="closing-inner">
+      <div class="closing-line1">Momentum isn't built by never stopping.</div>
+      <span class="closing-script">It's built by returning sooner.</span>
+    </div>
   </div>
 
-  <!-- STOP -->
-  <div class="loop-section" style="border-left-color:rgba(201,147,10,0.3)">
-    <div class="loop-step-num">Part 2 — The Stop</div>
-    <div class="loop-step-title">What usually causes you to lose momentum?</div>
-    <div class="loop-step-desc">This is not failure — it is pattern data. Understanding your stop is the first step to shortening it.</div>
-    <label class="field-label">What typically stops my momentum</label>
-    <textarea class="field-input" id="whatStops" rows="2" placeholder="A busy week, a setback, losing clarity on why it matters, someone else's urgency…" oninput="autoExpand(this)"></textarea>
-    <label class="field-label">What the first sign of drift looks like</label>
-    <textarea class="field-input" id="firstSign" rows="2" placeholder="The thing I notice first — before I've fully stopped…" oninput="autoExpand(this)"></textarea>
-  </div>
-
-  <!-- RETURN -->
-  <div class="loop-section">
-    <div class="loop-step-num">Part 3 — Returning</div>
-    <div class="loop-step-title">How do you get back in?</div>
-    <div class="loop-step-desc">The return does not have to be dramatic. It just has to happen. What is your smallest possible re-entry point?</div>
-    <label class="field-label">My smallest re-entry action</label>
-    <textarea class="field-input" id="reEntry" rows="2" placeholder="The one thing I can do — even in 5 minutes — that puts me back in the loop…" oninput="autoExpand(this)"></textarea>
-    <label class="field-label">What I will say to myself when I have drifted</label>
-    <textarea class="field-input" id="selfTalk" rows="2" placeholder="Not judgment. A signal. Something kind and true…" oninput="autoExpand(this)"></textarea>
-  </div>
-
-  <!-- RESTART PLAN -->
-  <div class="restart-section">
-    <div class="restart-title">Your return plan</div>
-    <div class="restart-heading">If I lose momentum, here is what I will do</div>
-    <div class="restart-desc">Write this now, while you are in momentum. The version of you that is thriving knows what to tell the version of you that has drifted.</div>
-    <div class="restart-grid">
-      <div class="restart-card">
-        <div class="restart-card-label">Within 24 hours I will</div>
-        <textarea id="restart24" rows="2" placeholder="One small action to reconnect…" oninput="autoExpand(this)"></textarea>
-      </div>
-      <div class="restart-card">
-        <div class="restart-card-label">I will remind myself that</div>
-        <textarea id="restartRemind" rows="2" placeholder="Something true and grounding…" oninput="autoExpand(this)"></textarea>
-      </div>
-      <div class="restart-card">
-        <div class="restart-card-label">The person I will tell is</div>
-        <textarea id="restartTell" rows="2" placeholder="Who holds you accountable…" oninput="autoExpand(this)"></textarea>
-      </div>
-      <div class="restart-card">
-        <div class="restart-card-label">What I will not do is</div>
-        <textarea id="restartNot" rows="2" placeholder="The self-critical story I will skip…" oninput="autoExpand(this)"></textarea>
+  <!-- Light action -->
+  <div class="la-section">
+    <div class="la-card">
+      <div class="la-circle" id="la-circle"></div>
+      <div>
+        <div class="la-label">Light action this period</div>
+        <div class="la-body">The next time momentum stops, notice which part of the right column you're in. Then ask yourself: <em>what is the one small action that would count as resuming?</em></div>
       </div>
     </div>
   </div>
 
-  <div class="complete-wrap">
+  <div class="complete-section">
     <button class="complete-btn" onclick="showCompletion()">I've completed this tool</button>
   </div>
 
-</div>
-</div>
+</div><!-- /toolView -->
 
-<!-- COMPLETION -->
+<!-- Completion view -->
 <div id="completionView">
-  <div class="completion-header">
-    <div class="completion-icon">🔄</div>
-    <h2>You know your loop now.</h2>
-    <p>And more importantly, you know how to return to it.</p>
+<div class="comp-inner">
+  <div class="comp-header">
+    <div class="comp-icon">🔄</div>
+    <h2>You understand the loop.</h2>
+    <p class="comp-tagline">Now you know how to break the stop-start cycle.</p>
   </div>
-  <div class="summary-card">
-    <div class="summary-label">What momentum feels like for me</div>
-    <div class="summary-text" id="s1"></div>
+  <div class="sum-section">
+    <h3>What I say to myself when I stop</h3>
+    <div class="sum-card"><div class="card-value" id="s_ws1"></div></div>
   </div>
-  <div class="summary-card">
-    <div class="summary-label">What stops me</div>
-    <div class="summary-text" id="s2"></div>
-  </div>
-  <div class="summary-card">
-    <div class="summary-label">My smallest re-entry action</div>
-    <div class="summary-text" id="s3"></div>
-  </div>
-  <div class="summary-card">
-    <div class="summary-label">My return plan</div>
-    <div class="summary-text" id="s4"></div>
+  <div class="sum-section">
+    <h3>My plan for returning</h3>
+    <div class="sum-card"><div class="card-label">I will simply…</div><div class="card-value" id="s_ws3a"></div></div>
+    <div class="sum-card"><div class="card-label">And remind myself that…</div><div class="card-value" id="s_ws3b"></div></div>
   </div>
   <div class="momentum-section">
-    <div class="momentum-label">Keep your momentum</div>
-    <div class="momentum-actions">
-      <button class="momentum-btn" onclick="emailToSelf()"><span class="mbtn-icon">📧</span><span class="mbtn-label">Email to myself</span></button>
-      <button class="momentum-btn" onclick="shareWhatsApp()"><span class="mbtn-icon">💬</span><span class="mbtn-label">WhatsApp</span></button>
-      <button class="momentum-btn" id="calBtn" onclick="toggleCalPanel()"><span class="mbtn-icon">📅</span><span class="mbtn-label">Add to calendar</span></button>
-      <button class="momentum-btn" id="copyBtn" onclick="copyCommitment()"><span class="mbtn-icon">📋</span><span class="mbtn-label">Copy commitment</span></button>
+    <h3>Keep your momentum</h3>
+    <div class="momentum-btns">
+      <button class="m-btn" onclick="emailToSelf()">📧 Email to myself</button>
+      <button class="m-btn" onclick="shareWhatsApp()">💬 WhatsApp</button>
+      <button class="m-btn" onclick="toggleCalPanel()">📅 Add to calendar</button>
+      <button class="m-btn" onclick="copyCommitment(this)">📋 Copy commitment</button>
     </div>
     <div class="cal-panel" id="calPanel">
-      <div class="cal-panel-title">Schedule your loop check-in</div>
-      <div class="cal-fields">
-        <div class="cal-field"><label>Date</label><input type="date" id="calDate" class="cal-input"></div>
-        <div class="cal-field"><label>Time</label><input type="time" id="calTime" class="cal-input" value="09:00"></div>
-        <div class="cal-field"><label>Repeat</label>
-          <select id="calRepeat" class="cal-input">
-            <option value="none">No repeat</option>
-            <option value="DAILY">Every day</option>
-            <option value="WEEKLY" selected>Every week</option>
-            <option value="MONTHLY">Every month</option>
-          </select>
-        </div>
-      </div>
-      <div class="cal-actions">
-        <button class="cal-add-btn" onclick="downloadICS()">Add to my calendar</button>
-        <button class="cal-cancel-btn" onclick="toggleCalPanel()">Cancel</button>
-      </div>
-      <div class="cal-hint">Downloads a .ics file — opens in Apple Calendar, Google Calendar, Outlook, or any calendar app.</div>
+      <label>Date</label><input type="date" id="calDate">
+      <label>Time</label><input type="time" id="calTime" value="09:00">
+      <label>Repeat</label>
+      <select id="calRepeat"><option value="none">No repeat</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
+      <button class="dl-btn" onclick="downloadICS()">Download .ics file</button>
     </div>
   </div>
-  <div class="closing-quote">
-    <p>"Momentum is not built by never stopping. It is built by returning sooner each time."</p>
+  <div class="comp-quote">
+    <strong>Momentum isn't built by never stopping.</strong>
+    It's built by returning sooner. You now know exactly how to do that.
   </div>
-  <div class="completion-actions">
-    <button class="action-btn" onclick="window.print()">🖨 Print blank worksheet</button>
-    <button class="action-btn" onclick="startAgain()">Start again</button>
-    <a href="index.html" class="action-btn">← Back to library</a>
+  <div class="comp-actions">
+    <button class="ca-btn" onclick="window.print()">🖨 Print blank worksheet</button>
+    <button class="ca-btn" onclick="startAgain()">↩ Start again</button>
+    <button class="ca-btn" onclick="history.back()">← Back to library</button>
   </div>
+</div>
 </div>
 
 <script>
+const STORE_KEY='tlr-momentum-loop';
+
 function autoExpand(el){el.style.height='auto';el.style.height=el.scrollHeight+'px'}
 
-function getSummary(){
-  return{
-    momentum:document.getElementById('inMomentum').value.trim(),
-    keeps:document.getElementById('keepActions').value.trim(),
-    stops:document.getElementById('whatStops').value.trim(),
-    sign:document.getElementById('firstSign').value.trim(),
-    reEntry:document.getElementById('reEntry').value.trim(),
-    selfTalk:document.getElementById('selfTalk').value.trim(),
-    r24:document.getElementById('restart24').value.trim(),
-    remind:document.getElementById('restartRemind').value.trim(),
-    tell:document.getElementById('restartTell').value.trim(),
-    not:document.getElementById('restartNot').value.trim()
-  };
+function toggleCheck(item){
+  const box=item.querySelector('.ws-check');
+  box.classList.toggle('checked');
+  saveProgress();
 }
 
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('textarea').forEach(t=>{
+    t.addEventListener('input',()=>autoExpand(t));
+    autoExpand(t);
+  });
+  const calDate=document.getElementById('calDate');
+  if(calDate)calDate.value=new Date().toISOString().split('T')[0];
+  const circle=document.getElementById('la-circle');
+  if(circle)circle.addEventListener('click',()=>{circle.classList.toggle('done');saveProgress();});
+  restoreProgress();
+});
+
 function showCompletion(){
-  const s=getSummary();
-  document.getElementById('s1').textContent=[s.momentum&&'In momentum: '+s.momentum,s.keeps&&'What keeps me there: '+s.keeps].filter(Boolean).join('\n\n')||'(not filled in)';
-  document.getElementById('s2').textContent=[s.stops&&'What stops me: '+s.stops,s.sign&&'First sign: '+s.sign].filter(Boolean).join('\n\n')||'(not filled in)';
-  document.getElementById('s3').textContent=[s.reEntry&&'Re-entry: '+s.reEntry,s.selfTalk&&'What I will say: '+s.selfTalk].filter(Boolean).join('\n\n')||'(not filled in)';
-  document.getElementById('s4').textContent=[s.r24&&'Within 24h: '+s.r24,s.remind&&'I will remind myself: '+s.remind,s.tell&&'I will tell: '+s.tell,s.not&&'I will not: '+s.not].filter(Boolean).join('\n')||'(not filled in)';
+  document.getElementById('s_ws1').textContent=document.getElementById('ws1')?.value||'—';
+  document.getElementById('s_ws3a').textContent=document.getElementById('ws3a')?.value||'—';
+  document.getElementById('s_ws3b').textContent=document.getElementById('ws3b')?.value||'—';
   document.getElementById('toolView').style.display='none';
   document.getElementById('completionView').style.display='block';
   window.scrollTo(0,0);
 }
 
-function startAgain(){localStorage.removeItem(STORE_KEY);
-  document.getElementById('toolView').style.display='block';
+function startAgain(){
+  localStorage.removeItem(STORE_KEY);
   document.getElementById('completionView').style.display='none';
+  document.getElementById('toolView').style.display='block';
+  document.querySelectorAll('#toolView textarea').forEach(t=>{t.value='';autoExpand(t);});
+  document.querySelectorAll('.ws-check').forEach(b=>b.classList.remove('checked'));
+  document.getElementById('saved-badge').style.display='none';
+  const circle=document.getElementById('la-circle');
+  if(circle)circle.classList.remove('done');
   window.scrollTo(0,0);
 }
 
-function getFullText(){
-  const s=getSummary();
-  return `THE MOMENTUM LOOP — The Living Room\n\nIn momentum I notice: ${s.momentum||'—'}\nWhat keeps me there: ${s.keeps||'—'}\n\nWhat stops me: ${s.stops||'—'}\nFirst sign of drift: ${s.sign||'—'}\n\nRe-entry action: ${s.reEntry||'—'}\nWhat I will say: ${s.selfTalk||'—'}\n\nReturn plan:\n- Within 24h: ${s.r24||'—'}\n- I will remind myself: ${s.remind||'—'}\n- I will tell: ${s.tell||'—'}\n- I will not: ${s.not||'—'}`;
+function getSummaryText(){
+  const ws1=document.getElementById('ws1')?.value||'';
+  const ws3a=document.getElementById('ws3a')?.value||'';
+  const ws3b=document.getElementById('ws3b')?.value||'';
+  let out='The Momentum Loop — TLR Reflection\n\nWHEN I STOP, I TELL MYSELF:\n'+(ws1||'Not noted');
+  if(ws3a)out+='\n\nMY PLAN FOR RETURNING:\nI will simply: '+ws3a;
+  if(ws3b)out+='\nAnd remind myself that: '+ws3b;
+  out+='\n\nRemember: Momentum isn\'t built by never stopping. It\'s built by returning sooner.';
+  return out;
 }
-
-function emailToSelf(){window.location.href='mailto:?subject=My%20Momentum%20Loop%20%E2%80%94%20TLR&body='+encodeURIComponent(getFullText())}
-function shareWhatsApp(){window.open('https://wa.me/?text='+encodeURIComponent(getFullText()),'_blank')}
-
-function toggleCalPanel(){
-  const p=document.getElementById('calPanel');
-  p.classList.toggle('open');
-  if(p.classList.contains('open')){const t=new Date();t.setDate(t.getDate()+7);document.getElementById('calDate').value=t.toISOString().split('T')[0];}
-}
-
+function emailToSelf(){window.location.href='mailto:?subject='+encodeURIComponent('The Momentum Loop — TLR')+'&body='+encodeURIComponent(getSummaryText())}
+function shareWhatsApp(){window.open('https://wa.me/?text='+encodeURIComponent(getSummaryText()),'_blank')}
+function toggleCalPanel(){document.getElementById('calPanel').classList.toggle('open')}
 function downloadICS(){
-  const d=document.getElementById('calDate').value;
-  const t=document.getElementById('calTime').value||'09:00';
-  const rep=document.getElementById('calRepeat').value;
-  if(!d){alert('Please choose a date first.');return;}
-  const dt=d.replace(/-/g,'')+'T'+t.replace(':','')+'00';
-  let ics=`BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//TLR//EN\nBEGIN:VEVENT\nUID:${Date.now()}@tlr\nDTSTAMP:${dt}Z\nDTSTART:${dt}\nDURATION:PT20M\nSUMMARY:Momentum Loop check-in — TLR\nDESCRIPTION:Review my momentum loop and return plan\n`;
-  if(rep!=='none')ics+=`RRULE:FREQ=${rep}\n`;
-  ics+=`END:VEVENT\nEND:VCALENDAR`;
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));a.download='momentum-loop-tlr.ics';a.click();
+  const date=document.getElementById('calDate').value||new Date().toISOString().split('T')[0];
+  const time=document.getElementById('calTime').value||'09:00';
+  const repeat=document.getElementById('calRepeat').value;
+  const dtStart=date.replace(/-/g,'')+'T'+time.replace(':','')+'00';
+  const[h,m]=time.split(':').map(Number);
+  const dtEnd=date.replace(/-/g,'')+'T'+String(h+1).padStart(2,'0')+String(m).padStart(2,'0')+'00';
+  let rr='';if(repeat==='daily')rr='\nRRULE:FREQ=DAILY';else if(repeat==='weekly')rr='\nRRULE:FREQ=WEEKLY';else if(repeat==='monthly')rr='\nRRULE:FREQ=MONTHLY';
+  const ics=`BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART:${dtStart}\nDTEND:${dtEnd}\nSUMMARY:TLR — The Momentum Loop${rr}\nEND:VEVENT\nEND:VCALENDAR`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));a.download='tlr-momentum-loop.ics';a.click();
 }
-
-function copyCommitment(){
-  navigator.clipboard.writeText(getFullText()).then(()=>{
-    const b=document.getElementById('copyBtn');b.classList.add('copied');b.querySelector('.mbtn-label').textContent='Copied!';
-    setTimeout(()=>{b.classList.remove('copied');b.querySelector('.mbtn-label').textContent='Copy commitment';},2500);
-  });
+function copyCommitment(btn){
+  navigator.clipboard.writeText(getSummaryText()).catch(()=>{const ta=document.createElement('textarea');ta.value=getSummaryText();document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta)});
+  if(btn){btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent='📋 Copy commitment',2500);}
 }
-
-document.querySelectorAll('textarea').forEach(t=>t.addEventListener('input',()=>autoExpand(t)));
-
-// --- Progress auto-save (localStorage) ---
-const STORE_KEY='tlr-momentum-loop';
 function saveProgress(){
   const s={};
-  document.querySelectorAll('textarea[id],input[id]').forEach(el=>{
-    if(el.type==='checkbox'||el.type==='radio') s[el.id]=el.checked;
-    else s[el.id]=el.value;
-  });
-  const badges={};
-  [1,2,3,4,5,6].forEach(i=>{['D','R','A'].forEach(c=>{
-    const b=document.getElementById('badge'+i+c);
-    if(b&&b.classList.contains('active-'+c)) badges[i]=c;
-  })});
-  if(Object.keys(badges).length) s['_badges']=badges;
+  document.querySelectorAll('textarea[id]').forEach(el=>{s[el.id]=el.value});
+  const checks=[];
+  document.querySelectorAll('.ws-check').forEach((b,i)=>{checks.push(b.classList.contains('checked'));});
+  s['_checks']=checks;
+  const circle=document.getElementById('la-circle');
+  s['_la']=circle?circle.classList.contains('done'):false;
   localStorage.setItem(STORE_KEY,JSON.stringify(s));
-  const badge=document.getElementById('saved-badge');
-  if(badge) badge.style.display='flex';
+  document.getElementById('saved-badge').style.display='flex';
 }
 function restoreProgress(){
-  const raw=localStorage.getItem(STORE_KEY);
-  if(!raw) return;
+  const raw=localStorage.getItem(STORE_KEY);if(!raw)return;
   try{
     const s=JSON.parse(raw);
-    document.querySelectorAll('textarea[id],input[id]').forEach(el=>{
-      if(!(el.id in s)) return;
-      if(el.type==='checkbox'||el.type==='radio') el.checked=s[el.id];
-      else{el.value=s[el.id];if(el.tagName==='TEXTAREA'){el.style.height='auto';el.style.height=el.scrollHeight+'px';}}
-    });
-    if(s['_badges']&&typeof setBadge==='function'){
-      Object.entries(s['_badges']).forEach(([i,c])=>setBadge(Number(i),c));
+    document.querySelectorAll('textarea[id]').forEach(el=>{if(el.id in s&&s[el.id]){el.value=s[el.id];autoExpand(el);}});
+    if(s['_checks']){
+      document.querySelectorAll('.ws-check').forEach((b,i)=>{if(s['_checks'][i])b.classList.add('checked');});
     }
-    if(typeof updateBars==='function') updateBars();
-    const hasData=Object.values(s).some(v=>v!==undefined&&v!==''&&v!==false&&v!=='0');
-    if(hasData){const badge=document.getElementById('saved-badge');if(badge)badge.style.display='flex';}
+    const circle=document.getElementById('la-circle');
+    if(circle&&s['_la'])circle.classList.add('done');
+    const hasData=Object.keys(s).filter(k=>!k.startsWith('_')).some(k=>s[k]&&s[k]!=='');
+    if(hasData)document.getElementById('saved-badge').style.display='flex';
   }catch(e){}
 }
 document.addEventListener('input',saveProgress);
-document.addEventListener('change',saveProgress);
-document.addEventListener('DOMContentLoaded',restoreProgress);
 </script>
 </body>
 </html>

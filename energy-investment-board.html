@@ -3,217 +3,267 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Energy Investment Board | TLR</title>
+<title>Energy Investment Board | TLR</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
   --navy:#0F1215; --navy-mid:#1C2B3A;
-  --cream:#F5F1EB; --cream-dark:#EDE8DF;
-  --text-dark:#1A1A1A; --text-mid:#4A4A4A; --text-muted:#888880;
-  --border:rgba(0,0,0,0.09); --white:#FFFFFF;
+  --cream:#F5F1EB; --cream-dark:#EDE8DF; --cream-deeper:#E5DFD5;
+  --text-dark:#1A1A1A; --text-mid:#4A4A4A; --text-muted:#8A8880;
+  --border:rgba(0,0,0,0.08); --white:#FFFFFF;
   --font-body:'Poppins',sans-serif; --font-display:'Playfair Display',serif;
-  --accent:#1A6B72; --accent-pale:#1A6B7218;
+  --accent:#1A6B72; --accent-pale:#1A6B7212;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);line-height:1.7}
-.topbar{position:sticky;top:0;z-index:100;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.5rem;gap:1rem}
-.topbar a.back{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.8rem;letter-spacing:0.01em;transition:color .2s}
+body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);line-height:1.7;font-size:16px}
+.topbar{position:sticky;top:0;z-index:100;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.75rem;gap:1rem}
+.topbar a.back{color:rgba(255,255,255,0.65);text-decoration:none;font-size:0.82rem;transition:color .2s}
 .topbar a.back:hover{color:#fff}
 .topbar .logo{color:#fff;font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.04em}
-.topbar .theme-pill{background:var(--accent);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.25rem 0.75rem;border-radius:20px}
-.page{max-width:820px;margin:0 auto;padding:3rem 2rem 5rem}
-.eyebrow{font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.75rem}
-h1{font-family:var(--font-display);font-size:2.2rem;line-height:1.25;margin-bottom:0.75rem;color:var(--text-dark)}
-.subtitle{font-size:0.9rem;color:var(--text-muted);margin-bottom:1.5rem;max-width:620px}
-.topic-tag{font-size:0.8rem;color:var(--text-muted);padding-bottom:1rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border)}
-.intro-quote{border-left:3px solid var(--accent);background:var(--accent-pale);padding:1rem 1.25rem;border-radius:0 8px 8px 0;margin-bottom:2rem;font-style:italic;color:var(--text-mid);font-size:0.95rem}
-textarea{font-family:var(--font-body);font-size:0.9rem;color:var(--text-dark);background:var(--white);border:1px solid var(--border);border-radius:8px;padding:0.75rem 1rem;width:100%;resize:none;overflow:hidden;outline:none;transition:border-color .2s,box-shadow .2s;line-height:1.6}
-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale)}
-textarea::placeholder{color:var(--text-muted)}
-label.q-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-mid);margin-bottom:0.4rem}
-.q-block{margin-bottom:1.5rem}
-.complete-wrap{margin-top:2.5rem;text-align:center}
-.complete-btn{background:var(--navy);color:#fff;border:none;padding:0.9rem 2.5rem;border-radius:8px;font-family:var(--font-body);font-size:0.95rem;font-weight:600;cursor:pointer;transition:opacity .2s}
-.complete-btn:hover{opacity:0.85}
+.topbar .theme-pill{background:var(--accent);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.28rem 0.85rem;border-radius:20px}
+#saved-badge{display:none;align-items:center;gap:0.4rem;font-size:0.72rem;color:rgba(255,255,255,0.5)}
+#saved-badge .dot{width:6px;height:6px;background:#5CB85C;border-radius:50%;display:inline-block}
+.page{max-width:780px;margin:0 auto;padding:3.5rem 2rem 7rem}
+.tool-eyebrow{font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.85rem;text-align:center}
+.tool-title{font-family:var(--font-display);font-size:3rem;line-height:1.15;text-align:center;color:var(--text-dark);margin-bottom:0.5rem}
+.tool-subtitle-wrap{text-align:center;margin-bottom:0.6rem}
+.tool-subtitle{font-size:1.05rem;color:var(--text-muted);font-style:italic;display:inline-block}
+.swoosh{display:block;margin:0.25rem auto 0;width:180px}
+.tool-framing{font-size:0.95rem;color:var(--text-mid);text-align:center;max-width:560px;margin:1.5rem auto 2.5rem;line-height:1.65;padding:1.1rem 1.5rem;background:var(--accent-pale);border-radius:10px}
+
+/* ── Two-column lists ── */
+.board-cols{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem}
+.board-col{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.board-col-head{padding:1rem 1.25rem;display:flex;align-items:flex-start;gap:0.65rem}
+.board-col-head.current{background:rgba(140,74,47,0.08)}
+.board-col-head.desired{background:var(--accent-pale)}
+.board-col-head-icon{font-size:1.1rem;line-height:1;margin-top:0.2rem}
+.board-col-head-title{font-size:0.85rem;font-weight:700;letter-spacing:0.03em;text-transform:uppercase}
+.board-col-head.current .board-col-head-title{color:#8C4A2F}
+.board-col-head.desired .board-col-head-title{color:var(--accent)}
+.board-col-head-hint{font-size:0.78rem;color:var(--text-muted);margin-top:0.15rem;line-height:1.4}
+.board-list-items{padding:0.5rem 0}
+.board-item{display:flex;align-items:flex-start;gap:0.65rem;padding:0.5rem 1rem}
+.item-num{font-size:0.75rem;font-weight:600;color:var(--text-muted);min-width:1.25rem;margin-top:0.35rem;text-align:right}
+.board-item textarea{font-family:var(--font-body);font-size:0.88rem;color:var(--text-dark);background:transparent;border:none;border-bottom:1.5px solid transparent;padding:0.1rem 0;width:100%;resize:none;overflow:hidden;outline:none;transition:border-color .2s;line-height:1.55;min-height:28px}
+.board-item textarea:focus{border-bottom-color:var(--accent)}
+.board-item textarea::placeholder{color:var(--text-muted);font-size:0.82rem}
+
+/* Arrow connector */
+.arrow-connector{display:flex;justify-content:center;margin:0.5rem 0}
+
+/* ── Shift section ── */
+.shift-head{font-size:0.85rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-dark);margin-bottom:1rem;margin-top:2.25rem;display:flex;align-items:center;gap:1rem}
+.shift-head::before,.shift-head::after{content:'';flex:1;height:1px;background:var(--border)}
+.q-block{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:0.75rem;position:relative;overflow:hidden}
+.q-block::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);border-radius:4px 0 0 4px}
+.q-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:var(--accent);color:#fff;border-radius:50%;font-size:0.72rem;font-weight:700;margin-bottom:0.6rem;flex-shrink:0}
+.q-block p{font-size:0.92rem;color:var(--text-mid);line-height:1.55;margin-bottom:0.75rem;font-style:italic}
+.q-block textarea{font-family:var(--font-body);font-size:0.94rem;color:var(--text-dark);background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:0.8rem 1rem;width:100%;resize:none;overflow:hidden;outline:none;transition:border-color .2s,box-shadow .2s;line-height:1.6}
+.q-block textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale);background:var(--white)}
+.q-block textarea::placeholder{color:var(--text-muted);font-size:0.88rem}
+
+/* ── Action block ── */
+.action-block{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.5rem 1.75rem;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.action-block::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);border-radius:4px 0 0 4px}
+.ab-label{font-size:0.82rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-dark);margin-bottom:0.35rem}
+.ab-stem{font-family:var(--font-display);font-size:1.05rem;font-style:italic;color:var(--text-mid);margin-bottom:0.85rem}
+.action-block textarea{font-family:var(--font-body);font-size:0.94rem;color:var(--text-dark);background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:0.9rem 1.1rem;width:100%;resize:none;overflow:hidden;outline:none;transition:border-color .2s,box-shadow .2s;line-height:1.6}
+.action-block textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale);background:var(--white)}
+.action-block textarea::placeholder{color:var(--text-muted);font-size:0.88rem}
+
+/* Tagline pill */
+.tagline-banner{background:var(--navy);color:#fff;text-align:center;padding:0.85rem 2rem;border-radius:10px;font-size:0.9rem;font-style:italic;letter-spacing:0.01em;margin-bottom:1.75rem}
+
+.tool-quote{border-left:4px solid var(--accent);background:var(--accent-pale);padding:1rem 1.4rem;border-radius:0 10px 10px 0;margin-bottom:1.75rem;line-height:1.6}
+.tool-quote strong{color:var(--accent);font-weight:700;font-size:0.92rem;display:block;margin-bottom:0.15rem}
+.tool-quote span{color:var(--text-mid);font-style:italic;font-size:0.9rem}
+
+.light-action{background:var(--cream-dark);border-radius:14px;padding:1.5rem 1.75rem;margin-bottom:2.5rem;display:flex;align-items:flex-start;gap:1.5rem;border:1px solid var(--cream-deeper)}
+.la-circle{flex-shrink:0;width:40px;height:40px;border-radius:50%;border:2px solid rgba(26,107,114,0.35);margin-top:0.2rem;transition:background .2s,border-color .2s;cursor:pointer}
+.la-circle:hover{background:var(--accent-pale);border-color:var(--accent)}
+.la-label{font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.4rem}
+.la-body{font-size:0.95rem;color:var(--text-mid);line-height:1.6}
+.la-body em{color:var(--text-dark);font-style:italic;font-weight:500}
+.complete-wrap{text-align:center;padding-top:0.5rem}
+.complete-btn{background:var(--navy);color:#fff;border:none;padding:1rem 2.75rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s}
+.complete-btn:hover{opacity:0.87;transform:translateY(-1px)}
+
+/* Completion */
 #completionView{display:none}
-.completion-header{text-align:center;padding:2.5rem 1rem 1.5rem;border-bottom:1px solid var(--border);margin-bottom:2rem}
-.completion-icon{font-size:2.5rem;margin-bottom:0.75rem}
-.completion-header h2{font-family:var(--font-display);font-size:1.8rem;color:var(--text-dark);margin-bottom:0.5rem}
-.completion-tagline{font-size:0.9rem;color:var(--text-muted)}
+.comp-inner{max-width:760px;margin:0 auto;padding:3rem 2rem 7rem}
+.completion-header{text-align:center;padding-bottom:2rem;border-bottom:1px solid var(--border);margin-bottom:2.5rem}
+.completion-icon{font-size:2.75rem;margin-bottom:0.75rem}
+.completion-header h2{font-family:var(--font-display);font-size:2rem;color:var(--text-dark);margin-bottom:0.4rem;line-height:1.25}
+.completion-tagline{font-size:0.95rem;color:var(--text-muted)}
 .summary-section{margin-bottom:2rem}
-.summary-section h3{font-size:0.8rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
-.summary-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:0.75rem}
+.summary-section h3{font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+.summary-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:0.65rem}
 .summary-card .card-label{font-size:0.75rem;font-weight:600;color:var(--text-muted);margin-bottom:0.25rem}
-.summary-card .card-value{font-size:0.9rem;color:var(--text-dark);white-space:pre-wrap}
-.momentum-section{background:var(--navy);border-radius:12px;padding:1.5rem;margin-bottom:2rem}
-.momentum-section h3{color:rgba(255,255,255,0.6);font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem}
-.momentum-btns{display:flex;flex-wrap:wrap;gap:0.6rem}
-.m-btn{background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);padding:0.6rem 1.1rem;border-radius:6px;font-family:var(--font-body);font-size:0.82rem;cursor:pointer;transition:background .2s}
-.m-btn:hover{background:rgba(255,255,255,0.15)}
-.cal-panel{display:none;background:rgba(255,255,255,0.06);border-radius:8px;padding:1rem;margin-top:0.75rem}
+.summary-card .card-value{font-size:0.92rem;color:var(--text-dark);white-space:pre-wrap;line-height:1.6}
+.momentum-section{background:var(--navy);border-radius:14px;padding:1.75rem;margin-bottom:2rem}
+.momentum-section h3{color:rgba(255,255,255,0.5);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.1rem}
+.momentum-btns{display:flex;flex-wrap:wrap;gap:0.65rem}
+.m-btn{background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);padding:0.65rem 1.2rem;border-radius:8px;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:background .2s}
+.m-btn:hover{background:rgba(255,255,255,0.18)}
+.cal-panel{display:none;background:rgba(255,255,255,0.06);border-radius:10px;padding:1.1rem;margin-top:0.85rem}
 .cal-panel.open{display:block}
-.cal-panel label{color:rgba(255,255,255,0.7);font-size:0.8rem;display:block;margin-bottom:0.25rem;margin-top:0.75rem}
+.cal-panel label{color:rgba(255,255,255,0.65);font-size:0.82rem;display:block;margin-bottom:0.3rem;margin-top:0.85rem}
 .cal-panel label:first-child{margin-top:0}
-.cal-panel input,.cal-panel select{width:100%;padding:0.5rem 0.75rem;border-radius:6px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-family:var(--font-body);font-size:0.85rem}
+.cal-panel input,.cal-panel select{width:100%;padding:0.55rem 0.8rem;border-radius:7px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-family:var(--font-body);font-size:0.87rem}
 .cal-panel input[type=date],.cal-panel input[type=time]{color-scheme:dark}
-.cal-panel .dl-btn{margin-top:0.75rem;background:var(--accent);color:#fff;border:none;padding:0.55rem 1rem;border-radius:6px;font-family:var(--font-body);font-size:0.82rem;cursor:pointer;width:100%}
-.closing-quote{border-left:3px solid var(--accent);background:var(--accent-pale);padding:1rem 1.25rem;border-radius:0 8px 8px 0;font-style:italic;color:var(--text-mid);font-size:0.95rem;margin-bottom:2rem}
+.cal-panel .dl-btn{margin-top:0.85rem;background:var(--accent);color:#fff;border:none;padding:0.6rem 1rem;border-radius:7px;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;width:100%}
+.closing-quote{border-left:4px solid var(--accent);background:var(--accent-pale);padding:1.1rem 1.5rem;border-radius:0 10px 10px 0;font-style:italic;color:var(--text-mid);font-size:1rem;margin-bottom:2.25rem;line-height:1.6}
 .completion-actions{display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:2rem}
-.ca-btn{border:1px solid var(--border);background:var(--white);color:var(--text-mid);padding:0.6rem 1.1rem;border-radius:6px;font-family:var(--font-body);font-size:0.82rem;cursor:pointer;transition:all .2s}
+.ca-btn{border:1px solid var(--border);background:var(--white);color:var(--text-mid);padding:0.65rem 1.25rem;border-radius:8px;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:all .2s}
 .ca-btn:hover{border-color:var(--accent);color:var(--accent)}
-
-.eib-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:2rem}
-.eib-panel{border-radius:12px;padding:1.5rem}
-.eib-current{background:var(--cream-dark);border:1px solid var(--border)}
-.eib-want{background:var(--white);border:2px solid var(--accent)}
-.eib-panel-title{font-size:0.8rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:1rem}
-.eib-current .eib-panel-title{color:var(--text-muted)}
-.eib-want .eib-panel-title{color:var(--accent)}
-.eib-row{display:flex;align-items:flex-start;gap:0.5rem;margin-bottom:0.65rem}
-.eib-num{width:1.4rem;height:1.4rem;border-radius:50%;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:0.55rem}
-.eib-current .eib-num{background:rgba(0,0,0,0.08);color:var(--text-muted)}
-.eib-want .eib-num{background:var(--accent);color:#fff}
-.eib-shift{background:var(--navy);border-radius:12px;padding:1.5rem;margin-bottom:2rem}
-.eib-shift-title{color:rgba(255,255,255,0.5);font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.75rem}
-.eib-shift label.q-label{color:rgba(255,255,255,0.7)}
-.eib-shift textarea{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.12);color:#fff}
-.eib-shift textarea::placeholder{color:rgba(255,255,255,0.3)}
-.eib-shift textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,107,114,0.3)}
-@media(max-width:580px){.eib-grid{grid-template-columns:1fr}}
-
-@media print{
-  .topbar,.complete-wrap,#completionView,.completion-actions{display:none!important}
-  #toolView{display:block!important}
-  body{background:#fff}
+@media(max-width:600px){
+  .tool-title{font-size:2.2rem}.page{padding:2.5rem 1.25rem 5rem}
+  .board-cols{grid-template-columns:1fr}
+  .light-action{flex-direction:column;gap:0.75rem}
 }
+@media print{.topbar,.complete-wrap,#completionView,.completion-actions{display:none!important}#toolView{display:block!important}body{background:#fff;font-size:12px}}
 </style>
 </head>
 <body>
 <div class="topbar">
   <a href="index.html" class="back">← Resource Library</a>
   <span class="logo">TLR</span>
-  <span class="theme-pill">Theme 4: Energy and Drive
-</span>
+  <span class="theme-pill">Energy &amp; Aliveness</span>
+  <span id="saved-badge"><span class="dot"></span>Progress saved</span>
 </div>
-<span id="saved-badge" style="display:none;align-items:center;gap:0.35rem;font-size:0.72rem;color:rgba(255,255,255,0.5)"><span style="width:6px;height:6px;background:#5CB85C;border-radius:50%;flex-shrink:0;display:inline-block"></span>Progress saved</span>
-</div>
-<div class="page" id="toolView">
-  <div class="eyebrow">Topic 3 of 4</div>
-  <h1>The Energy Investment Board</h1>
-  <p class="subtitle">Your energy goes somewhere every day. The question is whether it is going where you actually want it to.</p>
-  <div class="topic-tag">Theme: Energy and Drive · The Energy Investment Board</div>
-  <div class="intro-quote">Every day is an investment. The question is not whether you are spending energy — it is whether you are getting a return.</div>
-  <div class="eib-grid">
-    <div class="eib-panel eib-current">
-      <div class="eib-panel-title">Currently, my energy mostly goes toward...</div>
-      <div class="eib-row">
-        <div class="eib-num">1</div>
-        <textarea id="curr1" rows="1" placeholder="..."></textarea>
+
+<div id="toolView">
+<div class="page">
+  <div class="tool-eyebrow">Topic 3 of 4</div>
+  <h1 class="tool-title">Energy Investment Board</h1>
+  <div class="tool-subtitle-wrap">
+    <span class="tool-subtitle">Where is your energy going? Where do you want it to go?</span>
+    <svg class="swoosh" viewBox="0 0 180 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M 10 10 C 40 3 80 14 120 6 C 145 1 165 10 172 8" stroke="#1A6B72" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.55"/>
+    </svg>
+  </div>
+  <p class="tool-framing">Energy is one of our most precious resources — and yet most of us have never stopped to consciously ask where ours is going. This tool helps you see clearly where your energy currently flows, where you actually want it to go, and what one shift you can make to invest it more intentionally this week.</p>
+
+  <div class="board-cols">
+    <!-- Left: Current -->
+    <div class="board-col">
+      <div class="board-col-head current">
+        <div class="board-col-head-icon">→</div>
+        <div>
+          <div class="board-col-head-title">My energy currently goes toward…</div>
+          <div class="board-col-head-hint">Be honest. Include things that feel obligatory, habitual or unintentional.</div>
+        </div>
       </div>
-      <div class="eib-row">
-        <div class="eib-num">2</div>
-        <textarea id="curr2" rows="1" placeholder="..."></textarea>
-      </div>
-      <div class="eib-row">
-        <div class="eib-num">3</div>
-        <textarea id="curr3" rows="1" placeholder="..."></textarea>
-      </div>
-      <div class="eib-row">
-        <div class="eib-num">4</div>
-        <textarea id="curr4" rows="1" placeholder="..."></textarea>
-      </div>
-      <div class="eib-row">
-        <div class="eib-num">5</div>
-        <textarea id="curr5" rows="1" placeholder="..."></textarea>
+      <div class="board-list-items">
+        <div class="board-item"><span class="item-num">1</span><textarea id="c1" rows="1" placeholder=""></textarea></div>
+        <div class="board-item"><span class="item-num">2</span><textarea id="c2" rows="1" placeholder=""></textarea></div>
+        <div class="board-item"><span class="item-num">3</span><textarea id="c3" rows="1" placeholder=""></textarea></div>
+        <div class="board-item"><span class="item-num">4</span><textarea id="c4" rows="1" placeholder=""></textarea></div>
+        <div class="board-item"><span class="item-num">5</span><textarea id="c5" rows="1" placeholder=""></textarea></div>
+        <div class="board-item"><span class="item-num">6</span><textarea id="c6" rows="1" placeholder=""></textarea></div>
+        <div class="board-item"><span class="item-num">7</span><textarea id="c7" rows="1" placeholder=""></textarea></div>
+        <div class="board-item"><span class="item-num">8</span><textarea id="c8" rows="1" placeholder=""></textarea></div>
       </div>
     </div>
-    <div class="eib-panel eib-want">
-      <div class="eib-panel-title">I want more of my energy going toward...</div>
-      <div class="eib-row">
-        <div class="eib-num">1</div>
-        <textarea id="want1" rows="1" placeholder="..."></textarea>
+    <!-- Right: Desired -->
+    <div class="board-col">
+      <div class="board-col-head desired">
+        <div class="board-col-head-icon">✦</div>
+        <div>
+          <div class="board-col-head-title">I want more of my energy going toward…</div>
+          <div class="board-col-head-hint">What matters most to you? What would feel meaningful, energising and right?</div>
+        </div>
       </div>
-      <div class="eib-row">
-        <div class="eib-num">2</div>
-        <textarea id="want2" rows="1" placeholder="..."></textarea>
-      </div>
-      <div class="eib-row">
-        <div class="eib-num">3</div>
-        <textarea id="want3" rows="1" placeholder="..."></textarea>
-      </div>
-      <div class="eib-row">
-        <div class="eib-num">4</div>
-        <textarea id="want4" rows="1" placeholder="..."></textarea>
-      </div>
-      <div class="eib-row">
-        <div class="eib-num">5</div>
-        <textarea id="want5" rows="1" placeholder="..."></textarea>
+      <div class="board-list-items">
+        <div class="board-item"><span class="item-num">1</span><textarea id="d1" rows="1" placeholder=""></textarea></div>
+        <div class="board-item"><span class="item-num">2</span><textarea id="d2" rows="1" placeholder=""></textarea></div>
+        <div class="board-item"><span class="item-num">3</span><textarea id="d3" rows="1" placeholder=""></textarea></div>
+        <div class="board-item"><span class="item-num">4</span><textarea id="d4" rows="1" placeholder=""></textarea></div>
+        <div class="board-item"><span class="item-num">5</span><textarea id="d5" rows="1" placeholder=""></textarea></div>
+        <div class="board-item"><span class="item-num">6</span><textarea id="d6" rows="1" placeholder=""></textarea></div>
+        <div class="board-item"><span class="item-num">7</span><textarea id="d7" rows="1" placeholder=""></textarea></div>
+        <div class="board-item"><span class="item-num">8</span><textarea id="d8" rows="1" placeholder=""></textarea></div>
       </div>
     </div>
   </div>
-  <div class="eib-shift">
-    <div class="eib-shift-title">The shift</div>
-    <label class="q-label">Given what you see above, what is one concrete change you will make this week?</label>
-    <textarea id="shift" rows="1" placeholder="Be specific — what will you do, stop doing, or do differently?"></textarea>
+
+  <div class="arrow-connector">
+    <svg width="30" height="34" viewBox="0 0 30 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M 15 2 C 12 10 18 20 13 30" stroke="#1A6B72" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+      <path d="M 8 25 L 13 31 L 19 26" stroke="#1A6B72" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
   </div>
+
+  <div class="shift-head"><span>The Shift</span></div>
+  <p style="font-size:0.88rem;color:var(--text-muted);text-align:center;margin-bottom:1.25rem;font-style:italic;">Now that you can see both sides clearly, use the questions below to identify one meaningful shift.</p>
+
+  <div class="q-block">
+    <div class="q-num">1</div>
+    <p>Looking at both lists, what deserves more of my energy right now?</p>
+    <textarea id="shift1" rows="3" placeholder="What stands out most? What feels most important to shift toward?"></textarea>
+  </div>
+
+  <div class="q-block">
+    <div class="q-num">2</div>
+    <p>What is one shift that would free up more energy this week — either by doing less of something, or by doing more of something that restores me?</p>
+    <textarea id="shift2" rows="3" placeholder="What could you do less of, say no to, or protect yourself from this week?"></textarea>
+  </div>
+
+  <div class="arrow-connector">
+    <svg width="30" height="34" viewBox="0 0 30 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M 15 2 C 12 10 18 20 13 30" stroke="#1A6B72" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+      <path d="M 8 25 L 13 31 L 19 26" stroke="#1A6B72" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+  </div>
+
+  <div class="action-block">
+    <div class="ab-label">One small action this week</div>
+    <div class="ab-stem">To invest my energy more intentionally, I will…</div>
+    <textarea id="action" rows="3" placeholder="Make it specific and doable. What will you actually do differently this week?"></textarea>
+  </div>
+
+  <div class="tagline-banner">My energy. My choice. My life. Invest it wisely.</div>
+
+  <div class="tool-quote">
+    <strong>You are not powerless over where your energy goes.</strong>
+    <span>Awareness creates choice. Intention creates change.</span>
+  </div>
+
+  <div class="light-action">
+    <div class="la-circle" id="la-circle" title="Tap when done"></div>
+    <div>
+      <div class="la-label">Light action this week</div>
+      <div class="la-body">Do <em>one concrete thing</em> that reflects your intentional investment. Notice how it feels. Let that be your data.</div>
+    </div>
+  </div>
+
   <div class="complete-wrap">
     <button class="complete-btn" onclick="showCompletion()">I've completed this tool</button>
   </div>
-
+</div>
 </div>
 
-<div id="completionView" style="max-width:820px;margin:0 auto;padding:2rem 2rem 5rem">
+<div id="completionView">
+<div class="comp-inner">
   <div class="completion-header">
-    <div class="completion-icon">💡</div>
-    <h2>You are now investing, not just spending.</h2>
-    <p class="completion-tagline">The board is drawn. Now make the shift.</p>
+    <div class="completion-icon">⚡</div>
+    <h2>You have chosen where your energy goes.</h2>
+    <p class="completion-tagline">Intentional investment creates intentional results.</p>
   </div>
   <div class="summary-section">
-    <h3>What you reflected on</h3>
-    <div class="summary-card">
-      <div class="card-label">Currently investing in: 1</div>
-      <div class="card-value" id="s_curr1"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Currently investing in: 2</div>
-      <div class="card-value" id="s_curr2"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Currently investing in: 3</div>
-      <div class="card-value" id="s_curr3"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Currently investing in: 4</div>
-      <div class="card-value" id="s_curr4"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Currently investing in: 5</div>
-      <div class="card-value" id="s_curr5"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Want to invest more in: 1</div>
-      <div class="card-value" id="s_want1"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Want to invest more in: 2</div>
-      <div class="card-value" id="s_want2"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Want to invest more in: 3</div>
-      <div class="card-value" id="s_want3"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Want to invest more in: 4</div>
-      <div class="card-value" id="s_want4"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Want to invest more in: 5</div>
-      <div class="card-value" id="s_want5"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">The one concrete change this week</div>
-      <div class="card-value" id="s_shift"></div>
-    </div>
+    <h3>Where your energy currently goes</h3>
+    <div class="summary-card"><div class="card-value" id="s_current"></div></div>
+  </div>
+  <div class="summary-section">
+    <h3>Where you want your energy to go</h3>
+    <div class="summary-card"><div class="card-value" id="s_desired"></div></div>
+  </div>
+  <div class="summary-section">
+    <h3>The shift</h3>
+    <div class="summary-card"><div class="card-label">What deserves more energy</div><div class="card-value" id="s_shift1"></div></div>
+    <div class="summary-card"><div class="card-label">What would free up energy</div><div class="card-value" id="s_shift2"></div></div>
+    <div class="summary-card"><div class="card-label">My action this week</div><div class="card-value" id="s_action"></div></div>
   </div>
   <div class="momentum-section">
     <h3>Keep your momentum</h3>
@@ -221,156 +271,115 @@ label.q-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-m
       <button class="m-btn" onclick="emailToSelf()">📧 Email to myself</button>
       <button class="m-btn" onclick="shareWhatsApp()">💬 WhatsApp</button>
       <button class="m-btn" onclick="toggleCalPanel()">📅 Add to calendar</button>
-      <button class="m-btn" onclick="copyCommitment()">📋 Copy commitment</button>
+      <button class="m-btn" onclick="copyCommitment(this)">📋 Copy commitment</button>
     </div>
     <div class="cal-panel" id="calPanel">
-      <label>Date</label>
-      <input type="date" id="calDate">
-      <label>Time</label>
-      <input type="time" id="calTime" value="09:00">
+      <label>Date</label><input type="date" id="calDate">
+      <label>Time</label><input type="time" id="calTime" value="09:00">
       <label>Repeat</label>
-      <select id="calRepeat">
-        <option value="none">No repeat</option>
-        <option value="daily">Daily</option>
-        <option value="weekly">Weekly</option>
-        <option value="monthly">Monthly</option>
-      </select>
+      <select id="calRepeat"><option value="none">No repeat</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
       <button class="dl-btn" onclick="downloadICS()">Download .ics file</button>
     </div>
   </div>
-  <div class="closing-quote">The shift does not have to be dramatic. It just has to be intentional.</div>
+  <div class="closing-quote">My energy. My choice. My life. You have chosen — now invest wisely.</div>
   <div class="completion-actions">
     <button class="ca-btn" onclick="window.print()">🖨 Print blank worksheet</button>
     <button class="ca-btn" onclick="startAgain()">↩ Start again</button>
-    <button class="ca-btn" onclick="location.href='index.html'">← Back to library</button>
+    <button class="ca-btn" onclick="history.back()">← Back to library</button>
   </div>
 </div>
+</div>
+
 <script>
+const STORE_KEY='tlr-energy-investment-board';
+const CURRENT_IDS=['c1','c2','c3','c4','c5','c6','c7','c8'];
+const DESIRED_IDS=['d1','d2','d3','d4','d5','d6','d7','d8'];
 
 function autoExpand(el){el.style.height='auto';el.style.height=el.scrollHeight+'px'}
+
 document.addEventListener('DOMContentLoaded',()=>{
-  document.querySelectorAll('textarea').forEach(t=>{
-    t.addEventListener('input',()=>autoExpand(t));
-    autoExpand(t);
+  document.querySelectorAll('textarea').forEach(t=>{t.addEventListener('input',()=>autoExpand(t));autoExpand(t);});
+  const el=document.getElementById('calDate');if(el){el.value=new Date().toISOString().split('T')[0];}
+  const circle=document.getElementById('la-circle');
+  if(circle)circle.addEventListener('click',()=>{
+    const done=circle.dataset.done==='true';
+    circle.dataset.done=String(!done);
+    circle.style.background=!done?'var(--accent)':'';
+    circle.style.borderColor=!done?'var(--accent)':'rgba(26,107,114,0.35)';
   });
-  const d=new Date();
-  const iso=d.toISOString().split('T')[0];
-  const el=document.getElementById('calDate');
-  if(el) el.value=iso;
+  restoreProgress();
 });
-function getSummaryText(){
-  const cards=document.querySelectorAll('#completionView .summary-card');
-  let out=[];
-  cards.forEach(c=>{
-    const lbl=c.querySelector('.card-label')?.textContent||'';
-    const val=c.querySelector('.card-value')?.textContent||'';
-    if(val.trim()) out.push(lbl+': '+val);
-  });
-  return out.join('\n\n');
-}
-function emailToSelf(){
-  const body=encodeURIComponent(getSummaryText());
-  const sub=encodeURIComponent('My TLR reflection');
-  window.location.href='mailto:?subject='+sub+'&body='+body;
-}
-function shareWhatsApp(){
-  const text=encodeURIComponent(getSummaryText());
-  window.open('https://wa.me/?text='+text,'_blank');
-}
-function toggleCalPanel(){
-  document.getElementById('calPanel').classList.toggle('open');
-}
-function downloadICS(){
-  const date=document.getElementById('calDate').value||new Date().toISOString().split('T')[0];
-  const time=document.getElementById('calTime').value||'09:00';
-  const repeat=document.getElementById('calRepeat').value;
-  const dtStart=date.replace(/-/g,'')+'T'+time.replace(':','')+'00';
-  const dtEnd=date.replace(/-/g,'')+'T'+(function(){
-    const [h,m]=time.split(':').map(Number);
-    const eh=String(h+1).padStart(2,'0');
-    return eh+m.toString().padStart(2,'0')+'00';
-  })();
-  let rrule='';
-  if(repeat==='daily') rrule='\nRRULE:FREQ=DAILY';
-  else if(repeat==='weekly') rrule='\nRRULE:FREQ=WEEKLY';
-  else if(repeat==='monthly') rrule='\nRRULE:FREQ=MONTHLY';
-  const ics=`BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART:${dtStart}\nDTEND:${dtEnd}\nSUMMARY:TLR Reflection${rrule}\nEND:VEVENT\nEND:VCALENDAR`;
-  const blob=new Blob([ics],{type:'text/calendar'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='tlr-reflection.ics';
-  a.click();
-}
-function copyCommitment(){
-  const text=getSummaryText();
-  navigator.clipboard.writeText(text).then(()=>alert('Copied to clipboard!')).catch(()=>{
-    const ta=document.createElement('textarea');
-    ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('Copied!');
-  });
-}
-function startAgain(){localStorage.removeItem(STORE_KEY);
-  document.getElementById('toolView').style.display='block';
-  document.getElementById('completionView').style.display='none';
-  document.querySelectorAll('#toolView textarea').forEach(t=>{t.value='';autoExpand(t);});
-}
+
+function getListValues(ids){return ids.map((id,i)=>{const v=document.getElementById(id)?.value||'';return v?(i+1)+'. '+v:'';}).filter(Boolean).join('\n')||'—';}
 
 function showCompletion(){
-  document.getElementById('s_curr1') && (document.getElementById('s_curr1').textContent=document.getElementById('curr1').value||'—');
-  document.getElementById('s_curr2') && (document.getElementById('s_curr2').textContent=document.getElementById('curr2').value||'—');
-  document.getElementById('s_curr3') && (document.getElementById('s_curr3').textContent=document.getElementById('curr3').value||'—');
-  document.getElementById('s_curr4') && (document.getElementById('s_curr4').textContent=document.getElementById('curr4').value||'—');
-  document.getElementById('s_curr5') && (document.getElementById('s_curr5').textContent=document.getElementById('curr5').value||'—');
-  document.getElementById('s_want1') && (document.getElementById('s_want1').textContent=document.getElementById('want1').value||'—');
-  document.getElementById('s_want2') && (document.getElementById('s_want2').textContent=document.getElementById('want2').value||'—');
-  document.getElementById('s_want3') && (document.getElementById('s_want3').textContent=document.getElementById('want3').value||'—');
-  document.getElementById('s_want4') && (document.getElementById('s_want4').textContent=document.getElementById('want4').value||'—');
-  document.getElementById('s_want5') && (document.getElementById('s_want5').textContent=document.getElementById('want5').value||'—');
-  document.getElementById('s_shift') && (document.getElementById('s_shift').textContent=document.getElementById('shift').value||'—');
+  document.getElementById('s_current').textContent=getListValues(CURRENT_IDS);
+  document.getElementById('s_desired').textContent=getListValues(DESIRED_IDS);
+  document.getElementById('s_shift1').textContent=document.getElementById('shift1')?.value||'—';
+  document.getElementById('s_shift2').textContent=document.getElementById('shift2')?.value||'—';
+  document.getElementById('s_action').textContent=document.getElementById('action')?.value||'—';
   document.getElementById('toolView').style.display='none';
   document.getElementById('completionView').style.display='block';
   window.scrollTo(0,0);
 }
 
+function startAgain(){
+  localStorage.removeItem(STORE_KEY);
+  document.getElementById('completionView').style.display='none';
+  document.getElementById('toolView').style.display='block';
+  document.querySelectorAll('#toolView textarea').forEach(t=>{t.value='';autoExpand(t);});
+  document.getElementById('saved-badge').style.display='none';
+  window.scrollTo(0,0);
+}
 
-// --- Progress auto-save (localStorage) ---
-const STORE_KEY='tlr-energy-investment-board';
+function getSummaryText(){
+  let out='Energy Investment Board — TLR Reflection\n\nWHERE MY ENERGY CURRENTLY GOES:\n';
+  out+=getListValues(CURRENT_IDS);
+  out+='\n\nWHERE I WANT MY ENERGY TO GO:\n';
+  out+=getListValues(DESIRED_IDS);
+  const s1=document.getElementById('shift1')?.value||'';
+  const s2=document.getElementById('shift2')?.value||'';
+  const ac=document.getElementById('action')?.value||'';
+  if(s1)out+='\n\nWHAT DESERVES MORE ENERGY:\n'+s1;
+  if(s2)out+='\n\nWHAT WOULD FREE UP ENERGY:\n'+s2;
+  if(ac)out+='\n\nMY ACTION THIS WEEK:\n'+ac;
+  return out;
+}
+function emailToSelf(){window.location.href='mailto:?subject='+encodeURIComponent('Energy Investment Board — TLR')+'&body='+encodeURIComponent(getSummaryText())}
+function shareWhatsApp(){window.open('https://wa.me/?text='+encodeURIComponent(getSummaryText()),'_blank')}
+function toggleCalPanel(){document.getElementById('calPanel').classList.toggle('open')}
+function downloadICS(){
+  const date=document.getElementById('calDate').value||new Date().toISOString().split('T')[0];
+  const time=document.getElementById('calTime').value||'09:00';
+  const repeat=document.getElementById('calRepeat').value;
+  const dtStart=date.replace(/-/g,'')+'T'+time.replace(':','')+'00';
+  const[h,m]=time.split(':').map(Number);
+  const dtEnd=date.replace(/-/g,'')+'T'+String(h+1).padStart(2,'0')+String(m).padStart(2,'0')+'00';
+  let rrule='';if(repeat==='daily')rrule='\nRRULE:FREQ=DAILY';else if(repeat==='weekly')rrule='\nRRULE:FREQ=WEEKLY';else if(repeat==='monthly')rrule='\nRRULE:FREQ=MONTHLY';
+  const ics=`BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART:${dtStart}\nDTEND:${dtEnd}\nSUMMARY:TLR Reflection — Energy Investment Board${rrule}\nEND:VEVENT\nEND:VCALENDAR`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));a.download='tlr-energy-investment-board.ics';a.click();
+}
+function copyCommitment(btn){
+  navigator.clipboard.writeText(getSummaryText()).catch(()=>{const ta=document.createElement('textarea');ta.value=getSummaryText();document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta)});
+  if(btn){btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent='📋 Copy commitment',2500);}
+}
+
 function saveProgress(){
   const s={};
-  document.querySelectorAll('textarea[id],input[id]').forEach(el=>{
-    if(el.type==='checkbox'||el.type==='radio') s[el.id]=el.checked;
-    else s[el.id]=el.value;
-  });
-  const badges={};
-  [1,2,3,4,5,6].forEach(i=>{['D','R','A'].forEach(c=>{
-    const b=document.getElementById('badge'+i+c);
-    if(b&&b.classList.contains('active-'+c)) badges[i]=c;
-  })});
-  if(Object.keys(badges).length) s['_badges']=badges;
+  document.querySelectorAll('textarea[id]').forEach(el=>{s[el.id]=el.value});
   localStorage.setItem(STORE_KEY,JSON.stringify(s));
-  const badge=document.getElementById('saved-badge');
-  if(badge) badge.style.display='flex';
+  document.getElementById('saved-badge').style.display='flex';
 }
 function restoreProgress(){
-  const raw=localStorage.getItem(STORE_KEY);
-  if(!raw) return;
+  const raw=localStorage.getItem(STORE_KEY);if(!raw)return;
   try{
     const s=JSON.parse(raw);
-    document.querySelectorAll('textarea[id],input[id]').forEach(el=>{
-      if(!(el.id in s)) return;
-      if(el.type==='checkbox'||el.type==='radio') el.checked=s[el.id];
-      else{el.value=s[el.id];if(el.tagName==='TEXTAREA'){el.style.height='auto';el.style.height=el.scrollHeight+'px';}}
-    });
-    if(s['_badges']&&typeof setBadge==='function'){
-      Object.entries(s['_badges']).forEach(([i,c])=>setBadge(Number(i),c));
-    }
-    if(typeof updateBars==='function') updateBars();
-    const hasData=Object.values(s).some(v=>v!==undefined&&v!==''&&v!==false&&v!=='0');
-    if(hasData){const badge=document.getElementById('saved-badge');if(badge)badge.style.display='flex';}
+    document.querySelectorAll('textarea[id]').forEach(el=>{if(el.id in s&&s[el.id]){el.value=s[el.id];el.style.height='auto';el.style.height=el.scrollHeight+'px';}});
+    const hasData=Object.values(s).some(v=>v&&v!=='');
+    if(hasData)document.getElementById('saved-badge').style.display='flex';
   }catch(e){}
 }
 document.addEventListener('input',saveProgress);
-document.addEventListener('change',saveProgress);
-document.addEventListener('DOMContentLoaded',restoreProgress);
 </script>
 </body>
 </html>

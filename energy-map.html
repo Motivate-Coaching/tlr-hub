@@ -4,233 +4,420 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Energy Map | TLR</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --navy:#0F1215; --navy-mid:#1C2B3A;
-  --cream:#F5F1EB; --cream-dark:#EDE8DF;
-  --text-dark:#1A1A1A; --text-mid:#4A4A4A; --text-muted:#888880;
-  --border:rgba(0,0,0,0.09); --white:#FFFFFF;
-  --font-body:'Poppins',sans-serif; --font-display:'Playfair Display',serif;
-  --accent:#1A6B72; --accent-pale:#1A6B7218;
+  --navy:#0F1215;--navy-mid:#1C2B3A;
+  --cream:#F5F1EB;--cream-dark:#EDE8DF;--cream-deeper:#E5DFD5;
+  --text-dark:#1A1A1A;--text-mid:#4A4A4A;--text-muted:#8A8880;
+  --border:rgba(0,0,0,0.08);--white:#FFFFFF;
+  --font-body:'Poppins',sans-serif;
+  --font-display:'Playfair Display',serif;
+  --font-script:'Dancing Script',cursive;
+  --accent:#1A6B72;--accent-pale:rgba(26,107,114,0.09);--accent-light:#2A9EA8;
+  --drain:#C9930A;--drain-pale:rgba(201,147,10,0.09);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);line-height:1.7}
-.topbar{position:sticky;top:0;z-index:100;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.5rem;gap:1rem}
-.topbar a.back{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.8rem;letter-spacing:0.01em;transition:color .2s}
+body{font-family:var(--font-body);background:var(--navy);color:var(--text-dark);line-height:1.7;font-size:16px}
+
+/* Topbar */
+.topbar{position:sticky;top:0;z-index:100;background:#080B0D;display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.75rem;gap:1rem}
+.topbar a.back{color:rgba(255,255,255,0.55);text-decoration:none;font-size:0.82rem;transition:color .2s;cursor:pointer}
 .topbar a.back:hover{color:#fff}
 .topbar .logo{color:#fff;font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.04em}
-.topbar .theme-pill{background:var(--accent);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.25rem 0.75rem;border-radius:20px}
-.page{max-width:820px;margin:0 auto;padding:3rem 2rem 5rem}
-.eyebrow{font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.75rem}
-h1{font-family:var(--font-display);font-size:2.2rem;line-height:1.25;margin-bottom:0.75rem;color:var(--text-dark)}
-.subtitle{font-size:0.9rem;color:var(--text-muted);margin-bottom:1.5rem;max-width:620px}
-.topic-tag{font-size:0.8rem;color:var(--text-muted);padding-bottom:1rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border)}
-.intro-quote{border-left:3px solid var(--accent);background:var(--accent-pale);padding:1rem 1.25rem;border-radius:0 8px 8px 0;margin-bottom:2rem;font-style:italic;color:var(--text-mid);font-size:0.95rem}
-textarea{font-family:var(--font-body);font-size:0.9rem;color:var(--text-dark);background:var(--white);border:1px solid var(--border);border-radius:8px;padding:0.75rem 1rem;width:100%;resize:none;overflow:hidden;outline:none;transition:border-color .2s,box-shadow .2s;line-height:1.6}
-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale)}
-textarea::placeholder{color:var(--text-muted)}
-label.q-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-mid);margin-bottom:0.4rem}
-.q-block{margin-bottom:1.5rem}
-.complete-wrap{margin-top:2.5rem;text-align:center}
-.complete-btn{background:var(--navy);color:#fff;border:none;padding:0.9rem 2.5rem;border-radius:8px;font-family:var(--font-body);font-size:0.95rem;font-weight:600;cursor:pointer;transition:opacity .2s}
-.complete-btn:hover{opacity:0.85}
-#completionView{display:none}
-.completion-header{text-align:center;padding:2.5rem 1rem 1.5rem;border-bottom:1px solid var(--border);margin-bottom:2rem}
-.completion-icon{font-size:2.5rem;margin-bottom:0.75rem}
-.completion-header h2{font-family:var(--font-display);font-size:1.8rem;color:var(--text-dark);margin-bottom:0.5rem}
-.completion-tagline{font-size:0.9rem;color:var(--text-muted)}
-.summary-section{margin-bottom:2rem}
-.summary-section h3{font-size:0.8rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
-.summary-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:0.75rem}
-.summary-card .card-label{font-size:0.75rem;font-weight:600;color:var(--text-muted);margin-bottom:0.25rem}
-.summary-card .card-value{font-size:0.9rem;color:var(--text-dark);white-space:pre-wrap}
-.momentum-section{background:var(--navy);border-radius:12px;padding:1.5rem;margin-bottom:2rem}
-.momentum-section h3{color:rgba(255,255,255,0.6);font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem}
-.momentum-btns{display:flex;flex-wrap:wrap;gap:0.6rem}
-.m-btn{background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);padding:0.6rem 1.1rem;border-radius:6px;font-family:var(--font-body);font-size:0.82rem;cursor:pointer;transition:background .2s}
-.m-btn:hover{background:rgba(255,255,255,0.15)}
-.cal-panel{display:none;background:rgba(255,255,255,0.06);border-radius:8px;padding:1rem;margin-top:0.75rem}
+.topbar .theme-pill{background:var(--accent);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.28rem 0.85rem;border-radius:20px}
+#saved-badge{display:none;align-items:center;gap:0.4rem;font-size:0.72rem;color:rgba(255,255,255,0.45)}
+#saved-badge .dot{width:6px;height:6px;background:#5CB85C;border-radius:50%;display:inline-block}
+
+/* Header */
+.tool-header{background:var(--navy);padding:3rem 2rem 2rem;text-align:center}
+.tool-eyebrow{font-size:0.7rem;font-weight:600;letter-spacing:0.13em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:1rem}
+.tool-title{font-family:var(--font-display);font-size:3.4rem;line-height:1.1;color:#fff;margin-bottom:0.5rem}
+.tool-title .accent{color:var(--drain)}
+.tool-tagline{font-size:0.68rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);display:block;margin-bottom:1.5rem}
+.tool-framing{font-size:0.9rem;color:rgba(255,255,255,0.5);max-width:520px;margin:0 auto;line-height:1.8;font-weight:300}
+
+/* Diagram section */
+.diagram-section{background:var(--navy);padding:2.5rem 1.5rem 3.5rem}
+
+/* Column headers */
+.col-headers{max-width:900px;margin:0 auto 1.5rem;display:grid;grid-template-columns:1fr 160px 1fr;gap:0}
+.col-hd{padding:0 0.75rem}
+.col-hd.drain{text-align:left}
+.col-hd.restore{text-align:right}
+.col-hd-label{font-size:0.75rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase}
+.col-hd.drain .col-hd-label{color:var(--drain)}
+.col-hd.restore .col-hd-label{color:var(--accent-light)}
+.col-hd-script{font-family:var(--font-script);font-size:1.3rem;display:block;line-height:1.1}
+.col-hd.drain .col-hd-script{color:var(--drain)}
+.col-hd.restore .col-hd-script{color:var(--accent-light)}
+.col-hd-hint{font-size:0.7rem;color:rgba(255,255,255,0.3);line-height:1.5;margin-top:0.35rem;font-style:italic}
+
+/* Diagram grid */
+.diagram-grid{max-width:900px;margin:0 auto;display:grid;grid-template-columns:1fr 160px 1fr;position:relative;min-height:520px}
+#connector-svg{position:absolute;inset:0;pointer-events:none;z-index:1;width:100%;height:100%}
+
+/* Me circle */
+.diagram-center{display:flex;align-items:center;justify-content:center;position:relative;z-index:2;padding:1rem 0}
+.me-circle{width:136px;height:136px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#1e2e40,var(--navy));border:2px solid rgba(26,107,114,0.5);box-shadow:0 0 45px rgba(26,107,114,0.18),0 0 90px rgba(26,107,114,0.07);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0.6rem;gap:0.1rem}
+.me-script{font-family:var(--font-script);font-size:2.1rem;color:#fff;line-height:1;font-weight:600}
+.me-rule{width:36px;height:1.5px;background:var(--drain);margin:0.2rem auto;border-radius:2px}
+.me-label{font-size:0.44rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:rgba(255,255,255,0.4);line-height:1.5}
+
+/* Category columns */
+.drain-col,.restore-col{display:flex;flex-direction:column;justify-content:space-around;padding:0.5rem 0}
+.drain-col{padding-right:0.5rem}
+.restore-col{padding-left:0.5rem}
+
+/* Category items */
+.cat-item{position:relative;display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.5rem;border-radius:8px;transition:background .15s}
+.cat-item:hover{background:rgba(255,255,255,0.025)}
+.restore-col .cat-item{flex-direction:row-reverse}
+
+/* Icons */
+.cat-icon{flex-shrink:0;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.82rem}
+.drain-col .cat-icon{background:rgba(201,147,10,0.1);border:1px solid rgba(201,147,10,0.22)}
+.restore-col .cat-icon{background:rgba(26,107,114,0.1);border:1px solid rgba(26,107,114,0.22)}
+
+/* Content */
+.cat-content{flex:1;min-width:0}
+.restore-col .cat-content{text-align:right}
+.cat-name{font-size:0.68rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;line-height:1.2;margin-bottom:0.07rem}
+.drain-col .cat-name{color:rgba(201,147,10,0.9)}
+.restore-col .cat-name{color:rgba(42,158,168,0.9)}
+.cat-eg{font-size:0.63rem;color:rgba(255,255,255,0.28);font-style:italic;margin-bottom:0.3rem;line-height:1.35}
+.cat-input{font-family:var(--font-body);font-size:0.78rem;color:rgba(255,255,255,0.82);background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.1);padding:0.1rem 0;width:100%;resize:none;overflow:hidden;outline:none;transition:border-color .2s;line-height:1.5;min-height:22px}
+.restore-col .cat-input{text-align:right}
+.cat-input:focus{border-bottom-color:rgba(255,255,255,0.32)}
+.cat-input::placeholder{color:rgba(255,255,255,0.18);font-size:0.72rem}
+
+/* Connection dots for SVG lines */
+.drain-dot{position:absolute;right:2px;top:50%;transform:translateY(-50%);width:7px;height:7px;border-radius:50%;background:rgba(201,147,10,0.6);z-index:3;flex-shrink:0}
+.restore-dot{position:absolute;left:2px;top:50%;transform:translateY(-50%);width:7px;height:7px;border-radius:50%;background:rgba(42,158,168,0.6);z-index:3}
+
+/* Shift section (cream) */
+.shift-section{background:var(--cream);padding:3.5rem 2rem 0}
+.section-inner{max-width:660px;margin:0 auto}
+.section-eyebrow{font-size:0.68rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:var(--accent);text-align:center;margin-bottom:0.5rem}
+.section-rule{width:36px;height:2px;background:var(--accent);margin:0 auto 1.5rem;border-radius:2px;opacity:0.6}
+.shift-prompt{font-size:0.95rem;font-weight:600;color:var(--text-dark);text-align:center;margin-bottom:0.25rem}
+.shift-stem{font-family:var(--font-script);font-size:1.55rem;color:var(--accent);display:block;text-align:center;margin-bottom:1rem}
+.shift-ta{font-family:var(--font-body);font-size:0.94rem;color:var(--text-dark);background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:1rem 1.25rem;width:100%;resize:none;overflow:hidden;outline:none;transition:border-color .2s,box-shadow .2s;line-height:1.65;min-height:80px}
+.shift-ta:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale)}
+.shift-ta::placeholder{color:var(--text-muted);font-size:0.87rem}
+
+/* Tip box */
+.tip-box{margin-top:1.25rem;background:var(--cream-dark);border:1px solid var(--cream-deeper);border-radius:10px;padding:1rem 1.25rem;display:flex;align-items:flex-start;gap:0.8rem}
+.tip-icon{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--accent-pale);border:1px solid rgba(26,107,114,0.2);display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:var(--accent);font-weight:700;margin-top:0.1rem}
+.tip-label{font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:0.2rem}
+.tip-text{font-size:0.84rem;color:var(--text-mid);line-height:1.6}
+
+/* Closing quote */
+.closing-section{background:var(--cream);padding:2.5rem 2rem 0}
+.closing-inner{max-width:660px;margin:0 auto;border-top:1px solid var(--cream-deeper);padding-top:2.5rem;text-align:center}
+.closing-tagline{font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted)}
+.closing-script{font-family:var(--font-script);font-size:2.2rem;color:var(--accent);display:block;margin-top:0.6rem}
+
+/* Light action */
+.la-section{background:var(--cream);padding:2rem 2rem}
+.la-card{max-width:660px;margin:0 auto;background:var(--cream-dark);border-radius:14px;padding:1.5rem 1.75rem;display:flex;align-items:flex-start;gap:1.25rem;border:1px solid var(--cream-deeper)}
+.la-circle{flex-shrink:0;width:40px;height:40px;border-radius:50%;border:2px solid rgba(26,107,114,0.3);cursor:pointer;transition:all .25s;margin-top:0.1rem}
+.la-circle:hover{background:var(--accent-pale);border-color:var(--accent)}
+.la-circle.done{background:var(--accent);border-color:var(--accent)}
+.la-label{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.35rem}
+.la-body{font-size:0.9rem;color:var(--text-mid);line-height:1.65}
+.la-body em{color:var(--text-dark);font-style:italic;font-weight:500}
+
+/* Complete */
+.complete-section{background:var(--cream);padding:1.5rem 2rem 5rem;text-align:center}
+.complete-btn{background:var(--navy);color:#fff;border:none;padding:1rem 2.75rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s}
+.complete-btn:hover{opacity:0.87;transform:translateY(-1px)}
+
+/* Completion */
+#completionView{display:none;background:var(--cream)}
+.comp-inner{max-width:760px;margin:0 auto;padding:3rem 2rem 7rem}
+.comp-header{text-align:center;padding-bottom:2rem;border-bottom:1px solid var(--border);margin-bottom:2.5rem}
+.comp-icon{font-size:2.75rem;margin-bottom:0.75rem}
+.comp-header h2{font-family:var(--font-display);font-size:2rem;color:var(--text-dark);margin-bottom:0.4rem;line-height:1.25}
+.comp-tagline{font-size:0.95rem;color:var(--text-muted)}
+.sum-section{margin-bottom:1.5rem}
+.sum-section h3{font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.85rem}
+.sum-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:0.5rem}
+.sum-card .card-label{font-size:0.72rem;font-weight:600;color:var(--text-muted);margin-bottom:0.2rem}
+.sum-card .card-value{font-size:0.9rem;color:var(--text-dark);white-space:pre-wrap;line-height:1.6}
+.momentum-section{background:var(--navy);border-radius:14px;padding:1.75rem;margin-bottom:2rem}
+.momentum-section h3{color:rgba(255,255,255,0.45);font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.1rem}
+.momentum-btns{display:flex;flex-wrap:wrap;gap:0.65rem}
+.m-btn{background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.14);padding:0.65rem 1.2rem;border-radius:8px;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:background .2s}
+.m-btn:hover{background:rgba(255,255,255,0.17)}
+.cal-panel{display:none;background:rgba(255,255,255,0.05);border-radius:10px;padding:1.1rem;margin-top:0.85rem}
 .cal-panel.open{display:block}
-.cal-panel label{color:rgba(255,255,255,0.7);font-size:0.8rem;display:block;margin-bottom:0.25rem;margin-top:0.75rem}
+.cal-panel label{color:rgba(255,255,255,0.6);font-size:0.8rem;display:block;margin-bottom:0.3rem;margin-top:0.85rem}
 .cal-panel label:first-child{margin-top:0}
-.cal-panel input,.cal-panel select{width:100%;padding:0.5rem 0.75rem;border-radius:6px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-family:var(--font-body);font-size:0.85rem}
+.cal-panel input,.cal-panel select{width:100%;padding:0.55rem 0.8rem;border-radius:7px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.09);color:#fff;font-family:var(--font-body);font-size:0.87rem}
 .cal-panel input[type=date],.cal-panel input[type=time]{color-scheme:dark}
-.cal-panel .dl-btn{margin-top:0.75rem;background:var(--accent);color:#fff;border:none;padding:0.55rem 1rem;border-radius:6px;font-family:var(--font-body);font-size:0.82rem;cursor:pointer;width:100%}
-.closing-quote{border-left:3px solid var(--accent);background:var(--accent-pale);padding:1rem 1.25rem;border-radius:0 8px 8px 0;font-style:italic;color:var(--text-mid);font-size:0.95rem;margin-bottom:2rem}
-.completion-actions{display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:2rem}
-.ca-btn{border:1px solid var(--border);background:var(--white);color:var(--text-mid);padding:0.6rem 1.1rem;border-radius:6px;font-family:var(--font-body);font-size:0.82rem;cursor:pointer;transition:all .2s}
+.dl-btn{margin-top:0.85rem;background:var(--accent);color:#fff;border:none;padding:0.6rem 1rem;border-radius:7px;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;width:100%}
+.comp-quote{font-style:italic;color:var(--text-mid);font-size:0.92rem;text-align:center;padding:1.5rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:1.5rem;line-height:1.7}
+.comp-quote strong{color:var(--accent);font-style:normal;display:block;margin-bottom:0.3rem;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase}
+.comp-actions{display:flex;flex-wrap:wrap;gap:0.75rem}
+.ca-btn{border:1px solid var(--border);background:var(--white);color:var(--text-mid);padding:0.65rem 1.25rem;border-radius:8px;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:all .2s}
 .ca-btn:hover{border-color:var(--accent);color:var(--accent)}
 
-.em-wrap{display:grid;grid-template-columns:1fr auto 1fr;gap:0;border-radius:12px;overflow:hidden;margin-bottom:2rem}
-.em-drain{background:var(--navy);padding:1.5rem}
-.em-divider{background:linear-gradient(to bottom,var(--navy),#2a3a4a,var(--navy));width:4px;display:flex;align-items:center;justify-content:center}
-.em-person{writing-mode:vertical-rl;color:rgba(255,255,255,0.3);font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;transform:rotate(180deg);padding:0.5rem 0}
-.em-restore{background:var(--cream-dark);padding:1.5rem}
-.em-col-title{font-size:0.75rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem}
-.em-drain .em-col-title{color:rgba(255,255,255,0.5)}
-.em-restore .em-col-title{color:var(--accent)}
-.em-slot{margin-bottom:0.75rem}
-.em-slot-num{font-size:0.7rem;font-weight:600;margin-bottom:0.25rem}
-.em-drain .em-slot-num{color:rgba(255,255,255,0.35)}
-.em-restore .em-slot-num{color:var(--accent)}
-.em-drain textarea{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.1);color:#fff}
-.em-drain textarea::placeholder{color:rgba(255,255,255,0.25)}
-.em-drain textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,107,114,0.3)}
-.em-shift{background:var(--white);border:2px solid var(--accent);border-radius:12px;padding:1.5rem;margin-bottom:2rem}
-.em-shift-title{font-size:0.8rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:0.75rem}
-@media(max-width:560px){.em-wrap{grid-template-columns:1fr;}.em-divider{width:100%;height:4px;writing-mode:horizontal-tb;}.em-person{writing-mode:horizontal-tb;transform:none;}}
-
-@media print{
-  .topbar,.complete-wrap,#completionView,.completion-actions{display:none!important}
-  #toolView{display:block!important}
-  body{background:#fff}
+@media(max-width:640px){
+  .tool-title{font-size:2.3rem}
+  .diagram-grid,.col-headers{grid-template-columns:1fr}
+  .diagram-center{order:-1;padding:1.5rem 0}
+  .drain-col,.restore-col{padding:0}
+  .restore-col .cat-item{flex-direction:row}
+  .restore-col .cat-content{text-align:left}
+  .restore-col .cat-input{text-align:left}
+  #connector-svg,.drain-dot,.restore-dot{display:none}
+  .la-card{flex-direction:column;gap:0.75rem}
 }
+@media print{.topbar,.complete-section,#completionView{display:none!important}body{background:#fff}}
 </style>
 </head>
 <body>
+
 <div class="topbar">
-  <a href="index.html" class="back">← Resource Library</a>
+  <a class="back" onclick="history.back()">← Resource Library</a>
   <span class="logo">TLR</span>
-  <span class="theme-pill">Theme 4: Energy and Drive
-</span>
+  <span class="theme-pill">Energy &amp; Aliveness</span>
+  <span id="saved-badge"><span class="dot"></span>Progress saved</span>
 </div>
-<span id="saved-badge" style="display:none;align-items:center;gap:0.35rem;font-size:0.72rem;color:rgba(255,255,255,0.5)"><span style="width:6px;height:6px;background:#5CB85C;border-radius:50%;flex-shrink:0;display:inline-block"></span>Progress saved</span>
-</div>
-<div class="page" id="toolView">
-  <div class="eyebrow">Topic 1 of 4</div>
-  <h1>The Energy Map</h1>
-  <p class="subtitle">Not all effort is equal. Some things fill you up. Some things hollow you out. Knowing the difference is not a luxury.</p>
-  <div class="topic-tag">Theme: Energy and Drive · The Energy Map</div>
-  <div class="intro-quote">Energy is not infinite. But it is renewable — if you know what renews it.</div>
-  <div class="em-wrap">
-    <div class="em-drain">
-      <div class="em-col-title">What drains my energy</div>
-      <div class="em-slot">
-        <div class="em-slot-num">1</div>
-        <textarea id="drain1" rows="1" placeholder="..."></textarea>
+
+<div id="toolView">
+
+  <div class="tool-header">
+    <div class="tool-eyebrow">Topic 1 of 4 · Energy &amp; Aliveness</div>
+    <h1 class="tool-title">The Energy <span class="accent">Map</span></h1>
+    <span class="tool-tagline">Become aware. Choose with intention. Create more of what lights you up.</span>
+    <p class="tool-framing">Our energy is shaped by everything around us. Use this map to notice what drains you, what restores you, and where one small shift could make the biggest difference.</p>
+  </div>
+
+  <div class="diagram-section">
+
+    <div class="col-headers">
+      <div class="col-hd drain">
+        <div class="col-hd-label">What drains</div>
+        <span class="col-hd-script">my energy?</span>
+        <div class="col-hd-hint">Things, habits, people or environments that leave me feeling heavier, flat or depleted.</div>
       </div>
-      <div class="em-slot">
-        <div class="em-slot-num">2</div>
-        <textarea id="drain2" rows="1" placeholder="..."></textarea>
-      </div>
-      <div class="em-slot">
-        <div class="em-slot-num">3</div>
-        <textarea id="drain3" rows="1" placeholder="..."></textarea>
-      </div>
-      <div class="em-slot">
-        <div class="em-slot-num">4</div>
-        <textarea id="drain4" rows="1" placeholder="..."></textarea>
-      </div>
-      <div class="em-slot">
-        <div class="em-slot-num">5</div>
-        <textarea id="drain5" rows="1" placeholder="..."></textarea>
-      </div>
-      <div class="em-slot">
-        <div class="em-slot-num">6</div>
-        <textarea id="drain6" rows="1" placeholder="..."></textarea>
+      <div></div>
+      <div class="col-hd restore">
+        <div class="col-hd-label">What restores</div>
+        <span class="col-hd-script">my energy?</span>
+        <div class="col-hd-hint">Things, habits, people or environments that help me feel lighter, clearer and more alive.</div>
       </div>
     </div>
-    <div class="em-divider"><div class="em-person">You</div></div>
-    <div class="em-restore">
-      <div class="em-col-title">What restores my energy</div>
-      <div class="em-slot">
-        <div class="em-slot-num">1</div>
-        <textarea id="restore1" rows="1" placeholder="..."></textarea>
+
+    <div class="diagram-grid" id="diagram-grid">
+
+      <svg id="connector-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+
+      <!-- Drain column -->
+      <div class="drain-col">
+
+        <div class="cat-item">
+          <div class="cat-icon">🧠</div>
+          <div class="cat-content">
+            <div class="cat-name">Mental</div>
+            <div class="cat-eg">e.g. overthinking, worry, pressure</div>
+            <textarea class="cat-input" id="d_mental" rows="1" placeholder="What comes to mind…"></textarea>
+          </div>
+          <div class="drain-dot"></div>
+        </div>
+
+        <div class="cat-item">
+          <div class="cat-icon">📱</div>
+          <div class="cat-content">
+            <div class="cat-name">Digital</div>
+            <div class="cat-eg">e.g. scrolling, notifications, distractions</div>
+            <textarea class="cat-input" id="d_digital" rows="1" placeholder=""></textarea>
+          </div>
+          <div class="drain-dot"></div>
+        </div>
+
+        <div class="cat-item">
+          <div class="cat-icon">👥</div>
+          <div class="cat-content">
+            <div class="cat-name">People</div>
+            <div class="cat-eg">e.g. draining conversations, people pleasing</div>
+            <textarea class="cat-input" id="d_people" rows="1" placeholder=""></textarea>
+          </div>
+          <div class="drain-dot"></div>
+        </div>
+
+        <div class="cat-item">
+          <div class="cat-icon">⏱</div>
+          <div class="cat-content">
+            <div class="cat-name">Time &amp; Pace</div>
+            <div class="cat-eg">e.g. rushing, overcommitment, lack of time</div>
+            <textarea class="cat-input" id="d_time" rows="1" placeholder=""></textarea>
+          </div>
+          <div class="drain-dot"></div>
+        </div>
+
+        <div class="cat-item">
+          <div class="cat-icon">📋</div>
+          <div class="cat-content">
+            <div class="cat-name">Habits &amp; Behaviours</div>
+            <div class="cat-eg">e.g. poor sleep, avoidance, unhelpful habits</div>
+            <textarea class="cat-input" id="d_habits" rows="1" placeholder=""></textarea>
+          </div>
+          <div class="drain-dot"></div>
+        </div>
+
+        <div class="cat-item">
+          <div class="cat-icon">🏠</div>
+          <div class="cat-content">
+            <div class="cat-name">Environment</div>
+            <div class="cat-eg">e.g. clutter, noise, chaotic surroundings</div>
+            <textarea class="cat-input" id="d_env" rows="1" placeholder=""></textarea>
+          </div>
+          <div class="drain-dot"></div>
+        </div>
+
       </div>
-      <div class="em-slot">
-        <div class="em-slot-num">2</div>
-        <textarea id="restore2" rows="1" placeholder="..."></textarea>
+
+      <!-- Me circle -->
+      <div class="diagram-center">
+        <div class="me-circle" id="me-circle">
+          <span class="me-script">Me</span>
+          <div class="me-rule"></div>
+          <span class="me-label">at the centre<br>of my energy</span>
+        </div>
       </div>
-      <div class="em-slot">
-        <div class="em-slot-num">3</div>
-        <textarea id="restore3" rows="1" placeholder="..."></textarea>
+
+      <!-- Restore column -->
+      <div class="restore-col">
+
+        <div class="cat-item">
+          <div class="restore-dot"></div>
+          <div class="cat-content">
+            <div class="cat-name">Body</div>
+            <div class="cat-eg">e.g. movement, sleep, nourishing food</div>
+            <textarea class="cat-input" id="r_body" rows="1" placeholder="What comes to mind…"></textarea>
+          </div>
+          <div class="cat-icon">🌿</div>
+        </div>
+
+        <div class="cat-item">
+          <div class="restore-dot"></div>
+          <div class="cat-content">
+            <div class="cat-name">Mind &amp; Emotions</div>
+            <div class="cat-eg">e.g. calm, joy, creativity, positive mindset</div>
+            <textarea class="cat-input" id="r_mind" rows="1" placeholder=""></textarea>
+          </div>
+          <div class="cat-icon">💛</div>
+        </div>
+
+        <div class="cat-item">
+          <div class="restore-dot"></div>
+          <div class="cat-content">
+            <div class="cat-name">Connection</div>
+            <div class="cat-eg">e.g. uplifting people, quality time, belonging</div>
+            <textarea class="cat-input" id="r_connection" rows="1" placeholder=""></textarea>
+          </div>
+          <div class="cat-icon">🤝</div>
+        </div>
+
+        <div class="cat-item">
+          <div class="restore-dot"></div>
+          <div class="cat-content">
+            <div class="cat-name">Environment</div>
+            <div class="cat-eg">e.g. nature, fresh air, beautiful spaces</div>
+            <textarea class="cat-input" id="r_env" rows="1" placeholder=""></textarea>
+          </div>
+          <div class="cat-icon">🌳</div>
+        </div>
+
+        <div class="cat-item">
+          <div class="restore-dot"></div>
+          <div class="cat-content">
+            <div class="cat-name">Me Time</div>
+            <div class="cat-eg">e.g. reading, hobbies, music, quiet time</div>
+            <textarea class="cat-input" id="r_me" rows="1" placeholder=""></textarea>
+          </div>
+          <div class="cat-icon">📖</div>
+        </div>
+
+        <div class="cat-item">
+          <div class="restore-dot"></div>
+          <div class="cat-content">
+            <div class="cat-name">Purpose &amp; Progress</div>
+            <div class="cat-eg">e.g. meaningful work, small wins, growth</div>
+            <textarea class="cat-input" id="r_purpose" rows="1" placeholder=""></textarea>
+          </div>
+          <div class="cat-icon">⭐</div>
+        </div>
+
       </div>
-      <div class="em-slot">
-        <div class="em-slot-num">4</div>
-        <textarea id="restore4" rows="1" placeholder="..."></textarea>
-      </div>
-      <div class="em-slot">
-        <div class="em-slot-num">5</div>
-        <textarea id="restore5" rows="1" placeholder="..."></textarea>
-      </div>
-      <div class="em-slot">
-        <div class="em-slot-num">6</div>
-        <textarea id="restore6" rows="1" placeholder="..."></textarea>
+
+    </div><!-- /diagram-grid -->
+  </div><!-- /diagram-section -->
+
+  <!-- Shift section -->
+  <div class="shift-section">
+    <div class="section-inner">
+      <div class="section-eyebrow">One small shift I can make this period</div>
+      <div class="section-rule"></div>
+      <div class="shift-prompt">Based on my map, the shift that matters most right now is:</div>
+      <span class="shift-stem">I will…</span>
+      <textarea class="shift-ta" id="shift" rows="3" placeholder="The one shift that would make the biggest difference to my energy is…"></textarea>
+      <div class="tip-box">
+        <div class="tip-icon">✦</div>
+        <div>
+          <div class="tip-label">Tip</div>
+          <div class="tip-text">You do not need to change everything. One small, intentional shift can create a ripple effect across your whole energy.</div>
+        </div>
       </div>
     </div>
   </div>
-  <div class="em-shift">
-    <div class="em-shift-title">The shift</div>
-    <label class="q-label">Given what you see here, what is one thing you will do more of — and one thing you will protect yourself from?</label>
-    <textarea id="shift" rows="1" placeholder="Write your shift here..."></textarea>
+
+  <!-- Closing quote -->
+  <div class="closing-section">
+    <div class="closing-inner">
+      <div class="closing-tagline">Awareness is the first shift. Intention creates the next.</div>
+      <span class="closing-script">You've got this.</span>
+    </div>
   </div>
-  <div class="complete-wrap">
+
+  <!-- Light action -->
+  <div class="la-section">
+    <div class="la-card">
+      <div class="la-circle" id="la-circle"></div>
+      <div>
+        <div class="la-label">Light action this period</div>
+        <div class="la-body">Take your one shift and <em>do it once</em>. Notice what changes in your energy. That noticing is where real change begins.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="complete-section">
     <button class="complete-btn" onclick="showCompletion()">I've completed this tool</button>
   </div>
 
-</div>
+</div><!-- /toolView -->
 
-<div id="completionView" style="max-width:820px;margin:0 auto;padding:2rem 2rem 5rem">
-  <div class="completion-header">
-    <div class="completion-icon">⚡</div>
-    <h2>You know your energy now.</h2>
-    <p class="completion-tagline">The map is drawn. Now you can navigate.</p>
+<div id="completionView">
+<div class="comp-inner">
+  <div class="comp-header">
+    <div class="comp-icon">⚡</div>
+    <h2>You've mapped your energy.</h2>
+    <p class="comp-tagline">Awareness is where every intentional shift begins.</p>
   </div>
-  <div class="summary-section">
-    <h3>What you reflected on</h3>
-    <div class="summary-card">
-      <div class="card-label">Drains my energy: 1</div>
-      <div class="card-value" id="s_drain1"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Drains my energy: 2</div>
-      <div class="card-value" id="s_drain2"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Drains my energy: 3</div>
-      <div class="card-value" id="s_drain3"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Drains my energy: 4</div>
-      <div class="card-value" id="s_drain4"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Drains my energy: 5</div>
-      <div class="card-value" id="s_drain5"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Drains my energy: 6</div>
-      <div class="card-value" id="s_drain6"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Restores my energy: 1</div>
-      <div class="card-value" id="s_restore1"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Restores my energy: 2</div>
-      <div class="card-value" id="s_restore2"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Restores my energy: 3</div>
-      <div class="card-value" id="s_restore3"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Restores my energy: 4</div>
-      <div class="card-value" id="s_restore4"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Restores my energy: 5</div>
-      <div class="card-value" id="s_restore5"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Restores my energy: 6</div>
-      <div class="card-value" id="s_restore6"></div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">The shift I will make</div>
-      <div class="card-value" id="s_shift"></div>
-    </div>
+  <div class="sum-section">
+    <h3>What drains you</h3>
+    <div class="sum-card"><div class="card-value" id="s_drains"></div></div>
+  </div>
+  <div class="sum-section">
+    <h3>What restores you</h3>
+    <div class="sum-card"><div class="card-value" id="s_restores"></div></div>
+  </div>
+  <div class="sum-section">
+    <h3>Your shift this period</h3>
+    <div class="sum-card"><div class="card-label">I will…</div><div class="card-value" id="s_shift"></div></div>
   </div>
   <div class="momentum-section">
     <h3>Keep your momentum</h3>
@@ -238,158 +425,161 @@ label.q-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-m
       <button class="m-btn" onclick="emailToSelf()">📧 Email to myself</button>
       <button class="m-btn" onclick="shareWhatsApp()">💬 WhatsApp</button>
       <button class="m-btn" onclick="toggleCalPanel()">📅 Add to calendar</button>
-      <button class="m-btn" onclick="copyCommitment()">📋 Copy commitment</button>
+      <button class="m-btn" onclick="copyCommitment(this)">📋 Copy commitment</button>
     </div>
     <div class="cal-panel" id="calPanel">
-      <label>Date</label>
-      <input type="date" id="calDate">
-      <label>Time</label>
-      <input type="time" id="calTime" value="09:00">
+      <label>Date</label><input type="date" id="calDate">
+      <label>Time</label><input type="time" id="calTime" value="09:00">
       <label>Repeat</label>
-      <select id="calRepeat">
-        <option value="none">No repeat</option>
-        <option value="daily">Daily</option>
-        <option value="weekly">Weekly</option>
-        <option value="monthly">Monthly</option>
-      </select>
+      <select id="calRepeat"><option value="none">No repeat</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
       <button class="dl-btn" onclick="downloadICS()">Download .ics file</button>
     </div>
   </div>
-  <div class="closing-quote">You cannot pour from an empty vessel. But you can learn where the tap is.</div>
-  <div class="completion-actions">
+  <div class="comp-quote">
+    <strong>Awareness is the first shift. Intention creates the next.</strong>
+    You have taken the first step. Now take the next one.
+  </div>
+  <div class="comp-actions">
     <button class="ca-btn" onclick="window.print()">🖨 Print blank worksheet</button>
     <button class="ca-btn" onclick="startAgain()">↩ Start again</button>
-    <button class="ca-btn" onclick="location.href='index.html'">← Back to library</button>
+    <button class="ca-btn" onclick="history.back()">← Back to library</button>
   </div>
 </div>
+</div>
+
 <script>
+const STORE_KEY='tlr-energy-map';
 
 function autoExpand(el){el.style.height='auto';el.style.height=el.scrollHeight+'px'}
-document.addEventListener('DOMContentLoaded',()=>{
-  document.querySelectorAll('textarea').forEach(t=>{
-    t.addEventListener('input',()=>autoExpand(t));
-    autoExpand(t);
-  });
-  const d=new Date();
-  const iso=d.toISOString().split('T')[0];
-  const el=document.getElementById('calDate');
-  if(el) el.value=iso;
-});
-function getSummaryText(){
-  const cards=document.querySelectorAll('#completionView .summary-card');
-  let out=[];
-  cards.forEach(c=>{
-    const lbl=c.querySelector('.card-label')?.textContent||'';
-    const val=c.querySelector('.card-value')?.textContent||'';
-    if(val.trim()) out.push(lbl+': '+val);
-  });
-  return out.join('\n\n');
-}
-function emailToSelf(){
-  const body=encodeURIComponent(getSummaryText());
-  const sub=encodeURIComponent('My TLR reflection');
-  window.location.href='mailto:?subject='+sub+'&body='+body;
-}
-function shareWhatsApp(){
-  const text=encodeURIComponent(getSummaryText());
-  window.open('https://wa.me/?text='+text,'_blank');
-}
-function toggleCalPanel(){
-  document.getElementById('calPanel').classList.toggle('open');
-}
-function downloadICS(){
-  const date=document.getElementById('calDate').value||new Date().toISOString().split('T')[0];
-  const time=document.getElementById('calTime').value||'09:00';
-  const repeat=document.getElementById('calRepeat').value;
-  const dtStart=date.replace(/-/g,'')+'T'+time.replace(':','')+'00';
-  const dtEnd=date.replace(/-/g,'')+'T'+(function(){
-    const [h,m]=time.split(':').map(Number);
-    const eh=String(h+1).padStart(2,'0');
-    return eh+m.toString().padStart(2,'0')+'00';
-  })();
-  let rrule='';
-  if(repeat==='daily') rrule='\nRRULE:FREQ=DAILY';
-  else if(repeat==='weekly') rrule='\nRRULE:FREQ=WEEKLY';
-  else if(repeat==='monthly') rrule='\nRRULE:FREQ=MONTHLY';
-  const ics=`BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART:${dtStart}\nDTEND:${dtEnd}\nSUMMARY:TLR Reflection${rrule}\nEND:VEVENT\nEND:VCALENDAR`;
-  const blob=new Blob([ics],{type:'text/calendar'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='tlr-reflection.ics';
-  a.click();
-}
-function copyCommitment(){
-  const text=getSummaryText();
-  navigator.clipboard.writeText(text).then(()=>alert('Copied to clipboard!')).catch(()=>{
-    const ta=document.createElement('textarea');
-    ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('Copied!');
-  });
-}
-function startAgain(){localStorage.removeItem(STORE_KEY);
-  document.getElementById('toolView').style.display='block';
-  document.getElementById('completionView').style.display='none';
-  document.querySelectorAll('#toolView textarea').forEach(t=>{t.value='';autoExpand(t);});
+
+function drawConnectors(){
+  const grid=document.getElementById('diagram-grid');
+  const me=document.getElementById('me-circle');
+  const svg=document.getElementById('connector-svg');
+  if(!grid||!me||!svg)return;
+  const gR=grid.getBoundingClientRect();
+  const mR=me.getBoundingClientRect();
+  if(gR.width===0||gR.height===0)return;
+  const W=gR.width,H=gR.height;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.setAttribute('width',W);
+  svg.setAttribute('height',H);
+  const mCX=mR.left-gR.left+mR.width/2;
+  const mCY=mR.top-gR.top+mR.height/2;
+  const mRad=mR.width/2;
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  const draw=(dot,color)=>{
+    const dR=dot.getBoundingClientRect();
+    const x1=dR.left-gR.left+dR.width/2;
+    const y1=dR.top-gR.top+dR.height/2;
+    const ang=Math.atan2(y1-mCY,x1-mCX);
+    const x2=mCX+(mRad+1)*Math.cos(ang);
+    const y2=mCY+(mRad+1)*Math.sin(ang);
+    const mx=(x1+x2)/2;
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d',`M ${x1},${y1} C ${mx},${y1} ${mx},${y2} ${x2},${y2}`);
+    p.setAttribute('stroke',color);
+    p.setAttribute('stroke-width','1.5');
+    p.setAttribute('fill','none');
+    p.setAttribute('stroke-linecap','round');
+    svg.appendChild(p);
+  };
+  document.querySelectorAll('.drain-dot').forEach(d=>draw(d,'rgba(201,147,10,0.42)'));
+  document.querySelectorAll('.restore-dot').forEach(d=>draw(d,'rgba(42,158,168,0.42)'));
 }
 
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('textarea').forEach(t=>{
+    t.addEventListener('input',()=>{autoExpand(t);});
+    autoExpand(t);
+  });
+  const calDate=document.getElementById('calDate');
+  if(calDate)calDate.value=new Date().toISOString().split('T')[0];
+  const circle=document.getElementById('la-circle');
+  if(circle)circle.addEventListener('click',()=>{circle.classList.toggle('done');saveProgress();});
+  restoreProgress();
+  setTimeout(drawConnectors,150);
+  window.addEventListener('resize',drawConnectors);
+});
+
 function showCompletion(){
-  document.getElementById('s_drain1') && (document.getElementById('s_drain1').textContent=document.getElementById('drain1').value||'—');
-  document.getElementById('s_drain2') && (document.getElementById('s_drain2').textContent=document.getElementById('drain2').value||'—');
-  document.getElementById('s_drain3') && (document.getElementById('s_drain3').textContent=document.getElementById('drain3').value||'—');
-  document.getElementById('s_drain4') && (document.getElementById('s_drain4').textContent=document.getElementById('drain4').value||'—');
-  document.getElementById('s_drain5') && (document.getElementById('s_drain5').textContent=document.getElementById('drain5').value||'—');
-  document.getElementById('s_drain6') && (document.getElementById('s_drain6').textContent=document.getElementById('drain6').value||'—');
-  document.getElementById('s_restore1') && (document.getElementById('s_restore1').textContent=document.getElementById('restore1').value||'—');
-  document.getElementById('s_restore2') && (document.getElementById('s_restore2').textContent=document.getElementById('restore2').value||'—');
-  document.getElementById('s_restore3') && (document.getElementById('s_restore3').textContent=document.getElementById('restore3').value||'—');
-  document.getElementById('s_restore4') && (document.getElementById('s_restore4').textContent=document.getElementById('restore4').value||'—');
-  document.getElementById('s_restore5') && (document.getElementById('s_restore5').textContent=document.getElementById('restore5').value||'—');
-  document.getElementById('s_restore6') && (document.getElementById('s_restore6').textContent=document.getElementById('restore6').value||'—');
-  document.getElementById('s_shift') && (document.getElementById('s_shift').textContent=document.getElementById('shift').value||'—');
+  const dIds=['d_mental','d_digital','d_people','d_time','d_habits','d_env'];
+  const rIds=['r_body','r_mind','r_connection','r_env','r_me','r_purpose'];
+  const dLbls=['Mental','Digital','People','Time & Pace','Habits & Behaviours','Environment'];
+  const rLbls=['Body','Mind & Emotions','Connection','Environment','Me Time','Purpose & Progress'];
+  const drains=dIds.map((id,i)=>{const v=document.getElementById(id)?.value||'';return v?dLbls[i]+': '+v:'';}).filter(Boolean).join('\n')||'—';
+  const restores=rIds.map((id,i)=>{const v=document.getElementById(id)?.value||'';return v?rLbls[i]+': '+v:'';}).filter(Boolean).join('\n')||'—';
+  document.getElementById('s_drains').textContent=drains;
+  document.getElementById('s_restores').textContent=restores;
+  document.getElementById('s_shift').textContent=document.getElementById('shift')?.value||'—';
   document.getElementById('toolView').style.display='none';
   document.getElementById('completionView').style.display='block';
   window.scrollTo(0,0);
 }
 
+function startAgain(){
+  localStorage.removeItem(STORE_KEY);
+  document.getElementById('completionView').style.display='none';
+  document.getElementById('toolView').style.display='block';
+  document.querySelectorAll('#toolView textarea').forEach(t=>{t.value='';autoExpand(t);});
+  document.getElementById('saved-badge').style.display='none';
+  const circle=document.getElementById('la-circle');
+  if(circle)circle.classList.remove('done');
+  window.scrollTo(0,0);
+  setTimeout(drawConnectors,50);
+}
 
-// --- Progress auto-save (localStorage) ---
-const STORE_KEY='tlr-energy-map';
+function getSummaryText(){
+  const dIds=['d_mental','d_digital','d_people','d_time','d_habits','d_env'];
+  const rIds=['r_body','r_mind','r_connection','r_env','r_me','r_purpose'];
+  const dLbls=['Mental','Digital','People','Time & Pace','Habits & Behaviours','Environment'];
+  const rLbls=['Body','Mind & Emotions','Connection','Environment','Me Time','Purpose & Progress'];
+  let out='The Energy Map — TLR Reflection\n\nWHAT DRAINS ME:\n';
+  out+=dIds.map((id,i)=>{const v=document.getElementById(id)?.value||'';return v?dLbls[i]+': '+v:'';}).filter(Boolean).join('\n')||'Nothing noted';
+  out+='\n\nWHAT RESTORES ME:\n';
+  out+=rIds.map((id,i)=>{const v=document.getElementById(id)?.value||'';return v?rLbls[i]+': '+v:'';}).filter(Boolean).join('\n')||'Nothing noted';
+  const shift=document.getElementById('shift')?.value||'';
+  if(shift)out+='\n\nMY SHIFT THIS PERIOD:\nI will '+shift;
+  return out;
+}
+function emailToSelf(){window.location.href='mailto:?subject='+encodeURIComponent('My Energy Map — TLR')+'&body='+encodeURIComponent(getSummaryText())}
+function shareWhatsApp(){window.open('https://wa.me/?text='+encodeURIComponent(getSummaryText()),'_blank')}
+function toggleCalPanel(){document.getElementById('calPanel').classList.toggle('open')}
+function downloadICS(){
+  const date=document.getElementById('calDate').value||new Date().toISOString().split('T')[0];
+  const time=document.getElementById('calTime').value||'09:00';
+  const repeat=document.getElementById('calRepeat').value;
+  const dtStart=date.replace(/-/g,'')+'T'+time.replace(':','')+'00';
+  const[h,m]=time.split(':').map(Number);
+  const dtEnd=date.replace(/-/g,'')+'T'+String(h+1).padStart(2,'0')+String(m).padStart(2,'0')+'00';
+  let rr='';if(repeat==='daily')rr='\nRRULE:FREQ=DAILY';else if(repeat==='weekly')rr='\nRRULE:FREQ=WEEKLY';else if(repeat==='monthly')rr='\nRRULE:FREQ=MONTHLY';
+  const ics=`BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART:${dtStart}\nDTEND:${dtEnd}\nSUMMARY:TLR Reflection — The Energy Map${rr}\nEND:VEVENT\nEND:VCALENDAR`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));a.download='tlr-energy-map.ics';a.click();
+}
+function copyCommitment(btn){
+  navigator.clipboard.writeText(getSummaryText()).catch(()=>{const ta=document.createElement('textarea');ta.value=getSummaryText();document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta)});
+  if(btn){btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent='📋 Copy commitment',2500);}
+}
 function saveProgress(){
   const s={};
-  document.querySelectorAll('textarea[id],input[id]').forEach(el=>{
-    if(el.type==='checkbox'||el.type==='radio') s[el.id]=el.checked;
-    else s[el.id]=el.value;
-  });
-  const badges={};
-  [1,2,3,4,5,6].forEach(i=>{['D','R','A'].forEach(c=>{
-    const b=document.getElementById('badge'+i+c);
-    if(b&&b.classList.contains('active-'+c)) badges[i]=c;
-  })});
-  if(Object.keys(badges).length) s['_badges']=badges;
+  document.querySelectorAll('textarea[id]').forEach(el=>{s[el.id]=el.value});
+  const circle=document.getElementById('la-circle');
+  s['_la']=circle?circle.classList.contains('done'):false;
   localStorage.setItem(STORE_KEY,JSON.stringify(s));
-  const badge=document.getElementById('saved-badge');
-  if(badge) badge.style.display='flex';
+  document.getElementById('saved-badge').style.display='flex';
 }
 function restoreProgress(){
-  const raw=localStorage.getItem(STORE_KEY);
-  if(!raw) return;
+  const raw=localStorage.getItem(STORE_KEY);if(!raw)return;
   try{
     const s=JSON.parse(raw);
-    document.querySelectorAll('textarea[id],input[id]').forEach(el=>{
-      if(!(el.id in s)) return;
-      if(el.type==='checkbox'||el.type==='radio') el.checked=s[el.id];
-      else{el.value=s[el.id];if(el.tagName==='TEXTAREA'){el.style.height='auto';el.style.height=el.scrollHeight+'px';}}
-    });
-    if(s['_badges']&&typeof setBadge==='function'){
-      Object.entries(s['_badges']).forEach(([i,c])=>setBadge(Number(i),c));
-    }
-    if(typeof updateBars==='function') updateBars();
-    const hasData=Object.values(s).some(v=>v!==undefined&&v!==''&&v!==false&&v!=='0');
-    if(hasData){const badge=document.getElementById('saved-badge');if(badge)badge.style.display='flex';}
+    document.querySelectorAll('textarea[id]').forEach(el=>{if(el.id in s&&s[el.id]){el.value=s[el.id];autoExpand(el);}});
+    const circle=document.getElementById('la-circle');
+    if(circle&&s['_la'])circle.classList.add('done');
+    const hasData=Object.keys(s).filter(k=>k!=='_la').some(k=>s[k]&&s[k]!=='');
+    if(hasData)document.getElementById('saved-badge').style.display='flex';
   }catch(e){}
 }
 document.addEventListener('input',saveProgress);
-document.addEventListener('change',saveProgress);
-document.addEventListener('DOMContentLoaded',restoreProgress);
 </script>
 </body>
 </html>

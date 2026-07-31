@@ -131,6 +131,11 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .tool-btn-interactive:hover { background: var(--gold-light); }
 .tool-soon { font-size: 0.7rem; color: var(--text-muted); font-style: italic; }
 
+/* ── PROGRESS INDICATORS ─────────────────── */
+.topic-row.has-progress { border-left: 3px solid #4A7C5C; }
+.progress-badge { display: inline-flex; align-items: center; gap: 0.28rem; font-size: 0.58rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #4A7C5C; margin-left: 0.65rem; vertical-align: middle; opacity: 0.9; }
+.progress-badge::before { content: ''; display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #4A7C5C; flex-shrink: 0; }
+
 /* ── THEME BANNER ────────────────────────── */
 .theme-banner-wrap { margin: 0 0 1.75rem; border-radius: 8px; overflow: hidden; }
 .theme-banner-img { width: 100%; display: block; max-height: 280px; object-fit: cover; object-position: center top; }
@@ -926,16 +931,30 @@ const pastThemes = [
 ];
 
 /* ── HELPERS ────────────────────────────── */
+function getToolProgress(file) {
+  if (!file) return false;
+  const key = 'tlr-' + file.replace('.html', '');
+  const raw = localStorage.getItem(key);
+  if (!raw) return false;
+  try {
+    const data = JSON.parse(raw);
+    return Object.values(data).some(v => typeof v === 'string' && v.trim().length > 0);
+  } catch(e) { return raw.length > 4; }
+}
+
 function topicRowHTML(t) {
   let toolHTML;
+  const started = !!(t.tool && t.tool.interactive && getToolProgress(t.tool.file));
   if (!t.tool) {
     toolHTML = `<span class="tool-soon">Tool coming soon</span>`;
   } else if (t.tool.interactive) {
-    toolHTML = `<a class="tool-btn tool-btn-interactive" href="${t.tool.file}"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 4l4 2-4 2V4z" fill="currentColor"/></svg>${t.tool.name}</a>`;
+    const badge = started ? ` <span class="progress-badge">In progress</span>` : '';
+    toolHTML = `<a class="tool-btn tool-btn-interactive" href="${t.tool.file}"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 4l4 2-4 2V4z" fill="currentColor"/></svg>${t.tool.name}</a>${badge}`;
   } else {
     toolHTML = `<a class="tool-btn" href="${t.tool.file}" target="_blank"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 5l3 3 3-3M1 10h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>${t.tool.name}</a>`;
   }
-  return `<div class="topic-row"><div class="t-label">Topic ${t.n}</div><div class="t-body"><div class="t-topic">${t.topic}</div><div class="t-focus">${t.focus}</div>${toolHTML}</div></div>`;
+  const progressClass = started ? ' has-progress' : '';
+  return `<div class="topic-row${progressClass}"><div class="t-label">Topic ${t.n}</div><div class="t-body"><div class="t-topic">${t.topic}</div><div class="t-focus">${t.focus}</div>${toolHTML}</div></div>`;
 }
 
 function topicsBlockHTML(topics) {
