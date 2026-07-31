@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>More Like Me Compass | TLR</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
   --navy:#0F1215; --navy-mid:#1C2B3A;
@@ -114,6 +114,8 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
   .compass-grid{grid-template-columns:1fr}
   .light-action{flex-direction:column;gap:0.75rem}
 }
+.compass-visual{text-align:center;margin:0 0 1.5rem}
+.ytg-footer{text-align:center;margin:1.25rem 0 0.75rem;font-family:'Dancing Script',cursive;font-size:1.85rem;color:var(--accent);letter-spacing:0.02em}
 @media print{.topbar,.complete-wrap,#completionView,.completion-actions{display:none!important}#toolView{display:block!important}body{background:#fff;font-size:12px}}
 </style>
 </head>
@@ -136,6 +138,55 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
     </svg>
   </div>
   <p class="tool-framing">Sometimes we drift away from ourselves and do not notice until we feel flat, disconnected, or unlike ourselves. This compass helps you reconnect with what "more like me" actually looks and feels like — across every area of life. Use it to orient yourself, not to create a to-do list.</p>
+
+  <div class="compass-visual">
+    <svg width="100%" viewBox="0 0 440 380" fill="none" xmlns="http://www.w3.org/2000/svg" style="max-width:420px">
+      <!-- Outer decorative rings -->
+      <circle cx="220" cy="190" r="136" stroke="rgba(26,107,114,0.15)" stroke-width="1.5"/>
+      <circle cx="220" cy="190" r="128" stroke="rgba(26,107,114,0.07)" stroke-width="1" stroke-dasharray="4 5"/>
+      <!-- Cardinal spokes (N, E, S, W) — slightly bolder -->
+      <line x1="220" y1="156" x2="220" y2="78" stroke="#1A6B72" stroke-width="2" stroke-linecap="round"/>
+      <line x1="254" y1="190" x2="332" y2="190" stroke="#1A6B72" stroke-width="2" stroke-linecap="round"/>
+      <line x1="220" y1="224" x2="220" y2="302" stroke="#1A6B72" stroke-width="2" stroke-linecap="round"/>
+      <line x1="186" y1="190" x2="108" y2="190" stroke="#1A6B72" stroke-width="2" stroke-linecap="round"/>
+      <!-- Ordinal spokes (NE, SE, SW, NW) — lighter -->
+      <line x1="244" y1="166" x2="299" y2="111" stroke="rgba(26,107,114,0.45)" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="244" y1="214" x2="299" y2="269" stroke="rgba(26,107,114,0.45)" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="196" y1="214" x2="141" y2="269" stroke="rgba(26,107,114,0.45)" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="196" y1="166" x2="141" y2="111" stroke="rgba(26,107,114,0.45)" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- Cardinal endpoint dots -->
+      <circle cx="220" cy="78" r="4" fill="#1A6B72"/>
+      <circle cx="332" cy="190" r="4" fill="#1A6B72"/>
+      <circle cx="220" cy="302" r="4" fill="#1A6B72"/>
+      <circle cx="108" cy="190" r="4" fill="#1A6B72"/>
+      <!-- Ordinal endpoint dots -->
+      <circle cx="299" cy="111" r="3" fill="rgba(26,107,114,0.55)"/>
+      <circle cx="299" cy="269" r="3" fill="rgba(26,107,114,0.55)"/>
+      <circle cx="141" cy="269" r="3" fill="rgba(26,107,114,0.55)"/>
+      <circle cx="141" cy="111" r="3" fill="rgba(26,107,114,0.55)"/>
+      <!-- Center circle -->
+      <circle cx="220" cy="190" r="32" fill="rgba(26,107,114,0.06)" stroke="rgba(26,107,114,0.22)" stroke-width="1.5"/>
+      <text x="220" y="196" text-anchor="middle" dominant-baseline="middle" fill="#1A6B72" font-family="'Dancing Script',cursive" font-size="19" font-weight="600">Me</text>
+      <!-- N label -->
+      <text x="220" y="43" text-anchor="middle" fill="#1A6B72" font-family="Poppins,sans-serif" font-size="11" font-weight="600">What I'm here for</text>
+      <!-- NE label -->
+      <text x="308" y="85" text-anchor="start" fill="rgba(26,107,114,0.78)" font-family="Poppins,sans-serif" font-size="11">Priorities</text>
+      <!-- E label (two lines) -->
+      <text x="342" y="183" text-anchor="start" fill="#1A6B72" font-family="Poppins,sans-serif" font-size="11" font-weight="600">My people</text>
+      <text x="342" y="197" text-anchor="start" fill="rgba(26,107,114,0.6)" font-family="Poppins,sans-serif" font-size="11">around me</text>
+      <!-- SE label -->
+      <text x="308" y="290" text-anchor="start" fill="rgba(26,107,114,0.78)" font-family="Poppins,sans-serif" font-size="11">My time</text>
+      <!-- S label -->
+      <text x="220" y="335" text-anchor="middle" fill="#1A6B72" font-family="Poppins,sans-serif" font-size="11" font-weight="600">My body</text>
+      <!-- SW label -->
+      <text x="132" y="290" text-anchor="end" fill="rgba(26,107,114,0.78)" font-family="Poppins,sans-serif" font-size="11">Stop overdoing</text>
+      <!-- W label (two lines) -->
+      <text x="98" y="183" text-anchor="end" fill="#1A6B72" font-family="Poppins,sans-serif" font-size="11" font-weight="600">Inner</text>
+      <text x="98" y="197" text-anchor="end" fill="#1A6B72" font-family="Poppins,sans-serif" font-size="11" font-weight="600">voice</text>
+      <!-- NW label -->
+      <text x="132" y="85" text-anchor="end" fill="rgba(26,107,114,0.78)" font-family="Poppins,sans-serif" font-size="11">My pace</text>
+    </svg>
+  </div>
 
   <div class="section-label"><span>My compass</span></div>
   <p style="font-size:0.88rem;color:var(--text-muted);text-align:center;margin-bottom:1.5rem;font-style:italic;">For each area, describe what it looks like when you feel most like you. There are no right answers — only your answers.</p>
@@ -230,6 +281,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
     </div>
   </div>
 
+  <div class="ytg-footer">You've got this!</div>
   <div class="complete-wrap">
     <button class="complete-btn" onclick="showCompletion()">I've completed this tool</button>
   </div>
@@ -319,6 +371,7 @@ function showCompletion(){
   document.getElementById('toolView').style.display='none';
   document.getElementById('completionView').style.display='block';
   window.scrollTo(0,0);
+  try{const raw=localStorage.getItem(STORE_KEY);const s=raw?JSON.parse(raw):{};s._completed=true;localStorage.setItem(STORE_KEY,JSON.stringify(s));}catch(e){}
 }
 
 function startAgain(){

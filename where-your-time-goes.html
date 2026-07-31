@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Where Your Time Goes | TLR</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
   --navy:#0F1215; --navy-mid:#1C2B3A;
@@ -79,6 +79,9 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
 .completion-actions{display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:2rem}
 .ca-btn{border:1px solid var(--border);background:var(--white);color:var(--text-mid);padding:0.65rem 1.25rem;border-radius:8px;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:all .2s}
 .ca-btn:hover{border-color:var(--accent);color:var(--accent)}
+.time-visual{text-align:center;margin:0 0 2.5rem}
+.time-visual-caption{font-size:0.82rem;color:var(--text-muted);font-style:italic;margin-top:0.65rem;text-align:center}
+.ytg-footer{text-align:center;margin:1.25rem 0 0.75rem;font-family:'Dancing Script',cursive;font-size:1.85rem;color:var(--accent);letter-spacing:0.02em}
 @media(max-width:680px){.tool-title{font-size:2.2rem}.page{padding:2.5rem 1.25rem 5rem}.step-block{padding:1.25rem 1.25rem 1.1rem}.step-hint{padding-left:0.25rem}.light-action{flex-direction:column;gap:0.75rem}}
 @media print{.topbar,.complete-wrap,#completionView,.completion-actions{display:none!important}#toolView{display:block!important}body{background:#fff;font-size:12px}}
 </style>
@@ -101,6 +104,51 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
     </svg>
   </div>
   <p class="tool-framing">Most of us have a sense of how we want to spend our time. This tool is not about that — it is about what actually happened. Looking honestly at one day, without editing it, is how you begin to understand where your time is really going.</p>
+
+  <div class="time-visual">
+    <svg width="260" height="260" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Outer ring -->
+      <circle cx="150" cy="150" r="102" stroke="rgba(140,74,47,0.18)" stroke-width="1.5"/>
+      <circle cx="150" cy="150" r="94" stroke="rgba(140,74,47,0.06)" stroke-width="1"/>
+      <!-- Major ticks: midnight(0), 6am(90°), noon(180°), 6pm(270°) -->
+      <line x1="150" y1="48" x2="150" y2="64" stroke="#8C4A2F" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="252" y1="150" x2="236" y2="150" stroke="#8C4A2F" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="150" y1="252" x2="150" y2="236" stroke="#8C4A2F" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="48" y1="150" x2="64" y2="150" stroke="#8C4A2F" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Medium ticks: 3am(45°), 9am(135°), 3pm(225°), 9pm(315°) -->
+      <line x1="222.1" y1="77.9" x2="214.9" y2="84.9" stroke="rgba(140,74,47,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="222.1" y1="222.1" x2="214.9" y2="215.1" stroke="rgba(140,74,47,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="77.9" y1="222.1" x2="85.1" y2="215.1" stroke="rgba(140,74,47,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="77.9" y1="77.9" x2="85.1" y2="84.9" stroke="rgba(140,74,47,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- Minor ticks (remaining 16 hours) -->
+      <line x1="176.7" y1="51.3" x2="175.4" y2="56.6" stroke="rgba(140,74,47,0.28)" stroke-width="1"/>
+      <line x1="201.5" y1="63.5" x2="199.0" y2="68.0" stroke="rgba(140,74,47,0.28)" stroke-width="1"/>
+      <line x1="237.5" y1="98.5" x2="234.8" y2="101.5" stroke="rgba(140,74,47,0.28)" stroke-width="1"/>
+      <line x1="248.1" y1="124.1" x2="243.0" y2="125.5" stroke="rgba(140,74,47,0.28)" stroke-width="1"/>
+      <line x1="248.1" y1="175.9" x2="243.0" y2="174.5" stroke="rgba(140,74,47,0.28)" stroke-width="1"/>
+      <line x1="237.5" y1="201.5" x2="234.8" y2="198.5" stroke="rgba(140,74,47,0.28)" stroke-width="1"/>
+      <line x1="201.5" y1="236.5" x2="199.0" y2="232.0" stroke="rgba(140,74,47,0.28)" stroke-width="1"/>
+      <line x1="176.7" y1="248.7" x2="175.4" y2="243.4" stroke="rgba(140,74,47,0.28)" stroke-width="1"/>
+      <line x1="123.3" y1="248.7" x2="124.6" y2="243.4" stroke="rgba(140,74,47,0.28)" stroke-width="1"/>
+      <line x1="98.5" y1="236.5" x2="101.0" y2="232.0" stroke="rgba(140,74,47,0.28)" stroke-width="1"/>
+      <line x1="62.5" y1="201.5" x2="65.2" y2="198.5" stroke="rgba(140,74,47,0.28)" stroke-width="1"/>
+      <line x1="51.9" y1="175.9" x2="57.0" y2="174.5" stroke="rgba(140,74,47,0.28)" stroke-width="1"/>
+      <line x1="51.9" y1="124.1" x2="57.0" y2="125.5" stroke="rgba(140,74,47,0.28)" stroke-width="1"/>
+      <line x1="62.5" y1="98.5" x2="65.2" y2="101.5" stroke="rgba(140,74,47,0.28)" stroke-width="1"/>
+      <line x1="98.5" y1="63.5" x2="101.0" y2="68.0" stroke="rgba(140,74,47,0.28)" stroke-width="1"/>
+      <line x1="123.3" y1="51.3" x2="124.6" y2="56.6" stroke="rgba(140,74,47,0.28)" stroke-width="1"/>
+      <!-- Center -->
+      <circle cx="150" cy="150" r="3.5" fill="rgba(140,74,47,0.3)"/>
+      <!-- 24-hour label -->
+      <text x="150" y="148" text-anchor="middle" fill="rgba(140,74,47,0.18)" font-family="Poppins,sans-serif" font-size="11" letter-spacing="0.06em">24 hours</text>
+      <!-- Cardinal labels -->
+      <text x="150" y="25" text-anchor="middle" fill="#8C4A2F" font-family="Poppins,sans-serif" font-size="11" font-weight="600">midnight</text>
+      <text x="264" y="154" text-anchor="start" fill="#8C4A2F" font-family="Poppins,sans-serif" font-size="11" font-weight="600">6 am</text>
+      <text x="150" y="278" text-anchor="middle" fill="#8C4A2F" font-family="Poppins,sans-serif" font-size="11" font-weight="600">noon</text>
+      <text x="36" y="154" text-anchor="end" fill="#8C4A2F" font-family="Poppins,sans-serif" font-size="11" font-weight="600">6 pm</text>
+    </svg>
+    <p class="time-visual-caption">A full day — where did yours actually go?</p>
+  </div>
 
   <div class="step-block">
     <div class="step-head"><span class="step-bubble">1</span><div class="step-q">What actually filled my time today?</div></div>
@@ -147,6 +195,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
     </div>
     <div class="la-circle" title="Tap when done"></div>
   </div>
+  <div class="ytg-footer">You've got this!</div>
   <div class="complete-wrap">
     <button class="complete-btn" onclick="showCompletion()">I've completed this tool</button>
   </div>
@@ -203,6 +252,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 function showCompletion(){
   ['q1','q2','q3','q4'].forEach(id=>{const el=document.getElementById('s_'+id);if(el)el.textContent=document.getElementById(id)?.value||'—';});
   document.getElementById('toolView').style.display='none';document.getElementById('completionView').style.display='block';window.scrollTo(0,0);
+  try{const raw=localStorage.getItem(STORE_KEY);const s=raw?JSON.parse(raw):{};s._completed=true;localStorage.setItem(STORE_KEY,JSON.stringify(s));}catch(e){}
 }
 function startAgain(){
   localStorage.removeItem(STORE_KEY);document.getElementById('completionView').style.display='none';document.getElementById('toolView').style.display='block';

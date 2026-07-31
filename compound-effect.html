@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Compound Effect | TLR</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
   --navy:#0F1215; --navy-mid:#1C2B3A;
@@ -119,6 +119,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
   .concept-block{flex-direction:column;gap:1.25rem}
   .light-action{flex-direction:column;gap:0.75rem}
 }
+.ytg-footer{text-align:center;margin:1.25rem 0 0.75rem;font-family:'Dancing Script',cursive;font-size:1.85rem;color:var(--accent);letter-spacing:0.02em}
 @media print{.topbar,.complete-wrap,#completionView,.completion-actions{display:none!important}#toolView{display:block!important}body{background:#fff;font-size:12px}}
 </style>
 </head>
@@ -143,13 +144,21 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
   </div>
   <p class="tool-framing">You don't rise to the level of your goals. You fall to the level of your systems. Momentum is not built in moments — it is built in the quiet, consistent actions no one else sees.</p>
 
-  <div class="concept-block">
-    <div class="concept-bars">
-      <div class="c-bar-wrap"><div class="c-bar" style="height:8px"></div><div class="c-bar-l">Day 7</div></div>
-      <div class="c-bar-wrap"><div class="c-bar" style="height:20px"></div><div class="c-bar-l">Day 14</div></div>
-      <div class="c-bar-wrap"><div class="c-bar" style="height:46px"></div><div class="c-bar-l">Day 21</div></div>
-      <div class="c-bar-wrap"><div class="c-bar" style="height:80px"></div><div class="c-bar-l">Day 28</div></div>
-    </div>
+  <div class="concept-block" style="flex-direction:column;gap:1rem">
+    <svg width="100%" viewBox="0 0 590 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="30" y1="10" x2="30" y2="118" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <line x1="30" y1="118" x2="580" y2="118" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <path d="M 30 113 C 350 112 470 105 580 14 L 580 118 L 30 118 Z" fill="rgba(201,147,10,0.13)"/>
+      <path d="M 30 113 C 350 112 470 105 580 14" stroke="#C9930A" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="162" cy="113" r="3" fill="#C9930A" opacity="0.5"/>
+      <circle cx="294" cy="112" r="3" fill="#C9930A" opacity="0.6"/>
+      <circle cx="427" cy="108" r="3.5" fill="#C9930A" opacity="0.75"/>
+      <circle cx="580" cy="14" r="4.5" fill="#C9930A"/>
+      <text x="162" y="133" text-anchor="middle" fill="rgba(255,255,255,0.38)" font-family="Poppins,sans-serif" font-size="11">Day 7</text>
+      <text x="294" y="133" text-anchor="middle" fill="rgba(255,255,255,0.38)" font-family="Poppins,sans-serif" font-size="11">Day 14</text>
+      <text x="427" y="133" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-family="Poppins,sans-serif" font-size="11">Day 21</text>
+      <text x="574" y="133" text-anchor="middle" fill="rgba(255,255,255,0.65)" font-family="Poppins,sans-serif" font-size="11">Day 28</text>
+    </svg>
     <div class="concept-text">
       <div class="concept-headline">Day 7 looks the same as Day 1. Day 28 looks nothing like either.</div>
       <div class="concept-note">The early days of a new habit look almost flat. But the curve is forming beneath the surface. Every consistent action bends the line — slowly, then dramatically. The compound effect does not care about effort. It cares about consistency.</div>
@@ -223,6 +232,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
     </div>
   </div>
 
+  <div class="ytg-footer">You've got this!</div>
   <div class="complete-wrap">
     <button class="complete-btn" onclick="showCompletion()">I've completed this tool</button>
   </div>
@@ -305,6 +315,7 @@ function showCompletion(){
   document.getElementById('toolView').style.display='none';
   document.getElementById('completionView').style.display='block';
   window.scrollTo(0,0);
+  try{const raw=localStorage.getItem(STORE_KEY);const s=raw?JSON.parse(raw):{};s._completed=true;localStorage.setItem(STORE_KEY,JSON.stringify(s));}catch(e){}
 }
 
 function startAgain(){

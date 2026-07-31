@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Gap | TLR</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
   --navy:#0F1215; --navy-mid:#1C2B3A;
@@ -117,6 +117,8 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
   .gap-cell:last-child{border-bottom:none}
   .light-action{flex-direction:column;gap:0.75rem}
 }
+.gap-visual{margin:0 0 2rem;text-align:center}
+.ytg-footer{text-align:center;margin:1.25rem 0 0.75rem;font-family:'Dancing Script',cursive;font-size:1.85rem;color:var(--accent);letter-spacing:0.02em}
 @media print{.topbar,.complete-wrap,#completionView,.completion-actions{display:none!important}#toolView{display:block!important}body{background:#fff;font-size:12px}}
 </style>
 </head>
@@ -139,6 +141,33 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
     </svg>
   </div>
   <p class="tool-framing">There are moments in most days when what we want to say and what we actually say are different. The gap between them is where pressure, habit, and the need to please quietly shape our responses. Seeing the gap is where the work begins.</p>
+
+  <div class="gap-visual">
+    <svg width="100%" viewBox="0 0 580 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Left panel — what I wanted to say (solid, full opacity) -->
+      <rect x="0" y="6" width="246" height="78" rx="9" fill="rgba(140,74,47,0.07)" stroke="#8C4A2F" stroke-width="1.5"/>
+      <text x="16" y="30" fill="#8C4A2F" font-family="Poppins,sans-serif" font-size="11" font-weight="700" letter-spacing="0.06em">WHAT I WANTED TO SAY</text>
+      <line x1="16" y1="38" x2="230" y2="38" stroke="rgba(140,74,47,0.12)" stroke-width="1"/>
+      <text x="16" y="55" fill="rgba(140,74,47,0.7)" font-family="Poppins,sans-serif" font-size="11" font-style="italic">honest</text>
+      <text x="70" y="55" fill="rgba(140,74,47,0.35)" font-family="Poppins,sans-serif" font-size="11">·</text>
+      <text x="82" y="55" fill="rgba(140,74,47,0.7)" font-family="Poppins,sans-serif" font-size="11" font-style="italic">clear</text>
+      <text x="118" y="55" fill="rgba(140,74,47,0.35)" font-family="Poppins,sans-serif" font-size="11">·</text>
+      <text x="130" y="55" fill="rgba(140,74,47,0.7)" font-family="Poppins,sans-serif" font-size="11" font-style="italic">true</text>
+      <text x="16" y="75" fill="rgba(140,74,47,0.4)" font-family="Poppins,sans-serif" font-size="11">authentic response</text>
+      <!-- Gap label in the middle -->
+      <text x="290" y="40" text-anchor="middle" fill="rgba(0,0,0,0.22)" font-family="Poppins,sans-serif" font-size="11" font-weight="700" letter-spacing="0.1em">THE GAP</text>
+      <line x1="260" y1="48" x2="320" y2="48" stroke="rgba(0,0,0,0.1)" stroke-width="1" stroke-dasharray="3 2"/>
+      <text x="290" y="65" text-anchor="middle" fill="rgba(0,0,0,0.15)" font-family="Poppins,sans-serif" font-size="22">↕</text>
+      <!-- Right panel — what I actually said (dashed, faded) -->
+      <rect x="334" y="6" width="246" height="78" rx="9" fill="rgba(140,74,47,0.02)" stroke="rgba(140,74,47,0.28)" stroke-width="1.2" stroke-dasharray="5 4"/>
+      <text x="350" y="30" fill="rgba(140,74,47,0.42)" font-family="Poppins,sans-serif" font-size="11" font-weight="700" letter-spacing="0.06em">WHAT I ACTUALLY SAID</text>
+      <line x1="350" y1="38" x2="564" y2="38" stroke="rgba(140,74,47,0.08)" stroke-width="1"/>
+      <text x="350" y="55" fill="rgba(140,74,47,0.38)" font-family="Poppins,sans-serif" font-size="11" font-style="italic">softened</text>
+      <text x="426" y="55" fill="rgba(140,74,47,0.2)" font-family="Poppins,sans-serif" font-size="11">·</text>
+      <text x="438" y="55" fill="rgba(140,74,47,0.38)" font-family="Poppins,sans-serif" font-size="11" font-style="italic">adjusted</text>
+      <text x="350" y="75" fill="rgba(140,74,47,0.25)" font-family="Poppins,sans-serif" font-size="11">filtered response</text>
+    </svg>
+  </div>
 
   <div class="examples-note">
     <strong>To get you started</strong>
@@ -212,6 +241,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
     </div>
     <div class="la-circle" title="Tap when done"></div>
   </div>
+  <div class="ytg-footer">You've got this!</div>
   <div class="complete-wrap">
     <button class="complete-btn" onclick="showCompletion()">I've completed this tool</button>
   </div>
@@ -281,6 +311,7 @@ function showCompletion(){
   document.getElementById('s-influences').textContent=active.length?active.map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(', '):'—';
   document.getElementById('s-notes').textContent=document.getElementById('inf-notes')?.value||'—';
   document.getElementById('toolView').style.display='none';document.getElementById('completionView').style.display='block';window.scrollTo(0,0);
+  try{const raw=localStorage.getItem(STORE_KEY);const s=raw?JSON.parse(raw):{};s._completed=true;localStorage.setItem(STORE_KEY,JSON.stringify(s));}catch(e){}
 }
 function startAgain(){
   localStorage.removeItem(STORE_KEY);
