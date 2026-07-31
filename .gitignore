@@ -1,0 +1,7 @@
+# Local-only scripts -- never commit these to the repo
+push-to-github.bat
+git-log.txt
+
+# OS files
+.DS_Store
+Thumbs.db
