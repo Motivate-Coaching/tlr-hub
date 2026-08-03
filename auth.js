@@ -1,0 +1,61 @@
+// ── TLR Auth Layer ─────────────────────────────────────────────
+const SUPABASE_URL = 'https://tsusrzkpzevpiuvsppls.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzdXNyemtwemV2cGl1dnNwcGxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3NDAzMzUsImV4cCI6MjEwMTMxNjMzNX0.UQD9BaOjYWNOEVeV3QCF2sdlNc9SYJ2PrcZgpCtlQ8s';
+
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// requireAuth — call on any protected page; redirects to login if no session
+async function requireAuth() {
+  const { data: { session } } = await _supabase.auth.getSession();
+  if (!session) { window.location.replace('/login.html'); return null; }
+  return session.user;
+}
+
+async function getUser() {
+  const { data: { session } } = await _supabase.auth.getSession();
+  return session ? session.user : null;
+}
+
+async function signOut() {
+  await _supabase.auth.signOut();
+  window.location.replace('/login.html');
+}
+
+// saveProgress — upsert a tool result to Supabase + keep localStorage in sync
+async function saveProgress(toolId, completed, data = {}) {
+  const user = await getUser();
+  if (!user) return;
+  if (completed) {
+    const done = JSON.parse(localStorage.getItem('tlr_completed') || '[]');
+    if (!done.includes(toolId)) { done.push(toolId); localStorage.setItem('tlr_completed', JSON.stringify(done)); }
+  }
+  await _supabase.from('member_progress').upsert(
+    { user_id: user.id, tool_id: toolId, completed, data, last_updated: new Date().toISOString() },
+    { onConflict: 'user_id,tool_id' }
+  );
+}
+
+// loadProgress — pull all progress from Supabase and sync to localStorage
+async function loadProgress() {
+  const user = await getUser();
+  if (!user) return null;
+  const { data } = await _supabase.from('member_progress').select('*').eq('user_id', user.id);
+  if (!data) return null;
+  localStorage.setItem('tlr_completed', JSON.stringify(data.filter(r => r.completed).map(r => r.tool_id)));
+  return data;
+}
+
+// showUserBadge — inject email + sign-out into a CSS selector
+function showUserBadge(selector) {
+  getUser().then(user => {
+    if (!user) return;
+    const el = document.querySelector(selector);
+    if (!el) return;
+    const initials = (user.email || '').charAt(0).toUpperCase();
+    el.innerHTML = `<span style="display:flex;align-items:center;gap:0.6rem;">
+      <span style="background:var(--gold,#E8A800);color:#111;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;">${initials}</span>
+      <span style="font-size:0.72rem;color:rgba(255,255,255,0.55);">${user.email}</span>
+      <button onclick="signOut()" style="background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.55);padding:0.2rem 0.6rem;border-radius:3px;cursor:pointer;font-size:0.65rem;letter-spacing:0.05em;text-transform:uppercase;">Sign out</button>
+    </span>`;
+  });
+}

@@ -514,8 +514,11 @@ footer a { color: var(--gold); text-decoration: none; }
   .vision-close-quote { font-size: 1.2rem; }
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
 </head>
 <body>
+<script>requireAuth().then(u => { if(u) showUserBadge("#user-badge"); });</script>
 
 <!-- HEADER -->
 <header>
@@ -528,7 +531,7 @@ footer a { color: var(--gold); text-decoration: none; }
     </div>
     <div class="header-links">
       <a href="https://www.motivate-coaching.com/thelivingroom" target="_blank" class="header-link">Main Site</a>
-      <a href="https://www.facebook.com/groups/thelivingroommemberslounge" target="_blank" class="header-link primary">Members Lounge</a>
+      <div id="user-badge"></div>
     </div>
   </div>
 </header>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — The Living Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --navy: #0F1215; --navy-mid: #1C2B3A; --gold: #E8A800; --gold-light: #F5C842;
+  --cream: #F9F7F2; --text-dark: #111820; --text-muted: #8899AA; --border: #E2D9CE;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--navy);
+  color: var(--cream);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.login-card {
+  background: #161D24;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 2.5rem 2.5rem 2rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+}
+
+.logo-area {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.logo-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--gold);
+  color: var(--navy);
+  padding: 0.4rem 0.9rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.logo-box span { font-size: 1.1rem; font-weight: 700; letter-spacing: 0; }
+.tagline {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  color: var(--cream);
+  font-style: italic;
+  margin-bottom: 0.25rem;
+}
+.subtagline {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.tab-row {
+  display: flex;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 1.75rem;
+}
+.tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+.form-group { margin-bottom: 1rem; }
+label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+input[type="email"], input[type="password"] {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  color: var(--cream);
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.15s;
+  outline: none;
+}
+input[type="email"]:focus, input[type="password"]:focus {
+  border-color: var(--gold);
+}
+input::placeholder { color: rgba(255,255,255,0.2); }
+
+.btn-primary {
+  width: 100%;
+  background: var(--gold);
+  color: var(--navy);
+  border: none;
+  border-radius: 6px;
+  padding: 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-primary:hover { background: var(--gold-light); }
+.btn-primary:active { transform: scale(0.99); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.message {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  display: none;
+}
+.message.success { background: rgba(59,109,17,0.2); border: 1px solid rgba(59,109,17,0.4); color: #7EC84E; display: block; }
+.message.error { background: rgba(200,50,50,0.15); border: 1px solid rgba(200,50,50,0.3); color: #FF7070; display: block; }
+
+.footer-note {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 0.03em;
+}
+</style>
+</head>
+<body>
+
+<div class="login-card">
+  <div class="logo-area">
+    <div class="logo-box"><span>TLR</span></div>
+    <div class="tagline">Your Resource Library</div>
+    <div class="subtagline">The Living Room · Member Access</div>
+  </div>
+
+  <div class="tab-row">
+    <button class="tab-btn active" onclick="showTab('password')">Sign In</button>
+    <button class="tab-btn" onclick="showTab('magic')">Magic Link</button>
+  </div>
+
+  <!-- Password Login -->
+  <div id="tab-password">
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="pw-email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="pw-password" placeholder="Your password" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" id="pw-btn" onclick="signInWithPassword()">Sign In →</button>
+    <div id="pw-message" class="message"></div>
+  </div>
+
+  <!-- Magic Link -->
+  <div id="tab-magic" style="display:none;">
+    <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.25rem;line-height:1.6;">
+      Enter your email and we'll send you a one-click sign-in link. No password needed.
+    </p>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="ml-email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <button class="btn-primary" id="ml-btn" onclick="sendMagicLink()">Send Magic Link →</button>
+    <div id="ml-message" class="message"></div>
+  </div>
+</div>
+
+<div class="footer-note">Your progress is saved securely to your account</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://tsusrzkpzevpiuvsppls.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzdXNyemtwemV2cGl1dnNwcGxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3NDAzMzUsImV4cCI6MjEwMTMxNjMzNX0.UQD9BaOjYWNOEVeV3QCF2sdlNc9SYJ2PrcZgpCtlQ8s';
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// If already logged in, skip to library
+_supabase.auth.getSession().then(({ data: { session } }) => {
+  if (session) window.location.replace('/index.html');
+});
+
+// Also handle magic link redirect (hash fragment from email link)
+_supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' && session) {
+    window.location.replace('/index.html');
+  }
+});
+
+function showTab(tab) {
+  document.getElementById('tab-password').style.display = tab === 'password' ? '' : 'none';
+  document.getElementById('tab-magic').style.display = tab === 'magic' ? '' : 'none';
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && tab === 'password') || (i === 1 && tab === 'magic'));
+  });
+}
+
+async function signInWithPassword() {
+  const email = document.getElementById('pw-email').value.trim();
+  const password = document.getElementById('pw-password').value;
+  const msg = document.getElementById('pw-message');
+  const btn = document.getElementById('pw-btn');
+  msg.className = 'message';
+  if (!email || !password) { msg.className = 'message error'; msg.textContent = 'Please enter your email and password.'; return; }
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  const { error } = await _supabase.auth.signInWithPassword({ email, password });
+  if (error) {
+    msg.className = 'message error';
+    msg.textContent = error.message === 'Invalid login credentials' ? 'Email or password not recognised. Please try again.' : error.message;
+    btn.disabled = false; btn.textContent = 'Sign In →';
+  }
+  // On success, onAuthStateChange fires and redirects
+}
+
+async function sendMagicLink() {
+  const email = document.getElementById('ml-email').value.trim();
+  const msg = document.getElementById('ml-message');
+  const btn = document.getElementById('ml-btn');
+  msg.className = 'message';
+  if (!email) { msg.className = 'message error'; msg.textContent = 'Please enter your email address.'; return; }
+  btn.disabled = true; btn.textContent = 'Sending…';
+  const { error } = await _supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: 'https://tlr-hub.vercel.app/index.html' }
+  });
+  if (error) {
+    msg.className = 'message error'; msg.textContent = error.message;
+    btn.disabled = false; btn.textContent = 'Send Magic Link →';
+  } else {
+    msg.className = 'message success';
+    msg.textContent = '✓ Link sent! Check your inbox and click it to sign in.';
+    btn.textContent = 'Sent ✓';
+  }
+}
+
+// Allow Enter key to submit
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('tab-password').style.display !== 'none') signInWithPassword();
+    else sendMagicLink();
+  }
+});
+</script>
+</body>
+</html>
