@@ -29,11 +29,11 @@ body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--
 
 /* ── HEADER ─────────────────────────────── */
 header { background: var(--navy); position: sticky; top: 0; z-index: 200; border-bottom: 3px solid var(--gold); }
-.header-inner { max-width: 1240px; margin: 0 auto; padding: 0.85rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.header-inner { max-width: 1240px; margin: 0 auto; padding: 0.85rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; position: relative; }
 .logo { display: flex; align-items: center; gap: 0.9rem; flex-shrink: 0; }
 .logo-img { height: 58px; width: auto; display: block; mix-blend-mode: lighten; }
 .logo-sub { color: var(--gold); font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500; display: block; margin-top: 3px; }
-.header-title-block { text-align: center; flex: 1; }
+.header-title-block { position: absolute; left: 0; right: 0; text-align: center; pointer-events: none; }
 .header-title-block h1 { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 400; color: var(--white); line-height: 1.15; margin-bottom: 0.25rem; }
 .header-title-block h1 em { color: var(--gold); font-style: italic; }
 .header-title-block p { font-size: 0.72rem; color: rgba(255,255,255,0.38); font-weight: 300; }
@@ -933,17 +933,14 @@ footer a { color: var(--gold); text-decoration: none; }
 <header>
   <div class="header-inner">
     <div class="logo">
-      <div>
-        <img src="tlr-logo.png" alt="TLR The Living Room" class="logo-img">
-        <span class="logo-sub">Resource Library</span>
-      </div>
+      <img src="tlr-logo.png" alt="TLR The Living Room" class="logo-img">
     </div>
     <div class="header-title-block">
       <h1>Your <em>Living Room</em> Member Dashboard</h1>
-      <p>Not a course to finish. A companion you carry through life, used in the context of wherever you are right now.</p>
+      <p>Not a course to finish. A companion you carry through life.</p>
     </div>
     <div class="header-links">
-      <a href="https://www.motivate-coaching.com/thelivingroom" target="_blank" class="header-link">Main Site</a>
+      <a href="https://www.facebook.com/groups/thelivingroom" target="_blank" class="header-link primary">Members Lounge</a>
       <div id="user-badge"></div>
     </div>
   </div>
@@ -1051,6 +1048,17 @@ footer a { color: var(--gold); text-decoration: none; }
           <div class="ps-level-bar-fill" id="ps-level-fill" style="width:0%"></div>
         </div>
         <div class="ps-level-sub" id="ps-level-sub">Play to earn stars</div>
+      </div>
+
+      <!-- Wheel quick-link (shows only when wheel is set up) -->
+      <div class="ps-divider" id="ps-wheel-divider" style="display:none"></div>
+      <div class="ps-section" id="ps-wheel-section" style="display:none">
+        <div class="ps-section-label">My Balance Wheel</div>
+        <div class="ps-level-name" id="ps-wheel-avg" style="font-size:1.6rem;color:var(--gold)">—</div>
+        <div class="ps-level-sub" id="ps-wheel-label">avg satisfaction</div>
+        <a href="/my-wheel.html" class="ps-stat-tile" style="margin-top:0.75rem;display:block;text-align:center;text-decoration:none;padding:0.5rem">
+          <span style="font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold)">View Action Plan →</span>
+        </a>
       </div>
 
     </div>
@@ -1725,6 +1733,18 @@ document.querySelectorAll('.tab-btn[data-view]').forEach(btn => {
   if (wheelData && wheelTag) {
     wheelTag.textContent = 'View my wheel';
     if (wheelSub) wheelSub.textContent = 'Your Balance Wheel is set up — check in to see how you\'re tracking.';
+    // Show wheel quick-link in progress strip
+    const wd = JSON.parse(wheelData);
+    const avg = (wd.areas.reduce((s,a)=>s+a.score,0)/wd.areas.length).toFixed(1);
+    const doneCount = wd.areas.filter(a=>a.actionDone).length;
+    const wdiv = document.getElementById('ps-wheel-divider');
+    const wsec = document.getElementById('ps-wheel-section');
+    const wavg = document.getElementById('ps-wheel-avg');
+    const wlbl = document.getElementById('ps-wheel-label');
+    if (wdiv) wdiv.style.display = '';
+    if (wsec) wsec.style.display = '';
+    if (wavg) wavg.textContent = avg + '/10';
+    if (wlbl) wlbl.textContent = doneCount + ' of ' + wd.areas.length + ' actions done';
   }
 
   const journalCount = JSON.parse(localStorage.getItem('tlr_journal_entries') || '[]').length;

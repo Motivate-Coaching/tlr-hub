@@ -26,11 +26,11 @@ body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--
 
 /* ── HEADER ─────────────────────────── */
 header { background: var(--navy); position: sticky; top: 0; z-index: 200; border-bottom: 3px solid var(--gold); }
-.header-inner { max-width: 1240px; margin: 0 auto; padding: 0.85rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.header-inner { max-width: 1240px; margin: 0 auto; padding: 0.85rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; position: relative; }
 .logo { display: flex; align-items: center; gap: 0.9rem; flex-shrink: 0; text-decoration: none; }
 .logo-img { height: 58px; width: auto; display: block; mix-blend-mode: lighten; }
 .logo-sub { color: var(--gold); font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500; display: block; margin-top: 3px; }
-.header-title-block { text-align: center; flex: 1; }
+.header-title-block { position: absolute; left: 0; right: 0; text-align: center; pointer-events: none; }
 .header-title-block h1 { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 400; color: var(--white); line-height: 1.15; margin-bottom: 0.25rem; }
 .header-title-block h1 em { color: var(--gold); font-style: italic; }
 .header-title-block p { font-size: 0.72rem; color: rgba(255,255,255,0.38); font-weight: 300; }
@@ -155,14 +155,13 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
   <div class="header-inner">
     <a class="logo" href="/index.html">
       <img class="logo-img" src="/tlr-logo.png" alt="The Living Room">
-      <span class="logo-sub">Member Hub</span>
     </a>
     <div class="header-title-block">
       <h1>Your <em>Living Room</em> Member Dashboard</h1>
       <p>Not a course to finish. A companion you carry through life.</p>
     </div>
     <div class="header-links">
-      <a href="https://www.motivate-coaching.com/thelivingroom" target="_blank" class="header-link">Main Site</a>
+      <a href="https://www.facebook.com/groups/thelivingroom" target="_blank" class="header-link primary">Members Lounge</a>
     </div>
   </div>
 </header>

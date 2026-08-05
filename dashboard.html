@@ -1685,9 +1685,11 @@ function clearReminder() {
 // ═══════════════════════════════════════════════════════════════
 getUser().then(user => {
   if (!user) return;
-  const namePart = user.email.split('@')[0].replace(/[._-]/g, ' ');
-  const name = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-  document.getElementById('user-name').textContent = name;
+  const meta = user.user_metadata || {};
+  let firstName = meta.first_name || meta.name || meta.full_name || '';
+  if (!firstName && user.email) firstName = user.email.split('@')[0].split('.')[0];
+  firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
+  document.getElementById('user-name').textContent = firstName;
 });
 </script>
 </body>

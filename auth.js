@@ -45,17 +45,22 @@ async function loadProgress() {
   return data;
 }
 
-// showUserBadge — inject email + sign-out into a CSS selector
+// showUserBadge — inject first name + sign-out into a CSS selector
 function showUserBadge(selector) {
   getUser().then(user => {
     if (!user) return;
     const el = document.querySelector(selector);
     if (!el) return;
-    const initials = (user.email || '').charAt(0).toUpperCase();
+    // Extract first name: try metadata fields, fall back to email prefix
+    const meta = user.user_metadata || {};
+    let firstName = meta.first_name || meta.name || meta.full_name || '';
+    if (!firstName && user.email) firstName = user.email.split('@')[0].split('.')[0];
+    firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
+    const initials = firstName.charAt(0).toUpperCase();
     el.innerHTML = `<span style="display:flex;align-items:center;gap:0.6rem;">
-      <span style="background:var(--gold,#E8A800);color:#111;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;">${initials}</span>
-      <span style="font-size:0.72rem;color:rgba(255,255,255,0.55);">${user.email}</span>
-      <button onclick="signOut()" style="background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.55);padding:0.2rem 0.6rem;border-radius:3px;cursor:pointer;font-size:0.65rem;letter-spacing:0.05em;text-transform:uppercase;">Sign out</button>
+      <span style="background:var(--gold,#E8A800);color:#111;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0;">${initials}</span>
+      <span style="font-size:0.8rem;color:rgba(255,255,255,0.75);font-weight:500;">${firstName}</span>
+      <button onclick="signOut()" style="background:none;border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.45);padding:0.2rem 0.6rem;border-radius:3px;cursor:pointer;font-size:0.62rem;letter-spacing:0.05em;text-transform:uppercase;">Sign out</button>
     </span>`;
   });
 }
