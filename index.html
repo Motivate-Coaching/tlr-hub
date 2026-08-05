@@ -87,6 +87,29 @@ a.tab-btn { text-decoration: none; display: inline-block; }
 .wheel-dash-card:hover .wheel-dash-arrow { color: var(--gold); transform: translateX(2px); }
 @media (max-width: 600px) { .wheel-dash-grid { grid-template-columns: 1fr 1fr; } }
 
+/* ── THEME DASHBOARD SECTION ───────────────── */
+.theme-dash-section { background: #151e2b; padding: 2.25rem 2rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.theme-dash-inner { max-width: 1100px; margin: 0 auto; }
+.theme-dash-cols { display: flex; gap: 2rem; align-items: flex-start; }
+.theme-dash-img-col { flex-shrink: 0; width: 200px; }
+.theme-dash-img { width: 100%; display: block; border-radius: 8px; object-fit: cover; object-position: center top; max-height: 136px; }
+.theme-dash-content { flex: 1; min-width: 0; }
+.theme-dash-eyebrow { font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.32); font-weight: 500; margin-bottom: 0.3rem; }
+.theme-dash-meta { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: 0.4rem; flex-wrap: wrap; }
+.theme-dash-title { font-family: 'Playfair Display', serif; font-size: 1.85rem; font-weight: 400; color: var(--white); line-height: 1.15; }
+.theme-dash-door { font-size: 0.8rem; color: rgba(255,255,255,0.35); font-style: italic; margin-bottom: 1.1rem; }
+.theme-dash-link { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(255,255,255,0.36); text-decoration: none; border: 1px solid rgba(255,255,255,0.13); padding: 0.4rem 0.8rem; border-radius: 3px; transition: all 0.15s; white-space: nowrap; flex-shrink: 0; cursor: pointer; background: transparent; font-family: inherit; }
+.theme-dash-link:hover { color: var(--gold); border-color: rgba(232,168,0,0.4); }
+.theme-dash-topics { display: flex; flex-direction: column; gap: 0.45rem; }
+.theme-dash-topic { display: flex; align-items: center; gap: 0.8rem; padding: 0.6rem 0.85rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 6px; text-decoration: none; transition: all 0.15s; }
+.theme-dash-topic:hover { background: rgba(255,255,255,0.07); border-color: rgba(232,168,0,0.2); }
+.td-num { font-size: 0.57rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); width: 44px; flex-shrink: 0; }
+.td-name { flex: 1; font-size: 0.84rem; color: rgba(255,255,255,0.68); line-height: 1.3; }
+.td-status { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; flex-shrink: 0; }
+.td-arrow { font-size: 0.78rem; color: rgba(255,255,255,0.18); transition: all 0.15s; flex-shrink: 0; }
+.theme-dash-topic:hover .td-arrow { color: var(--gold); }
+@media (max-width: 640px) { .theme-dash-cols { flex-direction: column; } .theme-dash-img-col { width: 100%; } .theme-dash-img { max-height: 120px; } }
+
 /* ── HOME VIEW / NAV CARDS ───────────────── */
 .nav-buttons-section { background: var(--cream); padding: 2.5rem 2rem 3.5rem; }
 .nav-buttons-inner { max-width: 1100px; margin: 0 auto; }
@@ -1102,6 +1125,26 @@ footer a { color: var(--gold); text-decoration: none; }
     </div>
   </div>
 
+  <!-- ── THEME DASHBOARD ──────────────────────────────── -->
+  <div class="theme-dash-section">
+    <div class="theme-dash-inner">
+      <div class="theme-dash-cols">
+        <div class="theme-dash-img-col">
+          <img src="building-momentum.jpg" alt="Building Momentum" class="theme-dash-img" onerror="this.parentElement.style.display='none'">
+        </div>
+        <div class="theme-dash-content">
+          <div class="theme-dash-eyebrow">This Month's Theme</div>
+          <div class="theme-dash-meta">
+            <div class="theme-dash-title">Building Momentum</div>
+            <a href="#" onclick="event.preventDefault();goToView('library')" class="theme-dash-link">Open theme →</a>
+          </div>
+          <div class="theme-dash-door">"I know what I need to do. I just can't seem to keep it going."</div>
+          <div class="theme-dash-topics" id="td-topics"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── NAV BUTTONS ────────────────────────────────── -->
   <section class="nav-buttons-section">
     <div class="nav-buttons-inner">
@@ -1712,6 +1755,21 @@ const setActive = (id) => {
 
 /* ── RENDER LIBRARY ─────────────────────── */
 document.getElementById('current-topics').innerHTML = currentTopics.map(topicRowHTML).join('');
+
+/* ── THEME DASHBOARD ────────────────────── */
+document.getElementById('td-topics').innerHTML = currentTopics.map(t => {
+  const status = (t.tool && t.tool.interactive) ? getToolProgress(t.tool.file) : false;
+  let statusEl = '';
+  if (status === 'completed') statusEl = '<span class="td-status" style="color:var(--gold)">✓ done</span>';
+  else if (status === 'started') statusEl = '<span class="td-status" style="color:rgba(232,168,0,0.5)">in progress</span>';
+  const href = t.tool ? t.tool.file : '#';
+  return `<a href="${href}" class="theme-dash-topic">
+    <span class="td-num">Topic ${t.n}</span>
+    <span class="td-name">${t.topic}</span>
+    ${statusEl}
+    <span class="td-arrow">→</span>
+  </a>`;
+}).join('');
 
 const list = document.getElementById('themes-list');
 pastThemes.forEach(t => {
