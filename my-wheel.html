@@ -29,7 +29,6 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .header-inner { max-width: 1240px; margin: 0 auto; padding: 0.85rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; position: relative; }
 .logo { display: flex; align-items: center; gap: 0.9rem; flex-shrink: 0; text-decoration: none; }
 .logo-img { height: 58px; width: auto; display: block; mix-blend-mode: lighten; }
-.logo-sub { color: var(--gold); font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500; display: block; margin-top: 3px; }
 .header-title-block { position: absolute; left: 0; right: 0; text-align: center; pointer-events: none; }
 .header-title-block h1 { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 400; color: var(--white); line-height: 1.15; margin-bottom: 0.25rem; }
 .header-title-block h1 em { color: var(--gold); font-style: italic; }
@@ -38,6 +37,7 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .header-links { display: flex; align-items: center; gap: 1.25rem; }
 .header-link { color: rgba(255,255,255,0.45); text-decoration: none; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.15s; }
 .header-link:hover { color: var(--gold); }
+.header-link.primary { color: var(--gold); border: 1px solid rgba(232,168,0,0.4); padding: 0.35rem 0.75rem; border-radius: 3px; }
 
 /* ── PAGE TABS ──────────────────────── */
 .page-tabs { background: var(--navy-mid); border-bottom: 1px solid rgba(255,255,255,0.08); }
@@ -91,34 +91,58 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .custom-area-input:focus { outline: none; border-color: var(--gold); }
 .btn-add-custom { padding: 0.7rem 1.2rem; background: var(--navy); color: var(--white); border: none; border-radius: 4px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
 
+/* ── INSPIRATION BANK ───────────────── */
+.inspiration-bank { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 2rem; }
+.inspiration-bank-title { font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 0.85rem; }
+.inspiration-bank-intro { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.85rem; line-height: 1.6; }
+.inspiration-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.inspiration-tag { font-size: 0.78rem; color: var(--text-mid); background: var(--cream); border: 1px solid var(--border); border-radius: 20px; padding: 0.3rem 0.75rem; cursor: pointer; transition: all 0.15s; }
+.inspiration-tag:hover { border-color: var(--gold); color: var(--text-dark); background: #FFFBEF; }
+
 /* ── RATE CARDS ─────────────────────── */
 .rate-area-card { background: var(--white); border-radius: 8px; border: 1px solid var(--border); padding: 2rem 2rem 1.75rem; margin-bottom: 1.25rem; }
 .rate-area-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
 .rate-area-name { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 400; }
 .rate-area-score-badge { font-size: 2rem; font-weight: 700; color: var(--gold); font-family: 'Inter', sans-serif; min-width: 2.5rem; text-align: right; }
-.rate-question { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.1rem; font-style: italic; }
+.rate-question { font-size: 0.82rem; color: var(--gold); margin-bottom: 1.1rem; font-weight: 600; letter-spacing: 0.02em; }
 .rate-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 3px; background: var(--border); outline: none; cursor: pointer; }
 .rate-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--gold); cursor: pointer; border: 3px solid var(--white); box-shadow: 0 1px 6px rgba(0,0,0,0.2); }
 .rate-slider::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--gold); cursor: pointer; border: 3px solid var(--white); }
 .rate-labels { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.5rem; }
 .rate-feel { font-size: 0.85rem; color: var(--text-mid); margin-top: 1rem; text-align: center; font-style: italic; }
 
-/* ── DEFINE / ACTION CARDS ──────────── */
+/* ── DEFINE / VISION CARDS ──────────── */
 .define-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 1.75rem 2rem; margin-bottom: 1.25rem; }
 .define-card-label { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 0.4rem; display: block; }
 .define-card-area { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 0.25rem; }
-.define-card-score { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem; }
+.define-card-score { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.85rem; }
 .define-card-score strong { color: var(--gold); }
+.define-suggestions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.85rem; }
+.define-suggestion { font-size: 0.76rem; color: var(--text-mid); background: var(--cream); border: 1px solid var(--border); border-radius: 4px; padding: 0.25rem 0.65rem; cursor: pointer; transition: all 0.15s; }
+.define-suggestion:hover { border-color: var(--gold); color: var(--text-dark); }
+.define-suggestions-label { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.4rem; display: block; }
 .define-textarea { width: 100%; padding: 0.8rem 1rem; border: 1.5px solid var(--border); border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 0.88rem; line-height: 1.6; color: var(--text-dark); background: var(--cream); resize: vertical; min-height: 80px; }
 .define-textarea:focus { outline: none; border-color: var(--gold); background: var(--white); }
 .define-textarea::placeholder { color: var(--text-muted); }
+
+/* ── ACTION STEP CARDS ──────────────── */
 .action-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem 2rem; margin-bottom: 1rem; }
 .action-card-area { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 0.25rem; }
-.action-card-context { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.85rem; }
+.action-card-context { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.35rem; }
 .action-card-context strong { color: var(--gold); }
-.action-input { width: 100%; padding: 0.75rem 1rem; border: 1.5px solid var(--border); border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 0.88rem; color: var(--text-dark); background: var(--cream); }
+.action-card-hint { font-size: 0.78rem; color: var(--text-muted); font-style: italic; margin-bottom: 1rem; }
+.action-entry { display: flex; gap: 0.75rem; align-items: flex-start; margin-bottom: 0.85rem; }
+.action-entry-num { width: 22px; height: 22px; min-width: 22px; border-radius: 50%; background: var(--gold); color: var(--navy); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; margin-top: 0.6rem; }
+.action-entry-body { flex: 1; }
+.action-input { width: 100%; padding: 0.75rem 1rem; border: 1.5px solid var(--border); border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 0.88rem; color: var(--text-dark); background: var(--cream); margin-bottom: 0.4rem; }
 .action-input:focus { outline: none; border-color: var(--gold); background: var(--white); }
 .action-input::placeholder { color: var(--text-muted); }
+.commitment-row { display: flex; align-items: center; gap: 0.6rem; }
+.commitment-label { font-size: 0.72rem; color: var(--text-muted); }
+.commitment-stars { display: flex; gap: 0.15rem; }
+.cstar { font-size: 1.1rem; cursor: pointer; color: var(--border); transition: color 0.12s; line-height: 1; }
+.cstar.on { color: var(--gold); }
+.cstar:hover { color: var(--gold-light); }
 
 /* ── BUTTONS ────────────────────────── */
 .btn-primary { background: var(--gold); color: var(--navy); padding: 0.85rem 2rem; border: none; border-radius: 4px; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.04em; cursor: pointer; transition: background 0.15s; font-family: 'Inter', sans-serif; }
@@ -126,7 +150,7 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn-secondary { background: transparent; color: var(--text-mid); border: 1.5px solid var(--border); padding: 0.85rem 2rem; border-radius: 4px; font-size: 0.88rem; cursor: pointer; font-family: 'Inter', sans-serif; transition: border-color 0.15s; }
 .btn-secondary:hover { border-color: var(--gold); color: var(--text-dark); }
-.btn-sm { padding: 0.45rem 0.9rem; font-size: 0.75rem; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--cream); color: var(--text-mid); font-family: 'Inter', sans-serif; transition: all 0.15s; }
+.btn-sm { padding: 0.45rem 0.9rem; font-size: 0.75rem; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--cream); color: var(--text-mid); font-family: 'Inter', sans-serif; transition: all 0.15s; white-space: nowrap; }
 .btn-sm:hover { border-color: var(--gold); color: var(--gold); }
 .btn-sm.gold { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
 .btn-sm.gold:hover { background: var(--gold-light); }
@@ -176,17 +200,32 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .ap-item-score { font-size: 0.72rem; padding: 0.15rem 0.55rem; border-radius: 20px; font-weight: 600; color: var(--white); }
 .ap-item-vision { font-size: 0.8rem; color: var(--text-muted); font-style: italic; margin-bottom: 0.75rem; line-height: 1.5; }
 .ap-item-vision strong { color: var(--text-mid); font-style: normal; font-weight: 500; }
-.ap-action-row { display: flex; align-items: flex-start; gap: 0.75rem; }
+.ap-actions-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.ap-action-row { display: flex; align-items: flex-start; gap: 0.65rem; padding: 0.6rem 0.75rem; background: var(--cream); border-radius: 5px; border: 1px solid var(--border); }
 .ap-checkbox-wrap { padding-top: 2px; flex-shrink: 0; }
 .ap-checkbox { width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 4px; appearance: none; -webkit-appearance: none; cursor: pointer; transition: all 0.15s; flex-shrink: 0; display: inline-block; position: relative; }
 .ap-checkbox:checked { border-color: var(--gold); background: var(--gold); }
 .ap-checkbox:checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 0.7rem; color: var(--navy); font-weight: 700; }
-.ap-action-text { flex: 1; font-size: 0.88rem; color: var(--text-dark); line-height: 1.5; padding-top: 2px; }
+.ap-action-main { flex: 1; min-width: 0; }
+.ap-action-text { font-size: 0.88rem; color: var(--text-dark); line-height: 1.5; }
 .ap-action-text.done { text-decoration: line-through; color: var(--text-muted); }
-.ap-action-input { flex: 1; padding: 0.4rem 0.75rem; border: 1.5px solid var(--gold); border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 0.88rem; color: var(--text-dark); background: var(--white); }
+.ap-action-meta { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.3rem; flex-wrap: wrap; }
+.ap-commit-stars { font-size: 0.75rem; color: var(--gold); letter-spacing: -0.05em; }
+.ap-action-input { width: 100%; padding: 0.4rem 0.75rem; border: 1.5px solid var(--gold); border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 0.88rem; color: var(--text-dark); background: var(--white); }
 .ap-action-input:focus { outline: none; }
-.ap-item-btns { display: flex; gap: 0.4rem; flex-shrink: 0; padding-top: 1px; }
-.ap-cal-hint { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.4rem; }
+.ap-item-btns { display: flex; gap: 0.3rem; flex-shrink: 0; padding-top: 1px; flex-wrap: wrap; }
+
+/* Reminder */
+.reminder-wrap { position: relative; display: inline-block; }
+.reminder-popup { position: absolute; top: 100%; right: 0; background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem; z-index: 50; box-shadow: 0 4px 16px rgba(0,0,0,0.12); min-width: 160px; display: none; }
+.reminder-popup.open { display: block; }
+.reminder-popup button { display: block; width: 100%; text-align: left; padding: 0.3rem 0.5rem; font-size: 0.75rem; background: none; border: none; cursor: pointer; color: var(--text-mid); border-radius: 3px; }
+.reminder-popup button:hover { background: var(--cream); color: var(--text-dark); }
+.reminder-set-label { font-size: 0.68rem; color: var(--gold); }
+
+/* ── REMINDER BANNER ────────────────── */
+.reminder-banner { background: var(--gold); color: var(--navy); padding: 0.75rem 1.5rem; text-align: center; font-size: 0.85rem; font-weight: 600; display: none; }
+.reminder-banner.show { display: block; }
 
 /* ── CHECK-IN MODAL ─────────────────── */
 .checkin-overlay { position: fixed; inset: 0; background: rgba(15,18,21,0.8); z-index: 500; display: none; align-items: center; justify-content: center; padding: 1.5rem; }
@@ -209,9 +248,20 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .history-item-date { font-size: 0.68rem; color: var(--text-muted); margin-bottom: 0.3rem; }
 .history-item-avg { font-size: 1.4rem; font-weight: 700; color: var(--gold); }
 .history-item-label { font-size: 0.65rem; color: var(--text-muted); }
+
+/* ── REPLACE AREA MODAL ─────────────── */
+.replace-step { display: none; }
+.replace-step.active { display: block; }
+.replace-area-list { display: flex; flex-direction: column; gap: 0.5rem; margin: 1rem 0; }
+.replace-area-option { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; background: var(--cream); border: 1.5px solid var(--border); border-radius: 5px; cursor: pointer; transition: all 0.15s; }
+.replace-area-option:hover { border-color: var(--gold); }
+.replace-area-option.selected { border-color: var(--gold); background: #FFFBEF; }
 </style>
 </head>
 <body>
+
+<!-- ── REMINDER BANNER ────────────── -->
+<div class="reminder-banner" id="reminder-banner"></div>
 
 <!-- ── HEADER ──────────────────────── -->
 <header>
@@ -224,7 +274,7 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
       <p>Not a course to finish. A companion you carry through life.</p>
     </div>
     <div class="header-links">
-      <a href="https://www.facebook.com/groups/thelivingroom" target="_blank" class="header-link primary">Members Lounge</a>
+      <a href="https://www.facebook.com/groups/thelivingroommemberslounge" target="_blank" class="header-link primary">Members Lounge</a>
     </div>
   </div>
 </header>
@@ -248,13 +298,13 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
     <div class="wheel-welcome">
       <div class="wheel-welcome-eyebrow">Your personal compass</div>
       <h2>Your <em>Balance</em> Wheel</h2>
-      <p class="wheel-welcome-body">The Balance Wheel is a simple, powerful snapshot of where you are in life right now. You choose 8 areas that are priorities for you <em>at this moment</em>, then rate your level of satisfaction with each one. From there, you define what a 10 would feel like — and identify one small action to start moving.</p>
+      <p class="wheel-welcome-body">The Balance Wheel is a simple, powerful snapshot of where you are in life right now. You choose 8 areas that are priorities for you <em>at this moment</em>, then rate your level of satisfaction with each one. From there, you define what a 10 would feel like — and identify three small actions to start moving.</p>
       <p class="wheel-welcome-body">It takes about 10 minutes. You can come back and do it again anytime — with different areas, at a different season of life. This is a snapshot, not a commitment.</p>
       <ul class="wheel-welcome-list">
         <li><b>Choose 8 areas</b> that feel most relevant to your life right now</li>
         <li><b>Rate your satisfaction</b> in each area — honestly, and by your own measure</li>
         <li><b>Define your 10/10</b> — what would it look and feel like for you?</li>
-        <li><b>Set one +1 action</b> for each area — small, real, doable</li>
+        <li><b>Set three +1 actions</b> for each area — small, real, doable</li>
       </ul>
       <button class="btn-primary" onclick="startWizard()" style="margin-top:0.5rem">Begin my Balance Wheel →</button>
     </div>
@@ -273,6 +323,14 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
       <input type="text" class="custom-area-input" id="custom-area-input" placeholder="Add your own area (e.g. Creative Expression)" maxlength="40">
       <button class="btn-add-custom" onclick="addCustomArea()">+ Add</button>
     </div>
+
+    <!-- Inspiration Bank -->
+    <div class="inspiration-bank">
+      <div class="inspiration-bank-title">More ideas to draw from</div>
+      <div class="inspiration-bank-intro">Not finding the right words? Click any of these to add it as a custom area — or use them as a starting point to name something in your own way.</div>
+      <div class="inspiration-tags" id="inspiration-tags"></div>
+    </div>
+
     <div class="wizard-nav">
       <button class="btn-secondary" onclick="gotoStep(0)">← Back</button>
       <div>
@@ -290,8 +348,8 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
   <div class="wizard-step" id="step-2">
     <div class="step-header">
       <span class="step-eyebrow">Step 2 of 4</span>
-      <div class="step-title">How satisfied are you?</div>
-      <div class="step-sub">For each area, rate your level of satisfaction — not compared to anyone else, but how <em>you</em> genuinely feel about it right now. There are no right or wrong answers.</div>
+      <div class="step-title">Your level of satisfaction</div>
+      <div class="step-sub">For each area, rate <strong>your</strong> level of satisfaction — not compared to anyone else, but how <em>you</em> genuinely feel about it right now. This is about your experience. There are no right or wrong answers.</div>
     </div>
     <div id="rate-cards"></div>
     <div class="wizard-nav">
@@ -312,7 +370,7 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
     <div class="step-header">
       <span class="step-eyebrow">Step 3 of 4</span>
       <div class="step-title">What does 10/10 look like?</div>
-      <div class="step-sub">For each area, paint a picture of life when it's thriving. Be specific — what does it feel like, look like, sound like?</div>
+      <div class="step-sub">For each area, paint a picture of life when it's truly thriving. Be specific — what does it feel like, look like, sound like? Use the suggestions as a starting point, or write it entirely in your own words.</div>
     </div>
     <div id="define-cards"></div>
     <div class="wizard-nav">
@@ -332,8 +390,8 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
   <div class="wizard-step" id="step-4">
     <div class="step-header">
       <span class="step-eyebrow">Step 4 of 4</span>
-      <div class="step-title">Your +1 actions</div>
-      <div class="step-sub">What's one small, honest action that would move each area just one point forward? Keep it real — not inspiring, <em>doable</em>.</div>
+      <div class="step-title">Your three +1 actions</div>
+      <div class="step-sub">For each area, name three small things you could do to move up just one point in your satisfaction. Thinking of three makes each one feel more manageable — pick steps that are real and honest, not aspirational. Then rate how committed you are to each one.</div>
     </div>
     <div id="action-cards"></div>
     <div class="wizard-nav">
@@ -360,7 +418,6 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
     <div class="wheel-view-sub" id="wheel-checkin-date"></div>
   </div>
 
-  <!-- Coloured SVG Wheel -->
   <div class="wheel-svg-wrap">
     <svg id="wheelSvg" viewBox="0 0 440 460" xmlns="http://www.w3.org/2000/svg"></svg>
   </div>
@@ -368,8 +425,9 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
   <div class="wheel-controls">
     <button class="btn-primary" onclick="openCheckin()">Monthly Check-In</button>
     <button class="btn-secondary" onclick="openEditWheel()">Edit My Wheel</button>
+    <button class="btn-secondary" onclick="openReplaceArea()">Replace a Priority Area</button>
+    <a href="/index.html" class="btn-secondary" style="text-decoration:none;display:inline-flex;align-items:center;">← Return to Dashboard</a>
   </div>
-  <!-- Progress stats -->
   <div class="progress-stats" id="progress-stats"></div>
 
 </div>
@@ -388,8 +446,7 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
     </div>
   </div>
   <div class="ap-list" id="ap-list"></div>
-  <p style="font-size:0.78rem;color:var(--text-muted);text-align:center;margin-bottom:1rem">Your actions are saved here — come back anytime to check them off, edit them, or add them to your calendar.</p>
-  <p style="text-align:center"><button onclick="confirmReset()" style="background:none;border:none;font-size:0.72rem;color:var(--text-muted);cursor:pointer;text-decoration:underline">Reset everything and start again</button></p>
+  <p style="font-size:0.78rem;color:var(--text-muted);text-align:center;margin-bottom:2rem">Your actions are saved here — come back anytime to check them off, edit them, or add them to your calendar.</p>
 </div>
 
 <!-- History -->
@@ -415,11 +472,41 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 <div class="checkin-overlay" id="checkin-overlay" onclick="if(event.target===this)closeCheckin()">
   <div class="checkin-modal">
     <h3>Monthly Check-In</h3>
-    <p>How satisfied are you with each area right now? Be honest — this is just for you. Update your scores and see how your wheel has shifted.</p>
+    <p>How satisfied are you with each area right now — by your own measure? Be honest. Update your scores and see how your wheel has shifted.</p>
     <div id="checkin-rows"></div>
     <div class="checkin-modal-nav">
       <button class="btn-primary" onclick="saveCheckin()">Save Check-In</button>
       <button class="btn-secondary" onclick="closeCheckin()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── REPLACE AREA MODAL ─────────── -->
+<div class="checkin-overlay" id="replace-overlay" onclick="if(event.target===this)closeReplaceArea()">
+  <div class="checkin-modal" style="max-width:640px">
+    <h3>Replace a Priority Area</h3>
+
+    <!-- Step A: pick area to replace -->
+    <div class="replace-step active" id="replace-step-a">
+      <p>Which area are you stepping back from for now? You can always add it back later.</p>
+      <div class="replace-area-list" id="replace-current-list"></div>
+      <div class="checkin-modal-nav">
+        <button class="btn-secondary" onclick="closeReplaceArea()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Step B: pick new area -->
+    <div class="replace-step" id="replace-step-b">
+      <p>Which area would you like to bring into focus instead?</p>
+      <div class="areas-grid" id="replace-new-grid" style="margin-top:0.75rem"></div>
+      <div style="display:flex;gap:0.5rem;margin:0.75rem 0;">
+        <input type="text" class="custom-area-input" id="replace-custom-input" placeholder="Or type your own area…" maxlength="40">
+        <button class="btn-add-custom" onclick="addReplaceCustom()">+ Add</button>
+      </div>
+      <div class="checkin-modal-nav">
+        <button class="btn-secondary" onclick="showReplaceStepA()">← Back</button>
+        <button class="btn-primary" id="btn-replace-confirm" onclick="confirmReplaceArea()" disabled>Replace this area →</button>
+      </div>
     </div>
   </div>
 </div>
@@ -433,6 +520,37 @@ const PRESET_AREAS = [
   'Health & Fitness','Mental Wellbeing','Career & Purpose','Finances & Security',
   'Relationships & Family','Social & Community','Learning & Growth','Fun, Joy & Leisure',
   'Home & Environment','Spirituality & Meaning','Contribution & Giving','Creativity & Expression'
+];
+
+// ── INSPIRATION BANK ──────────────────────
+const INSPIRATION_AREAS = [
+  'Romantic Partnership','Parenting & Children','Physical Health','Emotional Resilience',
+  'Sleep & Rest','Nutrition & Nourishment','Business Growth','Leadership',
+  'Personal Boundaries','Self-Compassion','Mindfulness & Presence','Inner Peace',
+  'Adventure & Travel','Sports & Performance','Music & Arts','Writing & Storytelling',
+  'Volunteering','Faith & Religion','Sexual Wellbeing','Body Image & Confidence',
+  'Digital Wellbeing','Life Admin & Organisation','Financial Freedom','Side Projects',
+  'Friendship','Pets & Animals','Nature & Outdoors','Life Purpose','Grief & Healing',
+  'Family of Origin','Independence','Personal Style','Time Alone','Reading & Study'
+];
+
+// ── AREA 10/10 SUGGESTIONS ────────────────
+const AREA_SUGGESTIONS = {
+  'Health & Fitness': ['Moving my body in ways I enjoy every day','Waking with real energy — rested and ready','Nourishing myself with food that feels good','Feeling strong and comfortable in my body','Taking care of my health proactively, not reactively'],
+  'Mental Wellbeing': ['Feeling calm and present most of the time','Able to respond rather than react','A quiet, clear mind — not spinning','Not overwhelmed or consumed by anxiety','Emotionally steady and grounded in myself'],
+  'Career & Purpose': ['Doing work that feels genuinely meaningful','Aligned with my values in what I do each day','A clear sense of where I\'m heading','Feeling valued, seen and purposeful','Excited to show up and contribute'],
+  'Finances & Security': ['Not lying awake worrying about money','A plan I trust — and feel in control of','Enough to live well, save and enjoy life','Financial decisions feeling clear, not panicked','Real peace of mind around money'],
+  'Relationships & Family': ['Deep, nourishing connections with the people I love','Feeling truly known and accepted','Healthy communication and real mutual respect','Quality time and presence with those who matter','A sense of belonging and being cherished'],
+  'Social & Community': ['A circle of people who genuinely energise me','Regular connection and laughter with others','Feeling part of something bigger than myself','Giving back in ways that feel meaningful','Community that shares my values'],
+  'Learning & Growth': ['A curious, growing mind — always expanding','Regularly stretching into new territory','Reading, exploring, discovering new ideas','A clear direction for my own development','Feeling like I\'m evolving, not standing still'],
+  'Fun, Joy & Leisure': ['Regular experiences that make me laugh and feel alive','Time doing things purely for the joy of it','A life that doesn\'t feel like all work','Adventures, spontaneity and moments of pure play','Hobbies and interests that genuinely light me up'],
+  'Home & Environment': ['A home that truly feels like a sanctuary','Spaces that are calm, ordered and beautiful','An environment that supports how I want to feel','Feeling safe and at ease where I live','Order and calm in my everyday surroundings'],
+  'Spirituality & Meaning': ['A strong, clear sense of why I\'m here','Practices that connect me to something deeper','Living in alignment with my values','A sense of peace, purpose and inner knowing','Connection to something greater than myself'],
+  'Contribution & Giving': ['Knowing my existence makes a real difference','Regular opportunities to give time, energy or care','Feeling useful and genuinely of service','Leaving things better than I found them','Contributing in ways that feel meaningful and real'],
+  'Creativity & Expression': ['Regular space to create and express what\'s in me','Making things that feel alive and authentic','Not suppressing my creativity to fit in','Outlets for my ideas, art and voice','Freedom to explore, experiment and make things']
+};
+const DEFAULT_SUGGESTIONS = [
+  'Feeling fully alive and at my best in this area','No longer tolerating what I\'ve been putting up with','A clear sense of progress and forward movement','Waking up looking forward to this part of my life','Feeling proud and at peace with where I am here'
 ];
 
 function getRateFeel(score) {
@@ -451,7 +569,7 @@ function getRateFeel(score) {
 let selectedAreas = [];
 let areaScores = {};
 let areaVisions = {};
-let areaActions = {};
+let areaActions = {}; // now: { [area]: [{text,commitment}, {text,commitment}, {text,commitment}] }
 let allDisplayedAreas = [...PRESET_AREAS];
 
 // ── INIT ──────────────────────────────────
@@ -461,11 +579,13 @@ let allDisplayedAreas = [...PRESET_AREAS];
     showWheelView(JSON.parse(saved));
   } else {
     renderAreasGrid();
+    renderInspirationBank();
   }
   if (navigator.share) document.getElementById('btn-share').style.display = '';
+  checkReminders();
 })();
 
-function startWizard() { renderAreasGrid(); gotoStep(1); }
+function startWizard() { renderAreasGrid(); renderInspirationBank(); gotoStep(1); }
 
 function gotoStep(n) {
   document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
@@ -480,6 +600,7 @@ function gotoStep(n) {
 // ── STEP 1 ────────────────────────────────
 function renderAreasGrid() {
   const grid = document.getElementById('areas-grid');
+  if (!grid) return;
   grid.innerHTML = '';
   allDisplayedAreas.forEach(area => {
     const isSelected = selectedAreas.includes(area);
@@ -490,6 +611,23 @@ function renderAreasGrid() {
     grid.appendChild(chip);
   });
   updateSelectedCount();
+}
+
+function renderInspirationBank() {
+  const container = document.getElementById('inspiration-tags');
+  if (!container) return;
+  container.innerHTML = '';
+  INSPIRATION_AREAS.forEach(tag => {
+    if (allDisplayedAreas.includes(tag)) return; // skip if already in grid
+    const el = document.createElement('span');
+    el.className = 'inspiration-tag';
+    el.textContent = tag;
+    el.onclick = () => {
+      const input = document.getElementById('custom-area-input');
+      if (input) { input.value = tag; addCustomArea(); }
+    };
+    container.appendChild(el);
+  });
 }
 
 function toggleArea(area, chip) {
@@ -516,6 +654,7 @@ function addCustomArea() {
   allDisplayedAreas.push(name);
   input.value = '';
   renderAreasGrid();
+  renderInspirationBank();
 }
 document.getElementById('custom-area-input').addEventListener('keydown', e => { if (e.key === 'Enter') addCustomArea(); });
 
@@ -533,9 +672,9 @@ function renderRateCards() {
         <div class="rate-area-name">${area}</div>
         <div class="rate-area-score-badge" id="sb_${safeKey}">${v}</div>
       </div>
-      <div class="rate-question">How satisfied am I with this area of my life right now?</div>
+      <div class="rate-question">What is my level of satisfaction with this area right now?</div>
       <input type="range" class="rate-slider" min="1" max="10" value="${v}"
-             oninput="updateScore('${safeKey}','${area.replace(/'/g,"\\'") }',this.value)">
+             oninput="updateScore('${safeKey}','${area.replace(/'/g,"\\'")}',this.value)">
       <div class="rate-labels"><span>1 · Very unsatisfied</span><span>10 · Completely satisfied</span></div>
       <div class="rate-feel" id="rf_${safeKey}">${getRateFeel(v)}</div>`;
     areaScores[area] = v;
@@ -557,18 +696,32 @@ function renderDefineCards() {
   const container = document.getElementById('define-cards');
   container.innerHTML = '';
   selectedAreas.forEach(area => {
+    const suggestions = AREA_SUGGESTIONS[area] || DEFAULT_SUGGESTIONS;
+    const safeArea = area.replace(/'/g, "\\'");
     const card = document.createElement('div');
     card.className = 'define-card';
+    const suggestionsHtml = suggestions.map(s =>
+      `<span class="define-suggestion" onclick="appendVision('${safeArea}', '${s.replace(/'/g, "\\'")}')">${s}</span>`
+    ).join('');
     card.innerHTML = `
       <span class="define-card-label">10/10 Vision</span>
       <div class="define-card-area">${area}</div>
-      <div class="define-card-score">Your satisfaction score: <strong>${areaScores[area] || 5}/10</strong></div>
-      <textarea class="define-textarea"
+      <div class="define-card-score">Your satisfaction right now: <strong>${areaScores[area] || 5}/10</strong></div>
+      <span class="define-suggestions-label">Ideas to get you started — tap any to add it:</span>
+      <div class="define-suggestions">${suggestionsHtml}</div>
+      <textarea class="define-textarea" id="vision-${safeArea.replace(/[^a-z0-9]/gi,'_')}"
         placeholder="When this area is a 10, I feel… I have… I'm able to…"
-        oninput="areaVisions['${area.replace(/'/g,"\\'")}'] = this.value"
+        oninput="areaVisions['${safeArea}'] = this.value"
       >${areaVisions[area] || ''}</textarea>`;
     container.appendChild(card);
   });
+}
+
+function appendVision(area, text) {
+  areaVisions[area] = areaVisions[area] ? areaVisions[area] + ' ' + text + '.' : text + '.';
+  const key = area.replace(/[^a-z0-9]/gi,'_');
+  const ta = document.getElementById('vision-' + key);
+  if (ta) ta.value = areaVisions[area];
 }
 
 // ── STEP 4: ACTIONS ───────────────────────
@@ -577,17 +730,55 @@ function renderActionCards() {
   container.innerHTML = '';
   selectedAreas.forEach(area => {
     const score = areaScores[area] || 5;
+    const nextScore = Math.min(score + 1, 10);
+    if (!areaActions[area]) areaActions[area] = [{text:'',commitment:3},{text:'',commitment:3},{text:'',commitment:3}];
+    const acts = areaActions[area];
+    const safeArea = area.replace(/'/g, "\\'");
+    const domKey = area.replace(/[^a-z0-9]/gi,'_');
+
+    let actionsHtml = [0,1,2].map(j => {
+      const act = acts[j] || {text:'',commitment:3};
+      const stars = [1,2,3,4,5].map(s =>
+        `<span class="cstar ${s <= act.commitment ? 'on' : ''}" onclick="setCommitment('${safeArea}',${j},${s},'${domKey}')">&starf;</span>`
+      ).join('');
+      return `
+        <div class="action-entry">
+          <div class="action-entry-num">${j+1}</div>
+          <div class="action-entry-body">
+            <input type="text" class="action-input" placeholder="One small, honest, doable step…"
+              value="${(act.text||'').replace(/"/g,'&quot;')}"
+              oninput="setActionText('${safeArea}',${j},this.value)">
+            <div class="commitment-row">
+              <span class="commitment-label">My commitment to this:</span>
+              <div class="commitment-stars" id="cstars-${domKey}-${j}">${stars}</div>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
     const card = document.createElement('div');
     card.className = 'action-card';
     card.innerHTML = `
       <div class="action-card-area">${area}</div>
-      <div class="action-card-context">Satisfaction: <strong>${score}/10</strong> — what one action would make it a <strong>${Math.min(score + 1, 10)}/10</strong>?</div>
-      <input type="text" class="action-input"
-        placeholder="One small, honest, doable action…"
-        value="${areaActions[area] || ''}"
-        oninput="areaActions['${area.replace(/'/g,"\\'")}'] = this.value">`;
+      <div class="action-card-context">Satisfaction: <strong>${score}/10</strong> — What 3 small things could move this to a <strong>${nextScore}/10</strong>?</div>
+      <div class="action-card-hint">Think small and real — three steps you could actually take this week or this month.</div>
+      ${actionsHtml}`;
     container.appendChild(card);
   });
+}
+
+function setActionText(area, idx, value) {
+  if (!areaActions[area]) areaActions[area] = [{text:'',commitment:3},{text:'',commitment:3},{text:'',commitment:3}];
+  areaActions[area][idx] = areaActions[area][idx] || {text:'',commitment:3};
+  areaActions[area][idx].text = value;
+}
+
+function setCommitment(area, actionIdx, stars, domKey) {
+  if (!areaActions[area]) areaActions[area] = [{text:'',commitment:3},{text:'',commitment:3},{text:'',commitment:3}];
+  areaActions[area][actionIdx] = areaActions[area][actionIdx] || {text:'',commitment:3};
+  areaActions[area][actionIdx].commitment = stars;
+  const container = document.getElementById('cstars-' + domKey + '-' + actionIdx);
+  if (container) container.querySelectorAll('.cstar').forEach((el, i) => el.classList.toggle('on', i < stars));
 }
 
 // ── SAVE ─────────────────────────────────
@@ -600,8 +791,13 @@ function saveWheel() {
       name: area,
       score: areaScores[area] || 5,
       vision: areaVisions[area] || '',
-      action: areaActions[area] || '',
-      actionDone: false
+      actions: (areaActions[area] || [{text:'',commitment:3},{text:'',commitment:3},{text:'',commitment:3}]).map(a => ({
+        text: a.text || '',
+        done: false,
+        commitment: a.commitment || 3,
+        completedActions: [],
+        reminder: null
+      }))
     })),
     checkins: [{ date: today, scores: selectedAreas.map(area => areaScores[area] || 5) }]
   };
@@ -612,6 +808,18 @@ function saveWheel() {
 
 // ── WHEEL VIEW ────────────────────────────
 function showWheelView(data) {
+  // Migrate old single-action format if needed
+  data.areas.forEach(area => {
+    if (!area.actions && area.action !== undefined) {
+      area.actions = [
+        { text: area.action || '', done: area.actionDone || false, commitment: 3, completedActions: area.completedActions || [], reminder: null },
+        { text: '', done: false, commitment: 3, completedActions: [], reminder: null },
+        { text: '', done: false, commitment: 3, completedActions: [], reminder: null }
+      ];
+    }
+    if (!area.actions) area.actions = [{text:'',done:false,commitment:3,completedActions:[],reminder:null},{text:'',done:false,commitment:3,completedActions:[],reminder:null},{text:'',done:false,commitment:3,completedActions:[],reminder:null}];
+  });
+
   document.getElementById('wheel-wizard').style.display = 'none';
   document.getElementById('wheel-view').classList.add('active');
   document.getElementById('action-plan').style.display = 'block';
@@ -633,7 +841,7 @@ function drawWheel(areas) {
   const cx = 220, cy = 230, maxR = 155;
   const n = areas.length;
   const angleStep = (2 * Math.PI) / n;
-  const startAngle = -Math.PI / 2; // top
+  const startAngle = -Math.PI / 2;
   const gap = 0.018;
   let html = '';
 
@@ -641,15 +849,9 @@ function drawWheel(areas) {
     const color = COLORS[i % COLORS.length];
     const sa = startAngle + i * angleStep + gap;
     const ea = startAngle + (i + 1) * angleStep - gap;
-
-    // Ghost (full radius, faded)
     html += `<path d="${arc(cx, cy, maxR, sa, ea)}" fill="${color}" opacity="0.1"/>`;
-
-    // Score fill
     const r = Math.max(4, (area.score / 10) * maxR);
     html += `<path d="${arc(cx, cy, r, sa, ea)}" fill="${color}" opacity="0.82"/>`;
-
-    // Score number inside filled area
     if (area.score > 0) {
       const mid = (sa + ea) / 2;
       const tr = r * 0.62;
@@ -659,22 +861,18 @@ function drawWheel(areas) {
     }
   });
 
-  // Concentric rings at 25%, 50%, 75%
   [0.25, 0.5, 0.75].forEach(pct => {
     html += `<circle cx="${cx}" cy="${cy}" r="${maxR * pct}" fill="none" stroke="white" stroke-width="0.8" opacity="0.35"/>`;
   });
 
-  // Dividing spokes
   areas.forEach((_, i) => {
     const angle = startAngle + i * angleStep;
     html += `<line x1="${cx}" y1="${cy}" x2="${cx + Math.cos(angle) * maxR}" y2="${cy + Math.sin(angle) * maxR}"
       stroke="white" stroke-width="1.5" opacity="0.7"/>`;
   });
 
-  // Outer border
   html += `<circle cx="${cx}" cy="${cy}" r="${maxR}" fill="none" stroke="#D4CBBE" stroke-width="1.5"/>`;
 
-  // Labels
   areas.forEach((area, i) => {
     const mid = startAngle + (i + 0.5) * angleStep;
     const labelR = maxR + 30;
@@ -693,9 +891,7 @@ function drawWheel(areas) {
     }
   });
 
-  // Centre circle (small white dot)
   html += `<circle cx="${cx}" cy="${cy}" r="6" fill="white" opacity="0.9"/>`;
-
   svg.innerHTML = html;
 }
 
@@ -724,11 +920,47 @@ function renderActionPlan(data) {
   list.innerHTML = '';
   data.areas.forEach((area, i) => {
     const color = COLORS[i % COLORS.length];
-    const safeId = 'ap_' + i;
-    const isDone = area.actionDone || false;
     const scoreColor = area.score >= 7 ? '#4DB87A' : area.score >= 5 ? '#E8A800' : '#E85B3A';
+    const actions = area.actions || [];
+
+    const actionsHtml = actions.map((act, j) => {
+      if (!act.text) return '';
+      const stars = '★'.repeat(act.commitment || 3) + '☆'.repeat(5 - (act.commitment || 3));
+      const reminderLabel = act.reminder ? `<span class="reminder-set-label">🔔 ${formatReminderDate(act.reminder)}</span>` : '';
+      return `
+        <div class="ap-action-row" id="ap-row-${i}-${j}">
+          <div class="ap-checkbox-wrap">
+            <input type="checkbox" class="ap-checkbox" id="ap-cb-${i}-${j}"
+              ${act.done ? 'checked' : ''} onchange="toggleDone(${i},${j},this.checked)">
+          </div>
+          <div class="ap-action-main">
+            <div class="ap-action-text ${act.done ? 'done' : ''}" id="ap-text-${i}-${j}">${act.text}</div>
+            <div class="ap-action-meta">
+              <span class="ap-commit-stars" title="Commitment level">${stars}</span>
+              ${reminderLabel}
+            </div>
+          </div>
+          <div class="ap-item-btns">
+            <button class="btn-sm" onclick="editAction(${i},${j})">Edit</button>
+            <button class="btn-sm" onclick="addToCalendar(${i},${j})" title="Add to My Calendar">📅 Add to My Calendar</button>
+            <div class="reminder-wrap">
+              <button class="btn-sm" onclick="toggleReminderPopup(${i},${j})" title="Set a reminder">🔔 Remind me</button>
+              <div class="reminder-popup" id="rp-${i}-${j}">
+                <button onclick="setReminder(${i},${j},3)">In 3 days</button>
+                <button onclick="setReminder(${i},${j},7)">In 1 week</button>
+                <button onclick="setReminder(${i},${j},14)">In 2 weeks</button>
+                <button onclick="setReminder(${i},${j},30)">In 1 month</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    const emptyActionHint = actions.every(a => !a.text) ?
+      '<div style="font-size:0.82rem;color:var(--text-muted);font-style:italic;padding:0.5rem 0">No actions set yet — use Edit My Wheel to add some.</div>' : '';
+
     list.innerHTML += `
-      <div class="ap-item" id="${safeId}">
+      <div class="ap-item" id="ap-area-${i}">
         <div class="ap-color-bar" style="background:${color}"></div>
         <div class="ap-item-content">
           <div class="ap-item-top">
@@ -736,51 +968,37 @@ function renderActionPlan(data) {
             <span class="ap-item-score" style="background:${scoreColor}">${area.score}/10</span>
           </div>
           ${area.vision ? `<div class="ap-item-vision"><strong>10/10:</strong> ${area.vision}</div>` : ''}
-          <div class="ap-action-row" id="ap-row-${i}">
-            <div class="ap-checkbox-wrap">
-              <input type="checkbox" class="ap-checkbox" id="ap-cb-${i}"
-                ${isDone ? 'checked' : ''} onchange="toggleDone(${i}, this.checked)">
-            </div>
-            <div class="ap-action-text ${isDone ? 'done' : ''}" id="ap-text-${i}">${area.action || 'No action set yet'}</div>
-            <div class="ap-item-btns">
-              <button class="btn-sm" onclick="editAction(${i})" title="Edit action">Edit</button>
-              <button class="btn-sm" onclick="addToCalendar(${i})" title="Add to Google Calendar">📅</button>
-            </div>
-          </div>
-          <div class="ap-cal-hint" id="ap-cal-hint-${i}" style="display:none">Added to calendar ✓</div>
+          <div class="ap-actions-list">${actionsHtml || emptyActionHint}</div>
         </div>
       </div>`;
   });
 }
 
-function toggleDone(idx, checked) {
+function toggleDone(areaIdx, actionIdx, checked) {
   const data = JSON.parse(localStorage.getItem('tlr_wheel_data'));
-  data.areas[idx].actionDone = checked;
+  const act = data.areas[areaIdx].actions[actionIdx];
+  act.done = checked;
 
-  // Log completed action with date
   if (checked) {
-    if (!data.areas[idx].completedActions) data.areas[idx].completedActions = [];
-    data.areas[idx].completedActions.push({
-      text: data.areas[idx].action,
-      date: new Date().toISOString().slice(0,10)
-    });
+    if (!act.completedActions) act.completedActions = [];
+    act.completedActions.push({ text: act.text, date: new Date().toISOString().slice(0,10) });
   }
 
   localStorage.setItem('tlr_wheel_data', JSON.stringify(data));
-  const el = document.getElementById('ap-text-' + idx);
+  const el = document.getElementById('ap-text-' + areaIdx + '-' + actionIdx);
   if (el) el.classList.toggle('done', checked);
 
-  // If just checked off, prompt for a new action (after brief delay)
-  if (checked && data.areas[idx].action) {
+  if (checked && act.text) {
     setTimeout(() => {
       const newAction = prompt(
-        '✓ Well done on completing:\n"' + data.areas[idx].action + '"\n\n' +
-        'What\'s your next +1 action for ' + data.areas[idx].name + '?\n(Leave blank to keep this one marked done)'
+        '✓ Well done on completing:\n"' + act.text + '"\n\n' +
+        'What\'s your next step for ' + data.areas[areaIdx].name + '?\n(Leave blank to keep marked done)'
       );
       if (newAction && newAction.trim()) {
         const d = JSON.parse(localStorage.getItem('tlr_wheel_data'));
-        d.areas[idx].action = newAction.trim();
-        d.areas[idx].actionDone = false;
+        d.areas[areaIdx].actions[actionIdx].text = newAction.trim();
+        d.areas[areaIdx].actions[actionIdx].done = false;
+        d.areas[areaIdx].actions[actionIdx].reminder = null;
         localStorage.setItem('tlr_wheel_data', JSON.stringify(d));
         renderActionPlan(d);
         renderProgressStats(d);
@@ -789,51 +1007,95 @@ function toggleDone(idx, checked) {
   }
 }
 
-function editAction(idx) {
+function editAction(areaIdx, actionIdx) {
   const data = JSON.parse(localStorage.getItem('tlr_wheel_data'));
-  const area = data.areas[idx];
-  const row = document.getElementById('ap-row-' + idx);
-  const textEl = document.getElementById('ap-text-' + idx);
+  const act = data.areas[areaIdx].actions[actionIdx];
+  const row = document.getElementById('ap-row-' + areaIdx + '-' + actionIdx);
+  const textEl = document.getElementById('ap-text-' + areaIdx + '-' + actionIdx);
   if (!row || !textEl) return;
-  // Replace text div with input
   const input = document.createElement('input');
   input.type = 'text';
   input.className = 'ap-action-input';
-  input.value = area.action || '';
-  input.placeholder = 'What\'s your +1 action for this area?';
+  input.value = act.text || '';
+  input.placeholder = 'What\'s your action for this area?';
   textEl.replaceWith(input);
   input.focus();
-  // Replace Edit button with Save
   const btns = row.querySelector('.ap-item-btns');
   const editBtn = btns.querySelector('button');
   editBtn.textContent = 'Save';
-  editBtn.onclick = () => saveAction(idx, input.value);
-  input.addEventListener('keydown', e => { if (e.key === 'Enter') saveAction(idx, input.value); });
+  editBtn.onclick = () => saveAction(areaIdx, actionIdx, input.value);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') saveAction(areaIdx, actionIdx, input.value); });
 }
 
-function saveAction(idx, value) {
+function saveAction(areaIdx, actionIdx, value) {
   const data = JSON.parse(localStorage.getItem('tlr_wheel_data'));
-  data.areas[idx].action = value.trim();
+  data.areas[areaIdx].actions[actionIdx].text = value.trim();
   localStorage.setItem('tlr_wheel_data', JSON.stringify(data));
   renderActionPlan(data);
 }
 
-function addToCalendar(idx) {
+function addToCalendar(areaIdx, actionIdx) {
   const data = JSON.parse(localStorage.getItem('tlr_wheel_data'));
-  const area = data.areas[idx];
-  if (!area.action) return;
-  const title = encodeURIComponent('[TLR] ' + area.name + ': ' + area.action);
+  const area = data.areas[areaIdx];
+  const act = area.actions[actionIdx];
+  if (!act || !act.text) return;
+  const title = encodeURIComponent('[TLR] ' + area.name + ': ' + act.text);
   const details = encodeURIComponent(
     'Balance Wheel action — ' + area.name + ' (' + area.score + '/10 satisfaction)\n\n' +
     (area.vision ? 'My 10/10 vision: ' + area.vision : '')
   );
-  // One week from today
   const d = new Date(); d.setDate(d.getDate() + 7);
   const ds = d.toISOString().replace(/[-:]/g,'').slice(0,15) + 'Z';
-  const url = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + title + '&details=' + details + '&dates=' + ds + '/' + ds;
-  window.open(url, '_blank');
-  const hint = document.getElementById('ap-cal-hint-' + idx);
-  if (hint) { hint.style.display = 'block'; setTimeout(() => hint.style.display = 'none', 3000); }
+  window.open('https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + title + '&details=' + details + '&dates=' + ds + '/' + ds, '_blank');
+}
+
+// ── REMINDERS ────────────────────────────
+function toggleReminderPopup(areaIdx, actionIdx) {
+  document.querySelectorAll('.reminder-popup').forEach(p => {
+    if (p.id !== 'rp-' + areaIdx + '-' + actionIdx) p.classList.remove('open');
+  });
+  const popup = document.getElementById('rp-' + areaIdx + '-' + actionIdx);
+  if (popup) popup.classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.reminder-wrap')) {
+    document.querySelectorAll('.reminder-popup').forEach(p => p.classList.remove('open'));
+  }
+});
+
+function setReminder(areaIdx, actionIdx, daysFromNow) {
+  const data = JSON.parse(localStorage.getItem('tlr_wheel_data'));
+  const d = new Date();
+  d.setDate(d.getDate() + daysFromNow);
+  data.areas[areaIdx].actions[actionIdx].reminder = d.toISOString().slice(0,10);
+  localStorage.setItem('tlr_wheel_data', JSON.stringify(data));
+  const popup = document.getElementById('rp-' + areaIdx + '-' + actionIdx);
+  if (popup) popup.classList.remove('open');
+  renderActionPlan(data);
+}
+
+function formatReminderDate(dateStr) {
+  return 'Reminder: ' + new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+function checkReminders() {
+  const data = JSON.parse(localStorage.getItem('tlr_wheel_data') || 'null');
+  if (!data) return;
+  const today = new Date().toISOString().slice(0,10);
+  const due = [];
+  data.areas.forEach(area => {
+    (area.actions || []).forEach(act => {
+      if (act.reminder && act.reminder <= today && !act.done) {
+        due.push(area.name + ': ' + act.text);
+      }
+    });
+  });
+  if (due.length > 0) {
+    const banner = document.getElementById('reminder-banner');
+    banner.textContent = '🔔 Reminder: ' + due.join(' · ');
+    banner.classList.add('show');
+    setTimeout(() => banner.classList.remove('show'), 12000);
+  }
 }
 
 // ── SHARE / EXPORT ───────────────────────
@@ -845,7 +1107,9 @@ function emailActions() {
   data.areas.forEach(a => {
     body += a.name.toUpperCase() + '  —  ' + a.score + '/10 satisfaction\n';
     if (a.vision) body += 'My 10/10: ' + a.vision + '\n';
-    if (a.action) body += 'My +1 action: ' + a.action + '\n';
+    (a.actions || []).forEach((act, j) => {
+      if (act.text) body += 'Action ' + (j+1) + ': ' + act.text + (act.done ? ' ✓' : '') + '\n';
+    });
     body += '\n';
   });
   window.location.href = 'mailto:?subject=My%20Balance%20Wheel%20Action%20Plan&body=' + encodeURIComponent(body);
@@ -855,13 +1119,14 @@ function downloadActions() {
   const data = JSON.parse(localStorage.getItem('tlr_wheel_data'));
   if (!data) return;
   let text = 'MY BALANCE WHEEL ACTION PLAN\n';
-  text += new Date().toLocaleDateString('en-GB') + '\n';
-  text += '================================\n\n';
+  text += new Date().toLocaleDateString('en-GB') + '\n================================\n\n';
   data.areas.forEach(a => {
     text += a.name.toUpperCase() + '  —  ' + a.score + '/10 satisfaction\n';
     if (a.vision) text += 'When this is a 10: ' + a.vision + '\n';
-    if (a.action) text += 'My +1 action: ' + a.action + '\n';
-    text += (a.actionDone ? '✓ Done' : '○ Not yet') + '\n\n';
+    (a.actions || []).forEach((act, j) => {
+      if (act.text) text += 'Action ' + (j+1) + ': ' + act.text + ' ' + (act.done ? '✓ Done' : '○ Not yet') + '\n';
+    });
+    text += '\n';
   });
   const blob = new Blob([text], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
@@ -876,9 +1141,98 @@ function shareActions() {
   if (!data) return;
   let text = 'My Balance Wheel action plan:\n\n';
   data.areas.forEach(a => {
-    text += a.name + ' (' + a.score + '/10): ' + (a.action || 'action TBC') + '\n';
+    const acts = (a.actions || []).filter(x => x.text).map(x => x.text).join(', ');
+    text += a.name + ' (' + a.score + '/10): ' + (acts || 'actions TBC') + '\n';
   });
   navigator.share({ title: 'My Balance Wheel', text });
+}
+
+// ── PROGRESS STATS ───────────────────────
+function renderProgressStats(data) {
+  const el = document.getElementById('progress-stats');
+  if (!el) return;
+  const totalActions = data.areas.reduce((s, a) => s + (a.actions || []).filter(x => x.text).length, 0);
+  const doneCount = data.areas.reduce((s, a) => s + (a.actions || []).filter(x => x.done).length, 0);
+  let improvement = 0;
+  if (data.checkins && data.checkins.length > 1) {
+    const first = data.checkins[0].scores;
+    const last  = data.checkins[data.checkins.length - 1].scores;
+    improvement = (last.reduce((a,b)=>a+b,0) - first.reduce((a,b)=>a+b,0)) / first.length;
+  }
+  const days = Math.max(0, Math.round((Date.now() - new Date(data.setupDate)) / 86400000));
+  const avg = (data.areas.reduce((s,a)=>s+a.score,0) / data.areas.length).toFixed(1);
+  el.innerHTML = `
+    <div class="ps-chip"><div class="ps-chip-num">${avg}</div><div class="ps-chip-label">Avg satisfaction</div></div>
+    <div class="ps-chip"><div class="ps-chip-num">${doneCount}/${totalActions}</div><div class="ps-chip-label">Actions done</div></div>
+    <div class="ps-chip"><div class="ps-chip-num">${days}</div><div class="ps-chip-label">Days in</div></div>
+    ${improvement !== 0 ? `<div class="ps-chip"><div class="ps-chip-num" style="color:${improvement>0?'#4DB87A':'#E85B3A'}">${improvement>0?'+':''}${improvement.toFixed(1)}</div><div class="ps-chip-label">Score shift</div></div>` : ''}`;
+}
+
+// ── EDIT WHEEL ───────────────────────────
+function openEditWheel() {
+  const data = JSON.parse(localStorage.getItem('tlr_wheel_data'));
+  if (!data) return;
+  const rows = document.getElementById('edit-rows');
+  rows.innerHTML = '';
+  data.areas.forEach((area, i) => {
+    const actions = area.actions || [{text:'',commitment:3},{text:'',commitment:3},{text:'',commitment:3}];
+    const actInputs = [0,1,2].map(j => {
+      const act = actions[j] || {text:'',commitment:3};
+      return `<input type="text" class="ap-action-input" id="edit-action-${i}-${j}" value="${(act.text||'').replace(/"/g,'&quot;')}"
+        placeholder="Action ${j+1}" style="width:100%;margin-bottom:0.4rem">`;
+    }).join('');
+    rows.innerHTML += `
+      <div style="border-bottom:1px solid var(--border);padding:1.25rem 0;${i===0?'padding-top:0':''}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem">
+          <strong style="font-family:'Playfair Display',serif;font-size:1.05rem">${area.name}</strong>
+          <span style="font-size:1.1rem;font-weight:700;color:var(--gold)" id="edit-score-${i}">${area.score}</span>
+        </div>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;font-style:italic">What is my level of satisfaction with this area right now?</div>
+        <input type="range" class="checkin-slider" min="1" max="10" value="${area.score}"
+               oninput="document.getElementById('edit-score-${i}').textContent=this.value" id="edit-slider-${i}">
+        <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:var(--text-muted);margin-top:0.25rem;margin-bottom:0.9rem">
+          <span>1 · Very unsatisfied</span><span>10 · Completely satisfied</span>
+        </div>
+        <label style="font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.5rem">My three +1 actions</label>
+        ${actInputs}
+        <label style="font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.35rem;margin-top:0.5rem">My 10/10 vision</label>
+        <textarea id="edit-vision-${i}" class="define-textarea" style="min-height:60px;margin-bottom:0"
+          placeholder="What does 10/10 feel like for this area?">${area.vision || ''}</textarea>
+      </div>`;
+  });
+  document.getElementById('edit-overlay').classList.add('active');
+}
+
+function closeEditWheel() { document.getElementById('edit-overlay').classList.remove('active'); }
+
+function saveEditWheel() {
+  const data = JSON.parse(localStorage.getItem('tlr_wheel_data'));
+  const today = new Date().toISOString().slice(0, 10);
+  const newScores = data.areas.map((_, i) => parseInt(document.getElementById('edit-slider-' + i).value));
+  const scoresChanged = data.areas.some((a, i) => a.score !== newScores[i]);
+
+  data.areas.forEach((area, i) => {
+    area.score = newScores[i];
+    area.vision = document.getElementById('edit-vision-' + i).value.trim();
+    if (!area.actions) area.actions = [{text:'',done:false,commitment:3,completedActions:[],reminder:null},{text:'',done:false,commitment:3,completedActions:[],reminder:null},{text:'',done:false,commitment:3,completedActions:[],reminder:null}];
+    [0,1,2].forEach(j => {
+      const newText = (document.getElementById('edit-action-' + i + '-' + j) || {value:''}).value.trim();
+      if (newText !== area.actions[j].text) {
+        area.actions[j].text = newText;
+        area.actions[j].done = false;
+      }
+    });
+  });
+  data.lastCheckin = today;
+  if (scoresChanged) {
+    if (!data.checkins) data.checkins = [];
+    data.checkins.push({ date: today, scores: newScores });
+  }
+
+  localStorage.setItem('tlr_wheel_data', JSON.stringify(data));
+  closeEditWheel();
+  document.getElementById('wheel-view').classList.remove('active');
+  showWheelView(data);
 }
 
 // ── CHECK-IN ─────────────────────────────
@@ -894,6 +1248,7 @@ function openCheckin() {
           <span>${area.name}</span>
           <span class="checkin-row-score" id="ci-score-${i}">${area.score}</span>
         </div>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.4rem;font-style:italic">My level of satisfaction right now</div>
         <input type="range" class="checkin-slider" min="1" max="10" value="${area.score}"
                oninput="document.getElementById('ci-score-${i}').textContent=this.value">
       </div>`;
@@ -901,16 +1256,14 @@ function openCheckin() {
   document.getElementById('checkin-overlay').classList.add('active');
 }
 
-function closeCheckin() {
-  document.getElementById('checkin-overlay').classList.remove('active');
-}
+function closeCheckin() { document.getElementById('checkin-overlay').classList.remove('active'); }
 
 function saveCheckin() {
   const data = JSON.parse(localStorage.getItem('tlr_wheel_data'));
   const sliders = document.querySelectorAll('.checkin-slider');
   const today = new Date().toISOString().slice(0, 10);
   const newScores = Array.from(sliders).map(s => parseInt(s.value));
-  data.areas.forEach((area, i) => { area.score = newScores[i]; area.actionDone = false; });
+  data.areas.forEach((area, i) => { area.score = newScores[i]; });
   data.lastCheckin = today;
   if (!data.checkins) data.checkins = [];
   data.checkins.push({ date: today, scores: newScores });
@@ -920,113 +1273,95 @@ function saveCheckin() {
   showWheelView(data);
 }
 
+// ── REPLACE AREA ─────────────────────────
+let replaceFromIdx = -1;
+let replaceNewArea = '';
 
-// ── PROGRESS STATS ───────────────────────
-function renderProgressStats(data) {
-  const el = document.getElementById('progress-stats');
-  if (!el) return;
-
-  // Actions completed
-  const doneCount = data.areas.filter(a => a.actionDone).length;
-
-  // Score improvement since baseline
-  let improvement = 0;
-  if (data.checkins && data.checkins.length > 1) {
-    const first = data.checkins[0].scores;
-    const last  = data.checkins[data.checkins.length - 1].scores;
-    improvement = (last.reduce((a,b)=>a+b,0) - first.reduce((a,b)=>a+b,0)) / first.length;
-  }
-
-  // Days since setup
-  const days = Math.max(0, Math.round((Date.now() - new Date(data.setupDate)) / 86400000));
-
-  // Avg satisfaction
-  const avg = (data.areas.reduce((s,a)=>s+a.score,0) / data.areas.length).toFixed(1);
-
-  el.innerHTML = `
-    <div class="ps-chip">
-      <div class="ps-chip-num">${avg}</div>
-      <div class="ps-chip-label">Avg satisfaction</div>
-    </div>
-    <div class="ps-chip">
-      <div class="ps-chip-num">${doneCount}/${data.areas.length}</div>
-      <div class="ps-chip-label">Actions done</div>
-    </div>
-    <div class="ps-chip">
-      <div class="ps-chip-num">${days}</div>
-      <div class="ps-chip-label">Days in</div>
-    </div>
-    ${improvement !== 0 ? `<div class="ps-chip">
-      <div class="ps-chip-num" style="color:${improvement>0?'#4DB87A':'#E85B3A'}">${improvement>0?'+':''}${improvement.toFixed(1)}</div>
-      <div class="ps-chip-label">Score shift</div>
-    </div>` : ''}`;
+function openReplaceArea() {
+  replaceFromIdx = -1;
+  replaceNewArea = '';
+  showReplaceStepA();
+  document.getElementById('replace-overlay').classList.add('active');
 }
 
-// ── EDIT WHEEL ───────────────────────────
-function openEditWheel() {
+function closeReplaceArea() {
+  document.getElementById('replace-overlay').classList.remove('active');
+}
+
+function showReplaceStepA() {
+  document.getElementById('replace-step-a').classList.add('active');
+  document.getElementById('replace-step-b').classList.remove('active');
   const data = JSON.parse(localStorage.getItem('tlr_wheel_data'));
-  if (!data) return;
-  const rows = document.getElementById('edit-rows');
-  rows.innerHTML = '';
+  const list = document.getElementById('replace-current-list');
+  list.innerHTML = '';
   data.areas.forEach((area, i) => {
-    rows.innerHTML += `
-      <div style="border-bottom:1px solid var(--border);padding:1.25rem 0;${i===0?'padding-top:0':''}">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem">
-          <strong style="font-family:'Playfair Display',serif;font-size:1.05rem">${area.name}</strong>
-          <span style="font-size:1.1rem;font-weight:700;color:var(--gold)" id="edit-score-${i}">${area.score}</span>
-        </div>
-        <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;font-style:italic">How satisfied am I with this area right now?</div>
-        <input type="range" class="checkin-slider" min="1" max="10" value="${area.score}"
-               oninput="document.getElementById('edit-score-${i}').textContent=this.value" id="edit-slider-${i}">
-        <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:var(--text-muted);margin-top:0.25rem;margin-bottom:0.9rem">
-          <span>1 · Very unsatisfied</span><span>10 · Completely satisfied</span>
-        </div>
-        <label style="font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.35rem">My +1 action</label>
-        <input type="text" class="ap-action-input" id="edit-action-${i}" value="${area.action || ''}"
-               placeholder="What one action would move this forward?" style="width:100%;margin-bottom:0.75rem">
-        <label style="font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.35rem">My 10/10 vision</label>
-        <textarea id="edit-vision-${i}" class="define-textarea" style="min-height:60px;margin-bottom:0"
-          placeholder="What does 10/10 feel like for this area?">${area.vision || ''}</textarea>
-      </div>`;
+    const opt = document.createElement('div');
+    opt.className = 'replace-area-option';
+    opt.innerHTML = `<div style="width:14px;height:14px;border-radius:50%;background:${COLORS[i%COLORS.length]};flex-shrink:0"></div><span style="font-size:0.9rem">${area.name}</span><span style="margin-left:auto;font-size:0.78rem;color:var(--text-muted)">${area.score}/10</span>`;
+    opt.onclick = () => {
+      replaceFromIdx = i;
+      showReplaceStepB(data);
+    };
+    list.appendChild(opt);
   });
-  document.getElementById('edit-overlay').classList.add('active');
 }
 
-function closeEditWheel() {
-  document.getElementById('edit-overlay').classList.remove('active');
+function showReplaceStepB(data) {
+  document.getElementById('replace-step-a').classList.remove('active');
+  document.getElementById('replace-step-b').classList.add('active');
+  replaceNewArea = '';
+  document.getElementById('btn-replace-confirm').disabled = true;
+
+  const currentNames = data.areas.map(a => a.name);
+  const grid = document.getElementById('replace-new-grid');
+  grid.innerHTML = '';
+  [...PRESET_AREAS, ...INSPIRATION_AREAS].filter((v, i, a) => a.indexOf(v) === i)
+    .filter(a => !currentNames.includes(a))
+    .slice(0, 24)
+    .forEach(area => {
+      const chip = document.createElement('div');
+      chip.className = 'area-chip';
+      chip.innerHTML = `<div class="area-chip-check"></div><div class="area-chip-name">${area}</div>`;
+      chip.onclick = () => {
+        grid.querySelectorAll('.area-chip').forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        replaceNewArea = area;
+        document.getElementById('btn-replace-confirm').disabled = false;
+      };
+      grid.appendChild(chip);
+    });
 }
 
-function saveEditWheel() {
+function addReplaceCustom() {
+  const input = document.getElementById('replace-custom-input');
+  const name = input.value.trim();
+  if (!name) return;
+  replaceNewArea = name;
+  const grid = document.getElementById('replace-new-grid');
+  grid.querySelectorAll('.area-chip').forEach(c => c.classList.remove('selected'));
+  const chip = document.createElement('div');
+  chip.className = 'area-chip selected';
+  chip.innerHTML = `<div class="area-chip-check"></div><div class="area-chip-name">${name}</div>`;
+  grid.prepend(chip);
+  input.value = '';
+  document.getElementById('btn-replace-confirm').disabled = false;
+}
+
+function confirmReplaceArea() {
+  if (replaceFromIdx < 0 || !replaceNewArea) return;
   const data = JSON.parse(localStorage.getItem('tlr_wheel_data'));
-  const today = new Date().toISOString().slice(0, 10);
-  const newScores = data.areas.map((_, i) => parseInt(document.getElementById('edit-slider-' + i).value));
-  const scoresChanged = data.areas.some((a, i) => a.score !== newScores[i]);
-
-  data.areas.forEach((area, i) => {
-    area.score  = newScores[i];
-    area.action = document.getElementById('edit-action-' + i).value.trim();
-    area.vision = document.getElementById('edit-vision-' + i).value.trim();
-    area.actionDone = false; // reset done when action text changes
-  });
-  data.lastCheckin = today;
-
-  // Record as a check-in if scores changed
-  if (scoresChanged) {
-    if (!data.checkins) data.checkins = [];
-    data.checkins.push({ date: today, scores: newScores });
-  }
-
+  const oldArea = data.areas[replaceFromIdx];
+  data.areas[replaceFromIdx] = {
+    name: replaceNewArea,
+    score: 5,
+    vision: '',
+    actions: [{text:'',done:false,commitment:3,completedActions:[],reminder:null},{text:'',done:false,commitment:3,completedActions:[],reminder:null},{text:'',done:false,commitment:3,completedActions:[],reminder:null}]
+  };
   localStorage.setItem('tlr_wheel_data', JSON.stringify(data));
-  closeEditWheel();
+  closeReplaceArea();
   document.getElementById('wheel-view').classList.remove('active');
   showWheelView(data);
-}
-
-function confirmReset() {
-  if (!confirm('This will permanently delete your Balance Wheel, all your actions, and your history. Are you absolutely sure?')) return;
-  if (!confirm('Last chance — delete everything?')) return;
-  localStorage.removeItem('tlr_wheel_data');
-  location.reload();
+  alert('Done — ' + oldArea.name + ' has been replaced with ' + replaceNewArea + '. Head to Edit My Wheel to rate your satisfaction and set some actions.');
 }
 
 // ── HISTORY ──────────────────────────────
