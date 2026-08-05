@@ -833,6 +833,24 @@ function showWheelView(data) {
   renderActionPlan(data);
 
   if (data.checkins && data.checkins.length > 1) renderHistory(data);
+
+  // Scroll to & highlight a specific area if linked from the dashboard
+  const urlArea = new URLSearchParams(window.location.search).get('area');
+  if (urlArea !== null) {
+    const idx = parseInt(urlArea, 10);
+    if (!isNaN(idx)) {
+      setTimeout(() => {
+        const el = document.getElementById('ap-area-' + idx);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.style.transition = 'box-shadow 0.3s';
+          el.style.boxShadow = '0 0 0 3px var(--gold)';
+          el.style.borderRadius = '8px';
+          setTimeout(() => { el.style.boxShadow = ''; }, 2200);
+        }
+      }, 350);
+    }
+  }
 }
 
 // ── SVG WHEEL ────────────────────────────

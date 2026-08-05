@@ -135,17 +135,35 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .entry-modal-header { padding: 1.5rem 2rem 1rem; border-bottom: 1px solid var(--border); }
 .entry-modal-date { font-size: 0.72rem; color: var(--gold); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.4rem; }
 .entry-modal-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 400; }
-.entry-modal-body { padding: 1.5rem 2rem; font-size: 0.95rem; line-height: 1.85; color: var(--text-mid); white-space: pre-wrap; max-height: 60vh; overflow-y: auto; }
-.entry-modal-footer { padding: 1rem 2rem; border-top: 1px solid var(--border); display: flex; gap: 0.75rem; }
+.entry-modal-title-input { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 400; width: 100%; border: none; border-bottom: 2px solid var(--gold); outline: none; background: transparent; padding-bottom: 0.25rem; color: var(--text-dark); }
+.entry-modal-body { padding: 1.5rem 2rem; font-size: 0.95rem; line-height: 1.85; color: var(--text-mid); white-space: pre-wrap; max-height: 55vh; overflow-y: auto; }
+.entry-modal-body-textarea { width: 100%; padding: 1.5rem 2rem; font-family: 'Inter', sans-serif; font-size: 0.95rem; line-height: 1.85; color: var(--text-dark); border: none; outline: none; background: transparent; resize: vertical; min-height: 280px; display: block; }
+.entry-modal-footer { padding: 1rem 2rem; border-top: 1px solid var(--border); display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+.entry-modal-footer-right { margin-left: auto; display: flex; gap: 0.6rem; flex-wrap: wrap; }
 .btn-close-modal { background: var(--cream-dark); color: var(--text-mid); border: 1px solid var(--border); padding: 0.6rem 1.25rem; border-radius: 4px; font-size: 0.82rem; cursor: pointer; font-family: 'Inter', sans-serif; }
+.btn-close-modal:hover { border-color: var(--text-muted); }
+.share-wrap { position: relative; display: inline-block; }
+.share-popup { position: absolute; bottom: 100%; right: 0; margin-bottom: 0.4rem; background: var(--white); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); min-width: 180px; display: none; z-index: 10; }
+.share-popup.open { display: block; }
+.share-popup button { display: flex; align-items: center; gap: 0.6rem; width: 100%; text-align: left; padding: 0.55rem 0.9rem; font-size: 0.82rem; background: none; border: none; cursor: pointer; color: var(--text-mid); font-family: 'Inter', sans-serif; }
+.share-popup button:hover { background: var(--cream); color: var(--text-dark); }
+.share-popup button:first-child { border-radius: 6px 6px 0 0; }
+.share-popup button:last-child { border-radius: 0 0 6px 6px; }
+.copy-confirm { font-size: 0.75rem; color: var(--gold); display: none; }
+.copy-confirm.show { display: inline; }
 
-/* ── WHEEL SNAPSHOT ─────────────────── */
-.wheel-snapshot { background: var(--white); border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: 6px; padding: 1rem 1.25rem; margin-bottom: 1.75rem; }
-.wheel-snapshot-label { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 0.6rem; }
-.wheel-snapshot-areas { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.wheel-snapshot-chip { font-size: 0.75rem; padding: 0.3rem 0.75rem; background: var(--cream); border: 1px solid var(--border); border-radius: 20px; display: flex; align-items: center; gap: 0.4rem; }
-.wheel-snapshot-score { font-weight: 700; color: var(--gold); }
-.wheel-snapshot-none { font-size: 0.82rem; color: var(--text-muted); font-style: italic; }
+/* ── PROMPT + WHEEL LAYOUT ──────────── */
+.prompt-outer { display: flex; gap: 1.5rem; align-items: flex-start; margin-bottom: 1.75rem; }
+.prompt-outer .prompt-section { flex: 1; min-width: 0; margin-bottom: 0; }
+.wheel-panel { width: 260px; flex-shrink: 0; background: var(--navy); border-radius: 8px; padding: 1.25rem; border-bottom: 3px solid var(--gold); }
+.wheel-panel-label { font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.38); margin-bottom: 0.85rem; }
+.wheel-panel-svg { width: 100%; margin-bottom: 1rem; display: block; }
+.wheel-panel-area { display: flex; align-items: center; gap: 0.5rem; padding: 0.28rem 0; }
+.wheel-panel-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.wheel-panel-name { font-size: 0.76rem; color: rgba(255,255,255,0.65); flex: 1; }
+.wheel-panel-score { font-size: 0.8rem; font-weight: 700; }
+.wheel-panel-none { font-size: 0.82rem; color: rgba(255,255,255,0.4); font-style: italic; }
+@media (max-width: 680px) { .prompt-outer { flex-direction: column; } .wheel-panel { width: 100%; } }
 </style>
 </head>
 <body>
@@ -186,13 +204,8 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
     <div class="journal-sub">Prompted, guided, and personal — a space to think out loud.</div>
   </div>
 
-  <!-- Wheel snapshot (shows if wheel is set up) -->
-  <div class="wheel-snapshot" id="wheel-snapshot" style="display:none">
-    <div class="wheel-snapshot-label">From your Balance Wheel</div>
-    <div class="wheel-snapshot-areas" id="wheel-snapshot-areas"></div>
-  </div>
-
-  <!-- Prompt Generator -->
+  <!-- Prompt Generator + optional Wheel Panel -->
+  <div class="prompt-outer">
   <div class="prompt-section">
     <div class="prompt-section-label">Choose your prompt source, then press Generate Prompt to begin</div>
     <div class="prompt-type-tabs">
@@ -207,7 +220,16 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
       <button class="btn-get-prompt" onclick="getNewPrompt()">✦ Generate Prompt</button>
       <button class="btn-use-prompt" onclick="usePrompt()">Use this prompt →</button>
     </div>
+  </div><!-- /prompt-section -->
+
+  <!-- Wheel Panel (visible only when From My Wheel tab is active) -->
+  <div class="wheel-panel" id="wheel-panel" style="display:none">
+    <div class="wheel-panel-label">Your Balance Wheel</div>
+    <svg id="wheel-panel-svg" class="wheel-panel-svg" viewBox="0 0 220 220"></svg>
+    <div id="wheel-panel-areas"></div>
   </div>
+
+  </div><!-- /prompt-outer -->
 
   <!-- Writing Area -->
   <div class="writing-section">
@@ -243,10 +265,33 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
     <div class="entry-modal-header">
       <div class="entry-modal-date" id="modal-date"></div>
       <div class="entry-modal-title" id="modal-title"></div>
+      <input type="text" class="entry-modal-title-input" id="modal-title-input" style="display:none" placeholder="Entry title…">
     </div>
     <div class="entry-modal-body" id="modal-body"></div>
+    <textarea class="entry-modal-body-textarea" id="modal-body-textarea" style="display:none"></textarea>
     <div class="entry-modal-footer">
-      <button class="btn-close-modal" onclick="closeEntry()">Close</button>
+      <button class="btn-close-modal" id="modal-cancel-btn" onclick="closeEntry()">Close</button>
+      <span class="copy-confirm" id="copy-confirm">Copied ✓</span>
+      <div class="entry-modal-footer-right">
+        <!-- View mode buttons -->
+        <div id="modal-view-btns" style="display:flex;gap:0.6rem;flex-wrap:wrap">
+          <button class="btn-sm" onclick="enterEditMode()">✏ Edit</button>
+          <div class="share-wrap">
+            <button class="btn-sm gold" onclick="toggleSharePopup()">↗ Send to myself</button>
+            <div class="share-popup" id="share-popup">
+              <button onclick="shareViaEmail()">✉ Send by Email</button>
+              <button onclick="shareViaWhatsApp()">💬 Send on WhatsApp</button>
+              <button onclick="shareViaNative()" id="btn-native-share" style="display:none">⬆ Share…</button>
+              <button onclick="copyToClipboard()">⎘ Copy to clipboard</button>
+            </div>
+          </div>
+        </div>
+        <!-- Edit mode buttons -->
+        <div id="modal-edit-btns" style="display:none;gap:0.6rem;flex-wrap:wrap">
+          <button class="btn-primary" style="padding:0.6rem 1.25rem;font-size:0.82rem" onclick="saveEditedEntry()">Save changes</button>
+          <button class="btn-close-modal" onclick="cancelEditMode()">Cancel</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -328,7 +373,6 @@ let wheelData = null;
   const saved = localStorage.getItem('tlr_wheel_data');
   if (saved) {
     wheelData = JSON.parse(saved);
-    renderWheelSnapshot();
   }
 
   // Load entries
@@ -362,23 +406,72 @@ function saveDraft() {
   localStorage.setItem('tlr_journal_draft', JSON.stringify(draft));
 }
 
-// ── WHEEL SNAPSHOT ────────────────────────
-function renderWheelSnapshot() {
-  if (!wheelData) return;
-  const snap = document.getElementById('wheel-snapshot');
-  const areas = document.getElementById('wheel-snapshot-areas');
-  snap.style.display = 'block';
-  areas.innerHTML = wheelData.areas.map(a =>
-    `<div class="wheel-snapshot-chip"><span>${a.name}</span><span class="wheel-snapshot-score">${a.score}</span></div>`
-  ).join('');
-}
+// ── MINI WHEEL COLOURS ────────────────────
+const J_COLORS = ['#E8A800','#E85B3A','#2AB5A0','#7C5CBF','#3A8FD9','#4DB87A','#D95B8F','#E87A3A'];
 
 // ── PROMPT GENERATOR ─────────────────────
 function setPromptType(type, btn) {
   promptType = type;
   document.querySelectorAll('.prompt-type-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
+  const panel = document.getElementById('wheel-panel');
+  if (type === 'wheel' && wheelData) {
+    panel.style.display = '';
+    renderWheelPanel();
+  } else {
+    panel.style.display = 'none';
+  }
   getNewPrompt();
+}
+
+// ── WHEEL PANEL ───────────────────────────
+function renderWheelPanel() {
+  if (!wheelData) return;
+  const areas = wheelData.areas;
+
+  // Mini SVG wheel
+  const cx = 110, cy = 110, maxR = 90;
+  const n = areas.length;
+  const angleStep = (2 * Math.PI) / n;
+  const startAngle = -Math.PI / 2;
+  const gap = 0.025;
+  let svgContent = '';
+  areas.forEach((area, i) => {
+    const color = J_COLORS[i % J_COLORS.length];
+    const sa = startAngle + i * angleStep + gap;
+    const ea = startAngle + (i + 1) * angleStep - gap;
+    svgContent += `<path d="${miniArc(cx,cy,maxR,sa,ea)}" fill="${color}" opacity="0.15"/>`;
+    const r = Math.max(3, (area.score / 10) * maxR);
+    svgContent += `<path d="${miniArc(cx,cy,r,sa,ea)}" fill="${color}" opacity="0.85"/>`;
+  });
+  [0.25,0.5,0.75].forEach(p => {
+    svgContent += `<circle cx="${cx}" cy="${cy}" r="${maxR*p}" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="0.8"/>`;
+  });
+  areas.forEach((_,i) => {
+    const a = startAngle + i * angleStep;
+    svgContent += `<line x1="${cx}" y1="${cy}" x2="${cx+Math.cos(a)*maxR}" y2="${cy+Math.sin(a)*maxR}" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>`;
+  });
+  svgContent += `<circle cx="${cx}" cy="${cy}" r="${maxR}" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>`;
+  svgContent += `<circle cx="${cx}" cy="${cy}" r="4" fill="white" opacity="0.7"/>`;
+  document.getElementById('wheel-panel-svg').innerHTML = svgContent;
+
+  // Scores list
+  document.getElementById('wheel-panel-areas').innerHTML = areas.map((a, i) => {
+    const color = J_COLORS[i % J_COLORS.length];
+    const scoreColor = a.score >= 7 ? '#4DB87A' : a.score >= 5 ? '#E8A800' : '#E85B3A';
+    return `<div class="wheel-panel-area">
+      <div class="wheel-panel-dot" style="background:${color}"></div>
+      <div class="wheel-panel-name">${a.name}</div>
+      <div class="wheel-panel-score" style="color:${scoreColor}">${a.score}/10</div>
+    </div>`;
+  }).join('');
+}
+
+function miniArc(cx, cy, r, sa, ea) {
+  const x1 = cx + r*Math.cos(sa), y1 = cy + r*Math.sin(sa);
+  const x2 = cx + r*Math.cos(ea), y2 = cy + r*Math.sin(ea);
+  const large = (ea - sa) > Math.PI ? 1 : 0;
+  return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z`;
 }
 
 function getNewPrompt() {
@@ -534,22 +627,133 @@ function renderEntries() {
 }
 
 // ── OPEN / CLOSE ENTRY ────────────────────
+let activeEntryId = null;
+
 function openEntry(id) {
   const entries = JSON.parse(localStorage.getItem('tlr_journal_entries') || '[]');
   const entry = entries.find(e => e.id === id);
   if (!entry) return;
+  activeEntryId = id;
   const d = new Date(entry.date);
   document.getElementById('modal-date').textContent =
     d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   document.getElementById('modal-title').textContent = entry.title;
   document.getElementById('modal-body').textContent = entry.body;
+  // ensure view mode
+  document.getElementById('modal-title').style.display = '';
+  document.getElementById('modal-title-input').style.display = 'none';
+  document.getElementById('modal-body').style.display = '';
+  document.getElementById('modal-body-textarea').style.display = 'none';
+  document.getElementById('modal-view-btns').style.display = 'flex';
+  document.getElementById('modal-edit-btns').style.display = 'none';
+  document.getElementById('modal-cancel-btn').textContent = 'Close';
+  document.getElementById('modal-cancel-btn').onclick = closeEntry;
+  // show native share button if available
+  if (navigator.share) document.getElementById('btn-native-share').style.display = '';
   document.getElementById('entry-overlay').classList.add('active');
 }
 
 function closeEntry() {
   document.getElementById('entry-overlay').classList.remove('active');
+  document.getElementById('share-popup').classList.remove('open');
+  activeEntryId = null;
 }
 
+// ── EDIT MODE ─────────────────────────────
+function enterEditMode() {
+  const entries = JSON.parse(localStorage.getItem('tlr_journal_entries') || '[]');
+  const entry = entries.find(e => e.id === activeEntryId);
+  if (!entry) return;
+  document.getElementById('modal-title').style.display = 'none';
+  document.getElementById('modal-title-input').style.display = '';
+  document.getElementById('modal-title-input').value = entry.title;
+  document.getElementById('modal-body').style.display = 'none';
+  document.getElementById('modal-body-textarea').style.display = '';
+  document.getElementById('modal-body-textarea').value = entry.body;
+  document.getElementById('modal-view-btns').style.display = 'none';
+  document.getElementById('modal-edit-btns').style.display = 'flex';
+  document.getElementById('modal-cancel-btn').textContent = 'Cancel';
+  document.getElementById('modal-cancel-btn').onclick = cancelEditMode;
+  document.getElementById('modal-title-input').focus();
+}
+
+function cancelEditMode() {
+  document.getElementById('modal-title').style.display = '';
+  document.getElementById('modal-title-input').style.display = 'none';
+  document.getElementById('modal-body').style.display = '';
+  document.getElementById('modal-body-textarea').style.display = 'none';
+  document.getElementById('modal-view-btns').style.display = 'flex';
+  document.getElementById('modal-edit-btns').style.display = 'none';
+  document.getElementById('modal-cancel-btn').textContent = 'Close';
+  document.getElementById('modal-cancel-btn').onclick = closeEntry;
+}
+
+function saveEditedEntry() {
+  const newTitle = document.getElementById('modal-title-input').value.trim() || 'Untitled';
+  const newBody = document.getElementById('modal-body-textarea').value.trim();
+  if (!newBody) return;
+  let entries = JSON.parse(localStorage.getItem('tlr_journal_entries') || '[]');
+  const idx = entries.findIndex(e => e.id === activeEntryId);
+  if (idx === -1) return;
+  entries[idx].title = newTitle;
+  entries[idx].body = newBody;
+  entries[idx].words = newBody.split(/\s+/).length;
+  localStorage.setItem('tlr_journal_entries', JSON.stringify(entries));
+  // update view
+  document.getElementById('modal-title').textContent = newTitle;
+  document.getElementById('modal-body').textContent = newBody;
+  cancelEditMode();
+  renderEntries();
+}
+
+// ── SHARE / SEND ──────────────────────────
+function toggleSharePopup() {
+  document.getElementById('share-popup').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.share-wrap')) {
+    document.getElementById('share-popup').classList.remove('open');
+  }
+});
+
+function getActiveEntry() {
+  const entries = JSON.parse(localStorage.getItem('tlr_journal_entries') || '[]');
+  return entries.find(e => e.id === activeEntryId) || null;
+}
+
+function shareViaEmail() {
+  const e = getActiveEntry(); if (!e) return;
+  const subject = encodeURIComponent('My journal: ' + e.title);
+  const body = encodeURIComponent(e.title + '\n' + new Date(e.date).toLocaleDateString('en-GB') + '\n\n' + e.body);
+  window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
+  document.getElementById('share-popup').classList.remove('open');
+}
+
+function shareViaWhatsApp() {
+  const e = getActiveEntry(); if (!e) return;
+  const text = encodeURIComponent('*' + e.title + '*\n' + new Date(e.date).toLocaleDateString('en-GB') + '\n\n' + e.body);
+  window.open('https://wa.me/?text=' + text, '_blank');
+  document.getElementById('share-popup').classList.remove('open');
+}
+
+function shareViaNative() {
+  const e = getActiveEntry(); if (!e) return;
+  navigator.share({ title: e.title, text: e.body });
+  document.getElementById('share-popup').classList.remove('open');
+}
+
+function copyToClipboard() {
+  const e = getActiveEntry(); if (!e) return;
+  const text = e.title + '\n' + new Date(e.date).toLocaleDateString('en-GB') + '\n\n' + e.body;
+  navigator.clipboard.writeText(text).then(() => {
+    const el = document.getElementById('copy-confirm');
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2500);
+  });
+  document.getElementById('share-popup').classList.remove('open');
+}
+
+// ── DELETE ENTRY ──────────────────────────
 function deleteEntry(id) {
   if (!confirm('Delete this entry?')) return;
   let entries = JSON.parse(localStorage.getItem('tlr_journal_entries') || '[]');

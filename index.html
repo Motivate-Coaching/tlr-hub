@@ -66,6 +66,27 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
 a.tab-btn { text-decoration: none; display: inline-block; }
 
+/* ── WHEEL DASHBOARD SECTION ───────────────── */
+.wheel-dash-section { background: var(--navy-mid); padding: 2.25rem 2rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.wheel-dash-inner { max-width: 1100px; margin: 0 auto; }
+.wheel-dash-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap; }
+.wheel-dash-eyebrow { font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.35); font-weight: 500; margin-bottom: 0.3rem; }
+.wheel-dash-avg { font-family: 'Playfair Display', serif; font-size: 2.6rem; font-weight: 400; color: var(--gold); line-height: 1; }
+.wheel-dash-avg-label { font-size: 0.73rem; color: rgba(255,255,255,0.35); margin-top: 0.25rem; }
+.wheel-dash-link { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(255,255,255,0.38); text-decoration: none; border: 1px solid rgba(255,255,255,0.14); padding: 0.42rem 0.85rem; border-radius: 3px; transition: all 0.15s; white-space: nowrap; align-self: center; }
+.wheel-dash-link:hover { color: var(--gold); border-color: rgba(232,168,0,0.4); }
+.wheel-dash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0.65rem; }
+.wheel-dash-card { display: flex; align-items: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; overflow: hidden; text-decoration: none; transition: all 0.15s; cursor: pointer; }
+.wheel-dash-card:hover { background: rgba(255,255,255,0.07); border-color: rgba(232,168,0,0.28); transform: translateY(-1px); }
+.wheel-dash-bar { width: 4px; align-self: stretch; flex-shrink: 0; }
+.wheel-dash-body { flex: 1; padding: 0.8rem 0.85rem; min-width: 0; }
+.wheel-dash-name { font-size: 0.79rem; color: rgba(255,255,255,0.62); margin-bottom: 0.18rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wheel-dash-score { font-size: 1.18rem; font-weight: 700; line-height: 1; margin-bottom: 0.12rem; }
+.wheel-dash-actions { font-size: 0.62rem; color: rgba(255,255,255,0.25); }
+.wheel-dash-arrow { font-size: 0.82rem; color: rgba(255,255,255,0.18); padding-right: 0.7rem; transition: all 0.15s; }
+.wheel-dash-card:hover .wheel-dash-arrow { color: var(--gold); transform: translateX(2px); }
+@media (max-width: 600px) { .wheel-dash-grid { grid-template-columns: 1fr 1fr; } }
+
 /* ── HOME VIEW / NAV CARDS ───────────────── */
 .nav-buttons-section { background: var(--cream); padding: 2.5rem 2rem 3.5rem; }
 .nav-buttons-inner { max-width: 1100px; margin: 0 auto; }
@@ -1064,6 +1085,23 @@ footer a { color: var(--gold); text-decoration: none; }
     </div>
   </div>
 
+  <!-- ── WHEEL DASHBOARD ──────────────────────────────── -->
+  <div id="wheel-dashboard" style="display:none">
+    <div class="wheel-dash-section">
+      <div class="wheel-dash-inner">
+        <div class="wheel-dash-header">
+          <div>
+            <div class="wheel-dash-eyebrow">My Balance Wheel</div>
+            <div class="wheel-dash-avg" id="wd-avg">—</div>
+            <div class="wheel-dash-avg-label">overall satisfaction</div>
+          </div>
+          <a href="/my-wheel.html" class="wheel-dash-link">Open my wheel →</a>
+        </div>
+        <div class="wheel-dash-grid" id="wd-grid"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── NAV BUTTONS ────────────────────────────────── -->
   <section class="nav-buttons-section">
     <div class="nav-buttons-inner">
@@ -1745,6 +1783,38 @@ document.querySelectorAll('.tab-btn[data-view]').forEach(btn => {
     if (wsec) wsec.style.display = '';
     if (wavg) wavg.textContent = avg + '/10';
     if (wlbl) wlbl.textContent = doneCount + ' of ' + wd.areas.length + ' actions done';
+
+    // Populate full wheel dashboard section
+    const WD_COLORS = ['#E8A800','#E85B3A','#2AB5A0','#7C5CBF','#3A8FD9','#4DB87A','#D95B8F','#E87A3A'];
+    const wdSect = document.getElementById('wheel-dashboard');
+    const wdAvgEl = document.getElementById('wd-avg');
+    const wdGrid = document.getElementById('wd-grid');
+    if (wdSect && wdGrid) {
+      wdSect.style.display = '';
+      if (wdAvgEl) wdAvgEl.textContent = avg + '/10';
+      wdGrid.innerHTML = wd.areas.map((a, i) => {
+        const color = WD_COLORS[i % WD_COLORS.length];
+        const scoreColor = a.score >= 7 ? '#4DB87A' : a.score >= 5 ? '#E8A800' : '#E85B3A';
+        // Support both old (action) and new (actions[]) data models
+        let actionLabel = 'no actions yet';
+        if (a.actions && a.actions.length) {
+          const total = a.actions.filter(x => x.text).length;
+          const done = a.actions.filter(x => x.done).length;
+          if (total > 0) actionLabel = done + '/' + total + ' action' + (total !== 1 ? 's' : '') + ' done';
+        } else if (a.action) {
+          actionLabel = a.actionDone ? '✓ action done' : '1 action set';
+        }
+        return '<a href="/my-wheel.html?area=' + i + '" class="wheel-dash-card">' +
+          '<div class="wheel-dash-bar" style="background:' + color + '"></div>' +
+          '<div class="wheel-dash-body">' +
+            '<div class="wheel-dash-name">' + a.name + '</div>' +
+            '<div class="wheel-dash-score" style="color:' + scoreColor + '">' + a.score + '/10</div>' +
+            '<div class="wheel-dash-actions">' + actionLabel + '</div>' +
+          '</div>' +
+          '<div class="wheel-dash-arrow">→</div>' +
+        '</a>';
+      }).join('');
+    }
   }
 
   const journalCount = JSON.parse(localStorage.getItem('tlr_journal_entries') || '[]').length;
