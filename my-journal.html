@@ -65,11 +65,11 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 
 /* ── PROMPT CARD ────────────────────── */
 .prompt-section { background: var(--navy); border-radius: 8px; padding: 2rem 2.25rem; margin-bottom: 1.75rem; border-bottom: 3px solid var(--gold); }
-.prompt-section-label { font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.38); margin-bottom: 0.9rem; }
+.prompt-section-label { font-family: 'Playfair Display', serif; font-size: 1.45rem; font-weight: 400; color: rgba(255,255,255,0.72); margin-bottom: 1.1rem; line-height: 1.35; }
 .prompt-type-tabs { display: flex; gap: 0; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
-.prompt-type-btn { padding: 0.5rem 1rem; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.4); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+.prompt-type-btn { padding: 0.5rem 1rem; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.5); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
 .prompt-type-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
-.prompt-type-btn:hover { color: rgba(255,255,255,0.7); }
+.prompt-type-btn:hover { color: rgba(255,255,255,0.8); }
 .prompt-display { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 400; color: var(--white); line-height: 1.55; margin-bottom: 1.5rem; min-height: 3.5rem; }
 .prompt-context { font-size: 0.78rem; color: rgba(255,255,255,0.38); margin-bottom: 1.25rem; font-style: italic; }
 .prompt-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
@@ -201,7 +201,7 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
       <button class="prompt-type-btn" onclick="setPromptType('theme', this)">This Month's Theme</button>
       <button class="prompt-type-btn" onclick="setPromptType('deep', this)">Deeper Work</button>
     </div>
-    <div class="prompt-display" id="prompt-display" style="color:rgba(255,255,255,0.35);font-style:italic;font-size:1.1rem">Press "Generate Prompt" to get started — or write freely below.</div>
+    <div class="prompt-display" id="prompt-display" style="color:rgba(255,255,255,0.28);font-style:italic;font-size:1.05rem;font-family:'Inter',sans-serif;font-weight:300">Press "Generate Prompt" to get started — or write freely below.</div>
     <div class="prompt-context" id="prompt-context"></div>
     <div class="prompt-actions">
       <button class="btn-get-prompt" onclick="getNewPrompt()">✦ Generate Prompt</button>
