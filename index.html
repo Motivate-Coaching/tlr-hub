@@ -169,9 +169,9 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 
 /* ── DAILY GAME PROMO BANNER ─────────────── */
 .game-promo-banner {
-  background: linear-gradient(135deg, #0F1C2A 0%, #0A1520 100%);
-  border-bottom: 1px solid rgba(232,168,0,0.2);
-  border-top: 1px solid rgba(232,168,0,0.12);
+  background: #F2EBE0;
+  border-top: 1px solid #D4CBBE;
+  border-bottom: none;
 }
 .game-promo-inner {
   max-width: 1240px;
@@ -209,20 +209,27 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
   font-family: 'Playfair Display', serif;
   font-size: 1.55rem;
   font-weight: 600;
-  color: #fff;
-  margin-bottom: 0.35rem;
+  color: #1D1810;
+  margin-bottom: 0.2rem;
   line-height: 1.2;
+}
+.game-promo-title-sub {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #B8820A;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.5rem;
 }
 .game-promo-sub {
   font-size: 0.8rem;
-  color: rgba(255,255,255,0.45);
+  color: #7A6A58;
   line-height: 1.65;
   max-width: 460px;
   margin-bottom: 0.75rem;
 }
 .game-promo-stats {
   font-size: 0.72rem;
-  color: rgba(255,255,255,0.35);
+  color: #7A6A58;
   letter-spacing: 0.03em;
 }
 .game-promo-right {
@@ -255,14 +262,14 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .gp-tile {
   width: 32px; height: 32px;
   border-radius: 4px;
-  background: rgba(255,255,255,0.06);
-  border: 1.5px solid rgba(255,255,255,0.1);
+  background: #fff;
+  border: 1.5px solid #D4CBBE;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 13px;
   font-weight: 700;
-  color: rgba(255,255,255,0.5);
+  color: #1D1810;
   font-family: 'Inter', sans-serif;
   animation: tileFade 3s ease-in-out infinite;
 }
@@ -271,8 +278,8 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .gp-tile:nth-child(3) { animation-delay: 0.3s; }
 .gp-tile:nth-child(4) { animation-delay: 0.45s; }
 .gp-tile:nth-child(5) { animation-delay: 0.6s; }
-.gp-tile.c { background: rgba(83,141,78,0.35); border-color: rgba(83,141,78,0.5); color: #8FD48A; }
-.gp-tile.p { background: rgba(181,159,59,0.3); border-color: rgba(181,159,59,0.5); color: #D4BA5A; }
+.gp-tile.c { background: #538D4E; border-color: #538D4E; color: #fff; }
+.gp-tile.p { background: #B59F3B; border-color: #B59F3B; color: #fff; }
 @keyframes tileFade {
   0%,100% { opacity: 0.6; }
   50%      { opacity: 1; }
@@ -681,10 +688,6 @@ footer a { color: var(--gold); text-decoration: none; }
     </div>
   </div>
 
-  <div class="topic-bar">
-    <p>Current topic: My Momentum Playbook &nbsp;&middot;&nbsp; <a href="#building-momentum">Go to current theme</a></p>
-  </div>
-
   <!-- ── DAILY GAME PROMO ─────────────────────────── -->
   <div class="game-promo-banner">
     <div class="game-promo-inner">
@@ -693,7 +696,8 @@ footer a { color: var(--gold); text-decoration: none; }
           <span class="live-dot"></span>
           Daily · New word today
         </div>
-        <div class="game-promo-title">Quote of the Day</div>
+        <div class="game-promo-title">Guess Today's Missing Word</div>
+        <div class="game-promo-title-sub">Quote of the Day</div>
         <div class="game-promo-sub">A word is missing from today's quote — can you find it? Earn stars, keep your streak going.</div>
         <div class="game-promo-stats" id="gp-stats"></div>
       </div>
@@ -711,6 +715,10 @@ footer a { color: var(--gold); text-decoration: none; }
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="topic-bar">
+    <p>Current topic: My Momentum Playbook &nbsp;&middot;&nbsp; <a href="#building-momentum">Go to current theme</a></p>
   </div>
 
   <div class="page-layout">
