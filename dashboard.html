@@ -12,22 +12,22 @@
 <script>requireAuth();</script>
 <style>
 :root {
-  --navy:      #100E0B;
-  --navy-mid:  #1A1510;
-  --navy-card: #231D15;
-  --gold:      #E8A800;
-  --gold-lt:   #F5C842;
-  --cream:     #F5EFE4;
-  --muted:     #8A806E;
-  --border:    #2C241A;
-  --correct:   #4A7D45;
-  --present:   #A8903A;
-  --absent:    #3A3228;
+  --navy:      #F2EBE0;
+  --navy-mid:  #EAE2D4;
+  --navy-card: #CEC4B6;
+  --gold:      #B8820A;
+  --gold-lt:   #E8A800;
+  --cream:     #1D1810;
+  --muted:     #7A6A58;
+  --border:    #D4CBBE;
+  --correct:   #538D4E;
+  --present:   #B59F3B;
+  --absent:    #8A8278;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Poppins', sans-serif;
-  background: #0C0A08;
+  background: var(--navy);
   color: var(--cream);
   min-height: 100vh;
   display: flex;
@@ -39,7 +39,7 @@ body {
 /* ── TOP BAR ──────────────────────────────────────── */
 .top-bar {
   width: 100%;
-  background: #0C0A08;
+  background: var(--navy);
   border-bottom: 1px solid var(--border);
   padding: 10px 18px;
   display: flex;
@@ -53,7 +53,7 @@ body {
   height: 36px;
   width: auto;
   display: block;
-  mix-blend-mode: screen;
+  mix-blend-mode: multiply;
   flex-shrink: 0;
 }
 .welcome-txt {
@@ -104,26 +104,25 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.10);
   border-radius: 20px;
   color: var(--muted);
   font-size: 11px;
   font-weight: 500;
   padding: 7px 14px;
   text-decoration: none;
-  margin-bottom: 18px;
   transition: background 0.15s, color 0.15s;
   font-family: 'Poppins', sans-serif;
 }
-.btn-back-top:hover { background: rgba(255,255,255,0.12); color: var(--cream); }
+.btn-back-top:hover { background: rgba(0,0,0,0.09); color: var(--cream); }
 
 /* ── GAME SECTION ─────────────────────────────────── */
 .game-section { text-align: center; }
 .game-header {
   margin-bottom: 20px;
   padding-bottom: 18px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
 }
 .game-title-main {
   font-family: 'Playfair Display', serif;
@@ -148,7 +147,7 @@ body {
 .day-label {
   font-size: 10px;
   letter-spacing: 0.14em;
-  color: #3A5060;
+  color: var(--muted);
   text-transform: uppercase;
 }
 
@@ -194,7 +193,7 @@ body {
 .star-icon-wrap {
   font-size: 26px;
   line-height: 1;
-  filter: grayscale(1) opacity(0.15);
+  filter: grayscale(1) opacity(0.28);
   transition: filter 0.35s;
 }
 .star-icon-wrap.earned {
@@ -203,11 +202,12 @@ body {
 }
 .star-cap {
   font-size: 8px;
-  color: #3A5060;
+  color: var(--muted);
+  opacity: 0.5;
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
-.star-cap.earned { color: var(--muted); }
+.star-cap.earned { color: var(--muted); opacity: 1; }
 @keyframes starPop {
   0%   { transform: scale(0.4); }
   60%  { transform: scale(1.35); }
@@ -309,7 +309,7 @@ body {
 }
 .nudge-btn:hover { background: rgba(232,168,0,0.08); }
 .nudge-btn:disabled {
-  color: var(--muted); border-color: rgba(255,255,255,0.08); cursor: default;
+  color: var(--muted); border-color: rgba(0,0,0,0.08); cursor: default;
 }
 .nudge-reveal {
   display: inline-flex;
@@ -335,7 +335,7 @@ body {
 .kb-row { display: flex; gap: 4px; }
 .key {
   background: var(--navy-card);
-  color: #A0B4C0;
+  color: #3A2E24;
   border: none;
   border-radius: 7px;
   font-size: 13px;
@@ -352,7 +352,7 @@ body {
 .key.wide { min-width: 52px; font-size: 10px; letter-spacing: -0.02em; }
 .key.correct { background: var(--correct); color: #fff; }
 .key.present { background: var(--present); color: #fff; }
-.key.absent  { background: var(--absent);  color: #888; }
+.key.absent  { background: var(--absent);  color: #fff; }
 
 /* ── END PANEL ────────────────────────────────────── */
 .end-panel {
@@ -408,7 +408,7 @@ body {
   margin-bottom: 14px;
 }
 .btn-gold {
-  background: var(--gold); color: var(--navy);
+  background: var(--gold); color: #fff;
   border: none; border-radius: 6px;
   padding: 10px 20px; font-size: 12px; font-weight: 700;
   cursor: pointer; font-family: 'Poppins', sans-serif;
@@ -458,12 +458,12 @@ body {
 .btn-social:hover { background: rgba(232,168,0,0.08); }
 .btn-social:disabled {
   color: var(--muted);
-  border-color: rgba(255,255,255,0.1);
+  border-color: rgba(0,0,0,0.1);
   cursor: default;
 }
 .tlr-url {
   font-size: 10px;
-  color: #3A4F5A;
+  color: var(--muted);
   letter-spacing: 0.06em;
   margin-top: 12px;
 }
@@ -513,7 +513,7 @@ body {
 }
 .shr-bonus-note {
   font-size: 10px;
-  color: #3A5060;
+  color: var(--muted);
   margin-bottom: 12px;
 }
 .shr-claimed {
@@ -526,7 +526,7 @@ body {
 .results-overlay {
   position: fixed;
   inset: 0;
-  background: var(--navy);
+  background: #1D1810;
   z-index: 100;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -766,7 +766,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #4A6070;
+  color: var(--muted);
   font-size: 11px;
   font-weight: 500;
   text-decoration: none;
@@ -783,9 +783,9 @@ body {
 }
 .reminder-btn {
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid var(--border);
   border-radius: 20px;
-  color: #4A6070;
+  color: var(--muted);
   font-size: 11px;
   font-weight: 500;
   padding: 5px 14px;
@@ -815,16 +815,16 @@ body {
   </div>
 </div>
 
+<!-- SUB-NAV: back button sits below header, left-aligned -->
+<div style="width:100%;padding:12px 18px 0;">
+  <a class="btn-back-top" href="/index.html">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    Dashboard
+  </a>
+</div>
+
 <!-- MAIN -->
 <div class="main">
-
-  <!-- BACK BUTTON -->
-  <div>
-    <a class="btn-back-top" href="/index.html">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-      Dashboard
-    </a>
-  </div>
 
   <!-- GAME SECTION -->
   <div class="game-section">
@@ -1234,7 +1234,7 @@ function renderCurrent() {
   if (!row) return;
   for (let c = 0; c < COLS; c++) {
     row[c].textContent   = current[c] || '';
-    row[c].style.borderColor = current[c] ? 'rgba(249,247,242,0.4)' : 'var(--border)';
+    row[c].style.borderColor = current[c] ? 'rgba(0,0,0,0.45)' : 'var(--border)';
     row[c].style.background  = 'transparent';
     row[c].style.color       = 'var(--cream)';
   }
@@ -1618,7 +1618,7 @@ function shakeCurrentRow() {
   const saved = localStorage.getItem('tlr_reminder');
   if (saved) {
     const row = document.getElementById('reminder-row');
-    if (row) row.innerHTML = `<span class="reminder-set">🔔 Reminder set for ${saved.replace(':','.')} daily — <button onclick="clearReminder()" style="background:none;border:none;color:#4A6070;font-size:10px;cursor:pointer;text-decoration:underline;font-family:'Poppins',sans-serif;">change</button></span>`;
+    if (row) row.innerHTML = `<span class="reminder-set">🔔 Reminder set for ${saved.replace(':','.')} daily — <button onclick="clearReminder()" style="background:none;border:none;color:var(--muted);font-size:10px;cursor:pointer;text-decoration:underline;font-family:'Poppins',sans-serif;">change</button></span>`;
   }
   // Fire notification if it's time
   const time = saved;
@@ -1661,7 +1661,7 @@ function saveReminder() {
   const t = document.getElementById('rem-time').value;
   localStorage.setItem('tlr_reminder', t);
   const row = document.getElementById('reminder-row');
-  row.innerHTML = `<span class="reminder-set">🔔 Set for ${t.replace(':','.')} daily — <button onclick="clearReminder()" style="background:none;border:none;color:#4A6070;font-size:10px;cursor:pointer;text-decoration:underline;font-family:'Poppins',sans-serif;">change</button></span>`;
+  row.innerHTML = `<span class="reminder-set">🔔 Set for ${t.replace(':','.')} daily — <button onclick="clearReminder()" style="background:none;border:none;color:var(--muted);font-size:10px;cursor:pointer;text-decoration:underline;font-family:'Poppins',sans-serif;">change</button></span>`;
 }
 
 function clearReminder() {
