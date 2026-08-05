@@ -27,7 +27,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Poppins', sans-serif;
-  background: radial-gradient(ellipse at 50% -20%, #162030 0%, var(--navy) 65%);
+  background: #E8E2D8;
   color: var(--cream);
   min-height: 100vh;
   display: flex;
@@ -66,7 +66,8 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 120px;
+  flex: 1;
+  min-width: 0;
 }
 .top-stats {
   display: flex;
@@ -98,8 +99,31 @@ body {
 .main {
   width: 100%;
   max-width: 480px;
-  padding: 18px 16px 0;
+  padding: 18px 16px 28px;
+  background: var(--navy);
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 20px 56px rgba(0,0,0,0.22);
+  margin-bottom: 16px;
 }
+
+/* ── BACK BUTTON ──────────────────────────────────── */
+.btn-back-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 7px 14px;
+  text-decoration: none;
+  margin-bottom: 18px;
+  transition: background 0.15s, color 0.15s;
+  font-family: 'Poppins', sans-serif;
+}
+.btn-back-top:hover { background: rgba(255,255,255,0.12); color: var(--cream); }
 
 /* ── GAME SECTION ─────────────────────────────────── */
 .game-section { text-align: center; }
@@ -801,6 +825,14 @@ body {
 <!-- MAIN -->
 <div class="main">
 
+  <!-- BACK BUTTON -->
+  <div>
+    <a class="btn-back-top" href="/index.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Dashboard
+    </a>
+  </div>
+
   <!-- GAME SECTION -->
   <div class="game-section">
     <div class="game-header">
@@ -879,10 +911,6 @@ body {
 
   <!-- BOTTOM NAV -->
   <div class="bottom-nav">
-    <a class="btn-back-hub" href="/index.html">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-      Back to dashboard
-    </a>
     <div class="reminder-row" id="reminder-row">
       <button class="reminder-btn" id="reminder-btn" onclick="setReminder()">🔔 Remind me daily</button>
     </div>
