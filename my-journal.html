@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Journal — The Living Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:      #0F1215;
+  --navy-mid:  #1C2B3A;
+  --gold:      #E8A800;
+  --gold-light:#F5C842;
+  --cream:     #F9F7F2;
+  --cream-dark:#EFE9DF;
+  --white:     #FFFFFF;
+  --text-dark: #111820;
+  --text-mid:  #445566;
+  --text-muted:#8899AA;
+  --border:    #E2D9CE;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--text-dark); line-height: 1.65; font-size: 17px; }
+
+/* ── HEADER ─────────────────────────── */
+header { background: var(--navy); position: sticky; top: 0; z-index: 200; border-bottom: 3px solid var(--gold); }
+.header-inner { max-width: 1240px; margin: 0 auto; padding: 0.85rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.logo { display: flex; align-items: center; gap: 0.9rem; flex-shrink: 0; text-decoration: none; }
+.logo-img { height: 58px; width: auto; display: block; mix-blend-mode: lighten; }
+.logo-sub { color: var(--gold); font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500; display: block; margin-top: 3px; }
+.header-title-block { text-align: center; flex: 1; }
+.header-title-block h1 { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 400; color: var(--white); line-height: 1.15; margin-bottom: 0.25rem; }
+.header-title-block h1 em { color: var(--gold); font-style: italic; }
+.header-title-block p { font-size: 0.72rem; color: rgba(255,255,255,0.38); font-weight: 300; }
+@media (max-width: 640px) { .header-title-block { display: none; } }
+.header-links { display: flex; align-items: center; gap: 1.25rem; }
+.header-link { color: rgba(255,255,255,0.45); text-decoration: none; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.15s; }
+.header-link:hover { color: var(--gold); }
+
+/* ── PAGE TABS ──────────────────────── */
+.page-tabs { background: var(--navy-mid); border-bottom: 1px solid rgba(255,255,255,0.08); }
+.page-tabs-inner { max-width: 1240px; margin: 0 auto; padding: 0 2rem; display: flex; gap: 0; }
+.tab-btn {
+  padding: 0.7rem 1.25rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: rgba(255,255,255,0.4); background: none; border: none; cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  text-decoration: none; display: inline-block;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tab-btn:hover { color: rgba(255,255,255,0.7); }
+.tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+/* ── JOURNAL LAYOUT ─────────────────── */
+.journal-page { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+
+/* ── PAGE HEADER ─────────────────────── */
+.journal-header { text-align: center; margin-bottom: 2.5rem; }
+.journal-eyebrow { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 0.6rem; }
+.journal-title { font-family: 'Playfair Display', serif; font-size: 2.4rem; font-weight: 400; color: var(--text-dark); line-height: 1.2; margin-bottom: 0.4rem; }
+.journal-title em { color: var(--gold); font-style: italic; }
+.journal-sub { font-size: 0.85rem; color: var(--text-muted); }
+
+/* ── PROMPT CARD ────────────────────── */
+.prompt-section { background: var(--navy); border-radius: 8px; padding: 2rem 2.25rem; margin-bottom: 1.75rem; border-bottom: 3px solid var(--gold); }
+.prompt-section-label { font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.38); margin-bottom: 0.9rem; }
+.prompt-type-tabs { display: flex; gap: 0; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.prompt-type-btn { padding: 0.5rem 1rem; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.4); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+.prompt-type-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+.prompt-type-btn:hover { color: rgba(255,255,255,0.7); }
+.prompt-display { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 400; color: var(--white); line-height: 1.55; margin-bottom: 1.5rem; min-height: 3.5rem; }
+.prompt-context { font-size: 0.78rem; color: rgba(255,255,255,0.38); margin-bottom: 1.25rem; font-style: italic; }
+.prompt-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.btn-get-prompt { background: var(--gold); color: var(--navy); padding: 0.7rem 1.4rem; border: none; border-radius: 4px; font-weight: 700; font-size: 0.82rem; cursor: pointer; font-family: 'Inter', sans-serif; transition: background 0.15s; }
+.btn-get-prompt:hover { background: var(--gold-light); }
+.btn-use-prompt { background: transparent; color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.2); padding: 0.7rem 1.4rem; border-radius: 4px; font-size: 0.82rem; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
+.btn-use-prompt:hover { color: var(--white); border-color: rgba(255,255,255,0.5); }
+
+/* ── WRITING AREA ───────────────────── */
+.writing-section { background: var(--white); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 2rem; }
+.writing-toolbar { padding: 0.75rem 1.25rem; background: var(--cream-dark); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.writing-date { font-size: 0.78rem; color: var(--text-muted); }
+.writing-meta { display: flex; align-items: center; gap: 1rem; }
+.writing-wordcount { font-size: 0.72rem; color: var(--text-muted); }
+.entry-title-input {
+  width: 100%; padding: 1.25rem 1.5rem 0.5rem;
+  font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 400;
+  color: var(--text-dark); border: none; outline: none; background: transparent;
+}
+.entry-title-input::placeholder { color: var(--border); }
+.writing-area {
+  width: 100%; padding: 0.75rem 1.5rem 1.5rem;
+  font-family: 'Inter', sans-serif; font-size: 0.95rem; line-height: 1.9;
+  color: var(--text-dark); border: none; outline: none; background: transparent;
+  resize: none; min-height: 280px;
+}
+.writing-area::placeholder { color: var(--border); }
+.writing-footer { padding: 0.75rem 1.25rem; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+.btn-save { background: var(--gold); color: var(--navy); padding: 0.6rem 1.5rem; border: none; border-radius: 4px; font-weight: 700; font-size: 0.82rem; cursor: pointer; font-family: 'Inter', sans-serif; transition: background 0.15s; }
+.btn-save:hover { background: var(--gold-light); }
+.btn-clear { background: transparent; color: var(--text-muted); border: 1px solid var(--border); padding: 0.6rem 1.25rem; border-radius: 4px; font-size: 0.82rem; cursor: pointer; font-family: 'Inter', sans-serif; }
+.save-confirm { font-size: 0.78rem; color: var(--text-muted); display: none; }
+.save-confirm.show { display: inline; }
+
+/* ── PAST ENTRIES ───────────────────── */
+.past-entries-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.past-entries-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 400; }
+.past-entries-count { font-size: 0.78rem; color: var(--text-muted); }
+.entries-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.entry-card {
+  background: var(--white); border: 1px solid var(--border); border-radius: 6px;
+  padding: 1.25rem 1.5rem; cursor: pointer; transition: box-shadow 0.15s;
+  display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: start;
+}
+.entry-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.08); }
+.entry-card-date { font-size: 0.72rem; color: var(--gold); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.3rem; }
+.entry-card-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: var(--text-dark); margin-bottom: 0.3rem; }
+.entry-card-preview { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.entry-card-meta { text-align: right; }
+.entry-card-words { font-size: 0.72rem; color: var(--text-muted); }
+.entry-card-delete { font-size: 0.72rem; color: var(--text-muted); background: none; border: none; cursor: pointer; padding: 0.25rem; margin-top: 0.25rem; display: block; margin-left: auto; transition: color 0.15s; }
+.entry-card-delete:hover { color: #c0392b; }
+
+/* No entries state */
+.no-entries { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+.no-entries-icon { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.4; }
+.no-entries-text { font-size: 0.9rem; }
+
+/* ── FULL ENTRY MODAL ───────────────── */
+.entry-overlay { position: fixed; inset: 0; background: rgba(15,18,21,0.8); z-index: 500; display: none; align-items: flex-start; justify-content: center; padding: 2rem 1.5rem; overflow-y: auto; }
+.entry-overlay.active { display: flex; }
+.entry-modal { background: var(--white); border-radius: 8px; max-width: 680px; width: 100%; margin: auto; border-top: 4px solid var(--gold); }
+.entry-modal-header { padding: 1.5rem 2rem 1rem; border-bottom: 1px solid var(--border); }
+.entry-modal-date { font-size: 0.72rem; color: var(--gold); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.4rem; }
+.entry-modal-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 400; }
+.entry-modal-body { padding: 1.5rem 2rem; font-size: 0.95rem; line-height: 1.85; color: var(--text-mid); white-space: pre-wrap; max-height: 60vh; overflow-y: auto; }
+.entry-modal-footer { padding: 1rem 2rem; border-top: 1px solid var(--border); display: flex; gap: 0.75rem; }
+.btn-close-modal { background: var(--cream-dark); color: var(--text-mid); border: 1px solid var(--border); padding: 0.6rem 1.25rem; border-radius: 4px; font-size: 0.82rem; cursor: pointer; font-family: 'Inter', sans-serif; }
+
+/* ── WHEEL SNAPSHOT ─────────────────── */
+.wheel-snapshot { background: var(--white); border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: 6px; padding: 1rem 1.25rem; margin-bottom: 1.75rem; }
+.wheel-snapshot-label { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 0.6rem; }
+.wheel-snapshot-areas { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.wheel-snapshot-chip { font-size: 0.75rem; padding: 0.3rem 0.75rem; background: var(--cream); border: 1px solid var(--border); border-radius: 20px; display: flex; align-items: center; gap: 0.4rem; }
+.wheel-snapshot-score { font-weight: 700; color: var(--gold); }
+.wheel-snapshot-none { font-size: 0.82rem; color: var(--text-muted); font-style: italic; }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────── -->
+<header>
+  <div class="header-inner">
+    <a class="logo" href="/index.html">
+      <img class="logo-img" src="/tlr-logo.png" alt="The Living Room">
+      <span class="logo-sub">Member Hub</span>
+    </a>
+    <div class="header-title-block">
+      <h1>Your <em>Living Room</em> Member Dashboard</h1>
+      <p>Not a course to finish. A companion you carry through life.</p>
+    </div>
+    <div class="header-links">
+      <a href="https://www.motivate-coaching.com/thelivingroom" target="_blank" class="header-link">Main Site</a>
+    </div>
+  </div>
+</header>
+
+<!-- ── PAGE TABS ──────────────────── -->
+<div class="page-tabs">
+  <div class="page-tabs-inner">
+    <a class="tab-btn" href="/index.html">Dashboard</a>
+    <a class="tab-btn" href="/index.html#library">Resource Library</a>
+    <a class="tab-btn" href="/index.html#vision">The Bigger Picture</a>
+    <a class="tab-btn" href="/my-wheel.html">My Balance Wheel</a>
+    <a class="tab-btn active" href="/my-journal.html">My Journal</a>
+  </div>
+</div>
+
+<!-- ── JOURNAL PAGE ──────────────── -->
+<div class="journal-page">
+
+  <div class="journal-header">
+    <div class="journal-eyebrow">Your private space</div>
+    <div class="journal-title">My <em>Journal</em></div>
+    <div class="journal-sub">Prompted, guided, and personal — a space to think out loud.</div>
+  </div>
+
+  <!-- Wheel snapshot (shows if wheel is set up) -->
+  <div class="wheel-snapshot" id="wheel-snapshot" style="display:none">
+    <div class="wheel-snapshot-label">From your Balance Wheel</div>
+    <div class="wheel-snapshot-areas" id="wheel-snapshot-areas"></div>
+  </div>
+
+  <!-- Prompt Generator -->
+  <div class="prompt-section">
+    <div class="prompt-section-label">Today's Prompt</div>
+    <div class="prompt-type-tabs">
+      <button class="prompt-type-btn active" onclick="setPromptType('general')">General</button>
+      <button class="prompt-type-btn" onclick="setPromptType('wheel')">From My Wheel</button>
+      <button class="prompt-type-btn" onclick="setPromptType('theme')">This Month's Theme</button>
+      <button class="prompt-type-btn" onclick="setPromptType('deep')">Deeper Work</button>
+    </div>
+    <div class="prompt-display" id="prompt-display">Press "New Prompt" to get started — or write freely below.</div>
+    <div class="prompt-context" id="prompt-context"></div>
+    <div class="prompt-actions">
+      <button class="btn-get-prompt" onclick="getNewPrompt()">✦ New Prompt</button>
+      <button class="btn-use-prompt" onclick="usePrompt()">Use this prompt →</button>
+    </div>
+  </div>
+
+  <!-- Writing Area -->
+  <div class="writing-section">
+    <div class="writing-toolbar">
+      <div class="writing-date" id="writing-date"></div>
+      <div class="writing-meta">
+        <span class="writing-wordcount" id="word-count">0 words</span>
+      </div>
+    </div>
+    <input type="text" class="entry-title-input" id="entry-title" placeholder="Give this entry a title (optional)">
+    <textarea class="writing-area" id="writing-area" placeholder="Start writing… this is your space. No judgement, no rules. Just you and the page."></textarea>
+    <div class="writing-footer">
+      <button class="btn-save" onclick="saveEntry()">Save Entry</button>
+      <button class="btn-clear" onclick="clearEntry()">Clear</button>
+      <span class="save-confirm" id="save-confirm">Saved ✓</span>
+    </div>
+  </div>
+
+  <!-- Past Entries -->
+  <div id="past-entries-section">
+    <div class="past-entries-header">
+      <div class="past-entries-title">Past Entries</div>
+      <div class="past-entries-count" id="entries-count"></div>
+    </div>
+    <div class="entries-list" id="entries-list"></div>
+  </div>
+
+</div>
+
+<!-- ── FULL ENTRY MODAL ───────────── -->
+<div class="entry-overlay" id="entry-overlay" onclick="if(event.target===this)closeEntry()">
+  <div class="entry-modal">
+    <div class="entry-modal-header">
+      <div class="entry-modal-date" id="modal-date"></div>
+      <div class="entry-modal-title" id="modal-title"></div>
+    </div>
+    <div class="entry-modal-body" id="modal-body"></div>
+    <div class="entry-modal-footer">
+      <button class="btn-close-modal" onclick="closeEntry()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── PROMPT LIBRARIES ──────────────────────
+const GENERAL_PROMPTS = [
+  'What is one thing that went better than expected this week, and why?',
+  'Where are you spending your energy right now — and is it where you want to be?',
+  'What would you tell yourself six months ago? What do you know now that you didn't then?',
+  'What does a good day look like for you right now? When did you last have one?',
+  'What are you pretending not to know?',
+  'What would you do if you weren't afraid of how it looked?',
+  'Which relationship in your life deserves more attention right now, and what would that look like?',
+  'What has been draining you lately? What has been filling you up?',
+  'What would you need to let go of to feel lighter?',
+  'If you were watching your life from the outside, what would you notice?',
+  'What small win are you not giving yourself credit for?',
+  'What conversation are you avoiding that you know needs to happen?',
+  'What does "enough" mean to you right now — in work, in effort, in yourself?',
+  'Where in your life are you choosing comfort over growth?',
+  'What is one habit that, if you committed to it this month, would change something?',
+];
+
+const WHEEL_PROMPTS = [
+  { template: 'You rated [area] at [score]/10. What would it feel like to be at [next]/10?', usesArea: true },
+  { template: 'What is one honest reason your [area] score isn\'t higher right now?', usesArea: true },
+  { template: 'When did [area] last feel like a 10? What was different then?', usesArea: true },
+  { template: 'What is the gap between where you are in [area] and where you want to be? What\'s really in that gap?', usesArea: true },
+  { template: 'If you focused on [area] for the next 30 days, what would shift?', usesArea: true },
+  { template: 'You said your +1 action for [area] is: "[action]". Have you done it? What\'s in the way?', usesArea: true, usesAction: true },
+  { template: 'Which area of your wheel has the biggest impact on all the others? Why?', usesArea: false },
+  { template: 'Looking at your wheel, where is the imbalance that matters most right now?', usesArea: false },
+  { template: 'What would change in your life if your lowest-scoring area improved by just 2 points?', usesArea: false },
+];
+
+const THEME_PROMPTS = {
+  'Building Momentum': [
+    'What does momentum feel like in your body when you have it? When did you last feel it?',
+    'What one action, done consistently, would create the most movement right now?',
+    'Where are you waiting for the right time instead of starting?',
+    'What small win, if you noticed it today, might change how tomorrow feels?',
+    'What has been slowing you down — and is that something you have control over?',
+  ],
+  'default': [
+    'What does this month\'s theme — [theme] — mean to you personally?',
+    'Where in your life is this theme most relevant right now?',
+    'What would shift if you took this month\'s theme seriously for just one week?',
+  ]
+};
+
+const DEEP_PROMPTS = [
+  'What do you want that you haven\'t let yourself say out loud?',
+  'If your life were a book, what chapter are you in right now — and how does it need to end?',
+  'What does your ideal ordinary Tuesday look like in five years?',
+  'What are you most afraid of getting wrong?',
+  'What would you regret not trying?',
+  'What part of yourself have you been neglecting — and what does that part need from you?',
+  'When do you feel most like yourself? How often are you in that state?',
+  'What truth do you know but aren\'t ready to act on yet?',
+  'What are you tolerating that you shouldn\'t be?',
+  'If someone who deeply respected you could see how you spend your time, what would they notice?',
+];
+
+// ── STATE ────────────────────────────────
+const CURRENT_THEME = 'Building Momentum'; // would be dynamic later
+let promptType = 'general';
+let currentPromptText = '';
+let wheelData = null;
+
+// ── INIT ─────────────────────────────────
+(function init() {
+  // Date
+  const now = new Date();
+  document.getElementById('writing-date').textContent =
+    now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Load wheel data
+  const saved = localStorage.getItem('tlr_wheel_data');
+  if (saved) {
+    wheelData = JSON.parse(saved);
+    renderWheelSnapshot();
+  }
+
+  // Load entries
+  renderEntries();
+
+  // Word count
+  document.getElementById('writing-area').addEventListener('input', updateWordCount);
+
+  // Auto-draft restore
+  const draft = localStorage.getItem('tlr_journal_draft');
+  if (draft) {
+    try {
+      const d = JSON.parse(draft);
+      document.getElementById('entry-title').value = d.title || '';
+      document.getElementById('writing-area').value = d.body || '';
+      updateWordCount();
+    } catch {}
+  }
+
+  // Auto-save draft
+  setInterval(saveDraft, 10000);
+  document.getElementById('writing-area').addEventListener('input', saveDraft);
+  document.getElementById('entry-title').addEventListener('input', saveDraft);
+})();
+
+function saveDraft() {
+  const draft = {
+    title: document.getElementById('entry-title').value,
+    body: document.getElementById('writing-area').value
+  };
+  localStorage.setItem('tlr_journal_draft', JSON.stringify(draft));
+}
+
+// ── WHEEL SNAPSHOT ────────────────────────
+function renderWheelSnapshot() {
+  if (!wheelData) return;
+  const snap = document.getElementById('wheel-snapshot');
+  const areas = document.getElementById('wheel-snapshot-areas');
+  snap.style.display = 'block';
+  areas.innerHTML = wheelData.areas.map(a =>
+    `<div class="wheel-snapshot-chip"><span>${a.name}</span><span class="wheel-snapshot-score">${a.score}</span></div>`
+  ).join('');
+}
+
+// ── PROMPT GENERATOR ─────────────────────
+function setPromptType(type) {
+  promptType = type;
+  document.querySelectorAll('.prompt-type-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  getNewPrompt();
+}
+
+function getNewPrompt() {
+  let prompt = '';
+  let context = '';
+
+  if (promptType === 'general') {
+    prompt = pickRandom(GENERAL_PROMPTS);
+    context = 'General reflection';
+  }
+  else if (promptType === 'wheel') {
+    if (!wheelData || wheelData.areas.length === 0) {
+      prompt = 'Set up your Balance Wheel to get personalised prompts from your life areas.';
+      context = 'Set up your wheel first →';
+    } else {
+      const templateObj = pickRandom(WHEEL_PROMPTS);
+      const area = pickRandom(wheelData.areas);
+      if (templateObj.usesArea) {
+        prompt = templateObj.template
+          .replace('[area]', area.name)
+          .replace('[score]', area.score)
+          .replace('[next]', Math.min(area.score + 1, 10));
+        if (templateObj.usesAction && area.action) {
+          prompt = prompt.replace('[action]', area.action);
+        }
+        context = `Drawn from your Balance Wheel — ${area.name} (${area.score}/10)`;
+      } else {
+        prompt = templateObj.template;
+        context = 'Drawn from your Balance Wheel';
+      }
+    }
+  }
+  else if (promptType === 'theme') {
+    const themePrompts = THEME_PROMPTS[CURRENT_THEME] || THEME_PROMPTS['default'];
+    prompt = pickRandom(themePrompts).replace('[theme]', CURRENT_THEME);
+    context = `This month's theme: ${CURRENT_THEME}`;
+  }
+  else if (promptType === 'deep') {
+    prompt = pickRandom(DEEP_PROMPTS);
+    context = 'Deeper work — take your time with this one';
+  }
+
+  currentPromptText = prompt;
+  document.getElementById('prompt-display').textContent = prompt;
+  document.getElementById('prompt-context').textContent = context;
+}
+
+function usePrompt() {
+  if (!currentPromptText) return;
+  const area = document.getElementById('writing-area');
+  const existing = area.value.trim();
+  if (existing) {
+    area.value = existing + '\n\n— — —\n\n' + currentPromptText + '\n\n';
+  } else {
+    area.value = currentPromptText + '\n\n';
+  }
+  area.focus();
+  area.setSelectionRange(area.value.length, area.value.length);
+  updateWordCount();
+}
+
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// ── WORD COUNT ────────────────────────────
+function updateWordCount() {
+  const text = document.getElementById('writing-area').value.trim();
+  const count = text ? text.split(/\s+/).length : 0;
+  document.getElementById('word-count').textContent = `${count} word${count !== 1 ? 's' : ''}`;
+}
+
+// ── SAVE ENTRY ────────────────────────────
+function saveEntry() {
+  const title = document.getElementById('entry-title').value.trim();
+  const body = document.getElementById('writing-area').value.trim();
+  if (!body) return;
+
+  const entries = JSON.parse(localStorage.getItem('tlr_journal_entries') || '[]');
+  const now = new Date();
+  const entry = {
+    id: Date.now(),
+    date: now.toISOString(),
+    title: title || 'Untitled',
+    body: body,
+    words: body.split(/\s+/).length,
+    promptType: promptType,
+    prompt: currentPromptText || null
+  };
+  entries.unshift(entry);
+  localStorage.setItem('tlr_journal_entries', JSON.stringify(entries));
+
+  // Clear form
+  document.getElementById('entry-title').value = '';
+  document.getElementById('writing-area').value = '';
+  document.getElementById('word-count').textContent = '0 words';
+  localStorage.removeItem('tlr_journal_draft');
+
+  // Confirm
+  const confirm = document.getElementById('save-confirm');
+  confirm.classList.add('show');
+  setTimeout(() => confirm.classList.remove('show'), 2500);
+
+  renderEntries();
+}
+
+function clearEntry() {
+  if (document.getElementById('writing-area').value && !confirm('Clear this entry?')) return;
+  document.getElementById('entry-title').value = '';
+  document.getElementById('writing-area').value = '';
+  updateWordCount();
+  localStorage.removeItem('tlr_journal_draft');
+}
+
+// ── RENDER ENTRIES ────────────────────────
+function renderEntries() {
+  const entries = JSON.parse(localStorage.getItem('tlr_journal_entries') || '[]');
+  const list = document.getElementById('entries-list');
+  const count = document.getElementById('entries-count');
+  count.textContent = `${entries.length} entr${entries.length !== 1 ? 'ies' : 'y'}`;
+
+  if (entries.length === 0) {
+    list.innerHTML = `
+      <div class="no-entries">
+        <div class="no-entries-icon">✍</div>
+        <div class="no-entries-text">Your first entry is waiting to be written.</div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = entries.map(e => {
+    const d = new Date(e.date);
+    const dateStr = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    const preview = e.body.replace(/\n/g, ' ').slice(0, 120) + (e.body.length > 120 ? '…' : '');
+    return `
+      <div class="entry-card" onclick="openEntry(${e.id})">
+        <div>
+          <div class="entry-card-date">${dateStr}</div>
+          <div class="entry-card-title">${e.title}</div>
+          <div class="entry-card-preview">${preview}</div>
+        </div>
+        <div class="entry-card-meta">
+          <div class="entry-card-words">${e.words} words</div>
+          <button class="entry-card-delete" onclick="event.stopPropagation();deleteEntry(${e.id})" title="Delete">✕</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── OPEN / CLOSE ENTRY ────────────────────
+function openEntry(id) {
+  const entries = JSON.parse(localStorage.getItem('tlr_journal_entries') || '[]');
+  const entry = entries.find(e => e.id === id);
+  if (!entry) return;
+  const d = new Date(entry.date);
+  document.getElementById('modal-date').textContent =
+    d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('modal-title').textContent = entry.title;
+  document.getElementById('modal-body').textContent = entry.body;
+  document.getElementById('entry-overlay').classList.add('active');
+}
+
+function closeEntry() {
+  document.getElementById('entry-overlay').classList.remove('active');
+}
+
+function deleteEntry(id) {
+  if (!confirm('Delete this entry?')) return;
+  let entries = JSON.parse(localStorage.getItem('tlr_journal_entries') || '[]');
+  entries = entries.filter(e => e.id !== id);
+  localStorage.setItem('tlr_journal_entries', JSON.stringify(entries));
+  renderEntries();
+}
+</script>
+</body>
+</html>

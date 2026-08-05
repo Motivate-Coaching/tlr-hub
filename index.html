@@ -64,6 +64,77 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 }
 .tab-btn:hover { color: rgba(255,255,255,0.7); }
 .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+a.tab-btn { text-decoration: none; display: inline-block; }
+
+/* ── HOME VIEW / NAV CARDS ───────────────── */
+.nav-buttons-section { background: var(--cream); padding: 2.5rem 2rem 3.5rem; }
+.nav-buttons-inner { max-width: 1100px; margin: 0 auto; }
+.nav-section-eyebrow { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); text-align: center; margin-bottom: 1.75rem; font-weight: 500; }
+.nav-buttons-grid { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; }
+.nav-card {
+  flex: 1 1 calc(33.333% - 1rem);
+  min-width: 240px;
+  max-width: 340px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--gold);
+  border-radius: 6px;
+  padding: 1.5rem 1.4rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: var(--text-dark);
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  text-align: left;
+  transition: box-shadow 0.18s, transform 0.18s, border-top-color 0.18s;
+}
+.nav-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.1); transform: translateY(-2px); border-top-color: var(--gold-light); }
+.nav-card-icon { color: var(--gold); margin-bottom: 0.1rem; line-height: 1; }
+.nav-card-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 400; color: var(--text-dark); line-height: 1.2; }
+.nav-card-sub { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; flex: 1; }
+.nav-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 0.25rem; }
+.nav-card-tag { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+.nav-card-arrow { font-size: 1rem; color: var(--gold); opacity: 0.7; transition: opacity 0.15s, transform 0.15s; }
+.nav-card:hover .nav-card-arrow { opacity: 1; transform: translateX(3px); }
+@media (max-width: 800px) { .nav-card { flex: 1 1 calc(50% - 1rem); } }
+@media (max-width: 540px) { .nav-card { flex: 1 1 100%; max-width: 100%; } }
+
+/* ── LIGHTBOX ────────────────────────────── */
+.lb-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,18,21,0.82);
+  z-index: 1000;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 1.5rem;
+}
+.lb-overlay.active { display: flex; animation: lb-fade 0.25s ease; }
+@keyframes lb-fade { from { opacity: 0 } to { opacity: 1 } }
+.lb-card {
+  background: #F9F7F2;
+  border-radius: 8px;
+  padding: 2.75rem 2.75rem 2rem;
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+  border-top: 4px solid var(--gold);
+  position: relative;
+}
+.lb-logo { margin-bottom: 1.25rem; }
+.lb-logo img { height: 52px; width: auto; mix-blend-mode: multiply; }
+.lb-eyebrow { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 0.65rem; }
+.lb-title { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 400; color: var(--text-dark); margin-bottom: 1rem; line-height: 1.2; }
+.lb-title em { color: var(--gold); font-style: italic; }
+.lb-body { color: var(--text-mid); font-size: 0.88rem; line-height: 1.75; margin-bottom: 1.75rem; max-width: 400px; margin-left: auto; margin-right: auto; }
+.lb-actions { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.25rem; }
+.lb-btn-primary { background: var(--gold); color: var(--navy); padding: 0.9rem 1.5rem; border-radius: 4px; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.04em; text-decoration: none; display: block; transition: background 0.15s; }
+.lb-btn-primary:hover { background: var(--gold-light); }
+.lb-btn-secondary { background: transparent; color: var(--text-mid); border: 1px solid #CCC; padding: 0.75rem 1.5rem; border-radius: 4px; font-size: 0.82rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; font-family: 'Inter', sans-serif; }
+.lb-btn-secondary:hover { border-color: var(--gold); color: var(--text-dark); }
+.lb-note { font-size: 0.7rem; color: var(--text-muted); }
 
 /* ── HERO (library) ──────────────────────── */
 .hero { background: var(--navy); padding: 2.5rem 2rem 2.25rem; text-align: center; }
@@ -881,13 +952,16 @@ footer a { color: var(--gold); text-decoration: none; }
 <!-- PAGE TABS -->
 <div class="page-tabs">
   <div class="page-tabs-inner">
-    <button class="tab-btn active" data-view="library">Resource Library</button>
+    <button class="tab-btn active" data-view="home">Dashboard</button>
+    <button class="tab-btn" data-view="library">Resource Library</button>
     <button class="tab-btn" data-view="vision">The Bigger Picture</button>
+    <a class="tab-btn tab-link" href="/my-wheel.html">My Balance Wheel</a>
+    <a class="tab-btn tab-link" href="/my-journal.html">My Journal</a>
   </div>
 </div>
 
-<!-- ════ LIBRARY VIEW ════ -->
-<div id="view-library">
+<!-- ════ HOME VIEW (Dashboard Command Centre) ════ -->
+<div id="view-home">
 
   <!-- ── VALUES STRIP ──────────────────────────────── -->
   <div class="values-strip">
@@ -935,15 +1009,15 @@ footer a { color: var(--gold); text-decoration: none; }
       <div class="ps-section">
         <div class="ps-section-label">Your Tools</div>
         <div class="ps-stats-row">
-          <div class="ps-stat-tile" id="pw-stat-completed" onclick="filterTools('completed')" title="View completed tools">
+          <div class="ps-stat-tile" id="pw-stat-completed" onclick="goToView('library');filterTools('completed')" title="View completed tools">
             <span class="ps-stat-num" id="pw-done">0</span>
             <span class="ps-stat-lbl">Completed</span>
           </div>
-          <div class="ps-stat-tile" id="pw-stat-started" onclick="filterTools('started')" title="View in-progress tools">
+          <div class="ps-stat-tile" id="pw-stat-started" onclick="goToView('library');filterTools('started')" title="View in-progress tools">
             <span class="ps-stat-num" id="pw-started">0</span>
             <span class="ps-stat-lbl">In Progress</span>
           </div>
-          <div class="ps-stat-tile" id="pw-stat-unstarted" onclick="filterTools('unstarted')" title="View tools to explore">
+          <div class="ps-stat-tile" id="pw-stat-unstarted" onclick="goToView('library');filterTools('unstarted')" title="View tools to explore">
             <span class="ps-stat-num" id="pw-todo">22</span>
             <span class="ps-stat-lbl">To Explore</span>
           </div>
@@ -981,6 +1055,122 @@ footer a { color: var(--gold); text-decoration: none; }
 
     </div>
   </div>
+
+  <!-- ── NAV BUTTONS ────────────────────────────────── -->
+  <section class="nav-buttons-section">
+    <div class="nav-buttons-inner">
+      <p class="nav-section-eyebrow">Where would you like to go?</p>
+      <div class="nav-buttons-grid">
+
+        <!-- Quote of the Day -->
+        <a class="nav-card" href="/dashboard.html">
+          <div class="nav-card-icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8l-4 4V6z"/>
+              <path d="M9 10h1.5M9 14h10M14 10h5"/>
+            </svg>
+          </div>
+          <div class="nav-card-title">Quote of the Day</div>
+          <div class="nav-card-sub">A word is missing from today's quote — find it in 6 tries and keep your streak alive.</div>
+          <div class="nav-card-footer">
+            <span class="nav-card-tag" id="nc-game-tag">Play today</span>
+            <span class="nav-card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- Resource Library -->
+        <button class="nav-card" onclick="goToView('library')">
+          <div class="nav-card-icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="6" width="8" height="16" rx="1"/>
+              <rect x="14" y="4" width="10" height="20" rx="1"/>
+              <line x1="4" y1="10" x2="12" y2="10"/>
+              <line x1="4" y1="14" x2="12" y2="14"/>
+              <line x1="14" y1="9" x2="24" y2="9"/>
+              <line x1="14" y1="13" x2="24" y2="13"/>
+              <line x1="14" y1="17" x2="24" y2="17"/>
+            </svg>
+          </div>
+          <div class="nav-card-title">Resource Library</div>
+          <div class="nav-card-sub">Monthly themes, weekly topics, and all your tools — organised around where you are right now.</div>
+          <div class="nav-card-footer">
+            <span class="nav-card-tag" id="nc-library-tag">Explore</span>
+            <span class="nav-card-arrow">→</span>
+          </div>
+        </button>
+
+        <!-- The Bigger Picture -->
+        <button class="nav-card" onclick="goToView('vision')">
+          <div class="nav-card-icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="14" cy="14" r="11"/>
+              <circle cx="14" cy="14" r="6"/>
+              <circle cx="14" cy="14" r="2"/>
+              <line x1="14" y1="3" x2="14" y2="5"/>
+              <line x1="14" y1="23" x2="14" y2="25"/>
+              <line x1="3" y1="14" x2="5" y2="14"/>
+              <line x1="23" y1="14" x2="25" y2="14"/>
+            </svg>
+          </div>
+          <div class="nav-card-title">The Bigger Picture</div>
+          <div class="nav-card-sub">Step back from the day-to-day and see where you're heading — your values, your vision, your why.</div>
+          <div class="nav-card-footer">
+            <span class="nav-card-tag">Explore</span>
+            <span class="nav-card-arrow">→</span>
+          </div>
+        </button>
+
+        <!-- My Balance Wheel -->
+        <a class="nav-card" href="/my-wheel.html">
+          <div class="nav-card-icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <circle cx="14" cy="14" r="11"/>
+              <circle cx="14" cy="14" r="3"/>
+              <line x1="14" y1="3" x2="14" y2="11"/>
+              <line x1="14" y1="17" x2="14" y2="25"/>
+              <line x1="3" y1="14" x2="11" y2="14"/>
+              <line x1="17" y1="14" x2="25" y2="14"/>
+              <line x1="5.8" y1="5.8" x2="11.9" y2="11.9"/>
+              <line x1="16.1" y1="16.1" x2="22.2" y2="22.2"/>
+              <line x1="22.2" y1="5.8" x2="16.1" y2="11.9"/>
+              <line x1="11.9" y1="16.1" x2="5.8" y2="22.2"/>
+            </svg>
+          </div>
+          <div class="nav-card-title">My Balance Wheel</div>
+          <div class="nav-card-sub" id="nc-wheel-sub">Rate the 8 areas of your life and track how your balance shifts over time.</div>
+          <div class="nav-card-footer">
+            <span class="nav-card-tag" id="nc-wheel-tag">Set up</span>
+            <span class="nav-card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- My Journal -->
+        <a class="nav-card" href="/my-journal.html">
+          <div class="nav-card-icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="3" width="16" height="22" rx="2"/>
+              <line x1="9" y1="9" x2="19" y2="9"/>
+              <line x1="9" y1="13" x2="19" y2="13"/>
+              <line x1="9" y1="17" x2="15" y2="17"/>
+              <path d="M18 19l3-3-2-2-3 3v2h2z"/>
+            </svg>
+          </div>
+          <div class="nav-card-title">My Journal</div>
+          <div class="nav-card-sub" id="nc-journal-sub">Guided prompts drawn from your life, your wheel, and this month's theme.</div>
+          <div class="nav-card-footer">
+            <span class="nav-card-tag" id="nc-journal-tag">Write today</span>
+            <span class="nav-card-arrow">→</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ════ LIBRARY VIEW ════ -->
+<div id="view-library" style="display:none">
 
   <!-- ── DAILY GAME PROMO ─────────────────────────── -->
   <div class="game-promo-banner">
@@ -1496,16 +1686,57 @@ sidebarToggle.addEventListener('click', () => { const c = sidebar.classList.togg
 sidebarToggle.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sidebarToggle.click(); } });
 
 /* ── PAGE TABS ──────────────────────────── */
-const views = { library: document.getElementById('view-library'), vision: document.getElementById('view-vision') };
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const target = btn.dataset.view;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    Object.entries(views).forEach(([key, el]) => { el.style.display = key === target ? 'block' : 'none'; });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
+const views = {
+  home:    document.getElementById('view-home'),
+  library: document.getElementById('view-library'),
+  vision:  document.getElementById('view-vision')
+};
+
+function goToView(viewName) {
+  document.querySelectorAll('.tab-btn[data-view]').forEach(b => b.classList.remove('active'));
+  const tab = document.querySelector(`.tab-btn[data-view="${viewName}"]`);
+  if (tab) tab.classList.add('active');
+  Object.entries(views).forEach(([key, el]) => { if (el) el.style.display = key === viewName ? 'block' : 'none'; });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.querySelectorAll('.tab-btn[data-view]').forEach(btn => {
+  btn.addEventListener('click', () => goToView(btn.dataset.view));
 });
+
+// URL hash-based tab navigation (for links from other pages)
+(function handleHash() {
+  const hash = window.location.hash.replace('#', '');
+  if (hash && views[hash]) {
+    goToView(hash);
+  }
+})();
+
+// Dynamic nav card tags
+(function updateNavCards() {
+  const streak = parseInt(localStorage.getItem('tlr_streak') || '0');
+  const stars  = parseInt(localStorage.getItem('tlr_stars')  || '0');
+  const gameTag = document.getElementById('nc-game-tag');
+  if (gameTag && streak > 0) gameTag.textContent = `🔥 ${streak} day streak`;
+
+  const wheelData = localStorage.getItem('tlr_wheel_data');
+  const wheelTag = document.getElementById('nc-wheel-tag');
+  const wheelSub = document.getElementById('nc-wheel-sub');
+  if (wheelData && wheelTag) {
+    wheelTag.textContent = 'View my wheel';
+    if (wheelSub) wheelSub.textContent = 'Your Balance Wheel is set up — check in to see how you\'re tracking.';
+  }
+
+  const journalCount = JSON.parse(localStorage.getItem('tlr_journal_entries') || '[]').length;
+  const journalTag = document.getElementById('nc-journal-tag');
+  const journalSub = document.getElementById('nc-journal-sub');
+  if (journalCount > 0 && journalTag) {
+    journalTag.textContent = `${journalCount} entr${journalCount === 1 ? 'y' : 'ies'}`;
+  }
+  const libraryTag = document.getElementById('nc-library-tag');
+  const done = parseInt(document.getElementById('pw-done')?.textContent || '0');
+  if (libraryTag && done > 0) libraryTag.textContent = `${done} complete`;
+})();
 
 /* ── CURRENT THEME COLLAPSE ─────────────── */
 const currentFeature = document.getElementById('building-momentum');
@@ -1675,6 +1906,35 @@ window.addEventListener('scroll', () => {
   if (stars  > 0) parts.push(`⭐ ${stars} stars`);
   el.textContent = parts.length ? parts.join('  ·  ') : 'Start your streak today';
 })();
+/* ── LIGHTBOX ─────────────────────────── */
+(function initLightbox() {
+  if (!localStorage.getItem('tlr_welcomed')) {
+    document.getElementById('welcome-lightbox').classList.add('active');
+  }
+})();
+
+function dismissLightbox(goToWheel) {
+  localStorage.setItem('tlr_welcomed', 'true');
+  document.getElementById('welcome-lightbox').classList.remove('active');
+  if (goToWheel) window.location.href = '/my-wheel.html';
+}
 </script>
+
+<!-- ── FIRST-VISIT LIGHTBOX ──────────────── -->
+<div id="welcome-lightbox" class="lb-overlay" onclick="if(event.target===this)dismissLightbox(false)">
+  <div class="lb-card">
+    <div class="lb-logo">
+      <img src="/tlr-logo.png" alt="The Living Room">
+    </div>
+    <div class="lb-eyebrow">Welcome to your member space</div>
+    <h2 class="lb-title">Let's make this <em>yours</em></h2>
+    <p class="lb-body">Before you dive in, we'd love for you to set up your Balance Wheel — a 5-minute snapshot of where you are in life right now. It makes everything here more meaningful and personal.</p>
+    <div class="lb-actions">
+      <a class="lb-btn-primary" href="/my-wheel.html" onclick="localStorage.setItem('tlr_welcomed','true')">Set up my Balance Wheel</a>
+      <button class="lb-btn-secondary" onclick="dismissLightbox(false)">I'll explore first</button>
+    </div>
+    <p class="lb-note">Your Balance Wheel tab is always at the top — come back whenever you're ready.</p>
+  </div>
+</div>
 </body>
 </html>

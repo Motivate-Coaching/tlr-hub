@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Balance Wheel — The Living Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --navy:      #0F1215;
+  --navy-mid:  #1C2B3A;
+  --gold:      #E8A800;
+  --gold-light:#F5C842;
+  --cream:     #F9F7F2;
+  --cream-dark:#EFE9DF;
+  --white:     #FFFFFF;
+  --text-dark: #111820;
+  --text-mid:  #445566;
+  --text-muted:#8899AA;
+  --border:    #E2D9CE;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--text-dark); line-height: 1.65; font-size: 17px; }
+
+/* ── HEADER ─────────────────────────── */
+header { background: var(--navy); position: sticky; top: 0; z-index: 200; border-bottom: 3px solid var(--gold); }
+.header-inner { max-width: 1240px; margin: 0 auto; padding: 0.85rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.logo { display: flex; align-items: center; gap: 0.9rem; flex-shrink: 0; text-decoration: none; }
+.logo-img { height: 58px; width: auto; display: block; mix-blend-mode: lighten; }
+.logo-sub { color: var(--gold); font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500; display: block; margin-top: 3px; }
+.header-title-block { text-align: center; flex: 1; }
+.header-title-block h1 { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 400; color: var(--white); line-height: 1.15; margin-bottom: 0.25rem; }
+.header-title-block h1 em { color: var(--gold); font-style: italic; }
+.header-title-block p { font-size: 0.72rem; color: rgba(255,255,255,0.38); font-weight: 300; }
+@media (max-width: 640px) { .header-title-block { display: none; } }
+.header-links { display: flex; align-items: center; gap: 1.25rem; }
+.header-link { color: rgba(255,255,255,0.45); text-decoration: none; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.15s; }
+.header-link:hover { color: var(--gold); }
+
+/* ── PAGE TABS ──────────────────────── */
+.page-tabs { background: var(--navy-mid); border-bottom: 1px solid rgba(255,255,255,0.08); }
+.page-tabs-inner { max-width: 1240px; margin: 0 auto; padding: 0 2rem; display: flex; gap: 0; }
+.tab-btn {
+  padding: 0.7rem 1.25rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: rgba(255,255,255,0.4); background: none; border: none; cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  text-decoration: none; display: inline-block;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tab-btn:hover { color: rgba(255,255,255,0.7); }
+.tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+/* ── WHEEL PAGE LAYOUT ──────────────── */
+.wheel-page { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+
+/* ── WIZARD STEPS ───────────────────── */
+.wizard-step { display: none; }
+.wizard-step.active { display: block; }
+
+/* Step 0: Welcome */
+.wheel-welcome { text-align: center; max-width: 600px; margin: 0 auto; padding: 2rem 0; }
+.wheel-welcome-eyebrow { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 0.75rem; }
+.wheel-welcome h2 { font-family: 'Playfair Display', serif; font-size: 2.4rem; font-weight: 400; color: var(--text-dark); margin-bottom: 1rem; line-height: 1.2; }
+.wheel-welcome h2 em { color: var(--gold); font-style: italic; }
+.wheel-welcome-body { font-size: 0.95rem; color: var(--text-mid); line-height: 1.8; margin-bottom: 0.75rem; }
+.wheel-welcome-list { list-style: none; margin: 1.5rem auto; max-width: 420px; text-align: left; display: flex; flex-direction: column; gap: 0.6rem; }
+.wheel-welcome-list li { display: flex; align-items: flex-start; gap: 0.75rem; font-size: 0.88rem; color: var(--text-mid); }
+.wheel-welcome-list li::before { content: ''; display: inline-block; width: 18px; height: 18px; min-width: 18px; border-radius: 50%; background: var(--gold); opacity: 0.85; margin-top: 1px; }
+.wheel-welcome-list li span { display: flex; align-items: center; gap: 0.5rem; }
+.wheel-welcome-list li b { color: var(--text-dark); }
+
+/* Step 1: Choose Areas */
+.step-header { text-align: center; margin-bottom: 2rem; }
+.step-eyebrow { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.5rem; display: block; }
+.step-title { font-family: 'Playfair Display', serif; font-size: 1.9rem; font-weight: 400; color: var(--text-dark); }
+.step-sub { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem; }
+.areas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; margin-bottom: 2rem; }
+.area-chip {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.9rem 1rem; background: var(--white);
+  border: 2px solid var(--border); border-radius: 6px;
+  cursor: pointer; transition: all 0.15s; user-select: none;
+}
+.area-chip:hover { border-color: var(--gold); }
+.area-chip.selected { border-color: var(--gold); background: #FFFBEF; }
+.area-chip-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+.area-chip.selected .area-chip-check { background: var(--gold); border-color: var(--gold); }
+.area-chip.selected .area-chip-check::after { content: '✓'; font-size: 0.7rem; color: var(--navy); font-weight: 700; }
+.area-chip-name { font-size: 0.88rem; font-weight: 500; color: var(--text-dark); }
+.select-count { text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+.select-count strong { color: var(--gold); }
+
+/* Custom area input */
+.custom-area-row { display: flex; gap: 0.5rem; margin-bottom: 1.75rem; }
+.custom-area-input { flex: 1; padding: 0.7rem 1rem; border: 1.5px solid var(--border); border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 0.88rem; color: var(--text-dark); background: var(--white); }
+.custom-area-input:focus { outline: none; border-color: var(--gold); }
+.btn-add-custom { padding: 0.7rem 1.2rem; background: var(--navy); color: var(--white); border: none; border-radius: 4px; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.btn-add-custom:hover { background: var(--navy-mid); }
+
+/* Step 2: Rate Areas */
+.rate-area-card { background: var(--white); border-radius: 8px; border: 1px solid var(--border); padding: 2rem 2rem 1.75rem; margin-bottom: 1.25rem; }
+.rate-area-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+.rate-area-name { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 400; }
+.rate-area-score-badge { font-size: 2rem; font-weight: 700; color: var(--gold); font-family: 'Inter', sans-serif; min-width: 2.5rem; text-align: right; }
+.rate-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 3px; background: var(--border); outline: none; cursor: pointer; }
+.rate-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--gold); cursor: pointer; border: 3px solid var(--white); box-shadow: 0 1px 6px rgba(0,0,0,0.2); }
+.rate-slider::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--gold); cursor: pointer; border: 3px solid var(--white); box-shadow: 0 1px 6px rgba(0,0,0,0.2); }
+.rate-labels { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.5rem; }
+.rate-feel { font-size: 0.82rem; color: var(--text-mid); margin-top: 1rem; font-style: italic; text-align: center; }
+
+/* Step 3: Define 10/10 */
+.define-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 1.75rem 2rem; margin-bottom: 1.25rem; }
+.define-card-label { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 0.4rem; display: block; }
+.define-card-area { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 0.25rem; }
+.define-card-score { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem; }
+.define-card-score strong { color: var(--gold); }
+.define-textarea { width: 100%; padding: 0.8rem 1rem; border: 1.5px solid var(--border); border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 0.88rem; line-height: 1.6; color: var(--text-dark); background: var(--cream); resize: vertical; min-height: 80px; }
+.define-textarea:focus { outline: none; border-color: var(--gold); background: var(--white); }
+.define-textarea::placeholder { color: var(--text-muted); }
+
+/* Step 4: +1 Actions */
+.action-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem 2rem; margin-bottom: 1rem; }
+.action-card-area { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 0.25rem; }
+.action-card-context { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.85rem; }
+.action-card-context strong { color: var(--gold); }
+.action-input { width: 100%; padding: 0.75rem 1rem; border: 1.5px solid var(--border); border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 0.88rem; color: var(--text-dark); background: var(--cream); }
+.action-input:focus { outline: none; border-color: var(--gold); background: var(--white); }
+.action-input::placeholder { color: var(--text-muted); }
+
+/* Buttons */
+.btn-primary { background: var(--gold); color: var(--navy); padding: 0.85rem 2rem; border: none; border-radius: 4px; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.04em; cursor: pointer; transition: background 0.15s; font-family: 'Inter', sans-serif; }
+.btn-primary:hover { background: var(--gold-light); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-secondary { background: transparent; color: var(--text-mid); border: 1.5px solid var(--border); padding: 0.85rem 2rem; border-radius: 4px; font-size: 0.88rem; cursor: pointer; font-family: 'Inter', sans-serif; transition: border-color 0.15s; }
+.btn-secondary:hover { border-color: var(--gold); color: var(--text-dark); }
+.wizard-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; flex-wrap: wrap; gap: 1rem; }
+.wizard-progress { font-size: 0.78rem; color: var(--text-muted); }
+.wizard-progress-dots { display: flex; gap: 0.4rem; margin-top: 0.25rem; }
+.wizard-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: background 0.2s; }
+.wizard-dot.done { background: var(--gold); }
+
+/* ── WHEEL VIEW (after setup) ───────── */
+.wheel-view { display: none; }
+.wheel-view.active { display: block; }
+.wheel-view-header { text-align: center; padding: 2.5rem 2rem 1.5rem; }
+.wheel-view-eyebrow { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 0.6rem; }
+.wheel-view-title { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 400; color: var(--text-dark); margin-bottom: 0.4rem; }
+.wheel-view-sub { font-size: 0.82rem; color: var(--text-muted); }
+.wheel-layout { display: grid; grid-template-columns: 480px 1fr; gap: 2.5rem; align-items: start; max-width: 1060px; margin: 2rem auto 0; }
+@media (max-width: 900px) { .wheel-layout { grid-template-columns: 1fr; } }
+.wheel-chart-wrap { position: relative; }
+.wheel-chart-canvas { width: 100%; }
+.wheel-areas-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.wheel-area-row {
+  background: var(--white); border: 1px solid var(--border); border-radius: 6px;
+  padding: 1rem 1.25rem; display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+}
+.wheel-area-name { font-weight: 500; font-size: 0.9rem; color: var(--text-dark); margin-bottom: 0.2rem; }
+.wheel-area-vision { font-size: 0.78rem; color: var(--text-muted); font-style: italic; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.wheel-area-action { font-size: 0.78rem; color: var(--text-mid); margin-top: 0.2rem; }
+.wheel-area-action::before { content: '+1 → '; color: var(--gold); font-weight: 600; }
+.wheel-area-score { font-size: 1.6rem; font-weight: 700; color: var(--gold); line-height: 1; align-self: center; }
+.wheel-actions-bar { display: flex; gap: 1rem; margin: 2.5rem auto 0; max-width: 1060px; flex-wrap: wrap; }
+.checkin-date { font-size: 0.78rem; color: var(--text-muted); align-self: center; margin-left: auto; }
+
+/* ── CHECK-IN MODAL ─────────────────── */
+.checkin-overlay { position: fixed; inset: 0; background: rgba(15,18,21,0.8); z-index: 500; display: none; align-items: center; justify-content: center; padding: 1.5rem; }
+.checkin-overlay.active { display: flex; }
+.checkin-modal { background: var(--cream); border-radius: 8px; padding: 2rem; max-width: 640px; width: 100%; max-height: 90vh; overflow-y: auto; border-top: 4px solid var(--gold); }
+.checkin-modal h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 0.5rem; }
+.checkin-modal p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+.checkin-row { margin-bottom: 1.25rem; }
+.checkin-row-label { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.4rem; }
+.checkin-row-score { color: var(--gold); font-weight: 700; }
+.checkin-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 5px; border-radius: 3px; background: var(--border); outline: none; cursor: pointer; }
+.checkin-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--gold); cursor: pointer; border: 3px solid var(--white); box-shadow: 0 1px 5px rgba(0,0,0,0.2); }
+.checkin-modal-nav { display: flex; gap: 1rem; margin-top: 1.75rem; }
+
+/* ── HISTORY STRIP ──────────────────── */
+.history-section { max-width: 1060px; margin: 2.5rem auto 0; padding-top: 2rem; border-top: 1px solid var(--border); }
+.history-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 1rem; }
+.history-timeline { display: flex; gap: 0.75rem; overflow-x: auto; padding-bottom: 0.5rem; }
+.history-item { min-width: 90px; background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem 0.9rem; text-align: center; flex-shrink: 0; }
+.history-item-date { font-size: 0.68rem; color: var(--text-muted); margin-bottom: 0.3rem; }
+.history-item-avg { font-size: 1.4rem; font-weight: 700; color: var(--gold); }
+.history-item-label { font-size: 0.65rem; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────── -->
+<header>
+  <div class="header-inner">
+    <a class="logo" href="/index.html">
+      <img class="logo-img" src="/tlr-logo.png" alt="The Living Room">
+      <span class="logo-sub">Member Hub</span>
+    </a>
+    <div class="header-title-block">
+      <h1>Your <em>Living Room</em> Member Dashboard</h1>
+      <p>Not a course to finish. A companion you carry through life.</p>
+    </div>
+    <div class="header-links">
+      <a href="https://www.motivate-coaching.com/thelivingroom" target="_blank" class="header-link">Main Site</a>
+    </div>
+  </div>
+</header>
+
+<!-- ── PAGE TABS ──────────────────── -->
+<div class="page-tabs">
+  <div class="page-tabs-inner">
+    <a class="tab-btn" href="/index.html">Dashboard</a>
+    <a class="tab-btn" href="/index.html#library">Resource Library</a>
+    <a class="tab-btn" href="/index.html#vision">The Bigger Picture</a>
+    <a class="tab-btn active" href="/my-wheel.html">My Balance Wheel</a>
+    <a class="tab-btn" href="/my-journal.html">My Journal</a>
+  </div>
+</div>
+
+<!-- ════ WHEEL SETUP WIZARD ════ -->
+<div class="wheel-page" id="wheel-wizard">
+
+  <!-- STEP 0: Welcome -->
+  <div class="wizard-step active" id="step-0">
+    <div class="wheel-welcome">
+      <div class="wheel-welcome-eyebrow">Your personal compass</div>
+      <h2>Your <em>Balance</em> Wheel</h2>
+      <p class="wheel-welcome-body">The Balance Wheel is a simple, powerful snapshot of where you are in life right now. You choose 8 areas, rate each one, define what 10/10 looks like — and then we help you find one small action to move forward in each.</p>
+      <p class="wheel-welcome-body">It takes about 10 minutes to set up. Once it's done, everything in The Living Room becomes more personal.</p>
+      <ul class="wheel-welcome-list">
+        <li><span><b>Choose 8 areas</b> of life that matter most to you right now</span></li>
+        <li><span><b>Rate each area</b> from 1–10, honestly</span></li>
+        <li><span><b>Define your 10/10</b> — what would it look and feel like?</span></li>
+        <li><span><b>Set one +1 action</b> for each area — small, real, doable</span></li>
+      </ul>
+      <button class="btn-primary" onclick="startWizard()" style="margin-top:0.5rem">Begin my Balance Wheel →</button>
+    </div>
+  </div>
+
+  <!-- STEP 1: Choose Areas -->
+  <div class="wizard-step" id="step-1">
+    <div class="step-header">
+      <span class="step-eyebrow">Step 1 of 4</span>
+      <div class="step-title">Choose your 8 areas</div>
+      <div class="step-sub">Select the 8 areas of life you want to focus on. You can also add your own.</div>
+    </div>
+    <p class="select-count">Selected: <strong id="selected-count">0</strong> / 8</p>
+    <div class="areas-grid" id="areas-grid"></div>
+    <div class="custom-area-row">
+      <input type="text" class="custom-area-input" id="custom-area-input" placeholder="Add a custom area (e.g. Creative Expression)" maxlength="40">
+      <button class="btn-add-custom" onclick="addCustomArea()">+ Add</button>
+    </div>
+    <div class="wizard-nav">
+      <button class="btn-secondary" onclick="gotoStep(0)">← Back</button>
+      <div>
+        <div class="wizard-progress">Step 1 of 4</div>
+        <div class="wizard-progress-dots">
+          <div class="wizard-dot done"></div>
+          <div class="wizard-dot"></div>
+          <div class="wizard-dot"></div>
+          <div class="wizard-dot"></div>
+        </div>
+      </div>
+      <button class="btn-primary" id="btn-step1-next" onclick="gotoStep(2)" disabled>Rate my areas →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Rate Each Area -->
+  <div class="wizard-step" id="step-2">
+    <div class="step-header">
+      <span class="step-eyebrow">Step 2 of 4</span>
+      <div class="step-title">Rate each area</div>
+      <div class="step-sub">Be honest — there are no right or wrong answers. Where are you <em>actually</em> at right now?</div>
+    </div>
+    <div id="rate-cards"></div>
+    <div class="wizard-nav">
+      <button class="btn-secondary" onclick="gotoStep(1)">← Back</button>
+      <div>
+        <div class="wizard-progress">Step 2 of 4</div>
+        <div class="wizard-progress-dots">
+          <div class="wizard-dot done"></div>
+          <div class="wizard-dot done"></div>
+          <div class="wizard-dot"></div>
+          <div class="wizard-dot"></div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="gotoStep(3)">Define my 10/10 →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Define 10/10 -->
+  <div class="wizard-step" id="step-3">
+    <div class="step-header">
+      <span class="step-eyebrow">Step 3 of 4</span>
+      <div class="step-title">What does 10/10 look like?</div>
+      <div class="step-sub">For each area, paint a picture of life when it's thriving. Be specific — what does it feel like, look like, sound like?</div>
+    </div>
+    <div id="define-cards"></div>
+    <div class="wizard-nav">
+      <button class="btn-secondary" onclick="gotoStep(2)">← Back</button>
+      <div>
+        <div class="wizard-progress">Step 3 of 4</div>
+        <div class="wizard-progress-dots">
+          <div class="wizard-dot done"></div>
+          <div class="wizard-dot done"></div>
+          <div class="wizard-dot done"></div>
+          <div class="wizard-dot"></div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="gotoStep(4)">Set my +1 actions →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: +1 Actions -->
+  <div class="wizard-step" id="step-4">
+    <div class="step-header">
+      <span class="step-eyebrow">Step 4 of 4</span>
+      <div class="step-title">Your +1 actions</div>
+      <div class="step-sub">What's one small, honest action that would move each area just one point forward? Keep it real — not inspiring, <em>doable</em>.</div>
+    </div>
+    <div id="action-cards"></div>
+    <div class="wizard-nav">
+      <button class="btn-secondary" onclick="gotoStep(3)">← Back</button>
+      <div>
+        <div class="wizard-progress">Step 4 of 4</div>
+        <div class="wizard-progress-dots">
+          <div class="wizard-dot done"></div>
+          <div class="wizard-dot done"></div>
+          <div class="wizard-dot done"></div>
+          <div class="wizard-dot done"></div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="saveWheel()">Save my Balance Wheel →</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════ WHEEL VIEW (after setup) ════ -->
+<div class="wheel-view" id="wheel-view">
+  <div class="wheel-view-header">
+    <div class="wheel-view-eyebrow">Your personal compass</div>
+    <div class="wheel-view-title">My <em style="font-style:italic;color:var(--gold)">Balance</em> Wheel</div>
+    <div class="wheel-view-sub" id="wheel-checkin-date"></div>
+  </div>
+  <div class="wheel-layout">
+    <div class="wheel-chart-wrap">
+      <canvas id="wheelChart" class="wheel-chart-canvas"></canvas>
+    </div>
+    <div class="wheel-areas-list" id="wheel-areas-list"></div>
+  </div>
+  <div class="wheel-actions-bar">
+    <button class="btn-primary" onclick="openCheckin()">Monthly Check-In</button>
+    <button class="btn-secondary" onclick="resetWheel()">Reset &amp; Start Over</button>
+    <span class="checkin-date" id="last-checkin-label"></span>
+  </div>
+  <div class="history-section" id="history-section" style="display:none">
+    <div class="history-title">Your check-in history</div>
+    <div class="history-timeline" id="history-timeline"></div>
+  </div>
+</div>
+
+<!-- ── CHECK-IN MODAL ─────────────── -->
+<div class="checkin-overlay" id="checkin-overlay" onclick="if(event.target===this)closeCheckin()">
+  <div class="checkin-modal">
+    <h3>Monthly Check-In</h3>
+    <p>How are things feeling now? Update your scores to see how your wheel has shifted.</p>
+    <div id="checkin-rows"></div>
+    <div class="checkin-modal-nav">
+      <button class="btn-primary" onclick="saveCheckin()">Save Check-In</button>
+      <button class="btn-secondary" onclick="closeCheckin()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── PRESET AREAS ──────────────────────────
+const PRESET_AREAS = [
+  'Health & Fitness',
+  'Mental & Emotional Wellbeing',
+  'Career & Purpose',
+  'Finances & Security',
+  'Relationships & Family',
+  'Social & Community',
+  'Learning & Growth',
+  'Fun, Joy & Leisure',
+  'Home & Environment',
+  'Spirituality & Meaning',
+  'Contribution & Giving Back',
+  'Creativity & Expression'
+];
+
+const RATE_FEELS = [
+  'Needs urgent attention', // 1-2
+  'Struggling — but I notice it', // 3
+  'Getting by, not thriving', // 4
+  'Somewhere in the middle', // 5
+  'Okay — room to grow', // 6
+  'Pretty good', // 7
+  'Good — mostly on track', // 8
+  'Really well', // 9
+  'Thriving', // 10
+];
+
+function getRateFeel(score) {
+  if (score <= 2) return RATE_FEELS[0];
+  if (score === 3) return RATE_FEELS[1];
+  if (score === 4) return RATE_FEELS[2];
+  if (score === 5) return RATE_FEELS[3];
+  if (score === 6) return RATE_FEELS[4];
+  if (score === 7) return RATE_FEELS[5];
+  if (score === 8) return RATE_FEELS[6];
+  if (score === 9) return RATE_FEELS[7];
+  return RATE_FEELS[8];
+}
+
+// ── STATE ─────────────────────────────────
+let selectedAreas = [];
+let areaScores = {};
+let areaVisions = {};
+let areaActions = {};
+let customAreas = [];
+let allDisplayedAreas = [...PRESET_AREAS];
+
+// ── INIT ──────────────────────────────────
+(function init() {
+  const saved = localStorage.getItem('tlr_wheel_data');
+  if (saved) {
+    showWheelView(JSON.parse(saved));
+  } else {
+    renderAreasGrid();
+  }
+})();
+
+function startWizard() {
+  renderAreasGrid();
+  gotoStep(1);
+}
+
+function gotoStep(n) {
+  document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
+  const step = document.getElementById(`step-${n}`);
+  if (step) step.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (n === 2) renderRateCards();
+  if (n === 3) renderDefineCards();
+  if (n === 4) renderActionCards();
+}
+
+// ── STEP 1: CHOOSE AREAS ──────────────────
+function renderAreasGrid() {
+  const grid = document.getElementById('areas-grid');
+  grid.innerHTML = '';
+  allDisplayedAreas.forEach(area => {
+    const isSelected = selectedAreas.includes(area);
+    const chip = document.createElement('div');
+    chip.className = `area-chip${isSelected ? ' selected' : ''}`;
+    chip.innerHTML = `
+      <div class="area-chip-check"></div>
+      <div class="area-chip-name">${area}</div>
+    `;
+    chip.onclick = () => toggleArea(area, chip);
+    grid.appendChild(chip);
+  });
+  updateSelectedCount();
+}
+
+function toggleArea(area, chip) {
+  if (selectedAreas.includes(area)) {
+    selectedAreas = selectedAreas.filter(a => a !== area);
+    chip.classList.remove('selected');
+  } else {
+    if (selectedAreas.length >= 8) {
+      chip.style.animation = 'shake 0.3s ease';
+      setTimeout(() => chip.style.animation = '', 300);
+      return;
+    }
+    selectedAreas.push(area);
+    chip.classList.add('selected');
+  }
+  updateSelectedCount();
+}
+
+function updateSelectedCount() {
+  document.getElementById('selected-count').textContent = selectedAreas.length;
+  document.getElementById('btn-step1-next').disabled = selectedAreas.length !== 8;
+}
+
+function addCustomArea() {
+  const input = document.getElementById('custom-area-input');
+  const name = input.value.trim();
+  if (!name || allDisplayedAreas.includes(name)) return;
+  allDisplayedAreas.push(name);
+  customAreas.push(name);
+  input.value = '';
+  renderAreasGrid();
+}
+
+document.getElementById('custom-area-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addCustomArea();
+});
+
+// ── STEP 2: RATE ──────────────────────────
+function renderRateCards() {
+  const container = document.getElementById('rate-cards');
+  container.innerHTML = '';
+  selectedAreas.forEach(area => {
+    const currentScore = areaScores[area] || 5;
+    const card = document.createElement('div');
+    card.className = 'rate-area-card';
+    card.innerHTML = `
+      <div class="rate-area-header">
+        <div class="rate-area-name">${area}</div>
+        <div class="rate-area-score-badge" id="score-badge-${CSS.escape(area)}">${currentScore}</div>
+      </div>
+      <input type="range" class="rate-slider" min="1" max="10" value="${currentScore}"
+             oninput="updateScore('${area.replace(/'/g,"\\'")}', this.value)"
+             onchange="updateScore('${area.replace(/'/g,"\\'")}', this.value)">
+      <div class="rate-labels"><span>1 · Struggling</span><span>10 · Thriving</span></div>
+      <div class="rate-feel" id="feel-${CSS.escape(area)}">${getRateFeel(currentScore)}</div>
+    `;
+    areaScores[area] = currentScore;
+    container.appendChild(card);
+  });
+}
+
+function updateScore(area, value) {
+  const v = parseInt(value);
+  areaScores[area] = v;
+  const key = CSS.escape(area);
+  const badge = document.getElementById(`score-badge-${key}`);
+  const feel = document.getElementById(`feel-${key}`);
+  if (badge) badge.textContent = v;
+  if (feel) feel.textContent = getRateFeel(v);
+}
+
+// ── STEP 3: DEFINE ────────────────────────
+function renderDefineCards() {
+  const container = document.getElementById('define-cards');
+  container.innerHTML = '';
+  selectedAreas.forEach(area => {
+    const card = document.createElement('div');
+    card.className = 'define-card';
+    card.innerHTML = `
+      <span class="define-card-label">10/10 Vision</span>
+      <div class="define-card-area">${area}</div>
+      <div class="define-card-score">Your current score: <strong>${areaScores[area] || 5}/10</strong></div>
+      <textarea class="define-textarea"
+        placeholder="When this area is a 10, I feel... I have... I'm able to..."
+        oninput="areaVisions['${area.replace(/'/g,"\\'")}'] = this.value"
+      >${areaVisions[area] || ''}</textarea>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// ── STEP 4: ACTIONS ───────────────────────
+function renderActionCards() {
+  const container = document.getElementById('action-cards');
+  container.innerHTML = '';
+  selectedAreas.forEach(area => {
+    const score = areaScores[area] || 5;
+    const card = document.createElement('div');
+    card.className = 'action-card';
+    card.innerHTML = `
+      <div class="action-card-area">${area}</div>
+      <div class="action-card-context">Currently at <strong>${score}/10</strong> — what one action would make it a <strong>${Math.min(score + 1, 10)}/10</strong>?</div>
+      <input type="text" class="action-input"
+        placeholder="One small, honest, doable action…"
+        value="${areaActions[area] || ''}"
+        oninput="areaActions['${area.replace(/'/g,"\\'")}'] = this.value">
+    `;
+    container.appendChild(card);
+  });
+}
+
+// ── SAVE ─────────────────────────────────
+function saveWheel() {
+  const today = new Date().toISOString().slice(0, 10);
+  const data = {
+    setupDate: today,
+    lastCheckin: today,
+    areas: selectedAreas.map(area => ({
+      name: area,
+      score: areaScores[area] || 5,
+      vision: areaVisions[area] || '',
+      action: areaActions[area] || ''
+    })),
+    checkins: [{
+      date: today,
+      scores: selectedAreas.map(area => areaScores[area] || 5)
+    }]
+  };
+  localStorage.setItem('tlr_wheel_data', JSON.stringify(data));
+  document.getElementById('wheel-wizard').style.display = 'none';
+  showWheelView(data);
+}
+
+// ── WHEEL VIEW ────────────────────────────
+let wheelChart = null;
+
+function showWheelView(data) {
+  document.getElementById('wheel-wizard').style.display = 'none';
+  const view = document.getElementById('wheel-view');
+  view.classList.add('active');
+
+  // Date label
+  const checkin = new Date(data.lastCheckin);
+  document.getElementById('wheel-checkin-date').textContent =
+    `Last updated ${checkin.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+  document.getElementById('last-checkin-label').textContent =
+    `Set up ${new Date(data.setupDate).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}`;
+
+  // Radar chart
+  const ctx = document.getElementById('wheelChart').getContext('2d');
+  if (wheelChart) wheelChart.destroy();
+  wheelChart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: data.areas.map(a => a.name),
+      datasets: [{
+        label: 'Balance',
+        data: data.areas.map(a => a.score),
+        backgroundColor: 'rgba(232,168,0,0.12)',
+        borderColor: '#E8A800',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#E8A800',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        r: {
+          min: 0, max: 10,
+          ticks: { stepSize: 2, color: '#8899AA', backdropColor: 'transparent', font: { size: 10 } },
+          grid: { color: 'rgba(0,0,0,0.06)' },
+          angleLines: { color: 'rgba(0,0,0,0.08)' },
+          pointLabels: { font: { family: 'Inter', size: 11, weight: '500' }, color: '#111820' }
+        }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  // Areas list
+  const list = document.getElementById('wheel-areas-list');
+  list.innerHTML = '';
+  data.areas.forEach(area => {
+    const row = document.createElement('div');
+    row.className = 'wheel-area-row';
+    row.innerHTML = `
+      <div>
+        <div class="wheel-area-name">${area.name}</div>
+        ${area.vision ? `<div class="wheel-area-vision">${area.vision}</div>` : ''}
+        ${area.action ? `<div class="wheel-area-action">${area.action}</div>` : ''}
+      </div>
+      <div class="wheel-area-score">${area.score}</div>
+    `;
+    list.appendChild(row);
+  });
+
+  // History
+  if (data.checkins && data.checkins.length > 1) {
+    renderHistory(data);
+  }
+}
+
+function renderHistory(data) {
+  const section = document.getElementById('history-section');
+  const timeline = document.getElementById('history-timeline');
+  section.style.display = 'block';
+  timeline.innerHTML = '';
+  data.checkins.slice().reverse().forEach(c => {
+    const avg = (c.scores.reduce((a, b) => a + b, 0) / c.scores.length).toFixed(1);
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    item.innerHTML = `
+      <div class="history-item-date">${new Date(c.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</div>
+      <div class="history-item-avg">${avg}</div>
+      <div class="history-item-label">avg score</div>
+    `;
+    timeline.appendChild(item);
+  });
+}
+
+// ── CHECK-IN ─────────────────────────────
+function openCheckin() {
+  const data = JSON.parse(localStorage.getItem('tlr_wheel_data'));
+  if (!data) return;
+  const rows = document.getElementById('checkin-rows');
+  rows.innerHTML = '';
+  data.areas.forEach((area, i) => {
+    const row = document.createElement('div');
+    row.className = 'checkin-row';
+    row.innerHTML = `
+      <div class="checkin-row-label">
+        <span>${area.name}</span>
+        <span class="checkin-row-score" id="ci-score-${i}">${area.score}</span>
+      </div>
+      <input type="range" class="checkin-slider" min="1" max="10" value="${area.score}"
+             oninput="document.getElementById('ci-score-${i}').textContent=this.value">
+    `;
+    rows.appendChild(row);
+  });
+  document.getElementById('checkin-overlay').classList.add('active');
+}
+
+function closeCheckin() {
+  document.getElementById('checkin-overlay').classList.remove('active');
+}
+
+function saveCheckin() {
+  const data = JSON.parse(localStorage.getItem('tlr_wheel_data'));
+  const sliders = document.querySelectorAll('.checkin-slider');
+  const today = new Date().toISOString().slice(0, 10);
+  const newScores = Array.from(sliders).map(s => parseInt(s.value));
+  data.areas.forEach((area, i) => { area.score = newScores[i]; });
+  data.lastCheckin = today;
+  if (!data.checkins) data.checkins = [];
+  data.checkins.push({ date: today, scores: newScores });
+  localStorage.setItem('tlr_wheel_data', JSON.stringify(data));
+  closeCheckin();
+  document.getElementById('wheel-view').classList.remove('active');
+  showWheelView(data);
+}
+
+function resetWheel() {
+  if (!confirm('This will clear your Balance Wheel data. Are you sure?')) return;
+  localStorage.removeItem('tlr_wheel_data');
+  location.reload();
+}
+
+// Handle URL hash for tab navigation from index.html
+</script>
+</body>
+</html>
