@@ -1,0 +1,1664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — The Living Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<script>requireAuth();</script>
+<style>
+:root {
+  --navy:      #0F1215;
+  --navy-mid:  #141E28;
+  --navy-card: #1C2B3A;
+  --gold:      #E8A800;
+  --gold-lt:   #F5C842;
+  --cream:     #F9F7F2;
+  --muted:     #7A90A0;
+  --border:    #1A2530;
+  --correct:   #538D4E;
+  --present:   #B59F3B;
+  --absent:    #3A3A3C;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Poppins', sans-serif;
+  background: radial-gradient(ellipse at 50% -20%, #162030 0%, var(--navy) 65%);
+  color: var(--cream);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 48px;
+}
+
+/* ── TOP BAR ──────────────────────────────────────── */
+.top-bar {
+  width: 100%;
+  background: #0B0F12;
+  border-bottom: 1px solid var(--border);
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.logo-pill {
+  background: var(--gold);
+  color: var(--navy);
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  flex-shrink: 0;
+}
+.welcome-txt {
+  color: var(--muted);
+  font-size: 11px;
+  margin-left: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+.top-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.top-stat {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.top-stat.streak { color: var(--gold); }
+.top-stat.stars  { color: var(--cream); }
+.level-badge {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--gold);
+  background: rgba(232,168,0,0.1);
+  border: 1px solid rgba(232,168,0,0.25);
+  border-radius: 10px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+/* ── MAIN WRAPPER ─────────────────────────────────── */
+.main {
+  width: 100%;
+  max-width: 480px;
+  padding: 18px 16px 0;
+}
+
+/* ── GAME SECTION ─────────────────────────────────── */
+.game-section { text-align: center; }
+.game-header {
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.game-title-main {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--cream);
+  letter-spacing: -0.01em;
+  margin-bottom: 7px;
+}
+.game-title-accent {
+  width: 32px; height: 2px;
+  background: var(--gold);
+  border-radius: 2px;
+  margin: 0 auto 9px;
+}
+.game-title-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 7px;
+  letter-spacing: 0.01em;
+}
+.day-label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: #3A5060;
+  text-transform: uppercase;
+}
+
+/* ── LEVEL PROGRESS BAR ───────────────────────────── */
+.level-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: 11px;
+}
+.level-name { color: var(--gold); font-weight: 600; white-space: nowrap; }
+.progress-track {
+  flex: 1;
+  height: 4px;
+  background: var(--navy-card);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold) 0%, var(--gold-lt) 100%);
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+.level-next { color: var(--muted); white-space: nowrap; }
+
+/* ── TODAY'S STARS ────────────────────────────────── */
+.stars-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.star-slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.star-icon-wrap {
+  font-size: 26px;
+  line-height: 1;
+  filter: grayscale(1) opacity(0.15);
+  transition: filter 0.35s;
+}
+.star-icon-wrap.earned {
+  filter: drop-shadow(0 0 8px rgba(232,168,0,0.6));
+  animation: starPop 0.45s cubic-bezier(0.34,1.56,0.64,1);
+}
+.star-cap {
+  font-size: 8px;
+  color: #3A5060;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.star-cap.earned { color: var(--muted); }
+@keyframes starPop {
+  0%   { transform: scale(0.4); }
+  60%  { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+
+/* ── GRID ─────────────────────────────────────────── */
+.grid-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.grid-row {
+  display: flex;
+  gap: 5px;
+}
+.cell {
+  width: 52px; height: 52px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--cream);
+  background: transparent;
+  transition: border-color 0.1s;
+  user-select: none;
+}
+.cell.pop      { animation: cellPop    0.1s  ease; }
+.cell.flipping { animation: cellFlip   0.32s ease; }
+.cell.bounce   { animation: cellBounce 0.55s cubic-bezier(0.34,1.56,0.64,1); }
+.grid-row.shake { animation: rowShake  0.45s ease; }
+@keyframes cellPop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.14); }
+  100% { transform: scale(1); }
+}
+@keyframes cellFlip {
+  0%   { transform: scaleY(1); }
+  50%  { transform: scaleY(0); }
+  100% { transform: scaleY(1); }
+}
+@keyframes cellBounce {
+  0%,100% { transform: translateY(0); }
+  40%     { transform: translateY(-18px); }
+  70%     { transform: translateY(-7px); }
+}
+@keyframes rowShake {
+  0%,100% { transform: translateX(0); }
+  15%,55% { transform: translateX(-7px); }
+  35%,75% { transform: translateX(7px); }
+}
+
+/* ── MESSAGE ──────────────────────────────────────── */
+.message {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+.msg-toast {
+  background: var(--cream);
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 18px;
+  border-radius: 20px;
+  letter-spacing: 0.01em;
+  animation: toastIn 0.18s ease;
+}
+.msg-toast.gold { background: var(--gold); }
+@keyframes toastIn {
+  from { transform: translateY(-6px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── NUDGE ────────────────────────────────────────── */
+.nudge-wrap { min-height: 34px; margin-bottom: 8px; }
+.nudge-btn {
+  background: transparent;
+  border: 1px solid rgba(232,168,0,0.28);
+  border-radius: 20px;
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 5px 16px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  transition: background 0.15s;
+}
+.nudge-btn:hover { background: rgba(232,168,0,0.08); }
+.nudge-btn:disabled {
+  color: var(--muted); border-color: rgba(255,255,255,0.08); cursor: default;
+}
+.nudge-reveal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--navy-card);
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 12px;
+  color: var(--cream);
+}
+.nudge-letter {
+  color: var(--gold); font-weight: 700; font-size: 18px; line-height: 1;
+}
+
+/* ── KEYBOARD ─────────────────────────────────────── */
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+}
+.kb-row { display: flex; gap: 4px; }
+.key {
+  background: var(--navy-card);
+  color: #A0B4C0;
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  height: 46px;
+  min-width: 33px;
+  padding: 0 4px;
+  transition: background 0.1s, color 0.1s;
+  -webkit-tap-highlight-color: transparent;
+  letter-spacing: 0.02em;
+}
+.key.wide { min-width: 52px; font-size: 10px; letter-spacing: -0.02em; }
+.key.correct { background: var(--correct); color: #fff; }
+.key.present { background: var(--present); color: #fff; }
+.key.absent  { background: var(--absent);  color: #888; }
+
+/* ── END PANEL ────────────────────────────────────── */
+.end-panel {
+  border-top: 1px solid var(--border);
+  margin-top: 18px;
+  padding: 20px 0 0;
+  text-align: center;
+}
+.celebration { font-size: 32px; margin-bottom: 6px; }
+.result-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gold);
+  margin-bottom: 16px;
+  font-family: 'Playfair Display', serif;
+}
+.quote-card {
+  background: var(--navy-mid);
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+.quote-text {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--cream);
+  margin-bottom: 10px;
+}
+.quote-attr {
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+.stars-earned-today {
+  font-size: 14px;
+  color: var(--cream);
+  margin-bottom: 8px;
+}
+.share-emoji-grid {
+  font-size: 17px;
+  line-height: 1.6;
+  letter-spacing: 1px;
+  margin-bottom: 14px;
+}
+.btn-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.btn-gold {
+  background: var(--gold); color: var(--navy);
+  border: none; border-radius: 6px;
+  padding: 10px 20px; font-size: 12px; font-weight: 700;
+  cursor: pointer; font-family: 'Poppins', sans-serif;
+}
+.btn-outline {
+  background: transparent; color: var(--gold);
+  border: 1px solid rgba(232,168,0,0.3); border-radius: 6px;
+  padding: 10px 20px; font-size: 12px; font-weight: 500;
+  cursor: pointer; font-family: 'Poppins', sans-serif;
+  text-decoration: none; display: inline-flex; align-items: center;
+}
+
+/* Social share bonus */
+.social-share-section {
+  border-top: 1px solid var(--border);
+  margin-top: 14px;
+  padding-top: 14px;
+}
+.social-share-label {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.social-share-copy {
+  background: var(--navy-mid);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--muted);
+  font-style: italic;
+  text-align: left;
+  margin-bottom: 10px;
+}
+.btn-social {
+  background: transparent;
+  border: 1px solid rgba(232,168,0,0.35);
+  border-radius: 20px;
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 7px 18px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  transition: background 0.15s;
+}
+.btn-social:hover { background: rgba(232,168,0,0.08); }
+.btn-social:disabled {
+  color: var(--muted);
+  border-color: rgba(255,255,255,0.1);
+  cursor: default;
+}
+.tlr-url {
+  font-size: 10px;
+  color: #3A4F5A;
+  letter-spacing: 0.06em;
+  margin-top: 12px;
+}
+
+/* ── SOCIAL SHARE ICONS ───────────────────────────── */
+.share-label {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  letter-spacing: 0.04em;
+}
+.share-icons {
+  display: flex;
+  gap: 9px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.shr-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: transform 0.15s, opacity 0.15s;
+  flex-shrink: 0;
+}
+.shr-btn:hover { transform: scale(1.1); opacity: 0.88; }
+.shr-btn svg { width: 22px; height: 22px; }
+.shr-btn.lounge {
+  background: var(--navy-card);
+  border: 1px solid var(--gold);
+  flex-direction: column;
+  gap: 1px;
+}
+.shr-btn.lounge span {
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1.2;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 0.04em;
+}
+.shr-bonus-note {
+  font-size: 10px;
+  color: #3A5060;
+  margin-bottom: 12px;
+}
+.shr-claimed {
+  font-size: 11px;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+/* ── RESULTS OVERLAY ──────────────────────────────── */
+.results-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--navy);
+  z-index: 100;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.results-overlay.open { transform: translateX(0); }
+
+.results-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 20px 20px 0;
+  padding: 9px 18px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 24px;
+  cursor: pointer;
+  color: var(--cream);
+  font-size: 12px;
+  font-weight: 500;
+  user-select: none;
+  transition: background 0.15s;
+}
+.results-back:hover { background: rgba(255,255,255,0.12); }
+
+.results-inner {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 14px 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* ── SHAREABLE QUOTE CARD ─────────────────────────── */
+/* Designed around what actually gets shared:
+   large text, generous air, one clear thought */
+.quote-card-share {
+  width: 100%;
+  background: #F9F7F2;
+  border-radius: 16px;
+  padding: 72px 44px 56px;
+  position: relative;
+  margin-bottom: 36px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+}
+.qcs-mark {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  font-family: 'Playfair Display', serif;
+  font-size: 120px;
+  color: #C49A00;
+  line-height: 1;
+  opacity: 0.14;
+  pointer-events: none;
+  user-select: none;
+}
+.qcs-logo {
+  position: absolute;
+  top: 22px;
+  right: 24px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: #0F1215;
+  opacity: 0.22;
+  font-family: 'Poppins', sans-serif;
+}
+.qcs-quote {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 26px;
+  line-height: 2.0;
+  color: #141414;
+  text-align: left;
+  letter-spacing: -0.01em;
+}
+.qcs-word {
+  font-style: normal;
+  font-weight: 700;
+  color: #8A6000;
+}
+.qcs-rule {
+  width: 40px;
+  height: 1.5px;
+  background: #C8B898;
+  margin: 40px 0 24px;
+}
+.qcs-attr {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1A1A1A;
+  font-family: 'Poppins', sans-serif;
+  text-align: left;
+}
+.qcs-source {
+  display: block;
+  font-weight: 400;
+  font-style: italic;
+  color: #999;
+  font-size: 13px;
+  margin-top: 4px;
+}
+.qcs-url {
+  font-size: 11px;
+  color: #C0B898;
+  letter-spacing: 0.12em;
+  margin-top: 36px;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  text-transform: lowercase;
+}
+
+/* ── SHARE CTA ────────────────────────────────────── */
+.share-cta-block {
+  width: 100%;
+  margin-bottom: 24px;
+}
+.share-cta-heading {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--cream);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+.share-cta-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 22px;
+  line-height: 1.7;
+}
+
+/* ── SOCIAL ICONS WITH LABELS ─────────────────────── */
+.shr-grid {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.shr-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+.shr-item a, .shr-item button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s, opacity 0.15s;
+  flex-shrink: 0;
+}
+.shr-item a svg, .shr-item button svg { width: 24px; height: 24px; }
+.shr-item a:hover, .shr-item button:hover { transform: scale(1.08); opacity: 0.88; }
+.shr-item.lounge a, .shr-item.lounge button {
+  background: var(--navy-card);
+  border: 1.5px solid var(--gold);
+}
+.shr-lbl {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* ── DASHBOARD BUTTON ─────────────────────────────── */
+.btn-dashboard {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--gold);
+  color: var(--navy);
+  border: none;
+  border-radius: 8px;
+  padding: 14px 28px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: 'Poppins', sans-serif;
+  margin-top: 20px;
+  transition: opacity 0.15s;
+}
+.btn-dashboard:hover { opacity: 0.9; }
+
+/* ── STATS BAR ────────────────────────────────────── */
+.stats-bar {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 20px;
+}
+.stat-item {
+  flex: 1;
+  padding: 10px 4px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+}
+.stat-item:last-child { border-right: none; }
+.stat-num {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--cream);
+  display: block;
+}
+.stat-lbl {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── BOTTOM NAV ───────────────────────────────────── */
+.bottom-nav {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 16px;
+}
+.btn-back-hub {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #4A6070;
+  font-size: 11px;
+  font-weight: 500;
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  transition: color 0.15s;
+}
+.btn-back-hub:hover { color: var(--muted); }
+.reminder-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.reminder-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  color: #4A6070;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 5px 14px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  transition: border-color 0.15s, color 0.15s;
+}
+.reminder-btn:hover { border-color: rgba(232,168,0,0.3); color: var(--muted); }
+.reminder-set {
+  font-size: 11px;
+  color: var(--gold);
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div style="display:flex;align-items:center;min-width:0;">
+    <span class="logo-pill">TLR</span>
+    <span class="welcome-txt">Welcome back, <span id="user-name">member</span></span>
+  </div>
+  <div class="top-stats">
+    <div class="top-stat streak">🔥 <span id="hdr-streak">0</span></div>
+    <div class="top-stat stars">⭐ <span id="hdr-stars">0</span></div>
+    <div class="level-badge" id="hdr-level">Arriving</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- GAME SECTION -->
+  <div class="game-section">
+    <div class="game-header">
+      <div class="game-title-main">Quote of the Day</div>
+      <div class="game-title-accent"></div>
+      <div class="game-title-sub">Can you find the missing word?</div>
+      <div class="day-label" id="day-label"></div>
+    </div>
+
+    <!-- LEVEL PROGRESS -->
+    <div class="level-progress">
+      <span class="level-name" id="lvl-name">Arriving</span>
+      <div class="progress-track">
+        <div class="progress-fill" id="lvl-bar" style="width:0%"></div>
+      </div>
+      <span class="level-next" id="lvl-next">10 ⭐ to Showing Up</span>
+    </div>
+
+    <!-- TODAY'S STARS -->
+    <div class="stars-row">
+      <div class="star-slot">
+        <div class="star-icon-wrap" id="star1">⭐</div>
+        <div class="star-cap" id="star1-cap">Show up</div>
+      </div>
+      <div class="star-slot">
+        <div class="star-icon-wrap" id="star2">⭐</div>
+        <div class="star-cap" id="star2-cap">Solve it</div>
+      </div>
+      <div class="star-slot">
+        <div class="star-icon-wrap" id="star3">⭐</div>
+        <div class="star-cap" id="star3-cap">Pure solve</div>
+      </div>
+      <div class="star-slot">
+        <div class="star-icon-wrap" id="star4">⭐</div>
+        <div class="star-cap" id="star4-cap">Share it</div>
+      </div>
+    </div>
+
+    <!-- GRID -->
+    <div class="grid-wrap">
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <!-- MESSAGE -->
+    <div class="message" id="message"></div>
+
+    <!-- NUDGE -->
+    <div class="nudge-wrap" id="nudge-wrap"></div>
+
+    <!-- KEYBOARD -->
+    <div class="keyboard" id="keyboard"></div>
+
+    <!-- END PANEL -->
+    <div id="end-panel" style="display:none;" class="end-panel"></div>
+  </div>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-num" id="stat-played">0</span>
+      <span class="stat-lbl">Played</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" id="stat-solved">0</span>
+      <span class="stat-lbl">Solved</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" id="stat-streak">0</span>
+      <span class="stat-lbl">Streak</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" id="stat-best">0</span>
+      <span class="stat-lbl">Best</span>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <a class="btn-back-hub" href="/index.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to dashboard
+    </a>
+    <div class="reminder-row" id="reminder-row">
+      <button class="reminder-btn" id="reminder-btn" onclick="setReminder()">🔔 Remind me daily</button>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- RESULTS OVERLAY — slides in from right on game end -->
+<div class="results-overlay" id="results-overlay">
+  <div class="results-back" onclick="closeResults()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+    Back to game
+  </div>
+  <div class="results-inner" id="results-inner"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// WORD LIST
+// Each entry: word (5 letters, uppercase), quote (use _____ for
+// the hidden word), author, source (or null), def (plain English)
+// Add more entries to extend the rotation cycle.
+// ═══════════════════════════════════════════════════════════════
+const WORDS = [
+  {
+    word: 'CLEAR',
+    quote: '"_____ isn\'t the gatekeeper of action. Action is the doorway to clarity."',
+    author: 'Stuart Fairbairns', source: 'Do It Your Way',
+    def: 'Free from confusion or uncertainty'
+  },
+  {
+    word: 'TRUST',
+    quote: '"_____ yourself. You know more than you think you do."',
+    author: 'Benjamin Spock', source: null,
+    def: 'Firm belief in the reliability of something or someone'
+  },
+  {
+    word: 'SPACE',
+    quote: '"Between stimulus and response there is a _____. In that space is our power to choose."',
+    author: 'Viktor Frankl', source: null,
+    def: 'A gap — a moment between things where choice lives'
+  },
+  {
+    word: 'NERVE',
+    quote: '"Life shrinks or expands in proportion to one\'s _____."',
+    author: 'Anaïs Nin', source: null,
+    def: 'The boldness to act — the cousin of courage'
+  },
+  {
+    word: 'PLANT',
+    quote: '"The best time to _____ a tree was 20 years ago. The second best time is now."',
+    author: 'Chinese Proverb', source: null,
+    def: 'To put something in place so it can grow over time'
+  },
+  {
+    word: 'FULLY',
+    quote: '"There is no greater contribution than becoming _____ yourself."',
+    author: 'Stuart Fairbairns', source: 'Do It Your Way',
+    def: 'Completely and without holding back'
+  },
+  {
+    word: 'ENTER',
+    quote: '"The cave you fear to _____ holds the treasure you seek."',
+    author: 'Joseph Campbell', source: null,
+    def: 'To go into something — to step through a threshold'
+  },
+  {
+    word: 'LIGHT',
+    quote: '"It is during our darkest moments that we must focus to see the _____."',
+    author: 'Aristotle', source: null,
+    def: 'What makes things visible — the opposite of darkness'
+  },
+  {
+    word: 'HAPPY',
+    quote: '"_____ is the ground floor, not the destination."',
+    author: 'Stuart Fairbairns', source: 'Do It Your Way',
+    def: 'Feeling contentment and joy — a place to start from'
+  },
+  {
+    word: 'TEACH',
+    quote: '"Tell me and I forget. _____ me and I remember. Involve me and I learn."',
+    author: 'Benjamin Franklin', source: null,
+    def: 'To show someone how to do something so they can do it themselves'
+  },
+  {
+    word: 'STORY',
+    quote: '"Your _____ isn\'t over. In fact, the best chapters may still be ahead."',
+    author: 'Stuart Fairbairns', source: 'Do It Your Way',
+    def: 'The narrative of a life — the account we give of ourselves'
+  },
+  {
+    word: 'QUIET',
+    quote: '"In the _____ moments, you hear yourself most clearly."',
+    author: 'Stuart Fairbairns', source: 'Do It Your Way',
+    def: 'Free from noise — the space where clarity lives'
+  },
+  {
+    word: 'READY',
+    quote: '"You don\'t have to be _____ to begin. You just have to begin."',
+    author: 'Stuart Fairbairns', source: 'Do It Your Way',
+    def: 'Fully prepared — though waiting for it may be the real trap'
+  },
+  {
+    word: 'BRAVE',
+    quote: '"You don\'t need to be fearless. You just need to be _____."',
+    author: 'Stuart Fairbairns', source: 'Do It Your Way',
+    def: 'Willing to act despite fear — not the absence of it'
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════
+// LEVELS — every 10 stars = one level up
+// ═══════════════════════════════════════════════════════════════
+const LEVELS = [
+  { name: 'Just Starting',        min: 0,   max: 9   },
+  { name: 'Getting Curious',      min: 10,  max: 19  },
+  { name: 'Wordsmith',            min: 20,  max: 29  },
+  { name: 'Quote Lover',          min: 30,  max: 39  },
+  { name: 'Inspiration Seeker',   min: 40,  max: 49  },
+  { name: 'Deep Thinker',         min: 50,  max: 59  },
+  { name: 'Quote Connoisseur',    min: 60,  max: 69  },
+  { name: 'Wisdom Hunter',        min: 70,  max: 79  },
+  { name: 'Word Master',          min: 80,  max: 89  },
+  { name: 'Living Room Legend',   min: 90,  max: Infinity },
+];
+
+function getLevel(stars) {
+  return LEVELS.find(l => stars >= l.min && stars <= l.max) || LEVELS[0];
+}
+
+function getLevelProgress(stars) {
+  const lvl = getLevel(stars);
+  if (lvl.max === Infinity) return { pct: 100, toNext: 0, nextName: null };
+  const within = stars - lvl.min;       // 0–9 within this band
+  const toNext = lvl.max - stars + 1;   // stars needed to level up
+  const nextLvl = LEVELS[LEVELS.indexOf(lvl) + 1];
+  return { pct: Math.round((within / 10) * 100), toNext, nextName: nextLvl ? nextLvl.name : null };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DATE & WORD SELECTION
+// Word index = days since launch, cycling through WORDS array.
+// Everyone gets the same word on the same calendar date.
+// ═══════════════════════════════════════════════════════════════
+const LAUNCH_DATE = new Date('2026-08-04');
+LAUNCH_DATE.setHours(0,0,0,0);
+
+function getDateStr(d) {
+  d = d || new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function getTodayWord() {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const dayIndex = Math.max(0, Math.floor((today - LAUNCH_DATE) / 86400000)) % WORDS.length;
+  return WORDS[dayIndex];
+}
+function fmtDate(d) {
+  return d.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STATE — all persisted in localStorage
+// ═══════════════════════════════════════════════════════════════
+const TODAY     = getDateStr();
+const WORD_DATA = getTodayWord();
+const TARGET    = WORD_DATA.word;
+const MAX_R = 6, COLS = 5;
+
+// Daily keys (reset each day naturally, no cleanup needed)
+const K_GUESSES   = `tlr_guesses_${TODAY}`;
+const K_STATUS    = `tlr_status_${TODAY}`;    // 'playing'|'won'|'lost'
+const K_NUDGE     = `tlr_nudge_${TODAY}`;     // 'used'
+const K_STARS_DAY = `tlr_stars_${TODAY}`;     // JSON array [1,2,3,4]
+const K_PLAYED_D  = `tlr_played_${TODAY}`;    // '1' when counted today
+const K_SOCIAL    = `tlr_social_${TODAY}`;    // 'done'
+
+// Lifetime keys
+const K_STREAK    = 'tlr_streak';
+const K_BEST      = 'tlr_best_streak';
+const K_PLAYED    = 'tlr_played';
+const K_SOLVED    = 'tlr_solved';
+const K_STARS     = 'tlr_stars';
+const K_LAST_DAY  = 'tlr_last_day';
+
+// Load persisted values
+let guesses    = JSON.parse(localStorage.getItem(K_GUESSES)   || '[]');
+let status     = localStorage.getItem(K_STATUS)               || 'playing';
+let nudgeUsed  = localStorage.getItem(K_NUDGE)                === 'used';
+let starsToday = JSON.parse(localStorage.getItem(K_STARS_DAY) || '[]');
+let socialDone = localStorage.getItem(K_SOCIAL)               === 'done';
+let streak     = parseInt(localStorage.getItem(K_STREAK)      || '0');
+let bestStreak = parseInt(localStorage.getItem(K_BEST)        || '0');
+let played     = parseInt(localStorage.getItem(K_PLAYED)      || '0');
+let solved     = parseInt(localStorage.getItem(K_SOLVED)      || '0');
+let totalStars = parseInt(localStorage.getItem(K_STARS)       || '0');
+
+let guessColors = [];
+let keyColors   = {};
+let current     = '';
+let gameOver    = status !== 'playing';
+
+// Recompute colours from stored guesses (page reload recovery)
+guesses.forEach(g => {
+  const cols = scoreGuess(g);
+  guessColors.push(cols);
+  cols.forEach((c, i) => updateKeyColor(g[i], c));
+});
+
+// ═══════════════════════════════════════════════════════════════
+// STREAK GUARD — reset if they missed a day
+// ═══════════════════════════════════════════════════════════════
+(function checkStreak() {
+  const last = localStorage.getItem(K_LAST_DAY);
+  if (!last) return;
+  const lastD = new Date(last); lastD.setHours(0,0,0,0);
+  const todayD = new Date();    todayD.setHours(0,0,0,0);
+  const diff = Math.floor((todayD - lastD) / 86400000);
+  if (diff > 1) { streak = 0; localStorage.setItem(K_STREAK, '0'); }
+})();
+
+// ═══════════════════════════════════════════════════════════════
+// DOM — DATE LABEL
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('day-label').textContent = 'Daily Word · ' + fmtDate(new Date());
+
+// ═══════════════════════════════════════════════════════════════
+// GRID
+// ═══════════════════════════════════════════════════════════════
+const gridEl = document.getElementById('grid');
+const cells = [];
+const rows = [];
+for (let r = 0; r < MAX_R; r++) {
+  cells.push([]);
+  const rowEl = document.createElement('div');
+  rowEl.className = 'grid-row';
+  gridEl.appendChild(rowEl);
+  rows.push(rowEl);
+  for (let c = 0; c < COLS; c++) {
+    const el = document.createElement('div');
+    el.className = 'cell';
+    rowEl.appendChild(el);
+    cells[r].push(el);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════════════════════════════
+const KB_ROWS = [
+  ['Q','W','E','R','T','Y','U','I','O','P'],
+  ['A','S','D','F','G','H','J','K','L'],
+  ['ENTER','Z','X','C','V','B','N','M','⌫']
+];
+const kbEl = document.getElementById('keyboard');
+const keyEls = {};
+KB_ROWS.forEach(row => {
+  const div = document.createElement('div');
+  div.className = 'kb-row';
+  row.forEach(k => {
+    const btn = document.createElement('button');
+    btn.className = 'key' + (k.length > 1 ? ' wide' : '');
+    btn.textContent = k;
+    btn.addEventListener('click', () => handleKey(k));
+    div.appendChild(btn);
+    if (k.length === 1) keyEls[k] = btn;
+  });
+  kbEl.appendChild(div);
+});
+
+// Physical keyboard
+document.addEventListener('keydown', e => {
+  if (gameOver) return;
+  if (e.key === 'Enter')          handleKey('ENTER');
+  else if (e.key === 'Backspace') handleKey('⌫');
+  else if (/^[a-zA-Z]$/.test(e.key)) handleKey(e.key.toUpperCase());
+});
+
+// ═══════════════════════════════════════════════════════════════
+// RESTORE STATE on page reload
+// ═══════════════════════════════════════════════════════════════
+guesses.forEach((g, r) => {
+  guessColors[r].forEach((col, c) => {
+    cells[r][c].textContent = g[c];
+    cells[r][c].style.background  = colBg(col);
+    cells[r][c].style.borderColor = colBg(col);
+    cells[r][c].style.color = '#fff';
+  });
+});
+updateAllKeys();
+updateUI();
+
+if (gameOver) {
+  document.getElementById('keyboard').style.display = 'none';
+  document.getElementById('nudge-wrap').style.display = 'none';
+  setTimeout(() => showEndPanel(status === 'won', guesses.length), 100);
+} else if (guesses.length >= 3 && !gameOver) {
+  renderNudge();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GAME LOGIC
+// ═══════════════════════════════════════════════════════════════
+function handleKey(k) {
+  if (gameOver) return;
+  if (k === '⌫') {
+    if (current.length > 0) { current = current.slice(0,-1); renderCurrent(); }
+  } else if (k === 'ENTER') {
+    if (current.length === COLS) submitGuess();
+    else { showMsg('Not enough letters'); shakeCurrentRow(); }
+  } else if (current.length < COLS) {
+    current += k;
+    renderCurrent();
+    // Pop animation
+    const row = cells[guesses.length];
+    if (row && row[current.length-1]) {
+      row[current.length-1].classList.remove('pop');
+      void row[current.length-1].offsetWidth;
+      row[current.length-1].classList.add('pop');
+    }
+  }
+}
+
+function renderCurrent() {
+  const row = cells[guesses.length];
+  if (!row) return;
+  for (let c = 0; c < COLS; c++) {
+    row[c].textContent   = current[c] || '';
+    row[c].style.borderColor = current[c] ? 'rgba(249,247,242,0.4)' : 'var(--border)';
+    row[c].style.background  = 'transparent';
+    row[c].style.color       = 'var(--cream)';
+  }
+}
+
+function submitGuess() {
+  const g = current;
+  const cols = scoreGuess(g);
+  guesses.push(g);
+  guessColors.push(cols);
+  current = '';
+  localStorage.setItem(K_GUESSES, JSON.stringify(guesses));
+
+  // Award Star 1 (showed up) on first submission
+  if (guesses.length === 1 && !localStorage.getItem(K_PLAYED_D)) {
+    localStorage.setItem(K_PLAYED_D, '1');
+    localStorage.setItem(K_LAST_DAY, TODAY);
+    played++;
+    localStorage.setItem(K_PLAYED, played);
+    earnStar(1);
+  }
+
+  // Flip cells with stagger
+  const row = cells[guesses.length - 1];
+  cols.forEach((col, c) => {
+    setTimeout(() => {
+      row[c].classList.add('flipping');
+      setTimeout(() => {
+        row[c].style.background  = colBg(col);
+        row[c].style.borderColor = colBg(col);
+        row[c].style.color = '#fff';
+      }, 160);
+      setTimeout(() => row[c].classList.remove('flipping'), 330);
+    }, c * 160);
+    updateKeyColor(g[c], col);
+  });
+
+  setTimeout(() => {
+    updateAllKeys();
+
+    if (g === TARGET) {
+      // ── WIN ───────────────────────────────────────
+      status = 'won';
+      gameOver = true;
+      localStorage.setItem(K_STATUS, 'won');
+
+      earnStar(2); // solved
+      if (!nudgeUsed) earnStar(3); // pure solve
+
+      streak++;
+      if (streak > bestStreak) { bestStreak = streak; localStorage.setItem(K_BEST, bestStreak); }
+      localStorage.setItem(K_STREAK, streak);
+      solved++;
+      localStorage.setItem(K_SOLVED, solved);
+
+      updateUI();
+      document.getElementById('keyboard').style.display = 'none';
+      document.getElementById('nudge-wrap').style.display = 'none';
+
+      // Winning row bounce
+      cells[guesses.length-1].forEach((cell, i) => {
+        setTimeout(() => {
+          cell.classList.add('bounce');
+          cell.addEventListener('animationend', () => cell.classList.remove('bounce'), {once:true});
+        }, i * 90);
+      });
+      // Confetti
+      if (typeof confetti !== 'undefined') {
+        setTimeout(() => confetti({
+          particleCount: 75, spread: 65, origin: {y: 0.5},
+          colors: ['#E8A800','#F5C842','#F9F7F2','#538D4E','#ffffff']
+        }), 450);
+      }
+
+      setTimeout(() => showEndPanel(true, guesses.length), 1300);
+
+    } else if (guesses.length >= MAX_R) {
+      // ── LOSS ──────────────────────────────────────
+      status = 'lost';
+      gameOver = true;
+      localStorage.setItem(K_STATUS, 'lost');
+
+      // Streak = showing up, not just winning
+      streak++;
+      if (streak > bestStreak) { bestStreak = streak; localStorage.setItem(K_BEST, bestStreak); }
+      localStorage.setItem(K_STREAK, streak);
+
+      updateUI();
+      document.getElementById('keyboard').style.display = 'none';
+      document.getElementById('nudge-wrap').style.display = 'none';
+      setTimeout(() => showEndPanel(false, null), 600);
+
+    } else {
+      showMsg('');
+      if (guesses.length >= 3) renderNudge();
+    }
+  }, (COLS - 1) * 160 + 420);
+}
+
+function scoreGuess(g) {
+  const result = Array(COLS).fill('absent');
+  const t = TARGET.split('');
+  const a = g.split('');
+  // Pass 1: correct positions
+  a.forEach((l,i) => { if (l===t[i]) { result[i]='correct'; t[i]=a[i]=null; } });
+  // Pass 2: present letters
+  a.forEach((l,i) => {
+    if (!l) return;
+    const j = t.indexOf(l);
+    if (j !== -1) { result[i] = 'present'; t[j] = null; }
+  });
+  return result;
+}
+
+function colBg(col) {
+  return col==='correct' ? 'var(--correct)' : col==='present' ? 'var(--present)' : 'var(--absent)';
+}
+function updateKeyColor(letter, color) {
+  const cur = keyColors[letter];
+  if (cur==='correct') return;
+  if (cur==='present' && color!=='correct') return;
+  keyColors[letter] = color;
+}
+function updateAllKeys() {
+  Object.entries(keyColors).forEach(([l, col]) => {
+    if (keyEls[l]) keyEls[l].className = 'key ' + col;
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NUDGE SYSTEM
+// ═══════════════════════════════════════════════════════════════
+function renderNudge() {
+  const wrap = document.getElementById('nudge-wrap');
+  if (nudgeUsed) {
+    wrap.innerHTML = `<div class="nudge-reveal"><span>First letter:</span> <span class="nudge-letter">${TARGET[0]}</span></div>`;
+  } else {
+    wrap.innerHTML = `<button class="nudge-btn" onclick="useNudge()">Give me the first letter (1 nudge left today)</button>`;
+  }
+}
+
+function useNudge() {
+  if (nudgeUsed || gameOver) return;
+  nudgeUsed = true;
+  localStorage.setItem(K_NUDGE, 'used');
+  renderNudge();
+  // Star 3 (pure solve) is no longer possible
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STARS
+// ═══════════════════════════════════════════════════════════════
+function earnStar(n) {
+  if (starsToday.includes(n)) return;
+  starsToday.push(n);
+  totalStars += (n === 4) ? 2 : 1; // social share = 2 stars
+  localStorage.setItem(K_STARS_DAY, JSON.stringify(starsToday));
+  localStorage.setItem(K_STARS, totalStars);
+  updateUI();
+}
+
+// Called from end panel share button
+function claimSocialBonus() {
+  if (socialDone) return;
+  socialDone = true;
+  localStorage.setItem(K_SOCIAL, 'done');
+  earnStar(4);
+  renderSocialSection(true); // re-render the button area
+  showMsg('⭐⭐ Bonus stars added!');
+  setTimeout(() => showMsg(''), 2500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UI UPDATE — stars, level, stats
+// ═══════════════════════════════════════════════════════════════
+function updateUI() {
+  // Header
+  document.getElementById('hdr-streak').textContent = streak;
+  document.getElementById('hdr-stars').textContent  = totalStars;
+
+  // Level
+  const lvl  = getLevel(totalStars);
+  const prog = getLevelProgress(totalStars);
+  document.getElementById('hdr-level').textContent  = lvl.name;
+  document.getElementById('lvl-name').textContent   = lvl.name;
+  document.getElementById('lvl-bar').style.width    = prog.pct + '%';
+  document.getElementById('lvl-next').textContent   =
+    prog.nextName ? `${prog.toNext} ⭐ to ${prog.nextName}` : 'Max level reached ✨';
+
+  // Today's star slots
+  [1,2,3,4].forEach(n => {
+    const el  = document.getElementById(`star${n}`);
+    const cap = document.getElementById(`star${n}-cap`);
+    if (starsToday.includes(n)) {
+      el.classList.add('earned');
+      cap.classList.add('earned');
+    }
+  });
+
+  // Stats bar
+  document.getElementById('stat-played').textContent = played;
+  document.getElementById('stat-solved').textContent = solved;
+  document.getElementById('stat-streak').textContent = streak;
+  document.getElementById('stat-best').textContent   = bestStreak;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// END PANEL
+// ═══════════════════════════════════════════════════════════════
+
+const TLR_LOUNGE_URL = 'https://www.facebook.com/groups/thelivingroommemberslounge';
+
+let _shareText = ''; // held here so icon buttons can access it
+
+function showEndPanel(won, guessCount) {
+  // Standard Wordle emoji colours
+  const emojiGrid = guessColors
+    .map(row => row.map(c => c==='correct' ? '🟩' : c==='present' ? '🟨' : '⬛').join(''))
+    .join('\n');
+
+  const guessLine   = won ? `${guessCount}/${MAX_R}` : `X/${MAX_R}`;
+  const tag         = !nudgeUsed && won ? ' ✨' : nudgeUsed ? ' 💡' : '';
+  const starsEarned = starsToday.filter(n => n !== 4).length;
+  const starStr     = ['','⭐','⭐⭐','⭐⭐⭐'][Math.min(starsEarned, 3)] || '';
+
+  _shareText = `TLR Daily Word · ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'})}\n${guessLine}${tag}\n\n${emojiGrid}\n\nthe-living-room.com`;
+
+  // Quote with the revealed word highlighted
+  const quoteHtml = WORD_DATA.quote.replace('_____', `<span class="qcs-word">${TARGET}</span>`);
+
+  const inner = document.getElementById('results-inner');
+  inner.innerHTML = `
+    <!-- SHAREABLE QUOTE CARD -->
+    <div class="quote-card-share">
+      <div class="qcs-mark">"</div>
+      <div class="qcs-logo">TLR</div>
+      <div class="qcs-quote">${quoteHtml}</div>
+      <div class="qcs-rule"></div>
+      <div class="qcs-attr">
+        — ${WORD_DATA.author}
+        ${WORD_DATA.source ? `<span class="qcs-source">${WORD_DATA.source}</span>` : ''}
+      </div>
+      <div class="qcs-url">the-living-room.com</div>
+    </div>
+
+    <!-- SHARE CTA -->
+    <div class="share-cta-block">
+      <div class="share-cta-heading">Know someone who needs to read this?</div>
+      <div class="share-cta-sub">Share the quote and earn 2 bonus ⭐⭐ — every share helps someone else find The Living Room</div>
+      ${buildShareIcons()}
+      <div id="bonus-note">
+        ${socialDone
+          ? `<div class="shr-claimed">Sharing bonus claimed — thanks for spreading the word!</div>`
+          : ''}
+      </div>
+    </div>
+
+    <!-- DASHBOARD BUTTON -->
+    <a class="btn-dashboard" href="/index.html">Back to my dashboard</a>
+  `;
+
+  // Slide the overlay in
+  const overlay = document.getElementById('results-overlay');
+  overlay.classList.add('open');
+  overlay.scrollTop = 0;
+}
+
+function closeResults() {
+  document.getElementById('results-overlay').classList.remove('open');
+}
+
+function buildShareIcons() {
+  const txt     = encodeURIComponent(_shareText);
+  const siteUrl = encodeURIComponent('https://the-living-room.com');
+
+  const WA  = `<svg viewBox="0 0 24 24" fill="white"><path d="M17.498 14.382c-.301-.15-1.767-.867-2.04-.966-.273-.101-.473-.15-.673.15-.197.295-.771.964-.944 1.162-.175.195-.349.21-.646.075-.3-.15-1.263-.465-2.403-1.485-.888-.795-1.484-1.77-1.66-2.07-.174-.3-.019-.465.13-.615.136-.135.3-.345.45-.523.149-.18.199-.3.3-.498.099-.196.05-.372-.025-.522-.075-.15-.672-1.62-.922-2.206-.24-.584-.487-.51-.672-.51-.172-.015-.371-.015-.571-.015-.2 0-.523.074-.797.359-.273.3-1.045 1.02-1.045 2.475s1.07 2.865 1.219 3.075c.149.18 2.096 3.196 5.076 4.487.709.306 1.263.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.29.173-1.414-.074-.124-.272-.197-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`;
+
+  const IG  = `<svg viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>`;
+
+  const FB  = `<svg viewBox="0 0 24 24" fill="white"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.43c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.514c-1.491 0-1.956.93-1.956 1.886v2.248h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>`;
+
+  const LI  = `<svg viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>`;
+
+  const ML  = `<svg viewBox="0 0 24 24" fill="white"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>`;
+
+  const CP  = `<svg viewBox="0 0 24 24" fill="white"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
+
+  const LOUNGE = `<svg viewBox="0 0 24 24" fill="none" stroke="#E8A800" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 9h8M8 12h5M8 15h8"/></svg>`;
+
+  return `<div class="shr-grid">
+    <div class="shr-item">
+      <a style="background:#25D366;" href="https://wa.me/?text=${txt}" target="_blank" rel="noopener" onclick="maybeSocialBonus()">${WA}</a>
+      <span class="shr-lbl">WhatsApp</span>
+    </div>
+    <div class="shr-item">
+      <button style="background:linear-gradient(135deg,#f09433,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888);" onclick="igShare()">${IG}</button>
+      <span class="shr-lbl">Instagram</span>
+    </div>
+    <div class="shr-item">
+      <a style="background:#1877F2;" href="https://www.facebook.com/sharer/sharer.php?u=${siteUrl}" target="_blank" rel="noopener" onclick="maybeSocialBonus()">${FB}</a>
+      <span class="shr-lbl">Facebook</span>
+    </div>
+    <div class="shr-item lounge">
+      <button style="background:var(--navy-card);border:1.5px solid var(--gold);" onclick="loungeShare()">${LOUNGE}</button>
+      <span class="shr-lbl">TLR Lounge</span>
+    </div>
+    <div class="shr-item">
+      <a style="background:#0A66C2;" href="https://www.linkedin.com/shareArticle?mini=true&url=${siteUrl}&summary=${txt}" target="_blank" rel="noopener" onclick="maybeSocialBonus()">${LI}</a>
+      <span class="shr-lbl">LinkedIn</span>
+    </div>
+    <div class="shr-item">
+      <a style="background:#4A5568;" href="mailto:?subject=${encodeURIComponent('My TLR Daily Word')}&body=${txt}" onclick="maybeSocialBonus()">${ML}</a>
+      <span class="shr-lbl">Email</span>
+    </div>
+    <div class="shr-item">
+      <button style="background:#2D3748;" onclick="copyToClipboard()">${CP}</button>
+      <span class="shr-lbl">Copy</span>
+    </div>
+  </div>`;
+}
+
+function copyToClipboard() {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(_shareText).then(() => showMsg('Copied!')).catch(() => {});
+  }
+  setTimeout(() => showMsg(''), 2000);
+}
+
+function igShare() {
+  // Web Share API on mobile surfaces Instagram natively; desktop falls back to copy
+  if (navigator.share) {
+    navigator.share({ text: _shareText }).then(() => maybeSocialBonus()).catch(() => {});
+  } else {
+    navigator.clipboard && navigator.clipboard.writeText(_shareText);
+    showMsg('Copied — open Instagram and paste!');
+    maybeSocialBonus();
+    setTimeout(() => showMsg(''), 3000);
+  }
+}
+
+function loungeShare() {
+  // Copy result text then open the Members Lounge — member pastes to post
+  navigator.clipboard && navigator.clipboard.writeText(_shareText);
+  window.open(TLR_LOUNGE_URL, '_blank', 'noopener');
+  showMsg('Copied — paste it in the Lounge!');
+  setTimeout(() => showMsg(''), 3000);
+}
+
+function maybeSocialBonus() {
+  if (socialDone) return;
+  socialDone = true;
+  localStorage.setItem(K_SOCIAL, 'done');
+  earnStar(4); // awards 2 stars
+  const el = document.getElementById('bonus-note');
+  if (el) el.innerHTML = `<div class="shr-claimed">⭐⭐ Sharing bonus added — thanks for spreading the word!</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+let msgTimer;
+function showMsg(t) {
+  clearTimeout(msgTimer);
+  const el = document.getElementById('message');
+  if (!t) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="msg-toast">${t}</div>`;
+  msgTimer = setTimeout(() => { el.innerHTML = ''; }, 2200);
+}
+
+function shakeCurrentRow() {
+  const rowEl = rows[guesses.length];
+  if (!rowEl) return;
+  rowEl.classList.add('shake');
+  rowEl.addEventListener('animationend', () => rowEl.classList.remove('shake'), {once:true});
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NOTIFICATION REMINDER
+// ═══════════════════════════════════════════════════════════════
+(function initReminder() {
+  const saved = localStorage.getItem('tlr_reminder');
+  if (saved) {
+    const row = document.getElementById('reminder-row');
+    if (row) row.innerHTML = `<span class="reminder-set">🔔 Reminder set for ${saved.replace(':','.')} daily — <button onclick="clearReminder()" style="background:none;border:none;color:#4A6070;font-size:10px;cursor:pointer;text-decoration:underline;font-family:'Poppins',sans-serif;">change</button></span>`;
+  }
+  // Fire notification if it's time
+  const time = saved;
+  if (!time || !('Notification' in window) || Notification.permission !== 'granted') return;
+  const [h, m] = time.split(':').map(Number);
+  const now = new Date();
+  const fireAt = new Date(); fireAt.setHours(h, m, 0, 0);
+  const firedKey = `tlr_notif_${getDateStr()}`;
+  if (now >= fireAt && !localStorage.getItem(firedKey)) {
+    localStorage.setItem(firedKey, '1');
+    new Notification('The Living Room ✨', {
+      body: "Today's word is waiting — keep your streak going! ⭐",
+      icon: '/favicon.ico'
+    });
+  }
+})();
+
+function setReminder() {
+  if (!('Notification' in window)) { showMsg('Notifications not supported here'); return; }
+  const go = () => {
+    const row = document.getElementById('reminder-row');
+    row.innerHTML = `
+      <span style="font-size:11px;color:var(--muted);">What time each day?</span>
+      <select id="rem-time" style="background:var(--navy-card);color:var(--cream);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;">
+        <option value="07:00">7:00 AM</option>
+        <option value="08:00">8:00 AM</option>
+        <option value="09:00" selected>9:00 AM</option>
+        <option value="12:00">12:00 PM</option>
+        <option value="17:00">5:00 PM</option>
+        <option value="20:00">8:00 PM</option>
+      </select>
+      <button onclick="saveReminder()" style="background:var(--gold);color:var(--navy);border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;">Save</button>
+    `;
+  };
+  if (Notification.permission === 'granted') { go(); }
+  else { Notification.requestPermission().then(p => { if (p==='granted') go(); else showMsg('Enable notifications in browser settings'); }); }
+}
+
+function saveReminder() {
+  const t = document.getElementById('rem-time').value;
+  localStorage.setItem('tlr_reminder', t);
+  const row = document.getElementById('reminder-row');
+  row.innerHTML = `<span class="reminder-set">🔔 Set for ${t.replace(':','.')} daily — <button onclick="clearReminder()" style="background:none;border:none;color:#4A6070;font-size:10px;cursor:pointer;text-decoration:underline;font-family:'Poppins',sans-serif;">change</button></span>`;
+}
+
+function clearReminder() {
+  localStorage.removeItem('tlr_reminder');
+  const row = document.getElementById('reminder-row');
+  row.innerHTML = `<button class="reminder-btn" id="reminder-btn" onclick="setReminder()">🔔 Remind me daily</button>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AUTH — user display
+// (signOut() is provided globally by auth.js)
+// ═══════════════════════════════════════════════════════════════
+getUser().then(user => {
+  if (!user) return;
+  const namePart = user.email.split('@')[0].replace(/[._-]/g, ' ');
+  const name = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+  document.getElementById('user-name').textContent = name;
+});
+</script>
+</body>
+</html>

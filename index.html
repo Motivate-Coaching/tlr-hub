@@ -167,6 +167,121 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .growing-note { margin-top: 1.75rem; background: var(--cream-dark); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem 1.5rem; font-size: 0.81rem; color: var(--text-mid); line-height: 1.7; }
 .growing-note strong { color: var(--text-dark); font-weight: 500; }
 
+/* ── DAILY GAME PROMO BANNER ─────────────── */
+.game-promo-banner {
+  background: linear-gradient(135deg, #0F1C2A 0%, #0A1520 100%);
+  border-bottom: 1px solid rgba(232,168,0,0.2);
+  border-top: 1px solid rgba(232,168,0,0.12);
+}
+.game-promo-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 1.6rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+.game-promo-left { flex: 1; min-width: 0; }
+.game-promo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.55rem;
+}
+.live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--gold);
+  display: inline-block;
+  animation: livePulse 2s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.7); }
+}
+.game-promo-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.55rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.35rem;
+  line-height: 1.2;
+}
+.game-promo-sub {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.65;
+  max-width: 460px;
+  margin-bottom: 0.75rem;
+}
+.game-promo-stats {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.03em;
+}
+.game-promo-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+.game-promo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--gold);
+  color: #0F1215;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 0.65rem 1.4rem;
+  border-radius: 6px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s, transform 0.15s;
+}
+.game-promo-btn:hover { background: #F5C842; transform: translateY(-1px); }
+.game-promo-tiles {
+  display: flex;
+  gap: 4px;
+}
+.gp-tile {
+  width: 32px; height: 32px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.06);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  font-family: 'Inter', sans-serif;
+  animation: tileFade 3s ease-in-out infinite;
+}
+.gp-tile:nth-child(1) { animation-delay: 0s; }
+.gp-tile:nth-child(2) { animation-delay: 0.15s; }
+.gp-tile:nth-child(3) { animation-delay: 0.3s; }
+.gp-tile:nth-child(4) { animation-delay: 0.45s; }
+.gp-tile:nth-child(5) { animation-delay: 0.6s; }
+.gp-tile.c { background: rgba(83,141,78,0.35); border-color: rgba(83,141,78,0.5); color: #8FD48A; }
+.gp-tile.p { background: rgba(181,159,59,0.3); border-color: rgba(181,159,59,0.5); color: #D4BA5A; }
+@keyframes tileFade {
+  0%,100% { opacity: 0.6; }
+  50%      { opacity: 1; }
+}
+@media (max-width: 640px) {
+  .game-promo-inner { flex-direction: column; align-items: flex-start; gap: 1.2rem; }
+  .game-promo-right { width: 100%; flex-direction: row; justify-content: space-between; }
+}
+
 /* ════════════════════════════════════════════
    THE VISION PAGE
 ════════════════════════════════════════════ */
@@ -568,6 +683,34 @@ footer a { color: var(--gold); text-decoration: none; }
 
   <div class="topic-bar">
     <p>Current topic: My Momentum Playbook &nbsp;&middot;&nbsp; <a href="#building-momentum">Go to current theme</a></p>
+  </div>
+
+  <!-- ── DAILY GAME PROMO ─────────────────────────── -->
+  <div class="game-promo-banner">
+    <div class="game-promo-inner">
+      <div class="game-promo-left">
+        <div class="game-promo-badge">
+          <span class="live-dot"></span>
+          Daily · New word today
+        </div>
+        <div class="game-promo-title">Quote of the Day</div>
+        <div class="game-promo-sub">A word is missing from today's quote — can you find it? Earn stars, keep your streak going.</div>
+        <div class="game-promo-stats" id="gp-stats"></div>
+      </div>
+      <div class="game-promo-right">
+        <a class="game-promo-btn" href="/dashboard.html">
+          Play today's word
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <div class="game-promo-tiles" aria-hidden="true">
+          <span class="gp-tile c">W</span>
+          <span class="gp-tile p">O</span>
+          <span class="gp-tile">R</span>
+          <span class="gp-tile c">D</span>
+          <span class="gp-tile p">S</span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="page-layout">
@@ -1204,6 +1347,18 @@ window.addEventListener('scroll', () => {
   });
   setActive(current);
 }, { passive: true });
+
+// ── GAME PROMO STATS ──────────────────────────────
+(function() {
+  const streak = parseInt(localStorage.getItem('tlr_streak') || '0');
+  const stars  = parseInt(localStorage.getItem('tlr_stars')  || '0');
+  const el = document.getElementById('gp-stats');
+  if (!el) return;
+  const parts = [];
+  if (streak > 0) parts.push(`🔥 ${streak}-day streak`);
+  if (stars  > 0) parts.push(`⭐ ${stars} stars`);
+  el.textContent = parts.length ? parts.join('  ·  ') : 'Start your streak today';
+})();
 </script>
 </body>
 </html>
