@@ -594,21 +594,174 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .close-pillar { font-size: 0.68rem; color: var(--gold); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
 .close-sep { color: rgba(255,255,255,0.2); font-size: 0.8rem; }
 
-/* ── PROGRESS WIDGET (sidebar) ───────────── */
-.progress-widget{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:1rem 0.9rem 0.85rem;margin-bottom:0.65rem}
-.pw-title{font-size:0.59rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:0.8rem;text-align:center}
-.pw-ring-wrap{position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:0.7rem}
-.pw-ring-text{position:absolute;text-align:center;pointer-events:none}
-.pw-pct{display:block;font-size:1.1rem;font-weight:700;color:var(--text-dark);line-height:1}
-.pw-pct-label{display:block;font-size:0.52rem;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:3px}
-.pw-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0.35rem;margin-bottom:0.65rem}
-.pw-stat{background:var(--cream);border-radius:5px;padding:0.45rem 0.2rem;cursor:pointer;transition:background 0.15s;border:1.5px solid transparent;text-align:center}
-.pw-stat:hover{background:var(--cream-dark);border-color:var(--border)}
-.pw-stat.active{background:var(--navy);border-color:var(--navy)}
-.pw-stat.active .pw-num,.pw-stat.active .pw-stat-label{color:#fff!important}
-.pw-num{display:block;font-size:1.1rem;font-weight:700;color:var(--text-dark);line-height:1.1}
-.pw-stat-label{display:block;font-size:0.58rem;color:var(--text-muted);line-height:1.3;margin-top:2px}
-.pw-encourage{font-size:0.7rem;color:var(--text-muted);font-style:italic;line-height:1.5;text-align:center}
+/* ── PROGRESS STRIP (top of page) ───────────── */
+.progress-strip {
+  background: var(--navy);
+  padding: 1.8rem 2rem;
+  border-bottom: 3px solid var(--gold);
+}
+.progress-strip-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+.ps-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 1.5rem;
+}
+.ps-divider {
+  width: 1px;
+  height: 80px;
+  background: rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+.ps-section-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.75rem;
+}
+/* Ring */
+.ps-ring-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ps-ring-text {
+  position: absolute;
+  text-align: center;
+  pointer-events: none;
+}
+.ps-pct {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+.ps-pct-sub {
+  display: block;
+  font-size: 0.5rem;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+/* Stat tiles */
+.ps-stats-row {
+  display: flex;
+  gap: 0.6rem;
+}
+.ps-stat-tile {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  min-width: 72px;
+}
+.ps-stat-tile:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+.ps-stat-tile.active { background: rgba(232,168,0,0.12); border-color: rgba(232,168,0,0.45); }
+.ps-stat-num {
+  display: block;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+.ps-stat-lbl {
+  display: block;
+  font-size: 0.58rem;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 5px;
+}
+/* Game tiles */
+.ps-game-row {
+  display: flex;
+  gap: 0.6rem;
+}
+.ps-game-tile {
+  background: rgba(232,168,0,0.08);
+  border: 1px solid rgba(232,168,0,0.22);
+  border-radius: 8px;
+  padding: 0.7rem 1.1rem;
+  text-align: center;
+  min-width: 80px;
+}
+.ps-game-num {
+  display: block;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+}
+.ps-game-lbl {
+  display: block;
+  font-size: 0.58rem;
+  color: rgba(232,168,0,0.55);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 5px;
+}
+/* Level */
+.ps-level-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--gold);
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+.ps-level-bar-wrap {
+  width: 130px;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 0.4rem;
+}
+.ps-level-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 100%);
+  border-radius: 2px;
+  transition: width 0.8s ease;
+}
+.ps-level-sub {
+  font-size: 0.58rem;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+.ps-encourage {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.35);
+  font-style: italic;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+@media (max-width: 900px) {
+  .progress-strip-inner { flex-wrap: wrap; gap: 1.5rem; justify-content: center; }
+  .ps-divider { display: none; }
+  .ps-section { flex: 0 0 auto; padding: 0 0.75rem; }
+}
+@media (max-width: 480px) {
+  .progress-strip { padding: 1.4rem 1rem; }
+  .ps-stats-row, .ps-game-row { gap: 0.4rem; }
+  .ps-stat-tile, .ps-game-tile { min-width: 60px; padding: 0.55rem 0.6rem; }
+}
 /* ── FILTER PANEL ─────────────────────────── */
 .filter-panel{background:var(--white);border:1.5px solid var(--gold);border-radius:8px;padding:1.1rem 1.25rem;margin-bottom:1.75rem}
 .filter-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.9rem}
@@ -718,6 +871,81 @@ footer a { color: var(--gold); text-decoration: none; }
     </div>
   </div>
 
+  <!-- ── PROGRESS STRIP ────────────────────────────── -->
+  <div class="progress-strip">
+    <div class="progress-strip-inner">
+
+      <!-- Ring: Library Progress -->
+      <div class="ps-section">
+        <div class="ps-section-label">Library Progress</div>
+        <div class="ps-ring-wrap">
+          <svg width="110" height="110" viewBox="0 0 110 110" fill="none">
+            <circle cx="55" cy="55" r="46" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
+            <circle cx="55" cy="55" r="46" stroke="#E8A800" stroke-width="8" stroke-linecap="round"
+              stroke-dasharray="289.0" stroke-dashoffset="289.0" id="pw-ring"
+              style="transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset 0.8s ease"/>
+          </svg>
+          <div class="ps-ring-text">
+            <span class="ps-pct" id="pw-pct">0%</span>
+            <span class="ps-pct-sub">done</span>
+          </div>
+        </div>
+        <div class="ps-encourage" id="pw-encourage">Your journey starts here.</div>
+      </div>
+
+      <div class="ps-divider"></div>
+
+      <!-- Library Stats -->
+      <div class="ps-section">
+        <div class="ps-section-label">Your Tools</div>
+        <div class="ps-stats-row">
+          <div class="ps-stat-tile" id="pw-stat-completed" onclick="filterTools('completed')" title="View completed tools">
+            <span class="ps-stat-num" id="pw-done">0</span>
+            <span class="ps-stat-lbl">Completed</span>
+          </div>
+          <div class="ps-stat-tile" id="pw-stat-started" onclick="filterTools('started')" title="View in-progress tools">
+            <span class="ps-stat-num" id="pw-started">0</span>
+            <span class="ps-stat-lbl">In Progress</span>
+          </div>
+          <div class="ps-stat-tile" id="pw-stat-unstarted" onclick="filterTools('unstarted')" title="View tools to explore">
+            <span class="ps-stat-num" id="pw-todo">22</span>
+            <span class="ps-stat-lbl">To Explore</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ps-divider"></div>
+
+      <!-- Game Stats -->
+      <div class="ps-section">
+        <div class="ps-section-label">Daily Game</div>
+        <div class="ps-game-row">
+          <div class="ps-game-tile">
+            <span class="ps-game-num" id="ps-streak">0</span>
+            <span class="ps-game-lbl">🔥 Streak</span>
+          </div>
+          <div class="ps-game-tile">
+            <span class="ps-game-num" id="ps-stars">0</span>
+            <span class="ps-game-lbl">⭐ Stars</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ps-divider"></div>
+
+      <!-- Level -->
+      <div class="ps-section">
+        <div class="ps-section-label">Your Level</div>
+        <div class="ps-level-name" id="ps-level-name">Just Starting</div>
+        <div class="ps-level-bar-wrap">
+          <div class="ps-level-bar-fill" id="ps-level-fill" style="width:0%"></div>
+        </div>
+        <div class="ps-level-sub" id="ps-level-sub">Play to earn stars</div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ── DAILY GAME PROMO ─────────────────────────── -->
   <div class="game-promo-banner">
     <div class="game-promo-inner">
@@ -761,36 +989,6 @@ footer a { color: var(--gold); text-decoration: none; }
 
   <div class="page-layout">
     <aside class="sidebar" id="sidebar">
-      <div class="progress-widget" id="progress-widget">
-        <div class="pw-title">Your progress</div>
-        <div class="pw-ring-wrap">
-          <svg width="88" height="88" viewBox="0 0 88 88" fill="none">
-            <circle cx="44" cy="44" r="36" stroke="rgba(0,0,0,0.07)" stroke-width="7"/>
-            <circle cx="44" cy="44" r="36" stroke="#E8A800" stroke-width="7" stroke-linecap="round"
-              stroke-dasharray="226.2" stroke-dashoffset="226.2" id="pw-ring"
-              style="transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset 0.65s ease"/>
-          </svg>
-          <div class="pw-ring-text">
-            <span class="pw-pct" id="pw-pct">0%</span>
-            <span class="pw-pct-label">done</span>
-          </div>
-        </div>
-        <div class="pw-stats">
-          <div class="pw-stat" id="pw-stat-completed" onclick="filterTools('completed')" title="View completed tools">
-            <span class="pw-num" id="pw-done">0</span>
-            <span class="pw-stat-label">Completed</span>
-          </div>
-          <div class="pw-stat" id="pw-stat-started" onclick="filterTools('started')" title="View tools in progress">
-            <span class="pw-num" id="pw-started">0</span>
-            <span class="pw-stat-label">In progress</span>
-          </div>
-          <div class="pw-stat" id="pw-stat-unstarted" onclick="filterTools('unstarted')" title="View tools to explore">
-            <span class="pw-num" id="pw-todo">22</span>
-            <span class="pw-stat-label">To explore</span>
-          </div>
-        </div>
-        <div class="pw-encourage" id="pw-encourage">Your journey starts here.</div>
-      </div>
       <div class="sidebar-toggle" id="sidebarToggle" role="button" tabindex="0" aria-expanded="true">
         <span class="sidebar-toggle-label">Themes</span>
         <span class="sidebar-arrow">&#9660;</span>
@@ -1321,7 +1519,7 @@ function renderProgressWidget() {
   const started = ALL_TOOLS.filter(t=>getToolProgress(t.file)==='started').length;
   const total = ALL_TOOLS.length;
   const pct = Math.round((done/total)*100);
-  const circumference = 226.2;
+  const circumference = 289.0; // 2π × r46
   const offset = circumference*(1-done/total);
   const ring = document.getElementById('pw-ring');
   if(ring) ring.style.strokeDashoffset = offset;
@@ -1336,12 +1534,48 @@ function renderProgressWidget() {
   const encourageEl = document.getElementById('pw-encourage');
   if(encourageEl){
     let msg = 'Your journey starts here.';
-    if(done===total) msg='You have explored the whole library!';
+    if(done===total) msg='You\'ve explored the whole library!';
     else if(done>=10) msg='Impressive progress. Keep going.';
     else if(done>=5) msg='You\'re building real momentum.';
-    else if(done>0) msg='You\'re making great progress.';
-    else if(started>0) msg='You\'ve started exploring. Keep going.';
+    else if(done>0) msg='Great start. Keep exploring.';
+    else if(started>0) msg='You\'ve started. Keep going.';
     encourageEl.textContent=msg;
+  }
+
+  // ── Game stats from localStorage ──────────────────
+  const streak = parseInt(localStorage.getItem('tlr_streak')||'0');
+  const stars  = parseInt(localStorage.getItem('tlr_stars') ||'0');
+  const psStreak = document.getElementById('ps-streak');
+  if(psStreak) psStreak.textContent = streak;
+  const psStars = document.getElementById('ps-stars');
+  if(psStars) psStars.textContent = stars;
+
+  // ── Level ─────────────────────────────────────────
+  const LEVELS = [
+    {name:'Just Starting',min:0,max:9},
+    {name:'Getting Curious',min:10,max:19},
+    {name:'Wordsmith',min:20,max:29},
+    {name:'Quote Lover',min:30,max:39},
+    {name:'Inspiration Seeker',min:40,max:49},
+    {name:'Deep Thinker',min:50,max:59},
+    {name:'Quote Connoisseur',min:60,max:69},
+    {name:'Wisdom Hunter',min:70,max:79},
+    {name:'Word Master',min:80,max:89},
+    {name:'Living Room Legend',min:90,max:Infinity},
+  ];
+  const level = LEVELS.find(l=>stars>=l.min&&stars<=l.max)||LEVELS[0];
+  const nextLevel = LEVELS[LEVELS.indexOf(level)+1];
+  const psLevelName = document.getElementById('ps-level-name');
+  if(psLevelName) psLevelName.textContent = level.name;
+  const psLevelFill = document.getElementById('ps-level-fill');
+  if(psLevelFill && nextLevel){
+    const lpct = ((stars-level.min)/(nextLevel.min-level.min))*100;
+    psLevelFill.style.width = Math.min(lpct,100)+'%';
+  }
+  const psLevelSub = document.getElementById('ps-level-sub');
+  if(psLevelSub){
+    if(nextLevel) psLevelSub.textContent = (nextLevel.min-stars)+' ⭐ to '+nextLevel.name;
+    else psLevelSub.textContent = 'Maximum level reached!';
   }
 }
 renderProgressWidget();
