@@ -194,17 +194,17 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 
   <!-- Prompt Generator -->
   <div class="prompt-section">
-    <div class="prompt-section-label">Today's Prompt</div>
+    <div class="prompt-section-label">Choose your prompt source, then press Generate Prompt to begin</div>
     <div class="prompt-type-tabs">
-      <button class="prompt-type-btn active" onclick="setPromptType('general')">General</button>
-      <button class="prompt-type-btn" onclick="setPromptType('wheel')">From My Wheel</button>
-      <button class="prompt-type-btn" onclick="setPromptType('theme')">This Month's Theme</button>
-      <button class="prompt-type-btn" onclick="setPromptType('deep')">Deeper Work</button>
+      <button class="prompt-type-btn active" onclick="setPromptType('general', this)">General</button>
+      <button class="prompt-type-btn" onclick="setPromptType('wheel', this)">From My Wheel</button>
+      <button class="prompt-type-btn" onclick="setPromptType('theme', this)">This Month's Theme</button>
+      <button class="prompt-type-btn" onclick="setPromptType('deep', this)">Deeper Work</button>
     </div>
-    <div class="prompt-display" id="prompt-display">Press "New Prompt" to get started — or write freely below.</div>
+    <div class="prompt-display" id="prompt-display" style="color:rgba(255,255,255,0.35);font-style:italic;font-size:1.1rem">Press "Generate Prompt" to get started — or write freely below.</div>
     <div class="prompt-context" id="prompt-context"></div>
     <div class="prompt-actions">
-      <button class="btn-get-prompt" onclick="getNewPrompt()">✦ New Prompt</button>
+      <button class="btn-get-prompt" onclick="getNewPrompt()">✦ Generate Prompt</button>
       <button class="btn-use-prompt" onclick="usePrompt()">Use this prompt →</button>
     </div>
   </div>
@@ -374,10 +374,10 @@ function renderWheelSnapshot() {
 }
 
 // ── PROMPT GENERATOR ─────────────────────
-function setPromptType(type) {
+function setPromptType(type, btn) {
   promptType = type;
   document.querySelectorAll('.prompt-type-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+  if (btn) btn.classList.add('active');
   getNewPrompt();
 }
 
@@ -401,8 +401,9 @@ function getNewPrompt() {
           .replace('[area]', area.name)
           .replace('[score]', area.score)
           .replace('[next]', Math.min(area.score + 1, 10));
-        if (templateObj.usesAction && area.action) {
-          prompt = prompt.replace('[action]', area.action);
+        if (templateObj.usesAction) {
+          const actionText = (area.actions && area.actions[0] && area.actions[0].text) || area.action || '';
+          if (actionText) prompt = prompt.replace('[action]', actionText);
         }
         context = `Drawn from your Balance Wheel — ${area.name} (${area.score}/10)`;
       } else {
@@ -422,7 +423,11 @@ function getNewPrompt() {
   }
 
   currentPromptText = prompt;
-  document.getElementById('prompt-display').textContent = prompt;
+  const display = document.getElementById('prompt-display');
+  display.textContent = prompt;
+  display.style.color = '';
+  display.style.fontStyle = '';
+  display.style.fontSize = '';
   document.getElementById('prompt-context').textContent = context;
 }
 
