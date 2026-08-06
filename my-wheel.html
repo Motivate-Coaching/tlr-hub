@@ -25,7 +25,8 @@ html { scroll-behavior: smooth; }
 body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--text-dark); line-height: 1.65; font-size: 17px; }
 
 /* ── HEADER ─────────────────────────── */
-header { background: var(--navy); position: sticky; top: 0; z-index: 200; border-bottom: 3px solid var(--gold); }
+.sticky-top { position: sticky; top: 0; z-index: 200; }
+header { background: var(--navy); position: relative; border-bottom: 3px solid var(--gold); }
 .header-inner { max-width: 1240px; margin: 0 auto; padding: 0.85rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; position: relative; }
 .logo { display: flex; align-items: center; gap: 0.9rem; flex-shrink: 0; text-decoration: none; }
 .logo-img { height: 58px; width: auto; display: block; mix-blend-mode: lighten; }
@@ -264,6 +265,7 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 <div class="reminder-banner" id="reminder-banner"></div>
 
 <!-- ── HEADER ──────────────────────── -->
+<div class="sticky-top">
 <header>
   <div class="header-inner">
     <a class="logo" href="/index.html">
@@ -290,6 +292,7 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
     <a class="tab-btn" href="/index.html#vision">The Bigger Picture</a>
   </div>
 </div>
+</div><!-- /.sticky-top -->
 
 <!-- ════ WIZARD ════ -->
 <div class="wheel-page" id="wheel-wizard">

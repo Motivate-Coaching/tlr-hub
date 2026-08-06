@@ -25,7 +25,8 @@ html { scroll-behavior: smooth; }
 body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--text-dark); line-height: 1.65; font-size: 17px; }
 
 /* ── HEADER ─────────────────────────── */
-header { background: var(--navy); position: sticky; top: 0; z-index: 200; border-bottom: 3px solid var(--gold); }
+.sticky-top { position: sticky; top: 0; z-index: 200; }
+header { background: var(--navy); position: relative; border-bottom: 3px solid var(--gold); }
 .header-inner { max-width: 1240px; margin: 0 auto; padding: 0.85rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; position: relative; }
 .logo { display: flex; align-items: center; gap: 0.9rem; flex-shrink: 0; text-decoration: none; }
 .logo-img { height: 58px; width: auto; display: block; mix-blend-mode: lighten; }
@@ -164,6 +165,18 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .wheel-panel-name { font-size: 0.76rem; color: rgba(255,255,255,0.65); flex: 1; }
 .wheel-panel-score { font-size: 0.8rem; font-weight: 700; }
 .wheel-panel-none { font-size: 0.82rem; color: rgba(255,255,255,0.4); font-style: italic; }
+.wheel-area-picker { margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.85rem; }
+.wheel-area-picker-label { font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.32); margin-bottom: 0.55rem; }
+.wheel-area-btns { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.wheel-area-btn {
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 20px; color: rgba(255,255,255,0.6); font-size: 0.65rem; font-weight: 500;
+  padding: 0.25rem 0.65rem; cursor: pointer; font-family: 'Inter', sans-serif;
+  transition: all 0.15s; white-space: nowrap;
+}
+.wheel-area-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
+.wheel-area-btn.active { background: var(--gold); border-color: var(--gold); color: var(--navy); font-weight: 700; }
+.wheel-area-btn.any { border-style: dashed; }
 @media (max-width: 680px) { .prompt-outer { flex-direction: column; } .wheel-panel { width: 100%; } }
 
 /* ── FORMAT TOOLBAR ─────────────────── */
@@ -481,6 +494,7 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 </head>
 <body>
 
+<div class="sticky-top">
 <!-- ── HEADER ──────────────────────── -->
 <header>
   <div class="header-inner">
@@ -508,6 +522,7 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
     <a class="tab-btn" href="/index.html#vision">The Bigger Picture</a>
   </div>
 </div>
+</div><!-- /.sticky-top -->
 
 <!-- ── JOURNAL PAGE ──────────────── -->
 <div class="journal-page">
@@ -541,6 +556,12 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
     <div class="wheel-panel-label">Your Balance Wheel</div>
     <svg id="wheel-panel-svg" class="wheel-panel-svg" viewBox="0 0 220 220"></svg>
     <div id="wheel-panel-areas"></div>
+    <div class="wheel-area-picker" id="wheel-area-picker" style="display:none">
+      <div class="wheel-area-picker-label">Focus prompt on…</div>
+      <div class="wheel-area-btns" id="wheel-area-btns">
+        <button class="wheel-area-btn any active" onclick="selectWheelArea(null, this)">Any area</button>
+      </div>
+    </div>
   </div>
 
   </div><!-- /prompt-outer -->
@@ -724,6 +745,7 @@ const CURRENT_THEME = 'Building Momentum'; // would be dynamic later
 let promptType = 'general';
 let currentPromptText = '';
 let wheelData = null;
+let selectedWheelAreaIndex = null; // null = any area
 
 // ── INIT ─────────────────────────────────
 (function init() {
@@ -771,6 +793,14 @@ function saveDraft() {
 
 // ── MINI WHEEL COLOURS ────────────────────
 const J_COLORS = ['#E8A800','#E85B3A','#2AB5A0','#7C5CBF','#3A8FD9','#4DB87A','#D95B8F','#E87A3A'];
+
+// ── WHEEL AREA SELECTOR ───────────────────
+function selectWheelArea(index, btn) {
+  selectedWheelAreaIndex = index;
+  document.querySelectorAll('.wheel-area-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  getNewPrompt();
+}
 
 // ── PROMPT GENERATOR ─────────────────────
 function setPromptType(type, btn) {
@@ -828,6 +858,17 @@ function renderWheelPanel() {
       <div class="wheel-panel-score" style="color:${scoreColor}">${a.score}/10</div>
     </div>`;
   }).join('');
+
+  // Area picker buttons
+  const picker = document.getElementById('wheel-area-picker');
+  const btnWrap = document.getElementById('wheel-area-btns');
+  picker.style.display = '';
+  btnWrap.innerHTML = `<button class="wheel-area-btn any active" onclick="selectWheelArea(null,this)">Any area</button>` +
+    areas.map((a, i) => {
+      const color = J_COLORS[i % J_COLORS.length];
+      return `<button class="wheel-area-btn" onclick="selectWheelArea(${i},this)" style="--dot:${color}">${a.name}</button>`;
+    }).join('');
+  selectedWheelAreaIndex = null;
 }
 
 function miniArc(cx, cy, r, sa, ea) {
@@ -851,7 +892,10 @@ function getNewPrompt() {
       context = 'Set up your wheel first →';
     } else {
       const templateObj = pickRandom(WHEEL_PROMPTS);
-      const area = pickRandom(wheelData.areas);
+      // Use pinned area if selected, otherwise pick randomly
+      const area = (selectedWheelAreaIndex !== null && wheelData.areas[selectedWheelAreaIndex])
+        ? wheelData.areas[selectedWheelAreaIndex]
+        : pickRandom(wheelData.areas);
       if (templateObj.usesArea) {
         prompt = templateObj.template
           .replace('[area]', area.name)
@@ -863,8 +907,14 @@ function getNewPrompt() {
         }
         context = `Drawn from your Balance Wheel — ${area.name} (${area.score}/10)`;
       } else {
-        prompt = templateObj.template;
-        context = 'Drawn from your Balance Wheel';
+        // For non-area prompts when a specific area is selected, nudge toward that area
+        if (selectedWheelAreaIndex !== null) {
+          prompt = `Looking at your wheel, what's one thing you could do this week to improve your ${area.name}?`;
+          context = `Focused on ${area.name} (${area.score}/10)`;
+        } else {
+          prompt = templateObj.template;
+          context = 'Drawn from your Balance Wheel';
+        }
       }
     }
   }

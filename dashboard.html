@@ -37,12 +37,42 @@ body {
 }
 
 /* ── TOP BAR ──────────────────────────────────────── */
+/* ── STANDARD TLR HEADER (overrides inverted vars) ── */
+.tlr-header {
+  background: #0F1215; position: relative; border-bottom: 3px solid #E8A800;
+  font-family: 'Inter', sans-serif;
+}
+.tlr-header-inner {
+  max-width: 1240px; margin: 0 auto; padding: 0.85rem 2rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; position: relative;
+}
+.tlr-logo-nav { display: flex; align-items: center; gap: 0.9rem; flex-shrink: 0; text-decoration: none; }
+.tlr-logo-nav img { height: 58px; width: auto; display: block; mix-blend-mode: lighten; }
+.tlr-header-title { position: absolute; left: 0; right: 0; text-align: center; pointer-events: none; }
+.tlr-header-title h1 { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 400; color: #fff; line-height: 1.15; margin-bottom: 0.25rem; }
+.tlr-header-title h1 em { color: #E8A800; font-style: italic; }
+.tlr-header-title p { font-size: 0.72rem; color: rgba(255,255,255,0.38); font-weight: 300; }
+.tlr-header-right { display: flex; align-items: center; gap: 1.25rem; }
+.tlr-header-link { color: rgba(255,255,255,0.45); text-decoration: none; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.15s; font-family: 'Inter', sans-serif; }
+.tlr-header-link:hover { color: #E8A800; }
+/* Tab nav */
+.tlr-tabs { background: #1C2B3A; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', sans-serif; }
+.tlr-tabs-inner { max-width: 1240px; margin: 0 auto; padding: 0 2rem; display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; }
+.tlr-tabs-inner::-webkit-scrollbar { display: none; }
+.tlr-tab { padding: 0.7rem 1.25rem; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.4); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; text-decoration: none; display: inline-block; transition: color 0.15s, border-color 0.15s; white-space: nowrap; font-family: 'Inter', sans-serif; }
+.tlr-tab:hover { color: rgba(255,255,255,0.7); }
+.tlr-tab.active { color: #E8A800; border-bottom-color: #E8A800; }
+.tlr-sticky { position: sticky; top: 0; z-index: 200; }
+/* Hide old top bar */
+.top-bar { display: none; }
+.btn-back-top { display: none; }
+
 .top-bar {
   width: 100%;
   background: var(--navy);
   border-bottom: 1px solid var(--border);
   padding: 10px 18px;
-  display: flex;
+  display: none; /* replaced by TLR header */
   align-items: center;
   justify-content: space-between;
   position: sticky;
@@ -810,7 +840,36 @@ body {
 </head>
 <body>
 
-<!-- TOP BAR -->
+<!-- ── STANDARD TLR HEADER + TABS ── -->
+<div class="tlr-sticky">
+  <div class="tlr-header">
+    <div class="tlr-header-inner">
+      <a class="tlr-logo-nav" href="/index.html">
+        <img src="/tlr-logo.png" alt="The Living Room">
+      </a>
+      <div class="tlr-header-title">
+        <h1>Daily <em>Word Game</em></h1>
+        <p>Quote of the Day — guess the missing word</p>
+      </div>
+      <div class="tlr-header-right">
+        <div id="user-badge-tlr"></div>
+        <a href="https://www.facebook.com/groups/thelivingroommemberslounge" target="_blank" class="tlr-header-link">Members Lounge</a>
+      </div>
+    </div>
+  </div>
+  <div class="tlr-tabs">
+    <div class="tlr-tabs-inner">
+      <a class="tlr-tab" href="/index.html">Dashboard</a>
+      <a class="tlr-tab" href="/index.html#library">Resource Library</a>
+      <a class="tlr-tab" href="/my-wheel.html">My Balance Wheel</a>
+      <a class="tlr-tab" href="/my-journal.html">My Journal</a>
+      <a class="tlr-tab active" href="/dashboard.html">Daily Word Game</a>
+      <a class="tlr-tab" href="/index.html#vision">The Bigger Picture</a>
+    </div>
+  </div>
+</div>
+
+<!-- TOP BAR (hidden — replaced by header above) -->
 <div class="top-bar">
   <div style="display:flex;align-items:center;min-width:0;">
     <img src="/tlr-logo.png" alt="The Living Room" class="tlr-logo-img">
