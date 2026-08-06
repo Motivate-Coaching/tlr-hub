@@ -743,6 +743,8 @@ a.tab-btn { text-decoration: none; display: inline-block; }
 .close-sep { color: rgba(255,255,255,0.2); font-size: 0.8rem; }
 
 /* ── PROGRESS STRIP (top of page) ───────────── */
+.progress-strip-title { text-align: center; font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 400; color: rgba(255,255,255,0.45); letter-spacing: 0.02em; margin-bottom: 1.75rem; }
+.wheel-dash-section-title { text-align: center; font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 400; color: var(--cream); letter-spacing: 0.02em; padding-top: 0.25rem; margin-bottom: 1.4rem; }
 .progress-strip {
   background: var(--navy);
   padding: 3.5rem 2rem 4rem;
@@ -984,8 +986,8 @@ footer a { color: var(--gold); text-decoration: none; }
       <p>Not a course to finish. A companion you carry through life.</p>
     </div>
     <div class="header-links">
-      <a href="https://www.facebook.com/groups/thelivingroommemberslounge" target="_blank" class="header-link primary">Members Lounge</a>
       <div id="user-badge"></div>
+      <a href="https://www.facebook.com/groups/thelivingroommemberslounge" target="_blank" class="header-link primary">Members Lounge</a>
     </div>
   </div>
 </header>
@@ -1024,6 +1026,7 @@ footer a { color: var(--gold); text-decoration: none; }
 
   <!-- ── PROGRESS STRIP ────────────────────────────── -->
   <div class="progress-strip">
+    <div class="progress-strip-title">Your Stats</div>
     <div class="progress-strip-inner">
 
       <!-- Ring: Library Progress -->
@@ -1108,9 +1111,39 @@ footer a { color: var(--gold); text-decoration: none; }
     </div>
   </div>
 
+  <!-- ── DAILY GAME PROMO (home view) ─────────────────── -->
+  <div class="game-promo-banner">
+    <div class="game-promo-inner">
+      <div class="game-promo-left">
+        <div class="game-promo-badge">
+          <span class="live-dot"></span>
+          Daily · New word today
+        </div>
+        <div class="game-promo-title">Guess Today's Missing Word</div>
+        <div class="game-promo-title-sub">Quote of the Day</div>
+        <div class="game-promo-sub">A word is missing from today's quote — can you find it? Earn stars, keep your streak going.</div>
+        <div class="game-promo-stats" id="gp-stats-home"></div>
+      </div>
+      <div class="game-promo-right">
+        <a class="game-promo-btn" href="/dashboard.html">
+          Play today's word
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <div class="game-promo-tiles" aria-hidden="true">
+          <span class="gp-tile c">W</span>
+          <span class="gp-tile p">O</span>
+          <span class="gp-tile">R</span>
+          <span class="gp-tile c">D</span>
+          <span class="gp-tile p">S</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── WHEEL DASHBOARD ──────────────────────────────── -->
   <div id="wheel-dashboard" style="display:none">
     <div class="wheel-dash-section">
+      <div class="wheel-dash-section-title">My <em style="font-style:italic;color:var(--gold)">Balance Wheel</em></div>
       <div class="wheel-dash-inner">
         <div class="wheel-dash-header">
           <div>
@@ -2047,12 +2080,14 @@ window.addEventListener('scroll', () => {
 (function() {
   const streak = parseInt(localStorage.getItem('tlr_streak') || '0');
   const stars  = parseInt(localStorage.getItem('tlr_stars')  || '0');
-  const el = document.getElementById('gp-stats');
-  if (!el) return;
   const parts = [];
   if (streak > 0) parts.push(`🔥 ${streak}-day streak`);
   if (stars  > 0) parts.push(`⭐ ${stars} stars`);
-  el.textContent = parts.length ? parts.join('  ·  ') : 'Start your streak today';
+  const text = parts.length ? parts.join('  ·  ') : 'Start your streak today';
+  const el = document.getElementById('gp-stats');
+  const elHome = document.getElementById('gp-stats-home');
+  if (el) el.textContent = text;
+  if (elHome) elHome.textContent = text;
 })();
 /* ── LIGHTBOX ─────────────────────────── */
 (function initLightbox() {
