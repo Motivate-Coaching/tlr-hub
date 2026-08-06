@@ -165,7 +165,9 @@ header { background: var(--navy); position: relative; border-bottom: 3px solid v
 .wheel-panel-name { font-size: 0.76rem; color: rgba(255,255,255,0.65); flex: 1; }
 .wheel-panel-score { font-size: 0.8rem; font-weight: 700; }
 .wheel-panel-none { font-size: 0.82rem; color: rgba(255,255,255,0.4); font-style: italic; }
-.wheel-area-picker { margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.85rem; }
+.prompt-body-row { display: flex; gap: 0; align-items: flex-start; }
+.prompt-body-left { flex: 1; min-width: 0; }
+.wheel-area-picker { width: 190px; flex-shrink: 0; padding-left: 1.25rem; margin-left: 1.25rem; border-left: 1px solid rgba(255,255,255,0.12); }
 .wheel-area-picker-label { font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.32); margin-bottom: 0.55rem; }
 .wheel-area-btns { display: flex; flex-wrap: wrap; gap: 0.3rem; }
 .wheel-area-btn {
@@ -177,7 +179,7 @@ header { background: var(--navy); position: relative; border-bottom: 3px solid v
 .wheel-area-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
 .wheel-area-btn.active { background: var(--gold); border-color: var(--gold); color: var(--navy); font-weight: 700; }
 .wheel-area-btn.any { border-style: dashed; }
-@media (max-width: 680px) { .prompt-outer { flex-direction: column; } .wheel-panel { width: 100%; } }
+@media (max-width: 680px) { .prompt-outer { flex-direction: column; } .wheel-panel { width: 100%; } .prompt-body-row { flex-direction: column; } .wheel-area-picker { width: 100%; border-left: none; margin-left: 0; padding-left: 0; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 0.85rem; margin-top: 0.85rem; } }
 
 /* ── FORMAT TOOLBAR ─────────────────── */
 .format-toolbar { display: flex; align-items: center; gap: 0.3rem; flex-wrap: wrap; flex: 1; }
@@ -543,11 +545,22 @@ header { background: var(--navy); position: relative; border-bottom: 3px solid v
       <button class="prompt-type-btn" onclick="setPromptType('theme', this)">This Month's Theme</button>
       <button class="prompt-type-btn" onclick="setPromptType('deep', this)">Deeper Work</button>
     </div>
-    <div class="prompt-display" id="prompt-display" style="color:rgba(255,255,255,0.72);font-style:italic;font-size:1.05rem;font-family:'Inter',sans-serif;font-weight:300">Or write freely below…</div>
-    <div class="prompt-context" id="prompt-context"></div>
-    <div class="prompt-actions">
-      <button class="btn-get-prompt" onclick="getNewPrompt()">✦ Generate Prompt</button>
-      <button class="btn-use-prompt" onclick="usePrompt()">Use this prompt →</button>
+    <div class="prompt-body-row">
+      <div class="prompt-body-left">
+        <div class="prompt-display" id="prompt-display" style="color:rgba(255,255,255,0.72);font-style:italic;font-size:1.05rem;font-family:'Inter',sans-serif;font-weight:300">Or write freely below…</div>
+        <div class="prompt-context" id="prompt-context"></div>
+        <div class="prompt-actions">
+          <button class="btn-get-prompt" onclick="getNewPrompt()">✦ Generate Prompt</button>
+          <button class="btn-use-prompt" onclick="usePrompt()">Use this prompt →</button>
+        </div>
+      </div>
+      <!-- Area picker — shown when From My Wheel is active -->
+      <div class="wheel-area-picker" id="wheel-area-picker" style="display:none">
+        <div class="wheel-area-picker-label">Focus prompt on…</div>
+        <div class="wheel-area-btns" id="wheel-area-btns">
+          <button class="wheel-area-btn any active" onclick="selectWheelArea(null, this)">Any area</button>
+        </div>
+      </div>
     </div>
   </div><!-- /prompt-section -->
 
@@ -556,12 +569,6 @@ header { background: var(--navy); position: relative; border-bottom: 3px solid v
     <div class="wheel-panel-label">Your Balance Wheel</div>
     <svg id="wheel-panel-svg" class="wheel-panel-svg" viewBox="0 0 220 220"></svg>
     <div id="wheel-panel-areas"></div>
-    <div class="wheel-area-picker" id="wheel-area-picker" style="display:none">
-      <div class="wheel-area-picker-label">Focus prompt on…</div>
-      <div class="wheel-area-btns" id="wheel-area-btns">
-        <button class="wheel-area-btn any active" onclick="selectWheelArea(null, this)">Any area</button>
-      </div>
-    </div>
   </div>
 
   </div><!-- /prompt-outer -->
@@ -813,6 +820,7 @@ function setPromptType(type, btn) {
     renderWheelPanel();
   } else {
     panel.style.display = 'none';
+    document.getElementById('wheel-area-picker').style.display = 'none';
   }
   getNewPrompt();
 }
