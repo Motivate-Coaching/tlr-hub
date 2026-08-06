@@ -239,6 +239,157 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 
 /* Modal image rendering */
 .entry-modal-body img { max-width: 100%; border-radius: 6px; margin: 0.5rem 0; display: block; }
+
+/* ── UNSPLASH SEARCH MODAL ───────────────────── */
+.img-search-overlay {
+  position: fixed; inset: 0; background: rgba(15,18,21,0.72); z-index: 600;
+  display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+  animation: lb-fade 0.18s ease;
+}
+@keyframes lb-fade { from { opacity:0 } to { opacity:1 } }
+.img-search-panel {
+  background: #fff; border-radius: 10px; width: 100%; max-width: 740px;
+  max-height: 88vh; display: flex; flex-direction: column;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.38); border-top: 4px solid var(--gold);
+}
+.img-search-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.1rem 1.5rem 0; border-bottom: 1px solid var(--border);
+}
+.img-search-panel-tabs { display: flex; gap: 0; }
+.img-panel-tab {
+  padding: 0.65rem 1.1rem; font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted);
+  background: none; border: none; border-bottom: 2px solid transparent;
+  margin-bottom: -1px; cursor: pointer; transition: all 0.15s;
+  font-family: 'Inter', sans-serif;
+}
+.img-panel-tab.active { color: var(--text-dark); border-bottom-color: var(--gold); }
+.img-search-close {
+  background: none; border: none; cursor: pointer; color: var(--text-muted);
+  font-size: 1.1rem; padding: 0.3rem; margin-left: auto; flex-shrink: 0;
+  transition: color 0.12s;
+}
+.img-search-close:hover { color: var(--text-dark); }
+.img-search-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+/* Search tab */
+.img-search-bar { display: flex; gap: 0.6rem; padding: 1rem 1.5rem 0.75rem; }
+.img-search-input {
+  flex: 1; padding: 0.65rem 1rem; border: 1px solid var(--border);
+  border-radius: 4px; font-size: 0.9rem; font-family: 'Inter', sans-serif;
+  outline: none; color: var(--text-dark);
+}
+.img-search-input:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(232,168,0,0.15); }
+.img-search-btn {
+  background: var(--navy); color: white; border: none; border-radius: 4px;
+  padding: 0.65rem 1.3rem; font-weight: 600; font-size: 0.82rem;
+  cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap;
+  transition: background 0.15s;
+}
+.img-search-btn:hover { background: var(--navy-mid); }
+.img-results-grid {
+  flex: 1; overflow-y: auto; padding: 0 1.5rem 0.5rem;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.55rem;
+  align-content: start;
+}
+.img-result {
+  position: relative; cursor: pointer; border-radius: 5px; overflow: hidden;
+  aspect-ratio: 3/2; background: var(--cream-dark); transition: transform 0.14s, box-shadow 0.14s;
+}
+.img-result:hover { transform: scale(1.025); box-shadow: 0 6px 20px rgba(0,0,0,0.22); }
+.img-result img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.img-result-credit {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.65));
+  color: white; font-size: 0.6rem; padding: 1.2rem 0.6rem 0.35rem;
+  opacity: 0; transition: opacity 0.18s; pointer-events: none;
+}
+.img-result:hover .img-result-credit { opacity: 1; }
+.img-grid-msg { grid-column: 1/-1; text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
+.img-search-footer {
+  padding: 0.6rem 1.5rem; border-top: 1px solid var(--border); text-align: right;
+  font-size: 0.68rem; color: var(--text-muted); flex-shrink: 0;
+}
+.img-search-footer a { color: var(--gold); text-decoration: none; }
+
+/* URL paste tab */
+.img-tab-panel { padding: 1.25rem 1.5rem; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+.img-url-input { flex: 1; min-width: 200px; padding: 0.6rem 0.85rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem; font-family: 'Inter', sans-serif; outline: none; color: var(--text-dark); }
+.img-url-input:focus { border-color: var(--gold); }
+.img-insert-btn { background: var(--navy); color: white; border: none; border-radius: 4px; padding: 0.6rem 1.1rem; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap; }
+.img-insert-btn:hover { background: var(--navy-mid); }
+
+/* Upload tab */
+.img-upload-area { padding: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+.img-upload-label { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--navy); color: white; border-radius: 4px; padding: 0.6rem 1.1rem; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+.img-upload-hint { font-size: 0.72rem; color: var(--text-muted); font-style: italic; text-align: center; }
+
+/* Key notice */
+.img-key-notice {
+  margin: 1rem 1.5rem; padding: 1rem 1.25rem; background: #FFF8E6;
+  border: 1px solid #E8A800; border-radius: 6px; font-size: 0.82rem;
+  color: var(--text-dark); line-height: 1.65;
+}
+.img-key-notice strong { color: var(--text-dark); }
+.img-key-notice code { background: rgba(0,0,0,0.07); padding: 0.1em 0.35em; border-radius: 3px; font-size: 0.78rem; }
+.img-key-notice a { color: #B37F00; font-weight: 600; }
+
+/* ── IMAGE ALIGNMENT TOOLBAR ─────────────────── */
+.img-toolbar {
+  position: fixed; z-index: 700; background: var(--navy); border-radius: 7px;
+  padding: 0.38rem 0.5rem; display: none; gap: 0.2rem; align-items: center;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+  pointer-events: auto;
+}
+.img-toolbar::after {
+  content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent; border-top-color: var(--navy);
+}
+.img-tb-btn {
+  background: none; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;
+  color: rgba(255,255,255,0.65); padding: 0.28rem 0.6rem; font-size: 0.68rem;
+  cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap;
+  letter-spacing: 0.03em; transition: all 0.12s;
+}
+.img-tb-btn:hover { background: rgba(255,255,255,0.12); color: #fff; border-color: rgba(255,255,255,0.25); }
+.img-tb-btn.active { background: var(--gold); color: var(--navy); border-color: var(--gold); }
+.img-tb-sep { width: 1px; height: 15px; background: rgba(255,255,255,0.18); margin: 0 0.1rem; }
+.img-tb-del { color: rgba(255,120,120,0.8) !important; }
+.img-tb-del:hover { background: rgba(200,50,50,0.2) !important; color: #ff8080 !important; }
+
+/* Images in writing area */
+[contenteditable].writing-area figure { display: block; margin: 0.75rem 0; }
+[contenteditable].writing-area figure img { max-width: 100%; border-radius: 6px; display: block; cursor: pointer; transition: outline 0.1s; }
+[contenteditable].writing-area figure img.img-selected { outline: 3px solid var(--gold); outline-offset: 2px; }
+[contenteditable].writing-area figcaption { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.3rem; text-align: center; }
+
+/* ── VOICE BUTTON ────────────────────────────── */
+.fmt-voice-btn {
+  display: flex; align-items: center; gap: 0.35rem;
+  background: none; border: 1px solid var(--border); border-radius: 4px;
+  padding: 0.28rem 0.65rem; font-size: 0.72rem; cursor: pointer;
+  color: var(--text-mid); font-family: 'Inter', sans-serif;
+  transition: all 0.15s; white-space: nowrap;
+}
+.fmt-voice-btn:hover { background: var(--cream-dark); color: var(--text-dark); }
+.fmt-voice-btn.recording {
+  background: #FFF0F0; border-color: #E85B3A; color: #C0392B;
+  animation: pulse-border 1.4s ease-in-out infinite;
+}
+@keyframes pulse-border {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232,91,58,0.35); }
+  50% { box-shadow: 0 0 0 4px rgba(232,91,58,0); }
+}
+.voice-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: currentColor;
+  flex-shrink: 0;
+}
+.fmt-voice-btn.recording .voice-dot { animation: pulse-dot 0.8s ease-in-out infinite alternate; }
+@keyframes pulse-dot { from { opacity: 0.4; transform: scale(0.8); } to { opacity: 1; transform: scale(1.2); } }
+.voice-interim {
+  display: inline; color: #8899AA; font-style: italic;
+}
 </style>
 </head>
 <body>
@@ -340,33 +491,18 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
           <button class="fmt-color" style="background:#8899AA" title="Muted" onclick="fmtColor('#8899AA')"></button>
         </div>
         <div class="fmt-sep"></div>
-        <button class="fmt-btn" title="Add image" onclick="toggleImgPicker()">📷</button>
+        <button class="fmt-btn" title="Search &amp; insert image" onclick="openImgSearch()">🖼 Images</button>
+        <div class="fmt-sep"></div>
+        <button class="fmt-voice-btn" id="voice-btn" title="Speak to type" onclick="toggleVoice()">
+          <span class="voice-dot"></span>
+          <span id="voice-label">Speak</span>
+        </button>
       </div>
 
       <!-- Date + word count -->
       <div class="writing-meta">
         <span class="writing-date" id="writing-date"></span>
         <span class="writing-wordcount" id="word-count">0 words</span>
-      </div>
-    </div>
-
-    <!-- Image Picker Panel (hidden by default) -->
-    <div class="img-picker" id="img-picker" style="display:none">
-      <div class="img-picker-tabs">
-        <button class="img-tab active" onclick="setImgTab('url',this)">Paste image URL</button>
-        <button class="img-tab" onclick="setImgTab('upload',this)">Upload from device</button>
-        <button class="img-picker-close" onclick="document.getElementById('img-picker').style.display='none'" title="Close">✕</button>
-      </div>
-      <div id="img-tab-url" class="img-picker-panel">
-        <input type="url" class="img-url-input" id="img-url-input" placeholder="Paste any image URL — from Unsplash, Google Images, anywhere…">
-        <button class="img-insert-btn" onclick="insertImageFromUrl()">Insert</button>
-      </div>
-      <div id="img-tab-upload" class="img-picker-panel" style="display:none">
-        <label class="img-upload-label">
-          📁 Choose from device
-          <input type="file" accept="image/*" id="img-file-input" onchange="insertImageFromFile(this)" style="display:none">
-        </label>
-        <span class="img-upload-hint">Tip: resize large photos before uploading — they're stored in your browser.</span>
       </div>
     </div>
 
@@ -716,46 +852,329 @@ function fmtColor(color) {
   document.getElementById('writing-area').focus();
 }
 
-// ── IMAGE PICKER ─────────────────────────
-let imgTab = 'url';
-function toggleImgPicker() {
-  const picker = document.getElementById('img-picker');
-  const isHidden = picker.style.display === 'none' || picker.style.display === '';
-  picker.style.display = isHidden ? 'block' : 'none';
-  if (isHidden) document.getElementById('img-url-input').focus();
+// ── UNSPLASH CONFIG ───────────────────────────
+// Get your free key in 2 minutes at unsplash.com/developers
+const UNSPLASH_ACCESS_KEY = '';
+
+// ── IMAGE SEARCH MODAL ───────────────────────
+let savedRange = null;
+let activePanelTab = 'search';
+
+function openImgSearch() {
+  // Save cursor position so we know where to insert
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount > 0) savedRange = sel.getRangeAt(0).cloneRange();
+  const overlay = document.getElementById('img-search-overlay');
+  overlay.style.display = 'flex';
+  setPanelTab('search', document.getElementById('ptab-search'));
+  if (!UNSPLASH_ACCESS_KEY) {
+    document.getElementById('img-key-notice').style.display = '';
+    document.getElementById('img-search-input').disabled = true;
+    document.querySelector('.img-search-btn').disabled = true;
+  } else {
+    document.getElementById('img-key-notice').style.display = 'none';
+    document.getElementById('img-search-input').disabled = false;
+    setTimeout(() => document.getElementById('img-search-input').focus(), 60);
+  }
 }
-function setImgTab(tab, btn) {
-  imgTab = tab;
-  document.querySelectorAll('.img-tab').forEach(b => b.classList.remove('active'));
+
+function closeImgSearch() {
+  document.getElementById('img-search-overlay').style.display = 'none';
+}
+
+function setPanelTab(tab, btn) {
+  activePanelTab = tab;
+  document.querySelectorAll('.img-panel-tab').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  document.getElementById('img-tab-url').style.display = tab === 'url' ? '' : 'none';
-  document.getElementById('img-tab-upload').style.display = tab === 'upload' ? '' : 'none';
+  document.getElementById('img-panel-search').style.display = tab === 'search' ? '' : 'none';
+  document.getElementById('img-panel-url').style.display    = tab === 'url'    ? '' : 'none';
+  document.getElementById('img-panel-upload').style.display = tab === 'upload' ? '' : 'none';
 }
+
+async function searchUnsplash() {
+  const q = document.getElementById('img-search-input').value.trim();
+  if (!q || !UNSPLASH_ACCESS_KEY) return;
+  const grid = document.getElementById('img-results-grid');
+  grid.innerHTML = '<div class="img-grid-msg">Searching…</div>';
+  try {
+    const res = await fetch(
+      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(q)}&per_page=12&orientation=landscape&client_id=${UNSPLASH_ACCESS_KEY}`
+    );
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    if (!data.results.length) {
+      grid.innerHTML = '<div class="img-grid-msg">No images found. Try a different search.</div>';
+      return;
+    }
+    grid.innerHTML = data.results.map(p => `
+      <div class="img-result" onclick="selectUnsplashImage('${p.urls.regular.replace(/'/g,"\\'")}','${p.user.name.replace(/'/g,"\\'")}','${p.links.html}','${p.links.download_location}')">
+        <img src="${p.urls.small}" alt="${(p.alt_description||'').replace(/"/g,'')}" loading="lazy">
+        <div class="img-result-credit">📷 ${p.user.name}</div>
+      </div>`).join('');
+  } catch(e) {
+    grid.innerHTML = `<div class="img-grid-msg">Couldn't load images — check your API key is correct.</div>`;
+  }
+}
+
+function selectUnsplashImage(url, photographer, profileLink, downloadUrl) {
+  closeImgSearch();
+  restoreCursorAndInsert(
+    `<figure style="margin:1rem 0;display:block;">` +
+    `<img src="${url}" alt="Photo by ${photographer}" style="max-width:100%;border-radius:6px;display:block;" draggable="true">` +
+    `<figcaption style="font-size:0.7rem;color:#8899AA;margin-top:0.3rem;text-align:center;">` +
+    `Photo by <a href="${profileLink}?utm_source=tlr_journal&utm_medium=referral" target="_blank" style="color:var(--gold);">${photographer}</a> ` +
+    `on <a href="https://unsplash.com?utm_source=tlr_journal&utm_medium=referral" target="_blank" style="color:var(--gold);">Unsplash</a></figcaption></figure><br>`
+  );
+  // Trigger Unsplash download event (required by their guidelines)
+  if (UNSPLASH_ACCESS_KEY && downloadUrl) {
+    fetch(`${downloadUrl}?client_id=${UNSPLASH_ACCESS_KEY}`).catch(()=>{});
+  }
+}
+
 function insertImageFromUrl() {
   const url = document.getElementById('img-url-input').value.trim();
   if (!url) return;
-  insertImageAtCursor(url);
+  closeImgSearch();
+  restoreCursorAndInsert(
+    `<figure style="margin:1rem 0;display:block;">` +
+    `<img src="${url}" alt="Journal image" style="max-width:100%;border-radius:6px;display:block;" draggable="true">` +
+    `</figure><br>`
+  );
   document.getElementById('img-url-input').value = '';
-  document.getElementById('img-picker').style.display = 'none';
 }
+
 function insertImageFromFile(input) {
   const file = input.files && input.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = function(ev) {
-    insertImageAtCursor(ev.target.result);
-    document.getElementById('img-picker').style.display = 'none';
+    closeImgSearch();
+    restoreCursorAndInsert(
+      `<figure style="margin:1rem 0;display:block;">` +
+      `<img src="${ev.target.result}" alt="Journal image" style="max-width:100%;border-radius:6px;display:block;" draggable="true">` +
+      `</figure><br>`
+    );
     input.value = '';
   };
   reader.readAsDataURL(file);
 }
-function insertImageAtCursor(src) {
+
+function restoreCursorAndInsert(html) {
   const area = document.getElementById('writing-area');
   area.focus();
-  document.execCommand('insertHTML', false,
-    `<img src="${src}" alt="Journal image" style="max-width:100%;border-radius:6px;margin:0.75rem 0;display:block"><br>`);
+  if (savedRange) {
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(savedRange);
+    savedRange = null;
+  }
+  document.execCommand('insertHTML', false, html);
   updateWordCount();
 }
+
+function insertImageAtCursor(src) { // legacy shim
+  restoreCursorAndInsert(
+    `<figure style="margin:1rem 0;display:block;">` +
+    `<img src="${src}" alt="Journal image" style="max-width:100%;border-radius:6px;display:block;" draggable="true">` +
+    `</figure><br>`
+  );
+}
+
+// ── IMAGE ALIGNMENT TOOLBAR ───────────────────
+let activeImg = null;
+
+function selectImage(img) {
+  document.querySelectorAll('[contenteditable] img.img-selected').forEach(i => i.classList.remove('img-selected'));
+  activeImg = img;
+  img.classList.add('img-selected');
+  positionImgToolbar(img);
+}
+
+function positionImgToolbar(img) {
+  const toolbar = document.getElementById('img-toolbar');
+  toolbar.style.display = 'flex';
+  const r = img.getBoundingClientRect();
+  const tr = toolbar.getBoundingClientRect();
+  let left = r.left + r.width / 2 - tr.width / 2;
+  left = Math.max(8, Math.min(left, window.innerWidth - tr.width - 8));
+  const top = r.top + window.scrollY - tr.height - 12;
+  toolbar.style.left = left + 'px';
+  toolbar.style.top  = top  + 'px';
+  // Highlight active alignment
+  const fig = img.closest('figure') || img;
+  const fl = fig.style.float;
+  document.querySelectorAll('.img-tb-btn[data-align]').forEach(b => {
+    const a = b.dataset.align;
+    b.classList.toggle('active',
+      (a === 'left'   && fl === 'left')  ||
+      (a === 'right'  && fl === 'right') ||
+      (a === 'center' && !fl && fig.style.margin?.includes('auto')) ||
+      (a === 'full'   && !fl && fig.style.width === '100%')
+    );
+  });
+}
+
+function hideImgToolbar() {
+  document.getElementById('img-toolbar').style.display = 'none';
+  if (activeImg) { activeImg.classList.remove('img-selected'); activeImg = null; }
+}
+
+function alignImg(align) {
+  if (!activeImg) return;
+  const fig = activeImg.closest('figure') || activeImg;
+  // Reset
+  ['float','clear','margin','display','width'].forEach(p => fig.style[p] = '');
+  activeImg.style.width = '';
+  switch (align) {
+    case 'left':
+      fig.style.float = 'left'; fig.style.width = '46%';
+      fig.style.margin = '0.25rem 1.25rem 0.5rem 0'; fig.style.clear = 'none'; break;
+    case 'right':
+      fig.style.float = 'right'; fig.style.width = '46%';
+      fig.style.margin = '0.25rem 0 0.5rem 1.25rem'; fig.style.clear = 'none'; break;
+    case 'center':
+      fig.style.display = 'block'; fig.style.width = '68%';
+      fig.style.margin = '1rem auto'; break;
+    case 'full':
+      fig.style.display = 'block'; fig.style.width = '100%';
+      fig.style.margin = '0.75rem 0'; break;
+  }
+  document.querySelectorAll('.img-tb-btn[data-align]').forEach(b =>
+    b.classList.toggle('active', b.dataset.align === align));
+  // Reposition toolbar after layout settles
+  setTimeout(() => activeImg && positionImgToolbar(activeImg), 30);
+}
+
+function deleteActiveImg() {
+  if (!activeImg) return;
+  const fig = activeImg.closest('figure') || activeImg;
+  hideImgToolbar();
+  fig.remove();
+  updateWordCount();
+}
+
+// ── VOICE-TO-TEXT ─────────────────────────────
+let recognition = null;
+let isRecording = false;
+let interimSpan = null;
+
+function toggleVoice() {
+  if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+    alert('Sorry — your browser doesn\'t support voice input. Try Chrome or Edge.');
+    return;
+  }
+  isRecording ? stopVoice() : startVoice();
+}
+
+function startVoice() {
+  const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new Rec();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-GB';
+
+  const area = document.getElementById('writing-area');
+  area.focus();
+  // Place cursor at end
+  const sel = window.getSelection();
+  const range = document.createRange();
+  range.selectNodeContents(area);
+  range.collapse(false);
+  sel.removeAllRanges();
+  sel.addRange(range);
+
+  recognition.onstart = function() {
+    isRecording = true;
+    const btn = document.getElementById('voice-btn');
+    btn.classList.add('recording');
+    document.getElementById('voice-label').textContent = 'Listening…';
+    // Insert a span for interim results
+    interimSpan = document.createElement('span');
+    interimSpan.className = 'voice-interim';
+    interimSpan.setAttribute('data-voice-interim', 'true');
+    document.execCommand('insertHTML', false, '<span data-voice-interim="true" class="voice-interim"></span>');
+    interimSpan = area.querySelector('[data-voice-interim]');
+  };
+
+  recognition.onresult = function(event) {
+    let interim = '';
+    let finalText = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const t = event.results[i][0].transcript;
+      if (event.results[i].isFinal) finalText += t + ' ';
+      else interim += t;
+    }
+    if (finalText && interimSpan) {
+      // Replace interim span with real text node + fresh span
+      const textNode = document.createTextNode(finalText);
+      interimSpan.parentNode.insertBefore(textNode, interimSpan);
+      interimSpan.textContent = '';
+    }
+    if (interimSpan) interimSpan.textContent = interim;
+    updateWordCount();
+  };
+
+  recognition.onerror = function(e) {
+    if (e.error !== 'aborted') console.warn('Speech error:', e.error);
+    stopVoice();
+  };
+
+  recognition.onend = function() {
+    stopVoice();
+  };
+
+  recognition.start();
+}
+
+function stopVoice() {
+  isRecording = false;
+  if (recognition) { try { recognition.stop(); } catch(e){} recognition = null; }
+  // Clean up interim span
+  const area = document.getElementById('writing-area');
+  area.querySelectorAll('[data-voice-interim]').forEach(el => {
+    if (el.textContent) {
+      el.parentNode.insertBefore(document.createTextNode(el.textContent), el);
+    }
+    el.remove();
+  });
+  const btn = document.getElementById('voice-btn');
+  if (btn) {
+    btn.classList.remove('recording');
+    document.getElementById('voice-label').textContent = 'Speak';
+  }
+  updateWordCount();
+}
+
+// ── EVENT WIRING ─────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  const area = document.getElementById('writing-area');
+
+  // Image click → show toolbar
+  area.addEventListener('click', function(e) {
+    const img = e.target.closest('img');
+    if (img && area.contains(img)) { selectImage(img); e.preventDefault(); }
+    else hideImgToolbar();
+  });
+
+  // Click outside → hide toolbar (but not if clicking on toolbar itself)
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('#img-toolbar') && !e.target.closest('#writing-area img')) {
+      hideImgToolbar();
+    }
+  });
+
+  // Escape closes modals
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeImgSearch(); hideImgToolbar(); if (isRecording) stopVoice(); }
+  });
+
+  // Enter key triggers Unsplash search
+  const searchInput = document.getElementById('img-search-input');
+  if (searchInput) searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') searchUnsplash(); });
+
+  // Reposition toolbar on scroll
+  window.addEventListener('scroll', function() { if (activeImg) positionImgToolbar(activeImg); }, { passive: true });
+});
 
 // ── SAVE ENTRY ────────────────────────────
 function saveEntry() {
@@ -1018,5 +1437,73 @@ function deleteEntry(id) {
   renderEntries();
 }
 </script>
+<!-- ── IMAGE ALIGNMENT TOOLBAR ──────── -->
+<div class="img-toolbar" id="img-toolbar">
+  <button class="img-tb-btn" data-align="left"  onclick="alignImg('left')"   title="Float left">◀ Left</button>
+  <button class="img-tb-btn" data-align="center" onclick="alignImg('center')" title="Centre">Centre</button>
+  <button class="img-tb-btn" data-align="right"  onclick="alignImg('right')"  title="Float right">Right ▶</button>
+  <button class="img-tb-btn" data-align="full"   onclick="alignImg('full')"   title="Full width">⬛ Full</button>
+  <div class="img-tb-sep"></div>
+  <button class="img-tb-btn img-tb-del" onclick="deleteActiveImg()" title="Remove image">✕</button>
+</div>
+
+<!-- ── UNSPLASH IMAGE SEARCH MODAL ─── -->
+<div class="img-search-overlay" id="img-search-overlay" style="display:none" onclick="if(event.target===this)closeImgSearch()">
+  <div class="img-search-panel">
+
+    <!-- Tabs + close -->
+    <div class="img-search-header">
+      <div class="img-search-panel-tabs">
+        <button class="img-panel-tab active" id="ptab-search" onclick="setPanelTab('search',this)">🔍 Search Unsplash</button>
+        <button class="img-panel-tab" id="ptab-url"    onclick="setPanelTab('url',this)">🔗 Paste URL</button>
+        <button class="img-panel-tab" id="ptab-upload" onclick="setPanelTab('upload',this)">📁 Upload</button>
+      </div>
+      <button class="img-search-close" onclick="closeImgSearch()">✕</button>
+    </div>
+
+    <div class="img-search-body">
+
+      <!-- SEARCH UNSPLASH tab -->
+      <div id="img-panel-search">
+        <div id="img-key-notice" class="img-key-notice" style="display:none">
+          <strong>Quick setup — takes 2 minutes:</strong><br>
+          1. Sign up free at <a href="https://unsplash.com/developers" target="_blank">unsplash.com/developers</a><br>
+          2. Create a new application (call it anything — "TLR Journal")<br>
+          3. Copy your <strong>Access Key</strong><br>
+          4. Open <code>my-journal.html</code> in a text editor, find <code>const UNSPLASH_ACCESS_KEY = ''</code> near the top of the &lt;script&gt; and paste your key between the quotes<br>
+          5. Save and push — image search will be live!
+        </div>
+        <div class="img-search-bar">
+          <input type="text" class="img-search-input" id="img-search-input" placeholder="Search for an image… calm, autumn, coffee, ocean, abstract…">
+          <button class="img-search-btn" onclick="searchUnsplash()">Search</button>
+        </div>
+        <div class="img-results-grid" id="img-results-grid">
+          <div class="img-grid-msg">Search for something beautiful to add to your journal…</div>
+        </div>
+        <div class="img-search-footer">Photos from <a href="https://unsplash.com?utm_source=tlr_journal&utm_medium=referral" target="_blank">Unsplash</a></div>
+      </div>
+
+      <!-- PASTE URL tab -->
+      <div id="img-panel-url" style="display:none">
+        <div class="img-tab-panel">
+          <input type="url" class="img-url-input" id="img-url-input" placeholder="Paste any image URL — from Google, Pinterest, anywhere…">
+          <button class="img-insert-btn" onclick="insertImageFromUrl()">Insert image</button>
+        </div>
+      </div>
+
+      <!-- UPLOAD tab -->
+      <div id="img-panel-upload" style="display:none">
+        <div class="img-upload-area">
+          <label class="img-upload-label">
+            📁 Choose image from device
+            <input type="file" accept="image/*" id="img-file-input" onchange="insertImageFromFile(this)" style="display:none">
+          </label>
+          <p class="img-upload-hint">Images are stored in your browser. Large photos may slow things down — resize before uploading if needed.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
 </body>
 </html>
