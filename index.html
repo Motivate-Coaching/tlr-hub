@@ -761,9 +761,10 @@ a.tab-btn { text-decoration: none; display: inline-block; }
   max-width: 1240px;
   margin: 0 auto;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   gap: 0;
+  padding-top: 0.5rem;
 }
 .ps-section {
   flex: 1;
@@ -774,18 +775,23 @@ a.tab-btn { text-decoration: none; display: inline-block; }
 }
 .ps-divider {
   width: 1px;
-  height: 80px;
+  align-self: stretch;
+  min-height: 60px;
   background: rgba(255,255,255,0.1);
   flex-shrink: 0;
 }
 .ps-section-label {
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 0.75rem;
+  color: rgba(255,255,255,0.62);
+  margin-bottom: 0.85rem;
 }
+/* Clickable section titles */
+.section-title-link { text-decoration: none; display: block; }
+.section-title-link:hover em { text-decoration: underline; text-underline-offset: 3px; }
+.section-title-link:hover { opacity: 0.85; }
 /* Ring */
 .ps-ring-wrap {
   position: relative;
@@ -1152,7 +1158,7 @@ footer a { color: var(--gold); text-decoration: none; }
   <!-- ── WHEEL DASHBOARD ──────────────────────────────── -->
   <div id="wheel-dashboard" style="display:none">
     <div class="wheel-dash-section">
-      <div class="wheel-dash-section-title">My <em>Balance Wheel</em></div>
+      <a href="/my-wheel.html" class="section-title-link"><div class="wheel-dash-section-title">My <em>Balance Wheel</em></div></a>
       <div class="wheel-dash-inner">
         <div class="wheel-dash-header">
           <div>
@@ -1168,7 +1174,7 @@ footer a { color: var(--gold); text-decoration: none; }
 
   <!-- ── THEME DASHBOARD ──────────────────────────────── -->
   <div class="theme-dash-section">
-    <div class="wheel-dash-section-title" style="background:transparent;padding-bottom:1.5rem;">My <em>Resource Library</em></div>
+    <a href="#" onclick="event.preventDefault();goToView('library')" class="section-title-link"><div class="wheel-dash-section-title" style="background:transparent;padding-bottom:1.5rem;">My <em>Resource Library</em></div></a>
     <div class="theme-dash-inner">
       <div class="theme-dash-cols">
         <div class="theme-dash-img-col">
