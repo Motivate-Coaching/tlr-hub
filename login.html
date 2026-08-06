@@ -143,6 +143,42 @@ input::placeholder { color: rgba(255,255,255,0.2); }
 }
 .join-link a:hover { color: var(--gold-light); }
 
+.forgot-link {
+  display: block;
+  text-align: right;
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-top: 0.35rem;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.forgot-link:hover { color: var(--gold); }
+
+.forgot-panel { display: none; }
+.forgot-panel.visible { display: block; }
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-bottom: 1.25rem;
+  transition: color 0.15s;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+}
+.back-link:hover { color: var(--cream); }
+.reset-note {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin-bottom: 1.25rem;
+}
+
 .footer-note {
   text-align: center;
   margin-top: 1.5rem;
@@ -161,20 +197,37 @@ input::placeholder { color: rgba(255,255,255,0.2); }
     <div class="subtagline">The Living Room · Member Access</div>
   </div>
 
-  <div class="form-group">
-    <label>Email</label>
-    <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
-  </div>
-  <div class="form-group">
-    <label>Password</label>
-    <input type="password" id="password" placeholder="Your password" autocomplete="current-password">
-  </div>
-  <button class="btn-primary" id="signin-btn" onclick="signIn()">Sign In →</button>
-  <div id="message" class="message"></div>
+  <!-- ── SIGN IN PANEL ── -->
+  <div id="signin-panel">
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Your password" autocomplete="current-password">
+      <span class="forgot-link" onclick="showForgot()">Forgot your password?</span>
+    </div>
+    <button class="btn-primary" id="signin-btn" onclick="signIn()">Sign In →</button>
+    <div id="message" class="message"></div>
 
-  <div class="join-link">
-    <p>Not a member yet?</p>
-    <a href="https://www.motivate-coaching.com" target="_blank">Find out about The Living Room →</a>
+    <div class="join-link">
+      <p>Not a member yet?</p>
+      <a href="https://www.motivate-coaching.com" target="_blank">Find out about The Living Room →</a>
+    </div>
+  </div>
+
+  <!-- ── FORGOT PASSWORD PANEL ── -->
+  <div id="forgot-panel" class="forgot-panel">
+    <button class="back-link" onclick="showSignIn()">← Back to sign in</button>
+    <div class="tagline" style="font-size:1.1rem;margin-bottom:0.5rem;">Reset your password</div>
+    <p class="reset-note">Enter your email and we'll send you a link to set a new password.</p>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="reset-email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <button class="btn-primary" id="reset-btn" onclick="sendReset()">Send reset link →</button>
+    <div id="reset-message" class="message"></div>
   </div>
 </div>
 
@@ -225,8 +278,59 @@ async function signIn() {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Enter') signIn();
+  if (e.key === 'Enter') {
+    if (document.getElementById('forgot-panel').classList.contains('visible')) {
+      sendReset();
+    } else {
+      signIn();
+    }
+  }
 });
+
+function showForgot() {
+  document.getElementById('signin-panel').style.display = 'none';
+  document.getElementById('forgot-panel').classList.add('visible');
+  // Pre-fill email if already typed
+  const email = document.getElementById('email').value;
+  if (email) document.getElementById('reset-email').value = email;
+  document.getElementById('reset-email').focus();
+}
+
+function showSignIn() {
+  document.getElementById('forgot-panel').classList.remove('visible');
+  document.getElementById('signin-panel').style.display = '';
+}
+
+async function sendReset() {
+  const email = document.getElementById('reset-email').value.trim();
+  const msg = document.getElementById('reset-message');
+  const btn = document.getElementById('reset-btn');
+
+  msg.className = 'message';
+  if (!email) {
+    msg.className = 'message error';
+    msg.textContent = 'Please enter your email address.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  const { error } = await _supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://motivate-coaching.github.io/tlr-hub/reset-password.html'
+  });
+
+  if (error) {
+    msg.className = 'message error';
+    msg.textContent = error.message;
+    btn.disabled = false;
+    btn.textContent = 'Send reset link →';
+  } else {
+    msg.className = 'message success';
+    msg.textContent = 'Check your email — a reset link is on its way. It may take a minute or two.';
+    btn.textContent = 'Sent ✓';
+  }
+}
 </script>
 </body>
 </html>
