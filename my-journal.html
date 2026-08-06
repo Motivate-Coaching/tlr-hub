@@ -495,6 +495,9 @@ header { background: var(--navy); position: relative; border-bottom: 3px solid v
   [contenteditable].writing-area figure { min-width: 60%; }
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+<script>requireAuth();</script>
 </head>
 <body>
 
@@ -1510,6 +1513,7 @@ function saveEntry() {
   };
   entries.unshift(entry);
   localStorage.setItem('tlr_journal_entries', JSON.stringify(entries));
+  saveJournalToSupabase(entries);
 
   // Clear form
   document.getElementById('entry-title').value = '';
@@ -1673,6 +1677,7 @@ function saveEditedEntry() {
   entries[idx].words = newBodyText.split(/\s+/).filter(w => w.length > 0).length;
   entries[idx].format = 'html';
   localStorage.setItem('tlr_journal_entries', JSON.stringify(entries));
+  saveJournalToSupabase(entries);
   // Update view mode display
   document.getElementById('modal-title').textContent = newTitle;
   modalBody.contentEditable = 'false';
@@ -1746,8 +1751,56 @@ function deleteEntry(id) {
   let entries = JSON.parse(localStorage.getItem('tlr_journal_entries') || '[]');
   entries = entries.filter(e => e.id !== id);
   localStorage.setItem('tlr_journal_entries', JSON.stringify(entries));
+  saveJournalToSupabase(entries);
   renderEntries();
 }
+
+// ══════════════════════════════════════════
+// SUPABASE SYNC — cross-device journal
+// ══════════════════════════════════════════
+
+// Save all journal entries to Supabase (fire-and-forget)
+function saveJournalToSupabase(entries) {
+  getUser().then(user => {
+    if (!user) return;
+    _supabase.from('member_progress').upsert({
+      user_id: user.id,
+      tool_id: 'journal',
+      completed: false,
+      data: { entries },
+      last_updated: new Date().toISOString()
+    }, { onConflict: 'user_id,tool_id' }).then(({ error }) => {
+      if (error) console.warn('Journal sync error:', error.message);
+    });
+  });
+}
+
+// On load: fetch from Supabase and merge with localStorage
+getUser().then(async user => {
+  if (!user) return;
+  try {
+    const { data: row } = await _supabase.from('member_progress')
+      .select('data').eq('user_id', user.id).eq('tool_id', 'journal').maybeSingle();
+    if (!row?.data?.entries?.length) return;
+
+    const cloudEntries = row.data.entries;
+    const local = JSON.parse(localStorage.getItem('tlr_journal_entries') || '[]');
+
+    // Merge: keep all unique entries by id, sorted newest first
+    const map = new Map();
+    [...cloudEntries, ...local].forEach(e => {
+      if (!map.has(e.id)) map.set(e.id, e);
+    });
+    const merged = Array.from(map.values())
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    // Only update if we gained entries from the cloud
+    if (merged.length > local.length) {
+      localStorage.setItem('tlr_journal_entries', JSON.stringify(merged));
+      renderEntries();
+    }
+  } catch(e) { console.warn('Journal Supabase sync skipped:', e); }
+});
 </script>
 <!-- ── IMAGE SELECTION OVERLAY (resize handles + move) ──────── -->
 <div id="img-sel-box">
