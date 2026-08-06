@@ -25,6 +25,7 @@
   --absent:    #8A8278;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { overflow-x: clip; }
 body {
   font-family: 'Poppins', sans-serif;
   background: var(--navy);
@@ -57,7 +58,8 @@ body {
 .tlr-header-link:hover { color: #E8A800; }
 /* Tab nav */
 .tlr-tabs { background: #1C2B3A; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', sans-serif; }
-.tlr-tabs-inner { max-width: 1240px; margin: 0 auto; padding: 0 2rem; display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; }
+.tlr-tabs { overflow: hidden; }
+.tlr-tabs-inner { max-width: 1240px; margin: 0 auto; padding: 0 2rem; display: flex; gap: 0; overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
 .tlr-tabs-inner::-webkit-scrollbar { display: none; }
 .tlr-tab { padding: 0.7rem 1.25rem; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.4); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; text-decoration: none; display: inline-block; transition: color 0.15s, border-color 0.15s; white-space: nowrap; font-family: 'Inter', sans-serif; }
 .tlr-tab:hover { color: rgba(255,255,255,0.7); }

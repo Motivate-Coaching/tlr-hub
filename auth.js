@@ -7,7 +7,7 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // requireAuth — call on any protected page; redirects to login if no session
 async function requireAuth() {
   const { data: { session } } = await _supabase.auth.getSession();
-  if (!session) { window.location.replace('/login.html'); return null; }
+  if (!session) { window.location.replace('login.html'); return null; }
   return session.user;
 }
 
@@ -18,7 +18,7 @@ async function getUser() {
 
 async function signOut() {
   await _supabase.auth.signOut();
-  window.location.replace('/login.html');
+  window.location.replace('login.html');
 }
 
 // saveProgress — upsert a tool result to Supabase + keep localStorage in sync

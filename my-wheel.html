@@ -21,7 +21,8 @@
   --border:    #E2D9CE;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: clip; }
+body { overflow-x: clip; }
 body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--text-dark); line-height: 1.65; font-size: 17px; }
 
 /* ── HEADER ─────────────────────────── */
@@ -42,7 +43,9 @@ header { background: var(--navy); position: relative; border-bottom: 3px solid v
 
 /* ── PAGE TABS ──────────────────────── */
 .page-tabs { background: var(--navy-mid); border-bottom: 1px solid rgba(255,255,255,0.08); }
-.page-tabs-inner { max-width: 1240px; margin: 0 auto; padding: 0 2rem; display: flex; gap: 0; overflow-x: auto; }
+.page-tabs { overflow: hidden; }
+.page-tabs-inner { max-width: 1240px; margin: 0 auto; padding: 0 2rem; display: flex; gap: 0; overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.page-tabs-inner::-webkit-scrollbar { display: none; }
 .tab-btn {
   padding: 0.7rem 1.25rem; white-space: nowrap;
   font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;

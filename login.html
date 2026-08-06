@@ -187,11 +187,11 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // If already logged in, go straight to library
 _supabase.auth.getSession().then(({ data: { session } }) => {
-  if (session) window.location.replace('/index.html');
+  if (session) window.location.replace('index.html');
 });
 
 _supabase.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_IN' && session) window.location.replace('/index.html');
+  if (event === 'SIGNED_IN' && session) window.location.replace('index.html');
 });
 
 async function signIn() {
