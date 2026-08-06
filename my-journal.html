@@ -164,6 +164,81 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .wheel-panel-score { font-size: 0.8rem; font-weight: 700; }
 .wheel-panel-none { font-size: 0.82rem; color: rgba(255,255,255,0.4); font-style: italic; }
 @media (max-width: 680px) { .prompt-outer { flex-direction: column; } .wheel-panel { width: 100%; } }
+
+/* ── FORMAT TOOLBAR ─────────────────── */
+.format-toolbar { display: flex; align-items: center; gap: 0.3rem; flex-wrap: wrap; flex: 1; }
+.fmt-btn {
+  background: none; border: 1px solid transparent; border-radius: 3px;
+  padding: 0.28rem 0.55rem; font-size: 0.8rem; cursor: pointer;
+  color: var(--text-mid); font-family: 'Inter', sans-serif;
+  transition: all 0.12s; line-height: 1;
+}
+.fmt-btn:hover { background: var(--cream-dark); border-color: var(--border); color: var(--text-dark); }
+.fmt-btn.active { background: var(--cream-dark); border-color: var(--gold); color: var(--text-dark); }
+.fmt-sep { width: 1px; height: 18px; background: var(--border); margin: 0 0.2rem; flex-shrink: 0; }
+.fmt-select {
+  font-size: 0.72rem; border: 1px solid var(--border); border-radius: 3px;
+  padding: 0.26rem 0.4rem; color: var(--text-mid); background: white;
+  cursor: pointer; font-family: 'Inter', sans-serif; max-width: 100px;
+}
+.fmt-colors { display: flex; gap: 0.28rem; align-items: center; }
+.fmt-color {
+  width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.08);
+  cursor: pointer; transition: transform 0.12s, box-shadow 0.12s; flex-shrink: 0;
+}
+.fmt-color:hover { transform: scale(1.3); box-shadow: 0 0 0 2px var(--gold); }
+
+/* ── IMAGE PICKER ───────────────────── */
+.img-picker { padding: 0.85rem 1.25rem; background: #F0EDE8; border-bottom: 1px solid var(--border); animation: slideDown 0.18s ease; }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.img-picker-tabs { display: flex; gap: 0; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
+.img-tab { background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 0.3rem 0.85rem; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); cursor: pointer; letter-spacing: 0.04em; transition: all 0.15s; font-family: 'Inter', sans-serif; }
+.img-tab.active { color: var(--text-dark); border-bottom-color: var(--gold); }
+.img-picker-panel { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.img-url-input { flex: 1; min-width: 200px; font-size: 0.82rem; border: 1px solid var(--border); border-radius: 4px; padding: 0.5rem 0.75rem; color: var(--text-dark); font-family: 'Inter', sans-serif; outline: none; }
+.img-url-input:focus { border-color: var(--gold); }
+.img-insert-btn { background: var(--navy); color: white; border: none; border-radius: 4px; padding: 0.5rem 1rem; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap; transition: background 0.15s; }
+.img-insert-btn:hover { background: var(--navy-mid); }
+.img-upload-label { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--navy); color: white; border-radius: 4px; padding: 0.5rem 1rem; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+.img-upload-label:hover { background: var(--navy-mid); }
+.img-upload-hint { font-size: 0.7rem; color: var(--text-muted); font-style: italic; }
+.img-picker-close { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1rem; padding: 0.2rem; margin-left: auto; }
+.img-picker-close:hover { color: var(--text-dark); }
+
+/* ── WRITING AREA (rich text) ───────── */
+.writing-toolbar { padding: 0.65rem 1.25rem; background: var(--cream-dark); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.writing-meta { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; margin-left: auto; }
+.writing-date { font-size: 0.72rem; color: var(--text-muted); }
+.writing-wordcount { font-size: 0.72rem; color: var(--text-muted); }
+[contenteditable].writing-area {
+  width: 100%; padding: 1rem 1.5rem 1.5rem;
+  font-family: 'Inter', sans-serif; font-size: 0.95rem; line-height: 1.9;
+  color: var(--text-dark); border: none; outline: none; background: transparent;
+  min-height: 280px; cursor: text;
+}
+[contenteditable].writing-area:empty::before {
+  content: attr(data-placeholder);
+  color: #C8C1B7;
+  pointer-events: none;
+  display: block;
+  font-style: italic;
+}
+[contenteditable].writing-area img {
+  max-width: 100%; border-radius: 6px; margin: 0.5rem 0;
+  display: block; cursor: default;
+}
+[contenteditable].writing-area img.selected { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* Inline styles from execCommand */
+[contenteditable].writing-area b, [contenteditable].writing-area strong { font-weight: 700; }
+[contenteditable].writing-area i, [contenteditable].writing-area em { font-style: italic; }
+[contenteditable].writing-area u { text-decoration: underline; }
+
+/* Entry card thumbnail */
+.entry-card-thumb { width: 100%; max-height: 120px; object-fit: cover; border-radius: 4px; margin-bottom: 0.6rem; display: block; }
+
+/* Modal image rendering */
+.entry-modal-body img { max-width: 100%; border-radius: 6px; margin: 0.5rem 0; display: block; }
 </style>
 </head>
 <body>
@@ -234,13 +309,74 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
   <!-- Writing Area -->
   <div class="writing-section">
     <div class="writing-toolbar">
-      <div class="writing-date" id="writing-date"></div>
+
+      <!-- Formatting controls -->
+      <div class="format-toolbar">
+        <button class="fmt-btn" title="Bold (Ctrl+B)" onclick="fmt('bold')"><b>B</b></button>
+        <button class="fmt-btn" title="Italic (Ctrl+I)" onclick="fmt('italic')"><em>I</em></button>
+        <button class="fmt-btn" title="Underline (Ctrl+U)" onclick="fmt('underline')"><u>U</u></button>
+        <div class="fmt-sep"></div>
+        <select class="fmt-select" title="Font" onchange="fmtFont(this.value);this.value=''">
+          <option value="">Font…</option>
+          <option value="Inter, sans-serif">Sans-serif</option>
+          <option value="'Playfair Display', Georgia, serif">Serif</option>
+          <option value="Georgia, serif">Georgia</option>
+          <option value="'Courier New', monospace">Mono</option>
+        </select>
+        <select class="fmt-select" title="Text size" onchange="fmtSize(this.value);this.value=''">
+          <option value="">Size…</option>
+          <option value="0.78rem">Small</option>
+          <option value="0.95rem">Normal</option>
+          <option value="1.15rem">Large</option>
+          <option value="1.5rem">Heading</option>
+        </select>
+        <div class="fmt-sep"></div>
+        <div class="fmt-colors" title="Text colour">
+          <button class="fmt-color" style="background:#111820" title="Dark" onclick="fmtColor('#111820')"></button>
+          <button class="fmt-color" style="background:#E8A800" title="Gold" onclick="fmtColor('#E8A800')"></button>
+          <button class="fmt-color" style="background:#2AB5A0" title="Teal" onclick="fmtColor('#2AB5A0')"></button>
+          <button class="fmt-color" style="background:#E85B3A" title="Red" onclick="fmtColor('#E85B3A')"></button>
+          <button class="fmt-color" style="background:#7C5CBF" title="Purple" onclick="fmtColor('#7C5CBF')"></button>
+          <button class="fmt-color" style="background:#8899AA" title="Muted" onclick="fmtColor('#8899AA')"></button>
+        </div>
+        <div class="fmt-sep"></div>
+        <button class="fmt-btn" title="Add image" onclick="toggleImgPicker()">📷</button>
+      </div>
+
+      <!-- Date + word count -->
       <div class="writing-meta">
+        <span class="writing-date" id="writing-date"></span>
         <span class="writing-wordcount" id="word-count">0 words</span>
       </div>
     </div>
+
+    <!-- Image Picker Panel (hidden by default) -->
+    <div class="img-picker" id="img-picker" style="display:none">
+      <div class="img-picker-tabs">
+        <button class="img-tab active" onclick="setImgTab('url',this)">Paste image URL</button>
+        <button class="img-tab" onclick="setImgTab('upload',this)">Upload from device</button>
+        <button class="img-picker-close" onclick="document.getElementById('img-picker').style.display='none'" title="Close">✕</button>
+      </div>
+      <div id="img-tab-url" class="img-picker-panel">
+        <input type="url" class="img-url-input" id="img-url-input" placeholder="Paste any image URL — from Unsplash, Google Images, anywhere…">
+        <button class="img-insert-btn" onclick="insertImageFromUrl()">Insert</button>
+      </div>
+      <div id="img-tab-upload" class="img-picker-panel" style="display:none">
+        <label class="img-upload-label">
+          📁 Choose from device
+          <input type="file" accept="image/*" id="img-file-input" onchange="insertImageFromFile(this)" style="display:none">
+        </label>
+        <span class="img-upload-hint">Tip: resize large photos before uploading — they're stored in your browser.</span>
+      </div>
+    </div>
+
     <input type="text" class="entry-title-input" id="entry-title" placeholder="Give this entry a title (optional)">
-    <textarea class="writing-area" id="writing-area" placeholder="Start writing… this is your space. No judgement, no rules. Just you and the page."></textarea>
+    <div
+      class="writing-area"
+      id="writing-area"
+      contenteditable="true"
+      data-placeholder="Start writing… this is your space. No judgement, no rules. Just you and the page."
+    ></div>
     <div class="writing-footer">
       <button class="btn-save" onclick="saveEntry()">Save Entry</button>
       <button class="btn-clear" onclick="clearEntry()">Clear</button>
@@ -387,21 +523,21 @@ let wheelData = null;
     try {
       const d = JSON.parse(draft);
       document.getElementById('entry-title').value = d.title || '';
-      document.getElementById('writing-area').value = d.body || '';
+      if (d.body) document.getElementById('writing-area').innerHTML = d.body;
       updateWordCount();
     } catch {}
   }
 
   // Auto-save draft
   setInterval(saveDraft, 10000);
-  document.getElementById('writing-area').addEventListener('input', saveDraft);
+  document.getElementById('writing-area').addEventListener('input', function() { saveDraft(); updateWordCount(); });
   document.getElementById('entry-title').addEventListener('input', saveDraft);
 })();
 
 function saveDraft() {
   const draft = {
     title: document.getElementById('entry-title').value,
-    body: document.getElementById('writing-area').value
+    body: document.getElementById('writing-area').innerHTML
   };
   localStorage.setItem('tlr_journal_draft', JSON.stringify(draft));
 }
@@ -527,14 +663,19 @@ function getNewPrompt() {
 function usePrompt() {
   if (!currentPromptText) return;
   const area = document.getElementById('writing-area');
-  const existing = area.value.trim();
-  if (existing) {
-    area.value = existing + '\n\n— — —\n\n' + currentPromptText + '\n\n';
-  } else {
-    area.value = currentPromptText + '\n\n';
-  }
+  const existing = (area.innerText || '').trim();
+  const html = existing
+    ? `<br><br>— — —<br><br><em>${currentPromptText}</em><br><br>`
+    : `<em>${currentPromptText}</em><br><br>`;
   area.focus();
-  area.setSelectionRange(area.value.length, area.value.length);
+  // Move cursor to end
+  const sel = window.getSelection();
+  const range = document.createRange();
+  range.selectNodeContents(area);
+  range.collapse(false);
+  sel.removeAllRanges();
+  sel.addRange(range);
+  document.execCommand('insertHTML', false, html);
   updateWordCount();
 }
 
@@ -544,16 +685,84 @@ function pickRandom(arr) {
 
 // ── WORD COUNT ────────────────────────────
 function updateWordCount() {
-  const text = document.getElementById('writing-area').value.trim();
-  const count = text ? text.split(/\s+/).length : 0;
+  const text = (document.getElementById('writing-area').innerText || '').trim();
+  const count = text ? text.split(/\s+/).filter(w => w.length > 0).length : 0;
   document.getElementById('word-count').textContent = `${count} word${count !== 1 ? 's' : ''}`;
+}
+
+// ── FORMATTING ────────────────────────────
+function fmt(command) {
+  document.execCommand(command, false, null);
+  document.getElementById('writing-area').focus();
+}
+function fmtFont(font) {
+  if (!font) return;
+  document.execCommand('fontName', false, font);
+  document.getElementById('writing-area').focus();
+}
+function fmtSize(size) {
+  if (!size) return;
+  // execCommand fontSize uses 1-7; we abuse size 7 then override with CSS
+  document.execCommand('fontSize', false, '7');
+  const area = document.getElementById('writing-area');
+  area.querySelectorAll('font[size="7"]').forEach(el => {
+    el.removeAttribute('size');
+    el.style.fontSize = size;
+  });
+  area.focus();
+}
+function fmtColor(color) {
+  document.execCommand('foreColor', false, color);
+  document.getElementById('writing-area').focus();
+}
+
+// ── IMAGE PICKER ─────────────────────────
+let imgTab = 'url';
+function toggleImgPicker() {
+  const picker = document.getElementById('img-picker');
+  const isHidden = picker.style.display === 'none' || picker.style.display === '';
+  picker.style.display = isHidden ? 'block' : 'none';
+  if (isHidden) document.getElementById('img-url-input').focus();
+}
+function setImgTab(tab, btn) {
+  imgTab = tab;
+  document.querySelectorAll('.img-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('img-tab-url').style.display = tab === 'url' ? '' : 'none';
+  document.getElementById('img-tab-upload').style.display = tab === 'upload' ? '' : 'none';
+}
+function insertImageFromUrl() {
+  const url = document.getElementById('img-url-input').value.trim();
+  if (!url) return;
+  insertImageAtCursor(url);
+  document.getElementById('img-url-input').value = '';
+  document.getElementById('img-picker').style.display = 'none';
+}
+function insertImageFromFile(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    insertImageAtCursor(ev.target.result);
+    document.getElementById('img-picker').style.display = 'none';
+    input.value = '';
+  };
+  reader.readAsDataURL(file);
+}
+function insertImageAtCursor(src) {
+  const area = document.getElementById('writing-area');
+  area.focus();
+  document.execCommand('insertHTML', false,
+    `<img src="${src}" alt="Journal image" style="max-width:100%;border-radius:6px;margin:0.75rem 0;display:block"><br>`);
+  updateWordCount();
 }
 
 // ── SAVE ENTRY ────────────────────────────
 function saveEntry() {
   const title = document.getElementById('entry-title').value.trim();
-  const body = document.getElementById('writing-area').value.trim();
-  if (!body) return;
+  const bodyHTML = document.getElementById('writing-area').innerHTML.trim();
+  const bodyText = (document.getElementById('writing-area').innerText || '').trim();
+  if (!bodyText) return;
 
   const entries = JSON.parse(localStorage.getItem('tlr_journal_entries') || '[]');
   const now = new Date();
@@ -561,8 +770,10 @@ function saveEntry() {
     id: Date.now(),
     date: now.toISOString(),
     title: title || 'Untitled',
-    body: body,
-    words: body.split(/\s+/).length,
+    body: bodyHTML,
+    bodyText: bodyText,
+    words: bodyText.split(/\s+/).filter(w => w.length > 0).length,
+    format: 'html',
     promptType: promptType,
     prompt: currentPromptText || null
   };
@@ -571,22 +782,23 @@ function saveEntry() {
 
   // Clear form
   document.getElementById('entry-title').value = '';
-  document.getElementById('writing-area').value = '';
+  document.getElementById('writing-area').innerHTML = '';
   document.getElementById('word-count').textContent = '0 words';
   localStorage.removeItem('tlr_journal_draft');
 
   // Confirm
-  const confirm = document.getElementById('save-confirm');
-  confirm.classList.add('show');
-  setTimeout(() => confirm.classList.remove('show'), 2500);
+  const conf = document.getElementById('save-confirm');
+  conf.classList.add('show');
+  setTimeout(() => conf.classList.remove('show'), 2500);
 
   renderEntries();
 }
 
 function clearEntry() {
-  if (document.getElementById('writing-area').value && !confirm('Clear this entry?')) return;
+  const area = document.getElementById('writing-area');
+  if (area.innerText && area.innerText.trim() && !confirm('Clear this entry?')) return;
   document.getElementById('entry-title').value = '';
-  document.getElementById('writing-area').value = '';
+  area.innerHTML = '';
   updateWordCount();
   localStorage.removeItem('tlr_journal_draft');
 }
@@ -610,10 +822,16 @@ function renderEntries() {
   list.innerHTML = entries.map(e => {
     const d = new Date(e.date);
     const dateStr = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-    const preview = e.body.replace(/\n/g, ' ').slice(0, 120) + (e.body.length > 120 ? '…' : '');
+    // Get plain text for preview (strip HTML tags)
+    const rawText = e.bodyText || e.body.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    const preview = rawText.slice(0, 120) + (rawText.length > 120 ? '…' : '');
+    // Find first image in entry if any
+    const imgMatch = e.body.match(/<img[^>]+src=["']([^"']+)["']/i);
+    const thumbHtml = imgMatch ? `<img src="${imgMatch[1]}" class="entry-card-thumb" alt="">` : '';
     return `
       <div class="entry-card" onclick="openEntry(${e.id})">
         <div>
+          ${thumbHtml}
           <div class="entry-card-date">${dateStr}</div>
           <div class="entry-card-title">${e.title}</div>
           <div class="entry-card-preview">${preview}</div>
@@ -638,17 +856,23 @@ function openEntry(id) {
   document.getElementById('modal-date').textContent =
     d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   document.getElementById('modal-title').textContent = entry.title;
-  document.getElementById('modal-body').textContent = entry.body;
+  // Render body — HTML for new entries, plain text (with line breaks) for legacy
+  const modalBody = document.getElementById('modal-body');
+  if (entry.format === 'html') {
+    modalBody.innerHTML = entry.body;
+  } else {
+    modalBody.innerHTML = (entry.body || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+  }
+  modalBody.contentEditable = 'false';
   // ensure view mode
   document.getElementById('modal-title').style.display = '';
   document.getElementById('modal-title-input').style.display = 'none';
-  document.getElementById('modal-body').style.display = '';
+  modalBody.style.display = '';
   document.getElementById('modal-body-textarea').style.display = 'none';
   document.getElementById('modal-view-btns').style.display = 'flex';
   document.getElementById('modal-edit-btns').style.display = 'none';
   document.getElementById('modal-cancel-btn').textContent = 'Close';
   document.getElementById('modal-cancel-btn').onclick = closeEntry;
-  // show native share button if available
   if (navigator.share) document.getElementById('btn-native-share').style.display = '';
   document.getElementById('entry-overlay').classList.add('active');
 }
@@ -664,12 +888,16 @@ function enterEditMode() {
   const entries = JSON.parse(localStorage.getItem('tlr_journal_entries') || '[]');
   const entry = entries.find(e => e.id === activeEntryId);
   if (!entry) return;
+  const modalBody = document.getElementById('modal-body');
   document.getElementById('modal-title').style.display = 'none';
   document.getElementById('modal-title-input').style.display = '';
   document.getElementById('modal-title-input').value = entry.title;
-  document.getElementById('modal-body').style.display = 'none';
-  document.getElementById('modal-body-textarea').style.display = '';
-  document.getElementById('modal-body-textarea').value = entry.body;
+  // Make modal body directly editable (preserves HTML/formatting)
+  modalBody.contentEditable = 'true';
+  modalBody.style.border = '2px solid var(--gold)';
+  modalBody.style.borderRadius = '4px';
+  modalBody.style.outline = 'none';
+  modalBody.style.cursor = 'text';
   document.getElementById('modal-view-btns').style.display = 'none';
   document.getElementById('modal-edit-btns').style.display = 'flex';
   document.getElementById('modal-cancel-btn').textContent = 'Cancel';
@@ -678,10 +906,21 @@ function enterEditMode() {
 }
 
 function cancelEditMode() {
+  const modalBody = document.getElementById('modal-body');
+  // Restore from saved entry (discard edits)
+  const entries = JSON.parse(localStorage.getItem('tlr_journal_entries') || '[]');
+  const entry = entries.find(e => e.id === activeEntryId);
+  if (entry) {
+    modalBody.innerHTML = entry.format === 'html'
+      ? entry.body
+      : (entry.body || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+  }
+  modalBody.contentEditable = 'false';
+  modalBody.style.border = '';
+  modalBody.style.borderRadius = '';
+  modalBody.style.cursor = '';
   document.getElementById('modal-title').style.display = '';
   document.getElementById('modal-title-input').style.display = 'none';
-  document.getElementById('modal-body').style.display = '';
-  document.getElementById('modal-body-textarea').style.display = 'none';
   document.getElementById('modal-view-btns').style.display = 'flex';
   document.getElementById('modal-edit-btns').style.display = 'none';
   document.getElementById('modal-cancel-btn').textContent = 'Close';
@@ -690,19 +929,31 @@ function cancelEditMode() {
 
 function saveEditedEntry() {
   const newTitle = document.getElementById('modal-title-input').value.trim() || 'Untitled';
-  const newBody = document.getElementById('modal-body-textarea').value.trim();
-  if (!newBody) return;
+  const modalBody = document.getElementById('modal-body');
+  const newBodyHTML = modalBody.innerHTML.trim();
+  const newBodyText = (modalBody.innerText || '').trim();
+  if (!newBodyText) return;
   let entries = JSON.parse(localStorage.getItem('tlr_journal_entries') || '[]');
   const idx = entries.findIndex(e => e.id === activeEntryId);
   if (idx === -1) return;
   entries[idx].title = newTitle;
-  entries[idx].body = newBody;
-  entries[idx].words = newBody.split(/\s+/).length;
+  entries[idx].body = newBodyHTML;
+  entries[idx].bodyText = newBodyText;
+  entries[idx].words = newBodyText.split(/\s+/).filter(w => w.length > 0).length;
+  entries[idx].format = 'html';
   localStorage.setItem('tlr_journal_entries', JSON.stringify(entries));
-  // update view
+  // Update view mode display
   document.getElementById('modal-title').textContent = newTitle;
-  document.getElementById('modal-body').textContent = newBody;
-  cancelEditMode();
+  modalBody.contentEditable = 'false';
+  modalBody.style.border = '';
+  modalBody.style.borderRadius = '';
+  modalBody.style.cursor = '';
+  document.getElementById('modal-title').style.display = '';
+  document.getElementById('modal-title-input').style.display = 'none';
+  document.getElementById('modal-view-btns').style.display = 'flex';
+  document.getElementById('modal-edit-btns').style.display = 'none';
+  document.getElementById('modal-cancel-btn').textContent = 'Close';
+  document.getElementById('modal-cancel-btn').onclick = closeEntry;
   renderEntries();
 }
 
@@ -721,30 +972,35 @@ function getActiveEntry() {
   return entries.find(e => e.id === activeEntryId) || null;
 }
 
+function entryPlainText(e) {
+  // Use stored bodyText, or strip HTML tags for legacy entries
+  return e.bodyText || e.body.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+}
+
 function shareViaEmail() {
   const e = getActiveEntry(); if (!e) return;
   const subject = encodeURIComponent('My journal: ' + e.title);
-  const body = encodeURIComponent(e.title + '\n' + new Date(e.date).toLocaleDateString('en-GB') + '\n\n' + e.body);
+  const body = encodeURIComponent(e.title + '\n' + new Date(e.date).toLocaleDateString('en-GB') + '\n\n' + entryPlainText(e));
   window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
   document.getElementById('share-popup').classList.remove('open');
 }
 
 function shareViaWhatsApp() {
   const e = getActiveEntry(); if (!e) return;
-  const text = encodeURIComponent('*' + e.title + '*\n' + new Date(e.date).toLocaleDateString('en-GB') + '\n\n' + e.body);
+  const text = encodeURIComponent('*' + e.title + '*\n' + new Date(e.date).toLocaleDateString('en-GB') + '\n\n' + entryPlainText(e));
   window.open('https://wa.me/?text=' + text, '_blank');
   document.getElementById('share-popup').classList.remove('open');
 }
 
 function shareViaNative() {
   const e = getActiveEntry(); if (!e) return;
-  navigator.share({ title: e.title, text: e.body });
+  navigator.share({ title: e.title, text: entryPlainText(e) });
   document.getElementById('share-popup').classList.remove('open');
 }
 
 function copyToClipboard() {
   const e = getActiveEntry(); if (!e) return;
-  const text = e.title + '\n' + new Date(e.date).toLocaleDateString('en-GB') + '\n\n' + e.body;
+  const text = e.title + '\n' + new Date(e.date).toLocaleDateString('en-GB') + '\n\n' + entryPlainText(e);
   navigator.clipboard.writeText(text).then(() => {
     const el = document.getElementById('copy-confirm');
     el.classList.add('show');

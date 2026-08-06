@@ -1004,6 +1004,15 @@ footer a { color: var(--gold); text-decoration: none; }
   .vision-close { padding: 2rem 1.5rem; }
   .vision-close-quote { font-size: 1.2rem; }
 }
+
+/* ── JOURNAL INVITE ─────────────────────────── */
+.journal-invite-section { background: var(--navy); padding: 3rem 2rem 3.25rem; border-top: 1px solid rgba(255,255,255,0.05); }
+.journal-invite-inner { max-width: 620px; margin: 0 auto; text-align: center; }
+.journal-invite-mark { font-family: 'Playfair Display', serif; font-size: 5rem; color: var(--gold); opacity: 0.15; line-height: 0.5; margin-bottom: 0.9rem; user-select: none; }
+.journal-invite-quote { font-family: 'Playfair Display', serif; font-size: 1.45rem; font-weight: 400; color: rgba(255,255,255,0.9); font-style: italic; line-height: 1.65; margin-bottom: 0.85rem; }
+.journal-invite-attr { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.28); margin-bottom: 1.85rem; }
+.journal-invite-btn { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--gold); color: var(--navy); padding: 0.75rem 1.9rem; border-radius: 4px; font-weight: 700; font-size: 0.82rem; text-decoration: none; letter-spacing: 0.04em; transition: background 0.15s, transform 0.15s; }
+.journal-invite-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/auth.js"></script>
@@ -1214,6 +1223,16 @@ footer a { color: var(--gold); text-decoration: none; }
           <div class="theme-dash-topics" id="td-topics"></div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ── JOURNAL INVITE ─────────────────────────────── -->
+  <div class="journal-invite-section">
+    <div class="journal-invite-inner">
+      <div class="journal-invite-mark">"</div>
+      <div class="journal-invite-quote" id="ji-quote">We write to taste life twice, in the moment and in retrospect.</div>
+      <div class="journal-invite-attr" id="ji-attr">— Anaïs Nin</div>
+      <a href="/my-journal.html" class="journal-invite-btn">✦ Write in my journal</a>
     </div>
   </div>
 
@@ -2151,6 +2170,47 @@ function dismissLightbox(goToWheel) {
   document.getElementById('welcome-lightbox').classList.remove('active');
   if (goToWheel) window.location.href = '/my-wheel.html';
 }
+
+// ── JOURNAL INVITE — daily rotating quote ────────────────
+(function() {
+  const JOURNAL_QUOTES = [
+    { text: 'We write to taste life twice, in the moment and in retrospect.', attr: '— Anaïs Nin' },
+    { text: 'Fill your paper with the breathings of your heart.', attr: '— William Wordsworth' },
+    { text: 'I can shake off everything as I write; my sorrows disappear, my courage is reborn.', attr: '— Anne Frank' },
+    { text: 'There is no greater agony than bearing an untold story inside you.', attr: '— Maya Angelou' },
+    { text: 'You can make anything by writing.', attr: '— C.S. Lewis' },
+    { text: 'Journal writing is a voyage to the interior.', attr: '— Christina Baldwin' },
+    { text: 'In the journal I do not just express myself more openly than I could to any person; I create myself.', attr: '— Susan Sontag' },
+    { text: 'Start writing, no matter what. The water does not flow until the faucet is turned on.', attr: '— Louis L\'Amour' },
+    { text: 'Keeping a journal will absolutely change your life in ways you\'ve never imagined.', attr: '— Oprah Winfrey' },
+    { text: 'The act of writing is the act of discovering what you believe.', attr: '— David Hare' },
+    { text: 'I write because I don\'t know what I think until I read what I say.', attr: '— Flannery O\'Connor' },
+    { text: 'Writing is the only way I have to explain my own life to myself.', attr: '— Pat Conroy' },
+    { text: 'A journal is a friend who doesn\'t judge, doesn\'t interrupt, and is always there.', attr: '' },
+    { text: 'Every thought you put on paper is one less thought keeping you up at night.', attr: '' },
+    { text: 'Writing something down doesn\'t give it more power — it gives you more power over it.', attr: '' },
+    { text: 'Clarity is what happens after you write.', attr: '' },
+    { text: 'The journal doesn\'t need you to be eloquent. It just needs you to be honest.', attr: '' },
+    { text: 'A line a day. That\'s enough to start seeing your life differently.', attr: '' },
+    { text: 'You don\'t have to write well. You just have to write truly.', attr: '' },
+    { text: 'The page is where you figure out what you actually think.', attr: '' },
+    { text: 'Writing in a journal reminds you of your goals and of your learning in life.', attr: '— Robin S. Sharma' },
+    { text: 'One writes to make a home out of homesickness.', attr: '— Jhumpa Lahiri' },
+    { text: 'The secret of getting ahead is getting started.', attr: '— Mark Twain' },
+    { text: 'What we write becomes a mirror for who we are becoming.', attr: '' },
+    { text: 'Sometimes you need to write your way into courage.', attr: '' },
+    { text: 'Don\'t wait until you have something important to say. Just begin.', attr: '' },
+    { text: 'The things you carry in silence deserve a page.', attr: '' },
+    { text: 'Your story is worth writing, even — especially — the complicated parts.', attr: '' },
+  ];
+  const now = new Date();
+  const idx = (now.getFullYear() * 366 + now.getMonth() * 31 + now.getDate()) % JOURNAL_QUOTES.length;
+  const q = JOURNAL_QUOTES[idx];
+  const qEl = document.getElementById('ji-quote');
+  const aEl = document.getElementById('ji-attr');
+  if (qEl) qEl.textContent = q.text;
+  if (aEl) aEl.textContent = q.attr;
+})();
 </script>
 
 <!-- ── FIRST-VISIT LIGHTBOX ──────────────── -->
