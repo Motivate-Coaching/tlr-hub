@@ -1037,6 +1037,15 @@ footer a { color: var(--gold); text-decoration: none; }
 <script src="auth.js"></script>
 </head>
 <body>
+<script>
+// Intercept invite & password-reset links before auth check
+(function() {
+  const h = window.location.hash;
+  if (h.includes('type=invite') || h.includes('type=recovery')) {
+    window.location.replace('reset-password.html' + h);
+  }
+})();
+</script>
 <script>requireAuth().then(u => { if(u) showUserBadge("#user-badge"); });</script>
 
 <!-- HEADER -->
@@ -2228,19 +2237,18 @@ function dismissLightbox(goToWheel) {
 </script>
 
 <!-- ── FIRST-VISIT LIGHTBOX ──────────────── -->
-<div id="welcome-lightbox" class="lb-overlay" onclick="if(event.target===this)dismissLightbox(false)">
+<div id="welcome-lightbox" class="lb-overlay">
   <div class="lb-card">
     <div class="lb-logo">
       <img src="tlr-logo.png" alt="The Living Room">
     </div>
     <div class="lb-eyebrow">Welcome to your member space</div>
     <h2 class="lb-title">Let's make this <em>yours</em></h2>
-    <p class="lb-body">Before you dive in, we'd love for you to set up your Balance Wheel — a 5-minute snapshot of where you are in life right now. It makes everything here more meaningful and personal.</p>
+    <p class="lb-body">Your first step is your Balance Wheel — a 5-minute snapshot of where you are in life right now. It personalises everything in your member space and gives you a clear starting point.</p>
     <div class="lb-actions">
-      <a class="lb-btn-primary" href="my-wheel.html" onclick="localStorage.setItem('tlr_welcomed','true')">Set up my Balance Wheel</a>
-      <button class="lb-btn-secondary" onclick="dismissLightbox(false)">I'll explore first</button>
+      <a class="lb-btn-primary" href="my-wheel.html" onclick="localStorage.setItem('tlr_welcomed','true')">Start my Balance Wheel →</a>
     </div>
-    <p class="lb-note">Your Balance Wheel tab is always at the top — come back whenever you're ready.</p>
+    <p class="lb-note" style="margin-top:1rem"><span onclick="dismissLightbox(false)" style="cursor:pointer;text-decoration:underline;color:var(--text-muted)">Skip for now</span> — you can always find it under the Balance Wheel tab.</p>
   </div>
 </div>
 </body>

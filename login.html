@@ -330,7 +330,7 @@ async function sendReset() {
   btn.textContent = 'Sending…';
 
   const { error } = await _supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://motivate-coaching.github.io/tlr-hub/reset-password.html'
+    redirectTo: 'https://tlr-hub.vercel.app/reset-password.html'
   });
 
   if (error) {
