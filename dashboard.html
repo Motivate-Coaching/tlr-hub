@@ -564,7 +564,7 @@ body {
   position: fixed;
   inset: 0;
   background: #1D1810;
-  z-index: 100;
+  z-index: 300; /* above sticky header (200) */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   transform: translateX(100%);
@@ -577,18 +577,18 @@ body {
   align-items: center;
   gap: 7px;
   margin: 20px 20px 0;
-  padding: 9px 18px;
+  padding: 11px 20px;
   background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.18);
   border-radius: 24px;
   cursor: pointer;
   color: var(--cream);
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   user-select: none;
   transition: background 0.15s;
 }
-.results-back:hover { background: rgba(255,255,255,0.12); }
+.results-back:hover { background: rgba(255,255,255,0.14); }
 
 .results-inner {
   max-width: 480px;
@@ -684,21 +684,38 @@ body {
 .share-cta-block {
   width: 100%;
   margin-bottom: 24px;
+  background: rgba(232,168,0,0.07);
+  border: 1.5px solid rgba(232,168,0,0.35);
+  border-radius: 14px;
+  padding: 22px 18px 18px;
+}
+.share-bonus-badge {
+  display: inline-block;
+  background: rgba(232,168,0,0.18);
+  border: 1px solid var(--gold);
+  border-radius: 20px;
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 15px;
+  margin-bottom: 14px;
+  letter-spacing: 0.02em;
+  font-family: 'Poppins', sans-serif;
 }
 .share-cta-heading {
   font-family: 'Playfair Display', serif;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 400;
   font-style: italic;
   color: var(--cream);
   margin-bottom: 8px;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 .share-cta-sub {
-  font-size: 12px;
-  color: var(--muted);
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
   margin-bottom: 22px;
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 /* ── SOCIAL ICONS WITH LABELS ─────────────────────── */
@@ -736,9 +753,9 @@ body {
   border: 1.5px solid var(--gold);
 }
 .shr-lbl {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--muted);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   white-space: nowrap;
 }
 
@@ -1236,9 +1253,9 @@ const keyEls = {}; // kept for compatibility (key colouring skipped gracefully)
 
 const hiddenKb = document.getElementById('hidden-kb');
 
-// Focus hidden input to open phone keyboard
+// Focus hidden input to open phone keyboard — preventScroll stops mobile jumping to top
 function focusInput() {
-  if (!gameOver) { hiddenKb.value = ''; hiddenKb.focus(); }
+  if (!gameOver) { hiddenKb.value = ''; hiddenKb.focus({ preventScroll: true }); }
 }
 
 // Auto-focus on load
@@ -1257,12 +1274,13 @@ hiddenKb.addEventListener('input', () => {
   }
 });
 
-// Enter / Backspace from physical keyboard or phone keyboard keydown
+// Enter / Backspace / letters from physical keyboard
+// preventDefault on letters stops the char reaching hiddenKb (which would double-fire handleKey)
 document.addEventListener('keydown', e => {
   if (gameOver) return;
-  if (e.key === 'Enter')               { e.preventDefault(); handleKey('ENTER'); }
-  else if (e.key === 'Backspace')      { e.preventDefault(); handleKey('⌫'); }
-  else if (/^[a-zA-Z]$/.test(e.key))  handleKey(e.key.toUpperCase());
+  if (e.key === 'Enter')              { e.preventDefault(); handleKey('ENTER'); }
+  else if (e.key === 'Backspace')     { e.preventDefault(); handleKey('⌫'); }
+  else if (/^[a-zA-Z]$/.test(e.key)) { e.preventDefault(); handleKey(e.key.toUpperCase()); }
 });
 
 // ═══════════════════════════════════════════════════════════════
@@ -1563,8 +1581,9 @@ function showEndPanel(won, guessCount) {
 
     <!-- SHARE CTA -->
     <div class="share-cta-block">
+      <div class="share-bonus-badge">⭐⭐ Share = 2 Bonus Stars</div>
       <div class="share-cta-heading">Know someone who needs to read this?</div>
-      <div class="share-cta-sub">Share the quote and earn 2 bonus ⭐⭐ — every share helps someone else find The Living Room</div>
+      <div class="share-cta-sub">Share the quote below and earn 2 bonus stars — every share helps someone find The Living Room</div>
       ${buildShareIcons()}
       <div id="bonus-note">
         ${socialDone
