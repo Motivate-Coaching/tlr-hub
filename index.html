@@ -114,6 +114,7 @@ a.tab-btn { text-decoration: none; display: inline-block; }
 .nav-buttons-section { background: var(--cream); padding: 2.5rem 2rem 3.5rem; }
 .nav-buttons-inner { max-width: 1100px; margin: 0 auto; }
 .nav-section-eyebrow { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); text-align: center; margin-bottom: 1.75rem; font-weight: 500; }
+.nav-section-title { font-family: 'Playfair Display', serif; font-size: 1.55rem; font-weight: 600; color: var(--text-dark); text-align: center; margin-bottom: 1.75rem; letter-spacing: 0.01em; }
 .nav-buttons-grid { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; }
 .nav-card {
   flex: 1 1 calc(33.333% - 1rem);
@@ -742,12 +743,18 @@ a.tab-btn { text-decoration: none; display: inline-block; }
 .close-pillar { font-size: 0.68rem; color: var(--gold); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
 .close-sep { color: rgba(255,255,255,0.2); font-size: 0.8rem; }
 
+/* ── SECTION TITLE STYLE (consistent across all dark-bg sections) ── */
+.section-title { font-family: 'Playfair Display', serif; font-size: 1.55rem; font-weight: 600; color: var(--cream); text-align: center; letter-spacing: 0.01em; }
+.section-title em { font-style: italic; color: var(--gold); }
+
 /* ── PROGRESS STRIP (top of page) ───────────── */
-.progress-strip-title { text-align: center; font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 400; color: rgba(255,255,255,0.45); letter-spacing: 0.02em; margin-bottom: 1.75rem; }
-.wheel-dash-section-title { text-align: center; font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 400; color: var(--cream); letter-spacing: 0.02em; padding-top: 0.25rem; margin-bottom: 1.4rem; }
+.progress-strip-title { text-align: center; font-family: 'Playfair Display', serif; font-size: 1.55rem; font-weight: 600; color: var(--cream); letter-spacing: 0.01em; padding: 1.4rem 0 1.75rem; margin: 0; }
+.progress-strip-title em { font-style: italic; color: var(--gold); }
+.wheel-dash-section-title { font-family: 'Playfair Display', serif; font-size: 1.55rem; font-weight: 600; color: var(--cream); text-align: center; letter-spacing: 0.01em; padding: 1.5rem 0 1.2rem; margin: 0; }
+.wheel-dash-section-title em { font-style: italic; color: var(--gold); }
 .progress-strip {
   background: var(--navy);
-  padding: 3.5rem 2rem 4rem;
+  padding: 0 2rem 4rem;
   border-bottom: 3px solid var(--gold);
 }
 .progress-strip-inner {
@@ -934,10 +941,14 @@ a.tab-btn { text-decoration: none; display: inline-block; }
 .badge-started{color:#4A7C5C}.badge-started::before{background:#4A7C5C}
 .badge-completed{color:#9A7208}.badge-completed::before{background:var(--gold)}
 /* ── FOOTER ──────────────────────────────── */
-footer { background: var(--navy); padding: 2rem; text-align: center; border-top: 3px solid var(--gold); }
+footer { background: var(--navy); padding: 2rem 2.5rem; border-top: 3px solid var(--gold); display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
+.footer-left { flex: 1; }
 .footer-logo { font-family: 'Playfair Display', serif; color: var(--white); font-size: 0.95rem; font-weight: 400; margin-bottom: 0.4rem; }
 footer p { color: rgba(255,255,255,0.3); font-size: 0.72rem; line-height: 1.9; }
 footer a { color: var(--gold); text-decoration: none; }
+.footer-logo-img { height: 90px; width: auto; display: block; mix-blend-mode: lighten; opacity: 0.85; transition: opacity 0.2s; flex-shrink: 0; }
+.footer-logo-img:hover { opacity: 1; }
+@media (max-width: 600px) { footer { flex-direction: column; align-items: flex-start; } .footer-logo-img { height: 64px; } }
 
 /* ── MOBILE ──────────────────────────────── */
 @media (max-width: 900px) {
@@ -1026,7 +1037,7 @@ footer a { color: var(--gold); text-decoration: none; }
 
   <!-- ── PROGRESS STRIP ────────────────────────────── -->
   <div class="progress-strip">
-    <div class="progress-strip-title">Your Stats</div>
+    <div class="progress-strip-title">Your <em>Stats</em></div>
     <div class="progress-strip-inner">
 
       <!-- Ring: Library Progress -->
@@ -1070,6 +1081,17 @@ footer a { color: var(--gold); text-decoration: none; }
 
       <div class="ps-divider"></div>
 
+      <!-- Balance Wheel (middle — shows only when wheel is set up) -->
+      <div class="ps-section" id="ps-wheel-section" style="display:none">
+        <div class="ps-section-label">My Balance Wheel</div>
+        <div class="ps-level-name" id="ps-wheel-avg" style="font-size:1.6rem;color:var(--gold)">—</div>
+        <div class="ps-level-sub" id="ps-wheel-label">avg satisfaction</div>
+        <a href="/my-wheel.html" class="ps-stat-tile" style="margin-top:0.75rem;display:block;text-align:center;text-decoration:none;padding:0.5rem">
+          <span style="font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold)">View Action Plan →</span>
+        </a>
+      </div>
+      <div class="ps-divider" id="ps-post-wheel-div" style="display:none"></div>
+
       <!-- Game Stats -->
       <div class="ps-section">
         <div class="ps-section-label">Daily Game</div>
@@ -1085,9 +1107,7 @@ footer a { color: var(--gold); text-decoration: none; }
         </div>
       </div>
 
-      <div class="ps-divider"></div>
-
-      <!-- Level -->
+      <!-- Level (no divider — same section as Daily Game) -->
       <div class="ps-section">
         <div class="ps-section-label">Your Level</div>
         <div class="ps-level-name" id="ps-level-name">Just Starting</div>
@@ -1095,17 +1115,6 @@ footer a { color: var(--gold); text-decoration: none; }
           <div class="ps-level-bar-fill" id="ps-level-fill" style="width:0%"></div>
         </div>
         <div class="ps-level-sub" id="ps-level-sub">Play to earn stars</div>
-      </div>
-
-      <!-- Wheel quick-link (shows only when wheel is set up) -->
-      <div class="ps-divider" id="ps-wheel-divider" style="display:none"></div>
-      <div class="ps-section" id="ps-wheel-section" style="display:none">
-        <div class="ps-section-label">My Balance Wheel</div>
-        <div class="ps-level-name" id="ps-wheel-avg" style="font-size:1.6rem;color:var(--gold)">—</div>
-        <div class="ps-level-sub" id="ps-wheel-label">avg satisfaction</div>
-        <a href="/my-wheel.html" class="ps-stat-tile" style="margin-top:0.75rem;display:block;text-align:center;text-decoration:none;padding:0.5rem">
-          <span style="font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold)">View Action Plan →</span>
-        </a>
       </div>
 
     </div>
@@ -1143,11 +1152,10 @@ footer a { color: var(--gold); text-decoration: none; }
   <!-- ── WHEEL DASHBOARD ──────────────────────────────── -->
   <div id="wheel-dashboard" style="display:none">
     <div class="wheel-dash-section">
-      <div class="wheel-dash-section-title">My <em style="font-style:italic;color:var(--gold)">Balance Wheel</em></div>
+      <div class="wheel-dash-section-title">My <em>Balance Wheel</em></div>
       <div class="wheel-dash-inner">
         <div class="wheel-dash-header">
           <div>
-            <div class="wheel-dash-eyebrow">My Balance Wheel</div>
             <div class="wheel-dash-avg" id="wd-avg">—</div>
             <div class="wheel-dash-avg-label">overall satisfaction</div>
           </div>
@@ -1160,6 +1168,7 @@ footer a { color: var(--gold); text-decoration: none; }
 
   <!-- ── THEME DASHBOARD ──────────────────────────────── -->
   <div class="theme-dash-section">
+    <div class="wheel-dash-section-title" style="background:transparent;padding-bottom:1.5rem;">My <em>Resource Library</em></div>
     <div class="theme-dash-inner">
       <div class="theme-dash-cols">
         <div class="theme-dash-img-col">
@@ -1181,7 +1190,7 @@ footer a { color: var(--gold); text-decoration: none; }
   <!-- ── NAV BUTTONS ────────────────────────────────── -->
   <section class="nav-buttons-section">
     <div class="nav-buttons-inner">
-      <p class="nav-section-eyebrow">Where would you like to go?</p>
+      <p class="nav-section-title">Where would you like to go?</p>
       <div class="nav-buttons-grid">
 
         <!-- Quote of the Day -->
@@ -1674,13 +1683,18 @@ footer a { color: var(--gold); text-decoration: none; }
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo">The Living Room</div>
-  <p>
-    A place for capable people who function well, whilst quietly wondering if this is it.<br>
-    <a href="https://www.motivate-coaching.com/thelivingroom">motivate-coaching.com/thelivingroom</a>
-    &nbsp;&middot;&nbsp;
-    <a href="https://www.facebook.com/groups/thelivingroommemberslounge">Members Lounge</a>
-  </p>
+  <div class="footer-left">
+    <div class="footer-logo">The Living Room</div>
+    <p>
+      A place for capable people who function well, whilst quietly wondering if this is it.<br>
+      <a href="https://www.motivate-coaching.com/thelivingroom">motivate-coaching.com/thelivingroom</a>
+      &nbsp;&middot;&nbsp;
+      <a href="https://www.facebook.com/groups/thelivingroommemberslounge">Members Lounge</a>
+    </p>
+  </div>
+  <a href="https://www.motivate-coaching.com/thelivingroom" target="_blank">
+    <img src="tlr-logo.png" alt="The Living Room" class="footer-logo-img">
+  </a>
 </footer>
 
 <script>
@@ -1866,12 +1880,12 @@ document.querySelectorAll('.tab-btn[data-view]').forEach(btn => {
     const wd = JSON.parse(wheelData);
     const avg = (wd.areas.reduce((s,a)=>s+a.score,0)/wd.areas.length).toFixed(1);
     const doneCount = wd.areas.filter(a=>a.actionDone).length;
-    const wdiv = document.getElementById('ps-wheel-divider');
     const wsec = document.getElementById('ps-wheel-section');
+    const wpostdiv = document.getElementById('ps-post-wheel-div');
     const wavg = document.getElementById('ps-wheel-avg');
     const wlbl = document.getElementById('ps-wheel-label');
-    if (wdiv) wdiv.style.display = '';
     if (wsec) wsec.style.display = '';
+    if (wpostdiv) wpostdiv.style.display = '';
     if (wavg) wavg.textContent = avg + '/10';
     if (wlbl) wlbl.textContent = doneCount + ' of ' + wd.areas.length + ' actions done';
 
