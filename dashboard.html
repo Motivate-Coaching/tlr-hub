@@ -366,16 +366,15 @@ body {
 }
 
 /* ── KEYBOARD ─────────────────────────────────────── */
-.keyboard {
+.action-btns {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
-  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 4px;
 }
-.kb-row { display: flex; gap: 4px; }
-.key {
+.action-btn {
   background: var(--navy-card);
-  color: #3A2E24;
+  color: var(--cream);
   border: none;
   border-radius: 7px;
   font-size: 13px;
@@ -383,16 +382,14 @@ body {
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
   height: 46px;
-  min-width: 33px;
-  padding: 0 4px;
-  transition: background 0.1s, color 0.1s;
+  padding: 0 1.4rem;
+  transition: background 0.1s;
   -webkit-tap-highlight-color: transparent;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
 }
-.key.wide { min-width: 52px; font-size: 10px; letter-spacing: -0.02em; }
-.key.correct { background: var(--correct); color: #fff; }
-.key.present { background: var(--present); color: #fff; }
-.key.absent  { background: var(--absent);  color: #fff; }
+.action-btn:active { opacity: 0.75; }
+.action-btn.enter { background: var(--navy-mid); color: #fff; min-width: 100px; }
+.action-btn.del { font-size: 16px; min-width: 60px; }
 
 /* ── END PANEL ────────────────────────────────────── */
 .end-panel {
@@ -946,7 +943,16 @@ body {
     <div class="nudge-wrap" id="nudge-wrap"></div>
 
     <!-- KEYBOARD -->
-    <div class="keyboard" id="keyboard"></div>
+    <!-- Hidden input captures phone keyboard -->
+    <input id="hidden-kb" type="text" inputmode="text"
+      autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
+      style="position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;"
+      aria-hidden="true" tabindex="-1">
+    <!-- Just ENTER + delete — letters come from phone keyboard -->
+    <div class="action-btns" id="action-btns">
+      <button class="action-btn del" onclick="handleKey('⌫')">⌫</button>
+      <button class="action-btn enter" onclick="handleKey('ENTER')">ENTER</button>
+    </div>
 
     <!-- END PANEL -->
     <div id="end-panel" style="display:none;" class="end-panel"></div>
@@ -1225,33 +1231,38 @@ for (let r = 0; r < MAX_R; r++) {
 // ═══════════════════════════════════════════════════════════════
 // KEYBOARD
 // ═══════════════════════════════════════════════════════════════
-const KB_ROWS = [
-  ['Q','W','E','R','T','Y','U','I','O','P'],
-  ['A','S','D','F','G','H','J','K','L'],
-  ['ENTER','Z','X','C','V','B','N','M','⌫']
-];
-const kbEl = document.getElementById('keyboard');
-const keyEls = {};
-KB_ROWS.forEach(row => {
-  const div = document.createElement('div');
-  div.className = 'kb-row';
-  row.forEach(k => {
-    const btn = document.createElement('button');
-    btn.className = 'key' + (k.length > 1 ? ' wide' : '');
-    btn.textContent = k;
-    btn.addEventListener('click', () => handleKey(k));
-    div.appendChild(btn);
-    if (k.length === 1) keyEls[k] = btn;
-  });
-  kbEl.appendChild(div);
+// No on-screen keyboard — use phone keyboard via hidden input
+const keyEls = {}; // kept for compatibility (key colouring skipped gracefully)
+
+const hiddenKb = document.getElementById('hidden-kb');
+
+// Focus hidden input to open phone keyboard
+function focusInput() {
+  if (!gameOver) { hiddenKb.value = ''; hiddenKb.focus(); }
+}
+
+// Auto-focus on load
+window.addEventListener('load', () => { setTimeout(focusInput, 300); });
+
+// Re-focus when tapping anywhere on the game section
+document.querySelector('.game-section').addEventListener('click', focusInput);
+
+// Capture letters typed on phone keyboard
+hiddenKb.addEventListener('input', () => {
+  if (gameOver) return;
+  const val = hiddenKb.value;
+  hiddenKb.value = '';
+  for (const ch of val) {
+    if (/^[a-zA-Z]$/.test(ch)) handleKey(ch.toUpperCase());
+  }
 });
 
-// Physical keyboard
+// Enter / Backspace from physical keyboard or phone keyboard keydown
 document.addEventListener('keydown', e => {
   if (gameOver) return;
-  if (e.key === 'Enter')          handleKey('ENTER');
-  else if (e.key === 'Backspace') handleKey('⌫');
-  else if (/^[a-zA-Z]$/.test(e.key)) handleKey(e.key.toUpperCase());
+  if (e.key === 'Enter')               { e.preventDefault(); handleKey('ENTER'); }
+  else if (e.key === 'Backspace')      { e.preventDefault(); handleKey('⌫'); }
+  else if (/^[a-zA-Z]$/.test(e.key))  handleKey(e.key.toUpperCase());
 });
 
 // ═══════════════════════════════════════════════════════════════
@@ -1269,7 +1280,7 @@ updateAllKeys();
 updateUI();
 
 if (gameOver) {
-  document.getElementById('keyboard').style.display = 'none';
+  document.getElementById('action-btns').style.display = 'none';
   document.getElementById('nudge-wrap').style.display = 'none';
   setTimeout(() => showEndPanel(status === 'won', guesses.length), 100);
 } else if (guesses.length >= 3 && !gameOver) {
@@ -1361,7 +1372,7 @@ function submitGuess() {
       localStorage.setItem(K_SOLVED, solved);
 
       updateUI();
-      document.getElementById('keyboard').style.display = 'none';
+      document.getElementById('action-btns').style.display = 'none';
       document.getElementById('nudge-wrap').style.display = 'none';
 
       // Winning row bounce
@@ -1393,7 +1404,7 @@ function submitGuess() {
       localStorage.setItem(K_STREAK, streak);
 
       updateUI();
-      document.getElementById('keyboard').style.display = 'none';
+      document.getElementById('action-btns').style.display = 'none';
       document.getElementById('nudge-wrap').style.display = 'none';
       setTimeout(() => showEndPanel(false, null), 600);
 
