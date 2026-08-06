@@ -502,9 +502,10 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
   <div class="page-tabs-inner">
     <a class="tab-btn" href="/index.html">Dashboard</a>
     <a class="tab-btn" href="/index.html#library">Resource Library</a>
-    <a class="tab-btn" href="/index.html#vision">The Bigger Picture</a>
     <a class="tab-btn" href="/my-wheel.html">My Balance Wheel</a>
     <a class="tab-btn active" href="/my-journal.html">My Journal</a>
+    <a class="tab-btn" href="/dashboard.html">Daily Word Game</a>
+    <a class="tab-btn" href="/index.html#vision">The Bigger Picture</a>
   </div>
 </div>
 
@@ -601,9 +602,12 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
       data-placeholder="Start writing… this is your space. No judgement, no rules. Just you and the page."
     ></div>
     <div class="writing-footer">
-      <button class="btn-save" onclick="saveEntry()">Save Entry</button>
+      <div style="display:flex;flex-direction:column;gap:0.15rem;">
+        <button class="btn-save" onclick="saveEntry()">✓ Archive this entry</button>
+        <span style="font-size:0.68rem;color:var(--text-muted);">Saves &amp; moves to Past Entries below</span>
+      </div>
       <button class="btn-clear" onclick="clearEntry()">Clear</button>
-      <span class="save-confirm" id="save-confirm">Saved ✓</span>
+      <span class="save-confirm" id="save-confirm">Archived ✓</span>
     </div>
   </div>
 
