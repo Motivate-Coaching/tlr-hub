@@ -79,7 +79,7 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .btn-use-prompt:hover { color: var(--white); border-color: rgba(255,255,255,0.5); }
 
 /* ── WRITING AREA ───────────────────── */
-.writing-section { background: var(--white); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 2rem; }
+.writing-section { background: var(--white); border: 1px solid var(--border); border-radius: 8px; overflow: visible; margin-bottom: 2rem; }
 .writing-toolbar { padding: 0.75rem 1.25rem; background: var(--cream-dark); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .writing-date { font-size: 0.78rem; color: var(--text-muted); }
 .writing-meta { display: flex; align-items: center; gap: 1rem; }
@@ -95,6 +95,7 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
   font-family: 'Inter', sans-serif; font-size: 0.95rem; line-height: 1.9;
   color: var(--text-dark); border: none; outline: none; background: transparent;
   resize: none; min-height: 280px;
+  position: relative; overflow: visible;
 }
 .writing-area::placeholder { color: var(--border); }
 .writing-footer { padding: 0.75rem 1.25rem; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
@@ -360,9 +361,33 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 
 /* Images in writing area */
 [contenteditable].writing-area figure { display: block; margin: 0.75rem 0; }
-[contenteditable].writing-area figure img { max-width: 100%; border-radius: 6px; display: block; cursor: pointer; transition: outline 0.1s; }
-[contenteditable].writing-area figure img.img-selected { outline: 3px solid var(--gold); outline-offset: 2px; }
+[contenteditable].writing-area figure img { width: 100%; border-radius: 6px; display: block; cursor: pointer; }
 [contenteditable].writing-area figcaption { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.3rem; text-align: center; }
+
+/* ── IMAGE SELECTION OVERLAY ─────────────────── */
+#img-sel-box {
+  position: fixed; z-index: 750; display: none; box-sizing: border-box;
+  border: 2px solid var(--gold); pointer-events: none;
+}
+.img-sel-move {
+  position: absolute; inset: 0; cursor: grab; pointer-events: all;
+}
+.img-sel-move:active { cursor: grabbing; }
+.img-sel-handle {
+  position: absolute; width: 10px; height: 10px;
+  background: var(--gold); border: 2px solid #fff;
+  border-radius: 2px; pointer-events: all; box-sizing: border-box;
+}
+.img-sel-handle[data-c="nw"] { top: -6px;    left: -6px;   cursor: nw-resize; }
+.img-sel-handle[data-c="ne"] { top: -6px;    right: -6px;  cursor: ne-resize; }
+.img-sel-handle[data-c="sw"] { bottom: -6px; left: -6px;   cursor: sw-resize; }
+.img-sel-handle[data-c="se"] { bottom: -6px; right: -6px;  cursor: se-resize; }
+.img-sel-size-tip {
+  position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.7); color: #fff; font-size: 0.65rem;
+  padding: 2px 6px; border-radius: 3px; white-space: nowrap; pointer-events: none;
+  font-family: 'Inter', sans-serif;
+}
 
 /* ── VOICE BUTTON ────────────────────────────── */
 .fmt-voice-btn {
@@ -1044,28 +1069,49 @@ function insertImageAtCursor(src) { // legacy shim
   );
 }
 
-// ── IMAGE ALIGNMENT TOOLBAR ───────────────────
-let activeImg = null;
+// ── IMAGE SELECTION, RESIZE & MOVE ───────────────────────────
+let activeImg  = null;
+let dragState  = null;
 
 function selectImage(img) {
   document.querySelectorAll('[contenteditable] img.img-selected').forEach(i => i.classList.remove('img-selected'));
   activeImg = img;
   img.classList.add('img-selected');
+  updateSelBox(img);
   positionImgToolbar(img);
 }
 
+// ── Selection overlay ─────────────────────────────────────────
+function updateSelBox(img) {
+  if (!img) return;
+  const box = document.getElementById('img-sel-box');
+  const r   = img.getBoundingClientRect();
+  box.style.left   = (r.left - 2) + 'px';
+  box.style.top    = (r.top  - 2) + 'px';
+  box.style.width  = (r.width  + 4) + 'px';
+  box.style.height = (r.height + 4) + 'px';
+  box.style.display = 'block';
+  // Show pixel size tip
+  const tip = box.querySelector('.img-sel-size-tip');
+  if (tip) tip.textContent = Math.round(r.width) + ' × ' + Math.round(r.height) + 'px';
+}
+
+function hideSelBox() {
+  const box = document.getElementById('img-sel-box');
+  if (box) box.style.display = 'none';
+}
+
+// ── Toolbar positioning ───────────────────────────────────────
 function positionImgToolbar(img) {
   const toolbar = document.getElementById('img-toolbar');
   toolbar.style.display = 'flex';
-  const r = img.getBoundingClientRect();
+  const r  = img.getBoundingClientRect();
   const tr = toolbar.getBoundingClientRect();
   let left = r.left + r.width / 2 - tr.width / 2;
   left = Math.max(8, Math.min(left, window.innerWidth - tr.width - 8));
-  // If image is near top of viewport, show toolbar below instead
   let top;
   if (r.top < tr.height + 20) {
     top = r.bottom + window.scrollY + 8;
-    toolbar.style.setProperty('--arrow-top', 'auto');
   } else {
     top = r.top + window.scrollY - tr.height - 12;
   }
@@ -1073,62 +1119,68 @@ function positionImgToolbar(img) {
   toolbar.style.top  = top  + 'px';
   // Highlight active alignment
   const fig = img.closest('figure') || img;
-  const fl = fig.style.float;
+  const fl  = fig.style.float;
+  const isAbs = fig.style.position === 'absolute';
   document.querySelectorAll('.img-tb-btn[data-align]').forEach(b => {
     const a = b.dataset.align;
     b.classList.toggle('active',
-      (a === 'left'   && fl === 'left')  ||
-      (a === 'right'  && fl === 'right') ||
-      (a === 'center' && !fl && fig.style.margin?.includes('auto')) ||
-      (a === 'full'   && !fl && fig.style.width === '100%')
+      !isAbs && (
+        (a === 'left'   && fl === 'left')  ||
+        (a === 'right'  && fl === 'right') ||
+        (a === 'center' && !fl && (fig.style.margin||'').includes('auto')) ||
+        (a === 'full'   && !fl && fig.style.width === '100%')
+      )
     );
   });
 }
 
 function hideImgToolbar() {
   document.getElementById('img-toolbar').style.display = 'none';
+  hideSelBox();
   if (activeImg) { activeImg.classList.remove('img-selected'); activeImg = null; }
 }
 
+// ── Alignment (snaps image back into text flow) ───────────────
 function alignImg(align) {
   if (!activeImg) return;
   const fig = activeImg.closest('figure') || activeImg;
-  // Reset
+  // Remove free positioning, go back to text flow
+  fig.style.position = '';
+  fig.style.left = '';
+  fig.style.top  = '';
   ['float','clear','margin','display','width'].forEach(p => fig.style[p] = '');
-  activeImg.style.width = '';
   switch (align) {
     case 'left':
-      fig.style.float = 'left'; fig.style.width = '46%';
+      fig.style.float  = 'left'; fig.style.width = '46%';
       fig.style.margin = '0.25rem 1.25rem 0.5rem 0'; fig.style.clear = 'none'; break;
     case 'right':
-      fig.style.float = 'right'; fig.style.width = '46%';
+      fig.style.float  = 'right'; fig.style.width = '46%';
       fig.style.margin = '0.25rem 0 0.5rem 1.25rem'; fig.style.clear = 'none'; break;
     case 'center':
-      fig.style.display = 'block'; fig.style.width = '68%';
-      fig.style.margin = '1rem auto'; break;
+      fig.style.display = 'block'; fig.style.width = '68%'; fig.style.margin = '1rem auto'; break;
     case 'full':
-      fig.style.display = 'block'; fig.style.width = '100%';
-      fig.style.margin = '0.75rem 0'; break;
+      fig.style.display = 'block'; fig.style.width = '100%'; fig.style.margin = '0.75rem 0'; break;
   }
   document.querySelectorAll('.img-tb-btn[data-align]').forEach(b =>
     b.classList.toggle('active', b.dataset.align === align));
-  // Reposition toolbar after layout settles
-  setTimeout(() => activeImg && positionImgToolbar(activeImg), 30);
+  setTimeout(() => { if (activeImg) { updateSelBox(activeImg); positionImgToolbar(activeImg); } }, 30);
 }
 
+// ── Preset size buttons ───────────────────────────────────────
 function resizeImg(pct) {
   if (!activeImg) return;
   const fig = activeImg.closest('figure') || activeImg;
-  // Preserve existing float/margin so resize doesn't fight alignment
-  if (!fig.style.float) {
-    fig.style.display = 'block';
-    fig.style.margin = fig.style.margin || '1rem auto';
+  if (fig.style.position !== 'absolute') {
+    if (!fig.style.float) { fig.style.display = 'block'; fig.style.margin = fig.style.margin || '1rem auto'; }
+    fig.style.width = pct + '%';
+  } else {
+    // Absolute: set pixel width relative to writing area
+    const area = document.getElementById('writing-area');
+    fig.style.width = Math.round(area.offsetWidth * pct / 100) + 'px';
   }
-  fig.style.width = pct + '%';
-  // Highlight active size btn
   document.querySelectorAll('.img-tb-btn[data-size]').forEach(b =>
     b.classList.toggle('active', b.dataset.size === String(pct)));
-  setTimeout(() => activeImg && positionImgToolbar(activeImg), 30);
+  setTimeout(() => { if (activeImg) { updateSelBox(activeImg); positionImgToolbar(activeImg); } }, 30);
 }
 
 function deleteActiveImg() {
@@ -1136,6 +1188,99 @@ function deleteActiveImg() {
   const fig = activeImg.closest('figure') || activeImg;
   hideImgToolbar();
   fig.remove();
+  updateWordCount();
+}
+
+// ── Drag: resize corners + move ───────────────────────────────
+function startImgDrag(e, type, corner) {
+  e.preventDefault(); e.stopPropagation();
+  if (!activeImg) return;
+
+  const fig      = activeImg.closest('figure') || activeImg;
+  const area     = document.getElementById('writing-area');
+  const areaRect = area.getBoundingClientRect();
+  const imgRect  = activeImg.getBoundingClientRect();
+  const cx = e.touches ? e.touches[0].clientX : e.clientX;
+  const cy = e.touches ? e.touches[0].clientY : e.clientY;
+
+  dragState = { type, corner, cx, cy, fig, img: activeImg,
+                startW: imgRect.width, startH: imgRect.height, areaRect };
+
+  if (type === 'move') {
+    // Convert to absolute if not already
+    if (fig.style.position !== 'absolute') {
+      const figRect = fig.getBoundingClientRect();
+      fig.style.position = 'absolute';
+      fig.style.left    = Math.round(figRect.left - areaRect.left) + 'px';
+      fig.style.top     = Math.round(figRect.top  - areaRect.top + area.scrollTop) + 'px';
+      fig.style.width   = Math.round(figRect.width) + 'px';
+      fig.style.margin  = '0';
+      fig.style.float   = '';
+      fig.style.display = 'block';
+    }
+    dragState.startLeft = parseFloat(fig.style.left) || 0;
+    dragState.startTop  = parseFloat(fig.style.top)  || 0;
+  }
+
+  if (type === 'resize' && fig.style.position === 'absolute') {
+    dragState.startLeft = parseFloat(fig.style.left) || 0;
+  }
+
+  document.addEventListener('mousemove', onImgDrag, { passive: false });
+  document.addEventListener('mouseup',   stopImgDrag);
+  document.addEventListener('touchmove', onImgDrag, { passive: false });
+  document.addEventListener('touchend',  stopImgDrag);
+}
+
+function onImgDrag(e) {
+  if (!dragState) return;
+  e.preventDefault();
+  const cx = e.touches ? e.touches[0].clientX : e.clientX;
+  const cy = e.touches ? e.touches[0].clientY : e.clientY;
+  const dx = cx - dragState.cx;
+  const dy = cy - dragState.cy;
+  const { fig, img, type, corner } = dragState;
+  const area = document.getElementById('writing-area');
+
+  if (type === 'move') {
+    const newLeft = Math.max(0, dragState.startLeft + dx);
+    const newTop  = Math.max(0, dragState.startTop  + dy);
+    fig.style.left = newLeft + 'px';
+    fig.style.top  = newTop  + 'px';
+    // Expand writing area height if image goes below
+    const needed = newTop + fig.offsetHeight + 40;
+    if (needed > area.offsetHeight) area.style.minHeight = needed + 'px';
+  }
+
+  if (type === 'resize') {
+    let newW = dragState.startW;
+    if (corner === 'se' || corner === 'ne') newW = Math.max(60, dragState.startW + dx);
+    if (corner === 'sw' || corner === 'nw') newW = Math.max(60, dragState.startW - dx);
+    // Keep proportional height naturally (img width:100% of figure)
+    if (fig.style.position === 'absolute') {
+      fig.style.width = Math.round(newW) + 'px';
+      // Shift left anchor for NW/SW handles
+      if (corner === 'nw' || corner === 'sw') {
+        const newLeft = Math.max(0, dragState.startLeft + (dragState.startW - newW));
+        fig.style.left = Math.round(newLeft) + 'px';
+      }
+    } else {
+      // In-flow: resize as % of writing area
+      const pct = Math.max(10, Math.min(100, Math.round((newW / area.offsetWidth) * 100)));
+      fig.style.width = pct + '%';
+    }
+  }
+
+  updateSelBox(img);
+  positionImgToolbar(img);
+}
+
+function stopImgDrag() {
+  dragState = null;
+  document.removeEventListener('mousemove', onImgDrag);
+  document.removeEventListener('mouseup',   stopImgDrag);
+  document.removeEventListener('touchmove', onImgDrag);
+  document.removeEventListener('touchend',  stopImgDrag);
   updateWordCount();
 }
 
@@ -1235,18 +1380,29 @@ function stopVoice() {
 document.addEventListener('DOMContentLoaded', function() {
   const area = document.getElementById('writing-area');
 
-  // Image click → show toolbar
+  // Image click → show selection box + toolbar
   area.addEventListener('click', function(e) {
     const img = e.target.closest('img');
     if (img && area.contains(img)) { selectImage(img); e.preventDefault(); }
     else hideImgToolbar();
   });
 
-  // Click outside → hide toolbar (but not if clicking on toolbar itself)
+  // Click outside → hide toolbar + selection box
   document.addEventListener('click', function(e) {
-    if (!e.target.closest('#img-toolbar') && !e.target.closest('#writing-area img')) {
+    if (!e.target.closest('#img-toolbar') &&
+        !e.target.closest('#img-sel-box') &&
+        !e.target.closest('#writing-area img')) {
       hideImgToolbar();
     }
+  });
+
+  // Wire up drag handlers for selection box (move + corner resize)
+  const selMove = document.getElementById('img-sel-move');
+  selMove.addEventListener('mousedown',  e => startImgDrag(e, 'move'));
+  selMove.addEventListener('touchstart', e => startImgDrag(e, 'move'), { passive: false });
+  document.querySelectorAll('.img-sel-handle').forEach(h => {
+    h.addEventListener('mousedown',  e => startImgDrag(e, 'resize', h.dataset.c));
+    h.addEventListener('touchstart', e => startImgDrag(e, 'resize', h.dataset.c), { passive: false });
   });
 
   // Escape closes modals; Delete/Backspace removes selected image
@@ -1262,8 +1418,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const searchInput = document.getElementById('img-search-input');
   if (searchInput) searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') searchUnsplash(); });
 
-  // Reposition toolbar on scroll
-  window.addEventListener('scroll', function() { if (activeImg) positionImgToolbar(activeImg); }, { passive: true });
+  // Reposition toolbar + selection overlay on scroll
+  window.addEventListener('scroll', function() {
+    if (activeImg) { updateSelBox(activeImg); positionImgToolbar(activeImg); }
+  }, { passive: true });
 });
 
 // ── SAVE ENTRY ────────────────────────────
@@ -1527,6 +1685,16 @@ function deleteEntry(id) {
   renderEntries();
 }
 </script>
+<!-- ── IMAGE SELECTION OVERLAY (resize handles + move) ──────── -->
+<div id="img-sel-box">
+  <div class="img-sel-move"    id="img-sel-move"></div>
+  <div class="img-sel-handle"  data-c="nw"></div>
+  <div class="img-sel-handle"  data-c="ne"></div>
+  <div class="img-sel-handle"  data-c="sw"></div>
+  <div class="img-sel-handle"  data-c="se"></div>
+  <div class="img-sel-size-tip"></div>
+</div>
+
 <!-- ── IMAGE ALIGNMENT TOOLBAR ──────── -->
 <div class="img-toolbar" id="img-toolbar">
   <button class="img-tb-btn" data-align="left"  onclick="alignImg('left')"   title="Float left">◀ Left</button>
