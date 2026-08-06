@@ -291,7 +291,7 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 .img-results-grid {
   flex: 1; overflow-y: auto; padding: 0 1.5rem 0.5rem;
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.55rem;
-  align-content: start;
+  align-content: start; overscroll-behavior: contain;
 }
 .img-result {
   position: relative; cursor: pointer; border-radius: 5px; overflow: hidden;
@@ -389,6 +389,68 @@ header { background: var(--navy); position: sticky; top: 0; z-index: 200; border
 @keyframes pulse-dot { from { opacity: 0.4; transform: scale(0.8); } to { opacity: 1; transform: scale(1.2); } }
 .voice-interim {
   display: inline; color: #8899AA; font-style: italic;
+}
+
+/* ── MOBILE ───────────────────────────────────── */
+@media (max-width: 640px) {
+
+  /* Page spacing */
+  .journal-page { padding: 1.25rem 0.85rem 4rem; }
+
+  /* Tabs — horizontal scroll if they overflow */
+  .page-tabs-inner { padding: 0 0.85rem; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .page-tabs-inner::-webkit-scrollbar { display: none; }
+  .tab-btn { white-space: nowrap; padding: 0.6rem 0.9rem; font-size: 0.65rem; }
+
+  /* Writing section */
+  .writing-toolbar { flex-wrap: wrap; padding: 0.6rem 0.85rem; gap: 0.4rem; }
+  .writing-date { font-size: 0.68rem; width: 100%; }
+  .writing-meta { width: 100%; }
+
+  /* Format toolbar — wrap, shrink buttons */
+  .format-toolbar { gap: 0.18rem; }
+  .fmt-btn { padding: 0.25rem 0.42rem; font-size: 0.72rem; }
+  .fmt-select { font-size: 0.68rem; padding: 0.25rem 0.15rem; max-width: 76px; }
+  .fmt-colors { gap: 0.15rem; }
+  .fmt-color { width: 14px; height: 14px; }
+  .fmt-sep { height: 13px; margin: 0 0.08rem; }
+  .fmt-voice-btn { padding: 0.25rem 0.45rem; font-size: 0.65rem; }
+
+  /* Writing body */
+  .entry-title-input { font-size: 1.15rem; padding: 0.85rem 1rem 0.35rem; }
+  .writing-area { padding: 0.5rem 1rem 1rem; font-size: 0.9rem; min-height: 200px; }
+  .writing-footer { flex-wrap: wrap; padding: 0.55rem 0.85rem; gap: 0.5rem; }
+
+  /* Prompt */
+  .prompt-section { padding: 1.1rem 1.1rem; }
+  .prompt-display { font-size: 1.05rem; }
+  .prompt-actions { flex-wrap: wrap; }
+
+  /* Past entries */
+  .entry-card { padding: 0.9rem 1rem; }
+
+  /* Full entry modal */
+  .entry-overlay { padding: 0.5rem; }
+  .entry-modal { border-radius: 8px 8px 0 0; }
+  .entry-modal-header { padding: 1rem 1.1rem 0.75rem; }
+  .entry-modal-title { font-size: 1.2rem; }
+  .entry-modal-body { padding: 0.85rem 1.1rem; max-height: 58vh; }
+  .entry-modal-footer { padding: 0.65rem 1.1rem; flex-wrap: wrap; }
+  .entry-modal-footer-right { flex-wrap: wrap; }
+
+  /* Image search modal — bottom sheet on mobile */
+  .img-search-overlay { padding: 0; align-items: flex-end; }
+  .img-search-panel { max-height: 92vh; max-width: 100%; border-radius: 14px 14px 0 0; }
+  .img-results-grid { grid-template-columns: repeat(2, 1fr); gap: 0.4rem; padding: 0 0.85rem 0.5rem; }
+  .img-search-bar { padding: 0.65rem 0.85rem 0.5rem; }
+  .img-tab-panel { padding: 0.85rem 0.85rem; }
+  .img-upload-area { padding: 1rem; }
+
+  /* Image alignment/resize toolbar — prevent off-screen */
+  .img-toolbar { flex-wrap: wrap; max-width: calc(100vw - 16px); justify-content: center; }
+
+  /* Images in writing area — don't go too small on mobile */
+  [contenteditable].writing-area figure { min-width: 60%; }
 }
 </style>
 </head>
@@ -866,6 +928,7 @@ function openImgSearch() {
   if (sel && sel.rangeCount > 0) savedRange = sel.getRangeAt(0).cloneRange();
   const overlay = document.getElementById('img-search-overlay');
   overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden'; // prevent background page scroll
   setPanelTab('search', document.getElementById('ptab-search'));
   if (!UNSPLASH_ACCESS_KEY) {
     document.getElementById('img-key-notice').style.display = '';
@@ -880,6 +943,7 @@ function openImgSearch() {
 
 function closeImgSearch() {
   document.getElementById('img-search-overlay').style.display = 'none';
+  document.body.style.overflow = ''; // restore background scroll
 }
 
 function setPanelTab(tab, btn) {
@@ -919,8 +983,8 @@ async function searchUnsplash() {
 function selectUnsplashImage(url, photographer, profileLink, downloadUrl) {
   closeImgSearch();
   restoreCursorAndInsert(
-    `<figure style="margin:1rem 0;display:block;">` +
-    `<img src="${url}" alt="Photo by ${photographer}" style="max-width:100%;border-radius:6px;display:block;" draggable="true">` +
+    `<figure style="margin:1rem auto;display:block;width:55%;">` +
+    `<img src="${url}" alt="Photo by ${photographer}" style="width:100%;border-radius:6px;display:block;" draggable="true">` +
     `<figcaption style="font-size:0.7rem;color:#8899AA;margin-top:0.3rem;text-align:center;">` +
     `Photo by <a href="${profileLink}?utm_source=tlr_journal&utm_medium=referral" target="_blank" style="color:var(--gold);">${photographer}</a> ` +
     `on <a href="https://unsplash.com?utm_source=tlr_journal&utm_medium=referral" target="_blank" style="color:var(--gold);">Unsplash</a></figcaption></figure><br>`
@@ -936,8 +1000,8 @@ function insertImageFromUrl() {
   if (!url) return;
   closeImgSearch();
   restoreCursorAndInsert(
-    `<figure style="margin:1rem 0;display:block;">` +
-    `<img src="${url}" alt="Journal image" style="max-width:100%;border-radius:6px;display:block;" draggable="true">` +
+    `<figure style="margin:1rem auto;display:block;width:55%;">` +
+    `<img src="${url}" alt="Journal image" style="width:100%;border-radius:6px;display:block;" draggable="true">` +
     `</figure><br>`
   );
   document.getElementById('img-url-input').value = '';
@@ -950,8 +1014,8 @@ function insertImageFromFile(input) {
   reader.onload = function(ev) {
     closeImgSearch();
     restoreCursorAndInsert(
-      `<figure style="margin:1rem 0;display:block;">` +
-      `<img src="${ev.target.result}" alt="Journal image" style="max-width:100%;border-radius:6px;display:block;" draggable="true">` +
+      `<figure style="margin:1rem auto;display:block;width:55%;">` +
+      `<img src="${ev.target.result}" alt="Journal image" style="width:100%;border-radius:6px;display:block;" draggable="true">` +
       `</figure><br>`
     );
     input.value = '';
@@ -974,8 +1038,8 @@ function restoreCursorAndInsert(html) {
 
 function insertImageAtCursor(src) { // legacy shim
   restoreCursorAndInsert(
-    `<figure style="margin:1rem 0;display:block;">` +
-    `<img src="${src}" alt="Journal image" style="max-width:100%;border-radius:6px;display:block;" draggable="true">` +
+    `<figure style="margin:1rem auto;display:block;width:55%;">` +
+    `<img src="${src}" alt="Journal image" style="width:100%;border-radius:6px;display:block;" draggable="true">` +
     `</figure><br>`
   );
 }
@@ -997,7 +1061,14 @@ function positionImgToolbar(img) {
   const tr = toolbar.getBoundingClientRect();
   let left = r.left + r.width / 2 - tr.width / 2;
   left = Math.max(8, Math.min(left, window.innerWidth - tr.width - 8));
-  const top = r.top + window.scrollY - tr.height - 12;
+  // If image is near top of viewport, show toolbar below instead
+  let top;
+  if (r.top < tr.height + 20) {
+    top = r.bottom + window.scrollY + 8;
+    toolbar.style.setProperty('--arrow-top', 'auto');
+  } else {
+    top = r.top + window.scrollY - tr.height - 12;
+  }
   toolbar.style.left = left + 'px';
   toolbar.style.top  = top  + 'px';
   // Highlight active alignment
@@ -1042,6 +1113,21 @@ function alignImg(align) {
   document.querySelectorAll('.img-tb-btn[data-align]').forEach(b =>
     b.classList.toggle('active', b.dataset.align === align));
   // Reposition toolbar after layout settles
+  setTimeout(() => activeImg && positionImgToolbar(activeImg), 30);
+}
+
+function resizeImg(pct) {
+  if (!activeImg) return;
+  const fig = activeImg.closest('figure') || activeImg;
+  // Preserve existing float/margin so resize doesn't fight alignment
+  if (!fig.style.float) {
+    fig.style.display = 'block';
+    fig.style.margin = fig.style.margin || '1rem auto';
+  }
+  fig.style.width = pct + '%';
+  // Highlight active size btn
+  document.querySelectorAll('.img-tb-btn[data-size]').forEach(b =>
+    b.classList.toggle('active', b.dataset.size === String(pct)));
   setTimeout(() => activeImg && positionImgToolbar(activeImg), 30);
 }
 
@@ -1163,9 +1249,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Escape closes modals
+  // Escape closes modals; Delete/Backspace removes selected image
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') { closeImgSearch(); hideImgToolbar(); if (isRecording) stopVoice(); }
+    if ((e.key === 'Delete' || e.key === 'Backspace') && activeImg) {
+      e.preventDefault();
+      deleteActiveImg();
+    }
   });
 
   // Enter key triggers Unsplash search
@@ -1443,6 +1533,11 @@ function deleteEntry(id) {
   <button class="img-tb-btn" data-align="center" onclick="alignImg('center')" title="Centre">Centre</button>
   <button class="img-tb-btn" data-align="right"  onclick="alignImg('right')"  title="Float right">Right ▶</button>
   <button class="img-tb-btn" data-align="full"   onclick="alignImg('full')"   title="Full width">⬛ Full</button>
+  <div class="img-tb-sep"></div>
+  <button class="img-tb-btn" data-size="25"  onclick="resizeImg(25)"  title="Small">S</button>
+  <button class="img-tb-btn" data-size="50"  onclick="resizeImg(50)"  title="Medium">M</button>
+  <button class="img-tb-btn" data-size="75"  onclick="resizeImg(75)"  title="Large">L</button>
+  <button class="img-tb-btn" data-size="100" onclick="resizeImg(100)" title="Full width">↔</button>
   <div class="img-tb-sep"></div>
   <button class="img-tb-btn img-tb-del" onclick="deleteActiveImg()" title="Remove image">✕</button>
 </div>
