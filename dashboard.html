@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/auth.js"></script>
+<script src="auth.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 <script>requireAuth();</script>
 <style>
@@ -62,7 +62,7 @@ body {
 .tlr-tab { padding: 0.7rem 1.25rem; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.4); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; text-decoration: none; display: inline-block; transition: color 0.15s, border-color 0.15s; white-space: nowrap; font-family: 'Inter', sans-serif; }
 .tlr-tab:hover { color: rgba(255,255,255,0.7); }
 .tlr-tab.active { color: #E8A800; border-bottom-color: #E8A800; }
-.tlr-sticky { position: sticky; top: 0; z-index: 200; }
+.tlr-sticky { position: sticky; top: 0; z-index: 200; width: 100%; }
 /* Hide old top bar */
 .top-bar { display: none; }
 .btn-back-top { display: none; }
@@ -844,8 +844,8 @@ body {
 <div class="tlr-sticky">
   <div class="tlr-header">
     <div class="tlr-header-inner">
-      <a class="tlr-logo-nav" href="/index.html">
-        <img src="/tlr-logo.png" alt="The Living Room">
+      <a class="tlr-logo-nav" href="index.html">
+        <img src="tlr-logo.png" alt="The Living Room">
       </a>
       <div class="tlr-header-title">
         <h1>Daily <em>Word Game</em></h1>
@@ -859,12 +859,12 @@ body {
   </div>
   <div class="tlr-tabs">
     <div class="tlr-tabs-inner">
-      <a class="tlr-tab" href="/index.html">Dashboard</a>
-      <a class="tlr-tab" href="/index.html#library">Resource Library</a>
-      <a class="tlr-tab" href="/my-wheel.html">My Balance Wheel</a>
-      <a class="tlr-tab" href="/my-journal.html">My Journal</a>
-      <a class="tlr-tab active" href="/dashboard.html">Daily Word Game</a>
-      <a class="tlr-tab" href="/index.html#vision">The Bigger Picture</a>
+      <a class="tlr-tab" href="index.html">Dashboard</a>
+      <a class="tlr-tab" href="index.html#library">Resource Library</a>
+      <a class="tlr-tab" href="my-wheel.html">My Balance Wheel</a>
+      <a class="tlr-tab" href="my-journal.html">My Journal</a>
+      <a class="tlr-tab active" href="dashboard.html">Daily Word Game</a>
+      <a class="tlr-tab" href="index.html#vision">The Bigger Picture</a>
     </div>
   </div>
 </div>
@@ -872,7 +872,7 @@ body {
 <!-- TOP BAR (hidden — replaced by header above) -->
 <div class="top-bar">
   <div style="display:flex;align-items:center;min-width:0;">
-    <img src="/tlr-logo.png" alt="The Living Room" class="tlr-logo-img">
+    <img src="tlr-logo.png" alt="The Living Room" class="tlr-logo-img">
     <span class="welcome-txt">Welcome back, <span id="user-name">member</span></span>
   </div>
   <div class="top-stats">
@@ -884,7 +884,7 @@ body {
 
 <!-- SUB-NAV: back button sits below header, left-aligned -->
 <div style="width:100%;padding:12px 18px 0;">
-  <a class="btn-back-top" href="/index.html">
+  <a class="btn-back-top" href="index.html">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
     Dashboard
   </a>
@@ -1561,7 +1561,7 @@ function showEndPanel(won, guessCount) {
     </div>
 
     <!-- DASHBOARD BUTTON -->
-    <a class="btn-dashboard" href="/index.html">Back to my dashboard</a>
+    <a class="btn-dashboard" href="index.html">Back to my dashboard</a>
   `;
 
   // Slide the overlay in

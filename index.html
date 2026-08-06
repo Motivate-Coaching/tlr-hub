@@ -1029,7 +1029,7 @@ footer a { color: var(--gold); text-decoration: none; }
 .journal-invite-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/auth.js"></script>
+<script src="auth.js"></script>
 </head>
 <body>
 <script>requireAuth().then(u => { if(u) showUserBadge("#user-badge"); });</script>
@@ -1057,9 +1057,9 @@ footer a { color: var(--gold); text-decoration: none; }
   <div class="page-tabs-inner">
     <button class="tab-btn active" data-view="home">Dashboard</button>
     <button class="tab-btn" data-view="library">Resource Library</button>
-    <a class="tab-btn tab-link" href="/my-wheel.html">My Balance Wheel</a>
-    <a class="tab-btn tab-link" href="/my-journal.html">My Journal</a>
-    <a class="tab-btn tab-link" href="/dashboard.html">Daily Word Game</a>
+    <a class="tab-btn tab-link" href="my-wheel.html">My Balance Wheel</a>
+    <a class="tab-btn tab-link" href="my-journal.html">My Journal</a>
+    <a class="tab-btn tab-link" href="dashboard.html">Daily Word Game</a>
     <button class="tab-btn" data-view="vision">The Bigger Picture</button>
   </div>
 </div>
@@ -1158,7 +1158,7 @@ footer a { color: var(--gold); text-decoration: none; }
         <div class="ps-section-label">My Balance Wheel</div>
         <div class="ps-level-name" id="ps-wheel-avg" style="font-size:1.6rem;color:var(--gold)">—</div>
         <div class="ps-level-sub" id="ps-wheel-label">avg satisfaction</div>
-        <a href="/my-wheel.html" class="ps-stat-tile" style="margin-top:0.75rem;display:block;text-align:center;text-decoration:none;padding:0.5rem">
+        <a href="my-wheel.html" class="ps-stat-tile" style="margin-top:0.75rem;display:block;text-align:center;text-decoration:none;padding:0.5rem">
           <span style="font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold)">View Action Plan →</span>
         </a>
       </div>
@@ -1211,7 +1211,7 @@ footer a { color: var(--gold); text-decoration: none; }
         <div class="game-promo-stats" id="gp-stats-home"></div>
       </div>
       <div class="game-promo-right">
-        <a class="game-promo-btn" href="/dashboard.html">
+        <a class="game-promo-btn" href="dashboard.html">
           Play today's word
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
@@ -1229,14 +1229,14 @@ footer a { color: var(--gold); text-decoration: none; }
   <!-- ── WHEEL DASHBOARD ──────────────────────────────── -->
   <div id="wheel-dashboard" style="display:none">
     <div class="wheel-dash-section">
-      <a href="/my-wheel.html" class="section-title-link"><div class="wheel-dash-section-title">My <em>Balance Wheel</em></div></a>
+      <a href="my-wheel.html" class="section-title-link"><div class="wheel-dash-section-title">My <em>Balance Wheel</em></div></a>
       <div class="wheel-dash-inner">
         <div class="wheel-dash-header">
           <div>
             <div class="wheel-dash-avg" id="wd-avg">—</div>
             <div class="wheel-dash-avg-label">overall satisfaction</div>
           </div>
-          <a href="/my-wheel.html" class="wheel-dash-link">Open my wheel →</a>
+          <a href="my-wheel.html" class="wheel-dash-link">Open my wheel →</a>
         </div>
         <div class="wheel-dash-grid" id="wd-grid"></div>
       </div>
@@ -1270,7 +1270,7 @@ footer a { color: var(--gold); text-decoration: none; }
       <div class="journal-invite-mark">"</div>
       <div class="journal-invite-quote" id="ji-quote">We write to taste life twice, in the moment and in retrospect.</div>
       <div class="journal-invite-attr" id="ji-attr">— Anaïs Nin</div>
-      <a href="/my-journal.html" class="journal-invite-btn">✦ Write in my journal</a>
+      <a href="my-journal.html" class="journal-invite-btn">✦ Write in my journal</a>
     </div>
   </div>
 
@@ -1281,7 +1281,7 @@ footer a { color: var(--gold); text-decoration: none; }
       <div class="nav-buttons-grid">
 
         <!-- Quote of the Day -->
-        <a class="nav-card" href="/dashboard.html">
+        <a class="nav-card" href="dashboard.html">
           <div class="nav-card-icon">
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M4 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8l-4 4V6z"/>
@@ -1339,7 +1339,7 @@ footer a { color: var(--gold); text-decoration: none; }
         </button>
 
         <!-- My Balance Wheel -->
-        <a class="nav-card" href="/my-wheel.html">
+        <a class="nav-card" href="my-wheel.html">
           <div class="nav-card-icon">
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
               <circle cx="14" cy="14" r="11"/>
@@ -1363,7 +1363,7 @@ footer a { color: var(--gold); text-decoration: none; }
         </a>
 
         <!-- My Journal -->
-        <a class="nav-card" href="/my-journal.html">
+        <a class="nav-card" href="my-journal.html">
           <div class="nav-card-icon">
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <rect x="5" y="3" width="16" height="22" rx="2"/>
@@ -2006,7 +2006,7 @@ document.querySelectorAll('.tab-btn[data-view]').forEach(btn => {
         } else if (a.action) {
           actionLabel = a.actionDone ? '✓ action done' : '1 action set';
         }
-        return '<a href="/my-wheel.html?area=' + i + '" class="wheel-dash-card">' +
+        return '<a href="my-wheel.html?area=' + i + '" class="wheel-dash-card">' +
           '<div class="wheel-dash-bar" style="background:' + color + '"></div>' +
           '<div class="wheel-dash-body">' +
             '<div class="wheel-dash-name">' + a.name + '</div>' +
@@ -2265,13 +2265,13 @@ function dismissLightbox(goToWheel) {
 <div id="welcome-lightbox" class="lb-overlay" onclick="if(event.target===this)dismissLightbox(false)">
   <div class="lb-card">
     <div class="lb-logo">
-      <img src="/tlr-logo.png" alt="The Living Room">
+      <img src="tlr-logo.png" alt="The Living Room">
     </div>
     <div class="lb-eyebrow">Welcome to your member space</div>
     <h2 class="lb-title">Let's make this <em>yours</em></h2>
     <p class="lb-body">Before you dive in, we'd love for you to set up your Balance Wheel — a 5-minute snapshot of where you are in life right now. It makes everything here more meaningful and personal.</p>
     <div class="lb-actions">
-      <a class="lb-btn-primary" href="/my-wheel.html" onclick="localStorage.setItem('tlr_welcomed','true')">Set up my Balance Wheel</a>
+      <a class="lb-btn-primary" href="my-wheel.html" onclick="localStorage.setItem('tlr_welcomed','true')">Set up my Balance Wheel</a>
       <button class="lb-btn-secondary" onclick="dismissLightbox(false)">I'll explore first</button>
     </div>
     <p class="lb-note">Your Balance Wheel tab is always at the top — come back whenever you're ready.</p>
