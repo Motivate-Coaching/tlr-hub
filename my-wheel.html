@@ -218,6 +218,12 @@ header { background: var(--navy); position: relative; border-bottom: 3px solid v
 .ap-action-input { width: 100%; padding: 0.4rem 0.75rem; border: 1.5px solid var(--gold); border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 0.88rem; color: var(--text-dark); background: var(--white); }
 .ap-action-input:focus { outline: none; }
 .ap-item-btns { display: flex; gap: 0.3rem; flex-shrink: 0; padding-top: 1px; flex-wrap: wrap; }
+@media (max-width: 500px) {
+  .ap-action-row { flex-wrap: wrap; }
+  .ap-action-main { min-width: 0; width: calc(100% - 36px); }
+  .ap-item-btns { width: 100%; margin-top: 0.5rem; padding-top: 0; }
+  .ap-item-btns .btn-sm { font-size: 0.72rem; padding: 0.35rem 0.65rem; }
+}
 
 /* Reminder */
 .reminder-wrap { position: relative; display: inline-block; }
