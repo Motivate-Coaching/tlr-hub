@@ -852,6 +852,7 @@ a.tab-btn { text-decoration: none; display: inline-block; }
   margin-top: 5px;
 }
 /* Game tiles */
+.ps-game-combined-inner { display: flex; align-items: flex-start; gap: 1.75rem; }
 .ps-game-row {
   display: flex;
   gap: 0.6rem;
@@ -879,7 +880,25 @@ a.tab-btn { text-decoration: none; display: inline-block; }
   text-transform: uppercase;
   margin-top: 5px;
 }
-/* Level */
+.ps-rank-block { }
+.ps-rank-label { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.62); margin-bottom: 0.6rem; text-align: center; }
+/* Level scale */
+.ps-rank-scale { width: 190px; }
+.ps-rank-endpoints { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem; gap: 0.5rem; }
+.ps-rank-from {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gold);
+  white-space: nowrap;
+}
+.ps-rank-to {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.28);
+  font-style: italic;
+  white-space: nowrap;
+}
+/* Keep .ps-level-name in case used elsewhere */
 .ps-level-name {
   font-family: 'Playfair Display', serif;
   font-size: 1.05rem;
@@ -889,7 +908,7 @@ a.tab-btn { text-decoration: none; display: inline-block; }
   text-align: center;
 }
 .ps-level-bar-wrap {
-  width: 130px;
+  width: 100%;
   height: 4px;
   background: rgba(255,255,255,0.1);
   border-radius: 2px;
@@ -1098,29 +1117,34 @@ footer a { color: var(--gold); text-decoration: none; }
       </div>
       <div class="ps-divider" id="ps-post-wheel-div" style="display:none"></div>
 
-      <!-- Game Stats -->
-      <div class="ps-section">
+      <!-- Daily Game + Word Rank (one combined section) -->
+      <div class="ps-section" style="flex:2.2">
         <div class="ps-section-label">Daily Game</div>
-        <div class="ps-game-row">
-          <div class="ps-game-tile">
-            <span class="ps-game-num" id="ps-streak">0</span>
-            <span class="ps-game-lbl">🔥 Streak</span>
+        <div class="ps-game-combined-inner">
+          <div class="ps-game-row">
+            <div class="ps-game-tile">
+              <span class="ps-game-num" id="ps-streak">0</span>
+              <span class="ps-game-lbl">Day Streak 🔥</span>
+            </div>
+            <div class="ps-game-tile">
+              <span class="ps-game-num" id="ps-stars">0</span>
+              <span class="ps-game-lbl">Stars Won ⭐</span>
+            </div>
           </div>
-          <div class="ps-game-tile">
-            <span class="ps-game-num" id="ps-stars">0</span>
-            <span class="ps-game-lbl">⭐ Stars</span>
+          <div class="ps-rank-block">
+            <div class="ps-rank-label">Word Rank</div>
+            <div class="ps-rank-scale">
+              <div class="ps-rank-endpoints">
+                <span class="ps-rank-from" id="ps-level-name">Just Starting</span>
+                <span class="ps-rank-to" id="ps-rank-next">Getting Curious</span>
+              </div>
+              <div class="ps-level-bar-wrap">
+                <div class="ps-level-bar-fill" id="ps-level-fill" style="width:0%"></div>
+              </div>
+              <div class="ps-level-sub" id="ps-level-sub">Play to earn stars</div>
+            </div>
           </div>
         </div>
-      </div>
-
-      <!-- Level (no divider — same section as Daily Game) -->
-      <div class="ps-section">
-        <div class="ps-section-label">Your Level</div>
-        <div class="ps-level-name" id="ps-level-name">Just Starting</div>
-        <div class="ps-level-bar-wrap">
-          <div class="ps-level-bar-fill" id="ps-level-fill" style="width:0%"></div>
-        </div>
-        <div class="ps-level-sub" id="ps-level-sub">Play to earn stars</div>
       </div>
 
     </div>
@@ -2035,15 +2059,21 @@ function renderProgressWidget() {
   const nextLevel = LEVELS[LEVELS.indexOf(level)+1];
   const psLevelName = document.getElementById('ps-level-name');
   if(psLevelName) psLevelName.textContent = level.name;
+  const psRankNext = document.getElementById('ps-rank-next');
+  if(psRankNext) psRankNext.textContent = nextLevel ? nextLevel.name : '★ Legend';
   const psLevelFill = document.getElementById('ps-level-fill');
-  if(psLevelFill && nextLevel){
-    const lpct = ((stars-level.min)/(nextLevel.min-level.min))*100;
-    psLevelFill.style.width = Math.min(lpct,100)+'%';
+  if(psLevelFill){
+    if(nextLevel){
+      const lpct = ((stars-level.min)/(nextLevel.min-level.min))*100;
+      psLevelFill.style.width = Math.min(lpct,100)+'%';
+    } else {
+      psLevelFill.style.width = '100%';
+    }
   }
   const psLevelSub = document.getElementById('ps-level-sub');
   if(psLevelSub){
     if(nextLevel) psLevelSub.textContent = (nextLevel.min-stars)+' ⭐ to '+nextLevel.name;
-    else psLevelSub.textContent = 'Maximum level reached!';
+    else psLevelSub.textContent = 'You\'ve reached the top! 🎉';
   }
 }
 renderProgressWidget();
