@@ -1367,8 +1367,8 @@ function toggleVoice() {
 function startVoice() {
   const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new Rec();
-  recognition.continuous = true;
-  recognition.interimResults = true;
+  recognition.continuous = false;
+  recognition.interimResults = false;
   recognition.lang = 'en-GB';
 
   const area = document.getElementById('writing-area');
@@ -1385,7 +1385,7 @@ function startVoice() {
     isRecording = true;
     const btn = document.getElementById('voice-btn');
     btn.classList.add('recording');
-    document.getElementById('voice-label').textContent = 'Listening…';
+    document.getElementById('voice-label').textContent = 'Listening… (tap to stop)';
     // Insert a span for interim results
     interimSpan = document.createElement('span');
     interimSpan.className = 'voice-interim';
