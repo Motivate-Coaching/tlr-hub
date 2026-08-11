@@ -342,6 +342,13 @@ a.tab-btn { text-decoration: none; display: inline-block; }
 .video-wrap { position: relative; padding-bottom: 56.25%; height: 0; }
 .video-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; display: block; }
 .workshop-placeholder { background: var(--cream-dark); border-radius: 6px; padding: 1rem 1.25rem; font-size: 0.8rem; color: var(--text-muted); font-style: italic; }
+.yt-facade { position: relative; cursor: pointer; border-radius: 6px; overflow: hidden; background: #000; }
+.yt-facade img { width: 100%; display: block; transition: opacity 0.2s; }
+.yt-facade:hover img { opacity: 0.85; }
+.yt-facade iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+.yt-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 68px; height: 48px; background: #ff0000; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.15s; pointer-events: none; }
+.yt-facade:hover .yt-play { background: #cc0000; transform: translate(-50%,-50%) scale(1.08); }
+.yt-play svg { width: 24px; height: 24px; fill: white; margin-left: 4px; }
 
 /* ── PAST THEMES ─────────────────────────── */
 .theme-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 0.6rem; transition: box-shadow 0.2s; }
@@ -1429,10 +1436,9 @@ footer a { color: var(--gold); text-decoration: none; }
               <div class="workshop-eyebrow">Workshop Recording</div>
               <div class="workshop-title">Building Momentum, with Stuart Fairbairns PCC</div>
             </div>
-            <div class="video-wrap">
-              <iframe src="https://www.youtube.com/embed/3fQpPrvV8vo?rel=0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen></iframe>
+            <div class="yt-facade" onclick="this.innerHTML='<iframe src=\'https://www.youtube.com/embed/3fQpPrvV8vo?autoplay=1&rel=0\' allow=\'autoplay;accelerometer;clipboard-write;encrypted-media;gyroscope;picture-in-picture\' allowfullscreen style=\'position:absolute;top:0;left:0;width:100%;height:100%;border:0\'></iframe>';this.style.paddingBottom='56.25%';this.style.position='relative'">
+              <img src="https://img.youtube.com/vi/3fQpPrvV8vo/maxresdefault.jpg" alt="Building Momentum masterclass">
+              <div class="yt-play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
             </div>
           </div>
         </div>
@@ -1895,7 +1901,7 @@ pastThemes.forEach(t => {
   const card = document.createElement('div');
   card.className = 'theme-card'; card.id = t.id;
   const bannerHTML = t.banner ? `<div class="theme-banner-wrap"><img src="${t.banner}" alt="${t.theme}" class="theme-banner-img" onerror="this.parentElement.style.display='none'"></div>` : '';
-  card.innerHTML = `<div class="theme-trigger" role="button" tabindex="0" aria-expanded="false"><div class="th-meta"><div class="th-tag">Past theme</div><div class="th-title">${t.theme}</div><div class="th-door">"${t.door}"</div></div><span class="th-badge">Complete</span><div class="th-arrow">&#9660;</div></div><div class="theme-body">${bannerHTML}<p class="th-intro">${t.intro}</p>${topicsBlockHTML(t.topics)}${t.workshop ? `<div class="workshop-block"><div class="workshop-header"><div class="workshop-eyebrow">Workshop Recording</div><div class="workshop-title">${t.workshop.title}</div></div><div class="video-wrap"><iframe src="https://www.youtube.com/embed/${t.workshop.youtubeId}?rel=0" allowfullscreen></iframe></div></div>` : '<div class="workshop-placeholder">Workshop recording will be added here.</div>'}</div>`;
+  card.innerHTML = `<div class="theme-trigger" role="button" tabindex="0" aria-expanded="false"><div class="th-meta"><div class="th-tag">Past theme</div><div class="th-title">${t.theme}</div><div class="th-door">"${t.door}"</div></div><span class="th-badge">Complete</span><div class="th-arrow">&#9660;</div></div><div class="theme-body">${bannerHTML}<p class="th-intro">${t.intro}</p>${topicsBlockHTML(t.topics)}${t.workshop ? `<div class="workshop-block"><div class="workshop-header"><div class="workshop-eyebrow">Workshop Recording</div><div class="workshop-title">${t.workshop.title}</div></div><div class="yt-facade" onclick="this.innerHTML='<iframe src=\\'https://www.youtube.com/embed/${t.workshop.youtubeId}?autoplay=1&rel=0\\' allow=\\'autoplay;accelerometer;clipboard-write;encrypted-media;gyroscope;picture-in-picture\\' allowfullscreen style=\\'position:absolute;top:0;left:0;width:100%;height:100%;border:0\\'></iframe>';this.style.paddingBottom='56.25%';this.style.position='relative'"><img src="https://img.youtube.com/vi/${t.workshop.youtubeId}/maxresdefault.jpg" alt="${t.workshop.title}"><div class="yt-play"><svg viewBox="0 0 24 24" fill="white" width="24" height="24"><polygon points="5,3 19,12 5,21"/></svg></div></div></div>` : '<div class="workshop-placeholder">Workshop recording will be added here.</div>'}</div>`;
   const trigger = card.querySelector('.theme-trigger');
   trigger.addEventListener('click', () => { const o = card.classList.toggle('is-open'); trigger.setAttribute('aria-expanded', o); if (o) setActive(t.id); });
   trigger.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); trigger.click(); } });
