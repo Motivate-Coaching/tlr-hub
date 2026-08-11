@@ -1367,7 +1367,7 @@ function toggleVoice() {
 function startVoice() {
   const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new Rec();
-  recognition.continuous = false;
+  recognition.continuous = true;
   recognition.interimResults = false;
   recognition.lang = 'en-GB';
 
@@ -1418,14 +1418,19 @@ function startVoice() {
   };
 
   recognition.onend = function() {
-    stopVoice();
+    // If user hasn't manually stopped, restart to keep listening
+    if (isRecording) {
+      try { recognition.start(); } catch(e) { stopVoice(); }
+    } else {
+      stopVoice();
+    }
   };
 
   recognition.start();
 }
 
 function stopVoice() {
-  isRecording = false;
+  isRecording = false; // Must be set before recognition.stop() so onend doesn't restart
   if (recognition) { try { recognition.stop(); } catch(e){} recognition = null; }
   // Clean up interim span
   const area = document.getElementById('writing-area');
