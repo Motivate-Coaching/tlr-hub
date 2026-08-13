@@ -336,6 +336,20 @@ a.tab-btn { text-decoration: none; display: inline-block; }
 
 /* ── WORKSHOP ────────────────────────────── */
 .workshop-block { background: var(--navy); border-radius: 8px; overflow: hidden; }
+
+/* ── SESSIONS ───────────────────────────── */
+.session-card { display: flex; align-items: center; gap: 1.25rem; background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 1.1rem 1.4rem; margin-bottom: 0.6rem; transition: box-shadow 0.15s; }
+.session-card:hover { box-shadow: 0 3px 14px rgba(28,43,58,0.07); }
+.session-card--gold { border-color: rgba(232,168,0,0.35); background: rgba(232,168,0,0.04); }
+.session-day { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); min-width: 52px; }
+.session-info { flex: 1; min-width: 0; }
+.session-title { font-size: 0.92rem; font-weight: 600; color: var(--text-dark); margin-bottom: 0.2rem; }
+.session-time { font-size: 0.76rem; color: var(--text-muted); }
+.session-join-btn { display: inline-flex; align-items: center; gap: 0.45rem; background: var(--navy); color: var(--cream); border-radius: 5px; padding: 0.55rem 1rem; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; text-decoration: none; white-space: nowrap; transition: background 0.15s; flex-shrink: 0; }
+.session-join-btn:hover { background: var(--navy-mid); }
+.session-join-btn--gold { background: var(--gold); color: var(--navy); }
+.session-join-btn--gold:hover { background: var(--gold-light); }
+@media (max-width: 500px) { .session-card { flex-wrap: wrap; } .session-day { min-width: 100%; } }
 .workshop-header { padding: 1rem 1.35rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
 .workshop-eyebrow { font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 0.2rem; }
 .workshop-title { font-family: 'Playfair Display', serif; font-size: 0.93rem; color: var(--white); font-weight: 400; }
@@ -1081,6 +1095,7 @@ footer a { color: var(--gold); text-decoration: none; }
     <a class="tab-btn tab-link" href="my-wheel.html">My Balance Wheel</a>
     <a class="tab-btn tab-link" href="my-journal.html">My Journal</a>
     <a class="tab-btn tab-link" href="dashboard.html">Daily Word Game</a>
+    <button class="tab-btn" data-view="sessions">Live Sessions</button>
     <button class="tab-btn" data-view="vision">The Bigger Picture</button>
   </div>
 </div>
@@ -1455,6 +1470,80 @@ footer a { color: var(--gold); text-decoration: none; }
 </div>
 
 <!-- ════ VISION VIEW ════ -->
+<div id="view-sessions" style="display:none">
+  <div class="library-header">
+    <div class="library-header-title">Live Sessions</div>
+    <div class="library-header-sub">Your weekly coaching calls with Stuart — join directly from here</div>
+  </div>
+
+  <div style="max-width:780px;margin:0 auto;padding:0 1.5rem 3rem;">
+
+    <!-- Weekly sessions -->
+    <div style="margin-bottom:2rem;">
+      <div class="section-label" style="margin-bottom:1rem;">Weekly Calls</div>
+
+      <!-- Monday -->
+      <div class="session-card">
+        <div class="session-day">Monday</div>
+        <div class="session-info">
+          <div class="session-title">TLR Session with Stuart</div>
+          <div class="session-time">12:00pm BST &nbsp;·&nbsp; 1:00pm CET &nbsp;·&nbsp; 7:00am EST</div>
+        </div>
+        <a class="session-join-btn" href="https://us02web.zoom.us/j/84905037343?pwd=YzoFgXSbWWqXGH3dSYWEXauIxKi7VS.1" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg>
+          Join
+        </a>
+      </div>
+
+      <!-- Wednesday -->
+      <div class="session-card">
+        <div class="session-day">Wednesday</div>
+        <div class="session-info">
+          <div class="session-title">Dedicated Time Session</div>
+          <div class="session-time">12:00pm BST &nbsp;·&nbsp; 1:00pm CET &nbsp;·&nbsp; 7:00am EST</div>
+        </div>
+        <a class="session-join-btn" href="https://us02web.zoom.us/j/84923656855?pwd=V5kWtSwNkeKjkvboHBdfriQ9wyXDq8.1" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg>
+          Join
+        </a>
+      </div>
+
+      <!-- Thursday -->
+      <div class="session-card">
+        <div class="session-day">Thursday</div>
+        <div class="session-info">
+          <div class="session-title">TLR Session with Stuart</div>
+          <div class="session-time">7:30am BST &nbsp;·&nbsp; 8:30am CET</div>
+        </div>
+        <a class="session-join-btn" href="https://us02web.zoom.us/j/85474574696?pwd=kih5tcvekLY5vpNUVbRMaMzQ6zn9N1.1&jst=3" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg>
+          Join
+        </a>
+      </div>
+    </div>
+
+    <!-- Monthly Masterclass -->
+    <div style="margin-bottom:2rem;">
+      <div class="section-label" style="margin-bottom:1rem;">Monthly Masterclass</div>
+      <div class="session-card session-card--gold">
+        <div class="session-day" style="color:var(--gold)">Last Wed</div>
+        <div class="session-info">
+          <div class="session-title">TLR Monthly Masterclass</div>
+          <div class="session-time">2:00pm BST &nbsp;·&nbsp; 3:00pm CET &nbsp;·&nbsp; 9:00am EST &nbsp;·&nbsp; Last Wednesday of every month</div>
+        </div>
+        <a class="session-join-btn session-join-btn--gold" href="https://us02web.zoom.us/j/82914082316?pwd=6knOmrR63ZRWrP9he8nj5AZ7cCIWwW.1&jst=3" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg>
+          Join
+        </a>
+      </div>
+    </div>
+
+    <!-- Note -->
+    <p style="font-size:0.8rem;color:var(--text-muted);font-style:italic;text-align:center;padding-top:0.5rem;">All sessions are hosted on Zoom. Links open directly in the Zoom app or your browser.</p>
+
+  </div>
+</div>
+
 <div id="view-vision" style="display:none">
 
   <div class="vision-hero">
