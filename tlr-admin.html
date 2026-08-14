@@ -277,8 +277,22 @@ async function loadAll() {
     .order('created_at', { ascending: false })
     .limit(500);
 
-  if (error || !data) {
-    document.getElementById('last-updated').textContent = 'Error loading data.';
+  if (error) {
+    document.getElementById('last-updated').textContent = 'Error: ' + error.message;
+    document.getElementById('members-list').innerHTML = '<div class="loading">Could not load data.</div>';
+    document.getElementById('pages-list').innerHTML = '<div class="loading">Could not load data.</div>';
+    document.getElementById('feed-body').innerHTML = '<div class="loading">Could not load data.</div>';
+    return;
+  }
+  if (!data || data.length === 0) {
+    document.getElementById('s-members').textContent = '0';
+    document.getElementById('s-views').textContent = '0';
+    document.getElementById('s-today').textContent = '0';
+    document.getElementById('s-week').textContent = '0';
+    document.getElementById('members-list').innerHTML = '<div class="loading">No activity yet — check back once members have logged in.</div>';
+    document.getElementById('pages-list').innerHTML = '<div class="loading">No page views yet.</div>';
+    document.getElementById('feed-body').innerHTML = '<div class="loading">No activity yet.</div>';
+    document.getElementById('last-updated').textContent = 'Last updated ' + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     return;
   }
 
