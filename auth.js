@@ -8,7 +8,28 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 async function requireAuth() {
   const { data: { session } } = await _supabase.auth.getSession();
   if (!session) { window.location.replace('login.html'); return null; }
+  // Log page view (fire and forget — never blocks the page)
+  const page = window.location.pathname.split('/').pop().replace('.html', '') || 'home';
+  _supabase.from('activity_log').insert({
+    user_id: session.user.id,
+    user_email: session.user.email,
+    event_type: 'page_view',
+    page: page
+  }).catch(() => {});
   return session.user;
+}
+
+// logActivity — call for specific events (tool complete, game play, etc.)
+async function logActivity(eventType, page, metadata = {}) {
+  const { data: { session } } = await _supabase.auth.getSession();
+  if (!session) return;
+  _supabase.from('activity_log').insert({
+    user_id: session.user.id,
+    user_email: session.user.email,
+    event_type: eventType,
+    page: page,
+    metadata: metadata
+  }).catch(() => {});
 }
 
 async function getUser() {
