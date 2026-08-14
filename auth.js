@@ -4,12 +4,11 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// requireAuth — SOFT LAUNCH MODE: auth bypassed. Restore the real check below when ready.
+// requireAuth — call on any protected page; redirects to login if no session
 async function requireAuth() {
-  return true; // bypass
-  // const { data: { session } } = await _supabase.auth.getSession();
-  // if (!session) { window.location.replace('login.html'); return null; }
-  // return session.user;
+  const { data: { session } } = await _supabase.auth.getSession();
+  if (!session) { window.location.replace('login.html'); return null; }
+  return session.user;
 }
 
 async function getUser() {

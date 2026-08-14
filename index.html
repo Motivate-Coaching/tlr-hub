@@ -1076,9 +1076,7 @@ footer a { color: var(--gold); text-decoration: none; }
   }
 })();
 </script>
-<script>// AUTH TEMPORARILY DISABLED FOR SOFT LAUNCH — restore when ready
-// requireAuth().then(u => { if(u) showUserBadge("#user-badge"); });
-</script>
+<script>requireAuth().then(u => { if(u) showUserBadge("#user-badge"); });</script>
 
 <!-- HEADER -->
 <div class="sticky-top">
