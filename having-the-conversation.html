@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Having the Conversation | TLR</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0F1215; --navy-mid:#1C2B3A;
+  --cream:#F5F1EB; --cream-dark:#EDE8DF; --cream-deeper:#E5DFD5;
+  --text-dark:#1A1A1A; --text-mid:#4A4A4A; --text-muted:#8A8880;
+  --border:rgba(0,0,0,0.08); --white:#FFFFFF;
+  --font-body:'Poppins',sans-serif; --font-display:'Playfair Display',serif;
+  --accent:#C17B2E; --accent-pale:rgba(193,123,46,0.1); --accent-light:#D9964E;
+  /* Compass quadrant colours */
+  --q-me:#7A8B5C;      /* sage green */
+  --q-them:#B05A44;    /* terracotta */
+  --q-us:#6A7F96;      /* blue-grey */
+  --q-conv:#C17B2E;    /* amber/gold */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);line-height:1.7;font-size:16px}
+
+.topbar{position:sticky;top:0;z-index:100;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.75rem;gap:1rem}
+.topbar a.back{color:rgba(255,255,255,0.65);text-decoration:none;font-size:0.82rem;transition:color .2s}
+.topbar a.back:hover{color:#fff}
+.topbar .logo{color:#fff;font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.04em}
+.topbar .theme-pill{background:var(--accent);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.28rem 0.85rem;border-radius:20px}
+#saved-badge{display:none;align-items:center;gap:0.4rem;font-size:0.72rem;color:rgba(255,255,255,0.5)}
+#saved-badge .dot{width:6px;height:6px;background:#5CB85C;border-radius:50%;display:inline-block}
+
+.page{max-width:860px;margin:0 auto;padding:3.5rem 2rem 7rem}
+
+.tool-eyebrow{font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.6rem;text-align:center}
+.tool-title{font-family:var(--font-display);font-size:3rem;line-height:1.15;text-align:center;color:var(--text-dark);margin-bottom:0.4rem}
+.tool-subtitle{font-size:0.82rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);text-align:center;margin-bottom:0.5rem}
+.divider{width:48px;height:3px;background:var(--accent);margin:0.75rem auto 0.75rem;border-radius:2px}
+.tool-framing{font-size:0.95rem;color:var(--text-muted);text-align:center;margin-bottom:2.5rem;font-style:italic}
+
+/* ── COMPASS SECTION ── */
+.compass-section{margin-bottom:2.5rem}
+.compass-wrapper{display:grid;grid-template-columns:1fr auto 1fr;grid-template-rows:1fr auto 1fr;gap:0;position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--border)}
+
+/* The centre circle */
+.compass-centre{grid-column:2;grid-row:2;background:var(--white);width:150px;height:150px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;z-index:2;position:relative;border:3px solid var(--white);box-shadow:0 0 0 1px rgba(0,0,0,0.1)}
+.compass-centre-text{font-family:var(--font-display);font-style:italic;font-size:0.78rem;color:var(--text-mid);line-height:1.4;padding:0.5rem}
+
+/* Quadrant panels */
+.quad{padding:1.5rem 1.75rem;display:flex;flex-direction:column;gap:0.6rem}
+.quad-tl{background:var(--q-me);grid-column:1;grid-row:1;border-radius:0}
+.quad-tr{background:var(--q-them);grid-column:3;grid-row:1}
+.quad-bl{background:var(--q-conv);grid-column:1;grid-row:3}
+.quad-br{background:var(--q-us);grid-column:3;grid-row:3}
+/* top-left corner bridge cells */
+.quad-tc{grid-column:2;grid-row:1;background:linear-gradient(to bottom,var(--cream-dark),var(--white));display:flex;align-items:flex-end;justify-content:center;padding-bottom:0.35rem}
+.quad-bl-c{grid-column:2;grid-row:3;background:linear-gradient(to top,var(--cream-dark),var(--white));display:flex;align-items:flex-start;justify-content:center;padding-top:0.35rem}
+.quad-lc{grid-column:1;grid-row:2;background:linear-gradient(to right,var(--cream-dark),var(--white));display:flex;align-items:center;justify-content:flex-end;padding-right:0.35rem}
+.quad-rc{grid-column:3;grid-row:2;background:linear-gradient(to left,var(--cream-dark),var(--white));display:flex;align-items:center;justify-content:flex-start;padding-left:0.35rem}
+/* Arrow SVG */
+.arrow-svg{opacity:0.5}
+
+.quad-num{font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:-0.2rem}
+.quad-label{font-size:1.05rem;font-weight:700;color:#fff;letter-spacing:0.05em;text-transform:uppercase}
+.quad-q{font-size:0.85rem;font-weight:600;color:rgba(255,255,255,0.95);line-height:1.4;margin-bottom:0.1rem}
+.quad-hint{font-size:0.8rem;color:rgba(255,255,255,0.7);line-height:1.45;margin-bottom:0.6rem}
+.quad input[type=text]{font-family:var(--font-body);font-size:0.85rem;color:#fff;background:transparent;border:none;border-bottom:1.5px solid rgba(255,255,255,0.35);width:100%;outline:none;padding:0.2rem 0 0.3rem;transition:border-color .2s}
+.quad input[type=text]:focus{border-bottom-color:rgba(255,255,255,0.85)}
+.quad input[type=text]::placeholder{color:rgba(255,255,255,0.45);font-size:0.8rem}
+
+/* Conversation quadrant has checkboxes */
+.conv-checks{display:flex;flex-direction:column;gap:0.35rem;margin-bottom:0.5rem}
+.conv-check{display:flex;align-items:center;gap:0.5rem;font-size:0.83rem;color:rgba(255,255,255,0.85)}
+.conv-check::before{content:'✓';color:rgba(255,255,255,0.9);font-weight:700;flex-shrink:0}
+
+/* ── MY OPENING SECTION ── */
+.opening-section{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.75rem 1.75rem 1.5rem;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.opening-section::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);border-radius:4px 0 0 4px}
+.opening-header{display:flex;align-items:center;gap:0.75rem;margin-bottom:0.25rem}
+.opening-icon{width:36px;height:36px;background:var(--navy);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.opening-icon svg{width:16px;height:16px;fill:var(--accent-light)}
+.opening-title{font-size:0.9rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-dark)}
+.opening-sub{font-size:0.88rem;color:var(--text-muted);margin-bottom:0.3rem;padding-left:3rem}
+.opening-q{font-size:0.9rem;color:var(--text-mid);font-style:italic;margin-bottom:1.25rem;padding-left:3rem}
+
+.opening-lines{display:flex;flex-direction:column;gap:0.85rem;padding-left:3rem}
+.opening-line{display:grid;grid-template-columns:auto 1fr;gap:0.6rem;align-items:baseline}
+.ol-prompt{font-size:0.87rem;color:var(--text-mid);white-space:nowrap;flex-shrink:0}
+.ol-input{font-family:var(--font-body);font-size:0.9rem;color:var(--text-dark);border:none;border-bottom:1.5px solid var(--border);outline:none;background:transparent;padding:0.2rem 0 0.3rem;width:100%;transition:border-color .2s}
+.ol-input:focus{border-bottom-color:var(--accent)}
+.ol-input::placeholder{color:var(--text-muted);font-size:0.83rem}
+.ol-indent{padding-left:0;display:grid;grid-template-columns:1fr;gap:0.5rem}
+.ol-continuation{font-family:var(--font-body);font-size:0.9rem;color:var(--text-dark);border:none;border-bottom:1.5px solid var(--border);outline:none;background:transparent;padding:0.2rem 0 0.3rem;width:100%;transition:border-color .2s}
+.ol-continuation:focus{border-bottom-color:var(--accent)}
+.ol-continuation::placeholder{color:var(--text-muted);font-size:0.83rem}
+
+/* ── IN THE MOMENT SIDEBAR ── */
+.moment-grid{display:grid;grid-template-columns:1fr 260px;gap:1.5rem;align-items:start;margin-bottom:1.5rem}
+.moment-card{background:var(--navy);border-radius:12px;padding:1.5rem}
+.moment-title{font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:0.35rem}
+.moment-sub{font-size:0.85rem;color:rgba(255,255,255,0.55);margin-bottom:1.1rem;line-height:1.4}
+.moment-item{display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:0.85rem}
+.moment-item:last-child{margin-bottom:0}
+.moment-dot-wrap{flex-shrink:0;margin-top:0.2rem}
+.moment-dot{width:8px;height:8px;background:var(--accent);border-radius:50%}
+.moment-item-title{font-size:0.8rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.9);margin-bottom:0.15rem}
+.moment-item-body{font-size:0.83rem;color:rgba(255,255,255,0.55);line-height:1.4}
+.moment-italic{font-family:var(--font-display);font-style:italic;font-size:0.9rem;color:var(--accent-light);margin-top:1.1rem;line-height:1.5;border-top:1px solid rgba(255,255,255,0.08);padding-top:1rem}
+
+/* Keep in mind */
+.keep-in-mind{background:var(--cream-dark);border:1px solid var(--cream-deeper);border-radius:12px;padding:1.25rem 1.75rem;display:flex;align-items:flex-start;gap:1rem}
+.kim-icon{width:40px;height:40px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1.5px solid var(--border)}
+.kim-icon svg{width:20px;height:20px}
+.kim-label{font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:0.4rem}
+.kim-body{font-size:0.88rem;color:var(--text-mid);line-height:1.6}
+
+.complete-wrap{text-align:center;padding-top:1.5rem}
+.complete-btn{background:var(--navy);color:#fff;border:none;padding:1rem 2.75rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s;letter-spacing:0.01em}
+.complete-btn:hover{opacity:0.87;transform:translateY(-1px)}
+
+/* ── Completion view ── */
+#completionView{display:none}
+.comp-inner{max-width:860px;margin:0 auto;padding:3rem 2rem 7rem}
+.completion-header{text-align:center;padding-bottom:2rem;border-bottom:1px solid var(--border);margin-bottom:2.5rem}
+.completion-icon{font-size:2.75rem;margin-bottom:0.75rem}
+.completion-header h2{font-family:var(--font-display);font-size:2rem;color:var(--text-dark);margin-bottom:0.4rem;line-height:1.25}
+.completion-tagline{font-size:0.95rem;color:var(--text-muted)}
+.summary-section{margin-bottom:2rem}
+.summary-section h3{font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+.summary-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:0.65rem}
+.summary-card .card-label{font-size:0.75rem;font-weight:600;color:var(--text-muted);margin-bottom:0.25rem}
+.summary-card .card-value{font-size:0.92rem;color:var(--text-dark);white-space:pre-wrap;line-height:1.6}
+.closing-quote{border-left:4px solid var(--accent);background:var(--accent-pale);padding:1.1rem 1.5rem;border-radius:0 10px 10px 0;font-style:italic;color:var(--text-mid);font-size:1rem;margin-bottom:2.25rem;line-height:1.6}
+.completion-actions{display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:2rem}
+.ca-btn{border:1px solid var(--border);background:var(--white);color:var(--text-mid);padding:0.65rem 1.25rem;border-radius:8px;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:all .2s}
+.ca-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+@media(max-width:720px){
+  .tool-title{font-size:2.2rem}
+  .compass-wrapper{grid-template-columns:1fr;grid-template-rows:auto;display:flex;flex-direction:column;gap:0}
+  .compass-centre{display:none}
+  .quad-tc,.quad-bl-c,.quad-lc,.quad-rc{display:none}
+  .moment-grid{grid-template-columns:1fr}
+  .opening-lines,.opening-sub,.opening-q{padding-left:0}
+  .page{padding:2.5rem 1.25rem 5rem}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back" href="index.html" onclick="history.length>1?(event.preventDefault(),history.back()):true">← Back</a>
+  <span class="logo">The Living Room</span>
+  <div style="display:flex;align-items:center;gap:0.85rem">
+    <div id="saved-badge"><span class="dot"></span> Saved</div>
+    <span class="theme-pill">Difficult Conversations</span>
+  </div>
+</div>
+
+<div id="mainView">
+<div class="page">
+
+  <div class="tool-eyebrow">Week 3 &nbsp;·&nbsp; Difficult Conversations</div>
+  <h1 class="tool-title">Having the Conversation</h1>
+  <div class="tool-subtitle">Respect yourself. Respect them. Respect what needs to be said.</div>
+  <div class="divider"></div>
+  <div class="tool-framing">Use this compass to guide you in the moment.</div>
+
+  <!-- COMPASS -->
+  <div class="compass-section">
+    <div class="compass-wrapper">
+
+      <!-- TOP-LEFT: ME -->
+      <div class="quad quad-tl">
+        <div class="quad-num">1</div>
+        <div class="quad-label">Me</div>
+        <div class="quad-q">What do I need to say honestly?</div>
+        <div class="quad-hint">What matters enough that I shouldn't minimise, avoid or compromise it simply to make the conversation easier?</div>
+        <input type="text" id="q1a" placeholder="..." oninput="save()">
+        <input type="text" id="q1b" placeholder="..." oninput="save()">
+      </div>
+
+      <!-- TOP BRIDGE -->
+      <div class="quad-tc">
+        <svg class="arrow-svg" width="24" height="20" viewBox="0 0 24 20"><path d="M12 2v16M6 12l6 6 6-6" stroke="#666" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+      </div>
+
+      <!-- TOP-RIGHT: THEM -->
+      <div class="quad quad-tr">
+        <div class="quad-num">2</div>
+        <div class="quad-label">Them</div>
+        <div class="quad-q">What do I need to understand?</div>
+        <div class="quad-hint">What might I not know yet? What questions could help me understand their experience rather than assume it?</div>
+        <input type="text" id="q2a" placeholder="..." oninput="save()">
+        <input type="text" id="q2b" placeholder="..." oninput="save()">
+      </div>
+
+      <!-- LEFT BRIDGE -->
+      <div class="quad-lc">
+        <svg class="arrow-svg" width="20" height="24" viewBox="0 0 20 24"><path d="M2 12h16M12 6l6 6-6 6" stroke="#666" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+      </div>
+
+      <!-- CENTRE CIRCLE -->
+      <div class="compass-centre">
+        <div class="compass-centre-text">Stay clear on what matters.<br>Stay curious about what you don't know.</div>
+      </div>
+
+      <!-- RIGHT BRIDGE -->
+      <div class="quad-rc">
+        <svg class="arrow-svg" width="20" height="24" viewBox="0 0 20 24"><path d="M18 12H2M8 6L2 12l6 6" stroke="#666" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+      </div>
+
+      <!-- BOTTOM-LEFT: THE CONVERSATION -->
+      <div class="quad quad-bl">
+        <div class="quad-num">4</div>
+        <div class="quad-label">The Conversation</div>
+        <div class="quad-q">What needs to stay in the room?</div>
+        <div class="conv-checks">
+          <div class="conv-check">Be honest</div>
+          <div class="conv-check">Stay curious</div>
+          <div class="conv-check">Keep listening</div>
+        </div>
+        <input type="text" id="q4a" placeholder="What else do you want to hold onto?" oninput="save()">
+      </div>
+
+      <!-- BOTTOM BRIDGE -->
+      <div class="quad-bl-c">
+        <svg class="arrow-svg" width="24" height="20" viewBox="0 0 24 20"><path d="M12 18V2M6 8l6-6 6 6" stroke="#666" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+      </div>
+
+      <!-- BOTTOM-RIGHT: US -->
+      <div class="quad quad-br">
+        <div class="quad-num">3</div>
+        <div class="quad-label">Us</div>
+        <div class="quad-q">What do we both care about here?</div>
+        <div class="quad-hint">What shared outcome, relationship, responsibility or intention can we come back to when things get hard?</div>
+        <input type="text" id="q3a" placeholder="..." oninput="save()">
+        <input type="text" id="q3b" placeholder="..." oninput="save()">
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MY OPENING -->
+  <div class="opening-section">
+    <div class="opening-header">
+      <div class="opening-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </div>
+      <div class="opening-title">My Opening</div>
+    </div>
+    <div class="opening-sub">Bring the pieces together.</div>
+    <div class="opening-q">How could I begin this conversation in a way that sounds like me?</div>
+    <div class="opening-lines">
+      <div class="opening-line">
+        <span class="ol-prompt">I want to talk about</span>
+        <input class="ol-input" type="text" id="op1" placeholder="..." oninput="save()">
+      </div>
+      <div class="opening-line">
+        <span class="ol-prompt">because</span>
+        <input class="ol-input" type="text" id="op2" placeholder="..." oninput="save()">
+      </div>
+      <div class="opening-line">
+        <span class="ol-prompt">What I've noticed is</span>
+        <input class="ol-input" type="text" id="op3" placeholder="..." oninput="save()">
+      </div>
+      <div class="opening-line">
+        <span class="ol-prompt">The way I've experienced this is</span>
+        <input class="ol-input" type="text" id="op4" placeholder="..." oninput="save()">
+      </div>
+      <div class="opening-line">
+        <span class="ol-prompt">What's important to me here is</span>
+        <input class="ol-input" type="text" id="op5" placeholder="..." oninput="save()">
+      </div>
+      <div class="opening-line">
+        <span class="ol-prompt">I'd like to understand your perspective.</span>
+        <input class="ol-input" type="text" id="op6" placeholder="Any additional thought..." oninput="save()">
+      </div>
+    </div>
+  </div>
+
+  <!-- IN THE MOMENT + KEEP IN MIND -->
+  <div class="moment-grid">
+    <div class="keep-in-mind">
+      <div class="kim-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#C17B2E" stroke-width="1.8" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div>
+        <div class="kim-label">Keep in mind</div>
+        <div class="kim-body">You can disagree and still respect each other.<br><br>You can stand by what matters to you and stay curious about what matters to them.</div>
+      </div>
+    </div>
+    <div class="moment-card">
+      <div class="moment-title">In the Moment</div>
+      <div class="moment-sub">If things get tricky, come back here.</div>
+      <div class="moment-item">
+        <div class="moment-dot-wrap"><div class="moment-dot"></div></div>
+        <div>
+          <div class="moment-item-title">Pause</div>
+          <div class="moment-item-body">Take a breath. Stay calm.</div>
+        </div>
+      </div>
+      <div class="moment-item">
+        <div class="moment-dot-wrap"><div class="moment-dot"></div></div>
+        <div>
+          <div class="moment-item-title">Listen</div>
+          <div class="moment-item-body">Focus on understanding, not responding.</div>
+        </div>
+      </div>
+      <div class="moment-item">
+        <div class="moment-dot-wrap"><div class="moment-dot"></div></div>
+        <div>
+          <div class="moment-item-title">Return to Purpose</div>
+          <div class="moment-item-body">What are we trying to achieve here?</div>
+        </div>
+      </div>
+      <div class="moment-italic">Aim for understanding and the best possible way forward for everyone.</div>
+    </div>
+  </div>
+
+  <div class="complete-wrap">
+    <button class="complete-btn" onclick="complete()">Mark as complete ✓</button>
+  </div>
+
+</div>
+</div>
+
+<!-- COMPLETION VIEW -->
+<div id="completionView">
+  <div class="comp-inner">
+    <div class="completion-header">
+      <div class="completion-icon">🤝</div>
+      <h2>You're ready.</h2>
+      <div class="completion-tagline">You've done the preparation. You're clearer on what you need to say, what you need to understand, and what you both care about. That's a solid foundation for a real conversation.</div>
+    </div>
+    <div class="summary-section">
+      <h3>Your compass</h3>
+      <div class="summary-card"><div class="card-label">Me — what I need to say honestly</div><div class="card-value" id="sum-me"></div></div>
+      <div class="summary-card"><div class="card-label">Them — what I need to understand</div><div class="card-value" id="sum-them"></div></div>
+      <div class="summary-card"><div class="card-label">Us — what we both care about</div><div class="card-value" id="sum-us"></div></div>
+    </div>
+    <div class="summary-section">
+      <h3>My opening</h3>
+      <div class="summary-card"><div class="card-label">How I'll begin</div><div class="card-value" id="sum-opening"></div></div>
+    </div>
+    <div class="closing-quote">"Aim for understanding and the best possible way forward for everyone."</div>
+    <div class="completion-actions">
+      <button class="ca-btn" onclick="document.getElementById('mainView').style.display='';document.getElementById('completionView').style.display='none'">← Review your answers</button>
+      <button class="ca-btn" onclick="window.location.href='index.html'">Back to library</button>
+      <button class="ca-btn" onclick="window.location.href='why-we-avoid-them.html'">← Week 1: Why We Avoid Them</button>
+    </div>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+requireAuth().then(u => { if(u) showUserBadge && showUserBadge('.logo'); });
+
+const STORAGE_KEY = 'tlr-having-the-conversation';
+let saveTimer;
+
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{
+    const data = {
+      q1a:v('q1a'),q1b:v('q1b'),
+      q2a:v('q2a'),q2b:v('q2b'),
+      q3a:v('q3a'),q3b:v('q3b'),
+      q4a:v('q4a'),
+      op1:v('op1'),op2:v('op2'),op3:v('op3'),op4:v('op4'),op5:v('op5'),op6:v('op6'),
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    const badge = document.getElementById('saved-badge');
+    badge.style.display='flex';
+    setTimeout(()=>badge.style.display='none',2000);
+  }, 800);
+}
+
+function v(id){ return document.getElementById(id)?.value || ''; }
+function sv(id, val){ const el = document.getElementById(id); if(el) el.value = val; }
+
+function load(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return;
+  try{
+    const d = JSON.parse(raw);
+    Object.keys(d).forEach(k=>sv(k,d[k]));
+  }catch(e){}
+}
+
+function complete(){
+  const me = [v('q1a'),v('q1b')].filter(Boolean).join('\n');
+  document.getElementById('sum-me').textContent = me || '(not filled in)';
+  const them = [v('q2a'),v('q2b')].filter(Boolean).join('\n');
+  document.getElementById('sum-them').textContent = them || '(not filled in)';
+  const us = [v('q3a'),v('q3b')].filter(Boolean).join('\n');
+  document.getElementById('sum-us').textContent = us || '(not filled in)';
+
+  const prompts = [
+    'I want to talk about: '+v('op1'),
+    'because '+v('op2'),
+    'What I\'ve noticed is: '+v('op3'),
+    'The way I\'ve experienced this is: '+v('op4'),
+    'What\'s important to me here is: '+v('op5'),
+  ].filter(p=>!p.endsWith(': ')).join('\n');
+  document.getElementById('sum-opening').textContent = prompts || '(not filled in)';
+
+  const raw = localStorage.getItem(STORAGE_KEY);
+  let data = {};
+  try{ data=JSON.parse(raw)||{}; }catch(e){}
+  data._completed = true;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+  document.getElementById('mainView').style.display='none';
+  document.getElementById('completionView').style.display='';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+load();
+</script>
+</body>
+</html>

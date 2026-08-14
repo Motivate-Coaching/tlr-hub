@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Getting Clear Before You Speak | TLR</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0F1215; --navy-mid:#1C2B3A;
+  --cream:#F5F1EB; --cream-dark:#EDE8DF; --cream-deeper:#E5DFD5;
+  --text-dark:#1A1A1A; --text-mid:#4A4A4A; --text-muted:#8A8880;
+  --border:rgba(0,0,0,0.08); --white:#FFFFFF;
+  --font-body:'Poppins',sans-serif; --font-display:'Playfair Display',serif;
+  --accent:#C17B2E; --accent-pale:rgba(193,123,46,0.1); --accent-light:#D9964E;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);line-height:1.7;font-size:16px}
+
+.topbar{position:sticky;top:0;z-index:100;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.75rem;gap:1rem}
+.topbar a.back{color:rgba(255,255,255,0.65);text-decoration:none;font-size:0.82rem;transition:color .2s}
+.topbar a.back:hover{color:#fff}
+.topbar .logo{color:#fff;font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.04em}
+.topbar .theme-pill{background:var(--accent);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.28rem 0.85rem;border-radius:20px}
+#saved-badge{display:none;align-items:center;gap:0.4rem;font-size:0.72rem;color:rgba(255,255,255,0.5)}
+#saved-badge .dot{width:6px;height:6px;background:#5CB85C;border-radius:50%;display:inline-block}
+
+.page{max-width:800px;margin:0 auto;padding:3.5rem 2rem 7rem}
+
+.tool-eyebrow{font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.6rem;text-align:center}
+.tool-title{font-family:var(--font-display);font-size:3rem;line-height:1.15;text-align:center;color:var(--text-dark);margin-bottom:0.5rem}
+.tool-subtitle{font-size:1rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--accent);text-align:center;margin-bottom:0.25rem}
+.tool-framing{font-size:0.97rem;color:var(--text-muted);text-align:center;margin-bottom:0.5rem}
+.divider{width:48px;height:3px;background:var(--accent);margin:0.75rem auto 2rem;border-radius:2px}
+
+/* ── Main layout: content + sidebar ── */
+.two-col{display:grid;grid-template-columns:1fr 260px;gap:2rem;align-items:start}
+.main-col{}
+.side-col{}
+
+/* ── Step blocks ── */
+.step-block{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.75rem 1.75rem 1.5rem;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.step-block::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);border-radius:4px 0 0 4px}
+.step-head{display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:0.4rem}
+.step-num{width:32px;height:32px;background:var(--navy);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:700;flex-shrink:0;margin-top:0.1rem}
+.step-q{font-size:0.9rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-dark);line-height:1.35}
+.step-hint{font-size:0.9rem;color:var(--text-muted);margin-bottom:1rem;padding-left:2.75rem;line-height:1.55}
+.step-hint em{color:var(--accent);font-style:italic}
+textarea{font-family:var(--font-body);font-size:0.94rem;color:var(--text-dark);background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:0.9rem 1.1rem;width:100%;resize:none;overflow:hidden;outline:none;transition:border-color .2s,box-shadow .2s;line-height:1.65}
+textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale);background:var(--white)}
+textarea::placeholder{color:var(--text-muted);font-size:0.88rem}
+
+/* ── Checkbox grid (2-col within step) ── */
+.checkbox-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.55rem;padding-left:2.75rem}
+.check-item{display:flex;align-items:flex-start;gap:0.6rem;padding:0.65rem 0.9rem;background:var(--cream);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s;user-select:none}
+.check-item:hover{border-color:var(--accent-light);background:var(--white)}
+.check-item.checked{border-color:var(--accent);background:var(--accent-pale)}
+.check-item input[type=checkbox]{display:none}
+.check-box{width:20px;height:20px;border:2px solid var(--border);border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:0.1rem}
+.check-item.checked .check-box{background:var(--accent);border-color:var(--accent)}
+.check-box svg{width:11px;height:11px;stroke:white;stroke-width:2.5;fill:none;opacity:0;transition:opacity .15s}
+.check-item.checked .check-box svg{opacity:1}
+.check-icon{font-size:1rem;flex-shrink:0;width:20px;text-align:center}
+.check-label{font-size:0.85rem;color:var(--text-mid);line-height:1.4}
+
+/* Section 3: custom else input */
+.else-input{font-family:var(--font-body);font-size:0.85rem;color:var(--text-dark);border:none;border-bottom:1.5px solid var(--border);outline:none;width:120px;background:transparent;padding:0.1rem 0;margin-left:0.25rem;transition:border-color .2s}
+.else-input:focus{border-bottom-color:var(--accent)}
+
+/* ── Section 4: sentence completion ── */
+.sentence-block{padding-left:2.75rem}
+.sentence-prompt{font-size:0.9rem;color:var(--accent);font-style:italic;font-family:var(--font-display);margin-bottom:0.85rem;line-height:1.5}
+.sentence-line{display:flex;align-items:baseline;gap:0.5rem;margin-bottom:0.85rem;font-size:0.9rem;color:var(--text-mid)}
+.sentence-line input{flex:1;font-family:var(--font-body);font-size:0.9rem;color:var(--text-dark);border:none;border-bottom:1.5px solid var(--border);outline:none;background:transparent;padding:0.2rem 0 0.3rem;transition:border-color .2s}
+.sentence-line input:focus{border-bottom-color:var(--accent)}
+.sentence-line input::placeholder{color:var(--text-muted);font-size:0.83rem}
+
+/* ── Sidebar cards ── */
+.sidebar-card{background:var(--white);border:1.5px solid var(--accent);border-radius:12px;padding:1.4rem 1.5rem;margin-bottom:1.25rem}
+.sidebar-card-header{display:flex;align-items:center;gap:0.6rem;margin-bottom:1rem;padding-bottom:0.85rem;border-bottom:1px solid var(--cream-deeper)}
+.sc-icon{width:36px;height:36px;background:var(--navy);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sc-icon svg{width:16px;height:16px;fill:var(--accent-light)}
+.sc-title{font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-dark)}
+.sc-sub{font-size:0.82rem;color:var(--text-muted);margin-top:0.2rem}
+
+.pause-item{display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:1rem}
+.pause-item:last-child{margin-bottom:0}
+.pause-icon-wrap{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pause-icon-wrap svg{width:15px;height:15px;fill:none;stroke:var(--accent);stroke-width:1.8}
+.pause-q{font-size:0.87rem;color:var(--text-mid);line-height:1.45}
+.pause-q strong{color:var(--text-dark)}
+
+/* ── Remember callout ── */
+.remember-card{background:var(--navy);border-radius:12px;padding:1.4rem 1.5rem;text-align:center}
+.remember-icon{width:44px;height:44px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 0.85rem}
+.remember-icon svg{width:20px;height:20px;fill:var(--accent-light)}
+.remember-title{font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:0.5rem}
+.remember-body{font-size:0.9rem;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:0.5rem}
+.remember-gold{color:var(--accent-light);font-weight:600;font-size:0.9rem;line-height:1.5}
+
+/* ── Footer ── */
+.footer-banner{background:var(--cream-dark);border:1px solid var(--cream-deeper);border-radius:12px;padding:1.25rem 1.75rem;text-align:center;margin-bottom:2rem}
+.footer-strong{font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--navy)}
+.footer-sub{font-size:0.82rem;color:var(--text-muted);margin-top:0.2rem}
+
+.complete-wrap{text-align:center;padding-top:0.5rem}
+.complete-btn{background:var(--navy);color:#fff;border:none;padding:1rem 2.75rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s;letter-spacing:0.01em}
+.complete-btn:hover{opacity:0.87;transform:translateY(-1px)}
+
+/* ── Completion view ── */
+#completionView{display:none}
+.comp-inner{max-width:800px;margin:0 auto;padding:3rem 2rem 7rem}
+.completion-header{text-align:center;padding-bottom:2rem;border-bottom:1px solid var(--border);margin-bottom:2.5rem}
+.completion-icon{font-size:2.75rem;margin-bottom:0.75rem}
+.completion-header h2{font-family:var(--font-display);font-size:2rem;color:var(--text-dark);margin-bottom:0.4rem;line-height:1.25}
+.completion-tagline{font-size:0.95rem;color:var(--text-muted)}
+.summary-section{margin-bottom:2rem}
+.summary-section h3{font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+.summary-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:0.65rem}
+.summary-card .card-label{font-size:0.75rem;font-weight:600;color:var(--text-muted);margin-bottom:0.25rem}
+.summary-card .card-value{font-size:0.92rem;color:var(--text-dark);white-space:pre-wrap;line-height:1.6}
+.closing-quote{border-left:4px solid var(--accent);background:var(--accent-pale);padding:1.1rem 1.5rem;border-radius:0 10px 10px 0;font-style:italic;color:var(--text-mid);font-size:1rem;margin-bottom:2.25rem;line-height:1.6}
+.completion-actions{display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:2rem}
+.ca-btn{border:1px solid var(--border);background:var(--white);color:var(--text-mid);padding:0.65rem 1.25rem;border-radius:8px;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:all .2s}
+.ca-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+@media(max-width:720px){
+  .tool-title{font-size:2.2rem}
+  .two-col{grid-template-columns:1fr}
+  .checkbox-grid{grid-template-columns:1fr}
+  .page{padding:2.5rem 1.25rem 5rem}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back" href="index.html" onclick="history.length>1?(event.preventDefault(),history.back()):true">← Back</a>
+  <span class="logo">The Living Room</span>
+  <div style="display:flex;align-items:center;gap:0.85rem">
+    <div id="saved-badge"><span class="dot"></span> Saved</div>
+    <span class="theme-pill">Difficult Conversations</span>
+  </div>
+</div>
+
+<div id="mainView">
+<div class="page">
+
+  <div class="tool-eyebrow">Week 2 &nbsp;·&nbsp; Difficult Conversations</div>
+  <h1 class="tool-title">Getting Clear Before You Speak</h1>
+  <div class="tool-subtitle">Clarity creates confidence.</div>
+  <div class="tool-framing">Most difficult conversations become easier when you're clear about what matters before you begin.</div>
+  <div class="divider"></div>
+
+  <div class="two-col">
+    <!-- MAIN COLUMN -->
+    <div class="main-col">
+
+      <!-- SECTION 1 -->
+      <div class="step-block">
+        <div class="step-head">
+          <div class="step-num">1</div>
+          <div class="step-q">What's happened?</div>
+        </div>
+        <div class="step-hint">Describe the situation as objectively as you can. <em>(Just the facts.)</em></div>
+        <textarea id="s1" rows="5" placeholder="What actually happened — without the interpretation or the story..." oninput="autoResize(this);save()"></textarea>
+      </div>
+
+      <!-- SECTION 2 -->
+      <div class="step-block">
+        <div class="step-head">
+          <div class="step-num">2</div>
+          <div class="step-q">What story have I been telling myself?</div>
+        </div>
+        <div class="step-hint">What assumptions, interpretations or conclusions have I added?</div>
+        <textarea id="s2" rows="5" placeholder="What meanings have I made? What have I decided about them or myself?" oninput="autoResize(this);save()"></textarea>
+      </div>
+
+      <!-- SECTION 3 -->
+      <div class="step-block">
+        <div class="step-head">
+          <div class="step-num">3</div>
+          <div class="step-q">What actually matters to me?</div>
+        </div>
+        <div class="step-hint">Tick any that apply.</div>
+        <div class="checkbox-grid" id="matters-grid">
+          <label class="check-item" onclick="toggleCheck(this);save()">
+            <input type="checkbox" value="being-understood">
+            <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+            <span class="check-icon">🤝</span>
+            <span class="check-label">Being understood</span>
+          </label>
+          <label class="check-item" onclick="toggleCheck(this);save()">
+            <input type="checkbox" value="being-honest">
+            <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+            <span class="check-icon">💛</span>
+            <span class="check-label">Being honest</span>
+          </label>
+          <label class="check-item" onclick="toggleCheck(this);save()">
+            <input type="checkbox" value="finding-solution">
+            <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+            <span class="check-icon">🔑</span>
+            <span class="check-label">Finding a solution</span>
+          </label>
+          <label class="check-item" onclick="toggleCheck(this);save()">
+            <input type="checkbox" value="listening-properly">
+            <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+            <span class="check-icon">👂</span>
+            <span class="check-label">Listening properly</span>
+          </label>
+          <label class="check-item" onclick="toggleCheck(this);save()">
+            <input type="checkbox" value="protecting-relationship">
+            <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+            <span class="check-icon">🛡️</span>
+            <span class="check-label">Protecting the relationship</span>
+          </label>
+          <label class="check-item" onclick="toggleCheck(this);save()">
+            <input type="checkbox" value="moving-forward">
+            <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+            <span class="check-icon">→</span>
+            <span class="check-label">Moving forward</span>
+          </label>
+          <label class="check-item" onclick="toggleCheck(this);save()">
+            <input type="checkbox" value="setting-boundary">
+            <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+            <span class="check-icon">🚩</span>
+            <span class="check-label">Setting a boundary</span>
+          </label>
+          <label class="check-item" onclick="toggleCheck(this);save()">
+            <input type="checkbox" value="something-else">
+            <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+            <span class="check-icon">✏️</span>
+            <span class="check-label">Something else <input class="else-input" id="else-text" type="text" placeholder="..." onclick="event.stopPropagation()" oninput="save()"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- SECTION 4 -->
+      <div class="step-block">
+        <div class="step-head">
+          <div class="step-num">4</div>
+          <div class="step-q">If this conversation went well...</div>
+        </div>
+        <div class="step-hint">Finish the sentence.</div>
+        <div class="sentence-block">
+          <div class="sentence-prompt">When this conversation is over, I'd like us to...</div>
+          <div class="sentence-line">
+            <input type="text" id="s4a" placeholder="..." oninput="save()">
+          </div>
+          <div class="sentence-line">
+            <input type="text" id="s4b" placeholder="..." oninput="save()">
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER BANNER -->
+      <div class="footer-banner">
+        <div class="footer-strong">Awareness today. Clarity tomorrow. Confidence always.</div>
+        <div class="footer-sub">Better conversations. Better choices. Better life.</div>
+      </div>
+
+      <div class="complete-wrap">
+        <button class="complete-btn" onclick="complete()">Mark as complete ✓</button>
+      </div>
+
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="side-col">
+      <div class="sidebar-card">
+        <div class="sidebar-card-header">
+          <div class="sc-icon">
+            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <div>
+            <div class="sc-title">Pause Before You Speak</div>
+            <div class="sc-sub">Before the conversation, ask yourself:</div>
+          </div>
+        </div>
+        <div class="pause-item">
+          <div class="pause-icon-wrap">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8l4 4-4 4M8 12h8"/></svg>
+          </div>
+          <div class="pause-q">Am I trying to <strong>understand</strong>, or to <strong>win</strong>?</div>
+        </div>
+        <div class="pause-item">
+          <div class="pause-icon-wrap">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          </div>
+          <div class="pause-q">Am I talking about <strong>facts</strong>, or <strong>assumptions</strong>?</div>
+        </div>
+        <div class="pause-item">
+          <div class="pause-icon-wrap">
+            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          </div>
+          <div class="pause-q">What <strong>outcome</strong> matters most?</div>
+        </div>
+      </div>
+
+      <div class="remember-card">
+        <div class="remember-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        </div>
+        <div class="remember-title">Remember</div>
+        <div class="remember-body">You don't need the perfect words.</div>
+        <div class="remember-gold">You just need enough clarity to begin.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- COMPLETION VIEW -->
+<div id="completionView">
+  <div class="comp-inner">
+    <div class="completion-header">
+      <div class="completion-icon">🎯</div>
+      <h2>Clarity achieved.</h2>
+      <div class="completion-tagline">You know what happened, what story you've been telling, and what actually matters. That's more than most people have before a difficult conversation.</div>
+    </div>
+    <div class="summary-section">
+      <h3>Your reflections</h3>
+      <div class="summary-card"><div class="card-label">What happened (the facts)</div><div class="card-value" id="sum-s1"></div></div>
+      <div class="summary-card"><div class="card-label">The story I've been telling myself</div><div class="card-value" id="sum-s2"></div></div>
+      <div class="summary-card" id="sum-matters-card" style="display:none"><div class="card-label">What actually matters to me</div><div class="card-value" id="sum-matters"></div></div>
+      <div class="summary-card" id="sum-s4-card" style="display:none"><div class="card-label">If this conversation went well, I'd like us to...</div><div class="card-value" id="sum-s4"></div></div>
+    </div>
+    <div class="closing-quote">"You don't need the perfect words. You just need enough clarity to begin."</div>
+    <div class="completion-actions">
+      <button class="ca-btn" onclick="document.getElementById('mainView').style.display='';document.getElementById('completionView').style.display='none'">← Review your answers</button>
+      <button class="ca-btn" onclick="window.location.href='index.html'">Back to library</button>
+      <button class="ca-btn" onclick="window.location.href='having-the-conversation.html'">Next: Having the Conversation →</button>
+    </div>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+requireAuth().then(u => { if(u) showUserBadge && showUserBadge('.logo'); });
+
+const STORAGE_KEY = 'tlr-getting-clear-before-you-speak';
+let saveTimer;
+
+function autoResize(el){el.style.height='auto';el.style.height=el.scrollHeight+'px'}
+document.querySelectorAll('textarea').forEach(autoResize);
+
+function toggleCheck(label){
+  const cb = label.querySelector('input[type=checkbox]');
+  cb.checked = !cb.checked;
+  label.classList.toggle('checked', cb.checked);
+}
+
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{
+    const matters = [...document.querySelectorAll('#matters-grid input[type=checkbox]:checked')].map(i=>i.value);
+    const data = {
+      s1: document.getElementById('s1').value,
+      s2: document.getElementById('s2').value,
+      matters,
+      elseText: document.getElementById('else-text').value,
+      s4a: document.getElementById('s4a').value,
+      s4b: document.getElementById('s4b').value,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    const badge = document.getElementById('saved-badge');
+    badge.style.display='flex';
+    setTimeout(()=>badge.style.display='none',2000);
+  }, 800);
+}
+
+function load(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return;
+  try{
+    const d = JSON.parse(raw);
+    if(d.s1){ document.getElementById('s1').value=d.s1; autoResize(document.getElementById('s1')); }
+    if(d.s2){ document.getElementById('s2').value=d.s2; autoResize(document.getElementById('s2')); }
+    if(d.matters) d.matters.forEach(val=>{
+      const cb = document.querySelector(`#matters-grid input[value="${val}"]`);
+      if(cb){ cb.checked=true; cb.closest('.check-item').classList.add('checked'); }
+    });
+    if(d.elseText) document.getElementById('else-text').value=d.elseText;
+    if(d.s4a) document.getElementById('s4a').value=d.s4a;
+    if(d.s4b) document.getElementById('s4b').value=d.s4b;
+  }catch(e){}
+}
+
+// Label map for checkboxes
+const matterLabels = {
+  'being-understood':'Being understood','being-honest':'Being honest',
+  'finding-solution':'Finding a solution','listening-properly':'Listening properly',
+  'protecting-relationship':'Protecting the relationship','moving-forward':'Moving forward',
+  'setting-boundary':'Setting a boundary','something-else':'Something else'
+};
+
+function complete(){
+  const s1 = document.getElementById('s1').value.trim();
+  document.getElementById('sum-s1').textContent = s1 || '(not filled in)';
+  const s2 = document.getElementById('s2').value.trim();
+  document.getElementById('sum-s2').textContent = s2 || '(not filled in)';
+
+  const matters = [...document.querySelectorAll('#matters-grid input[type=checkbox]:checked')].map(i=>{
+    const lbl = matterLabels[i.value] || i.value;
+    return i.value === 'something-else' ? lbl + ': ' + document.getElementById('else-text').value : lbl;
+  });
+  if(matters.length){
+    document.getElementById('sum-matters').textContent = matters.join('\n');
+    document.getElementById('sum-matters-card').style.display='';
+  }
+
+  const s4parts = ['s4a','s4b'].map(k=>document.getElementById(k).value.trim()).filter(Boolean);
+  if(s4parts.length){
+    document.getElementById('sum-s4').textContent = s4parts.join('\n');
+    document.getElementById('sum-s4-card').style.display='';
+  }
+
+  const raw = localStorage.getItem(STORAGE_KEY);
+  let data = {};
+  try{ data=JSON.parse(raw)||{}; }catch(e){}
+  data._completed = true;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+  document.getElementById('mainView').style.display='none';
+  document.getElementById('completionView').style.display='';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+load();
+</script>
+</body>
+</html>

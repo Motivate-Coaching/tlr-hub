@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why We Avoid Them | TLR</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0F1215; --navy-mid:#1C2B3A;
+  --cream:#F5F1EB; --cream-dark:#EDE8DF; --cream-deeper:#E5DFD5;
+  --text-dark:#1A1A1A; --text-mid:#4A4A4A; --text-muted:#8A8880;
+  --border:rgba(0,0,0,0.08); --white:#FFFFFF;
+  --font-body:'Poppins',sans-serif; --font-display:'Playfair Display',serif;
+  --accent:#C17B2E; --accent-pale:rgba(193,123,46,0.1); --accent-light:#D9964E;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);line-height:1.7;font-size:16px}
+
+/* ── Topbar ── */
+.topbar{position:sticky;top:0;z-index:100;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.75rem;gap:1rem}
+.topbar a.back{color:rgba(255,255,255,0.65);text-decoration:none;font-size:0.82rem;transition:color .2s}
+.topbar a.back:hover{color:#fff}
+.topbar .logo{color:#fff;font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.04em}
+.topbar .theme-pill{background:var(--accent);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.28rem 0.85rem;border-radius:20px}
+#saved-badge{display:none;align-items:center;gap:0.4rem;font-size:0.72rem;color:rgba(255,255,255,0.5)}
+#saved-badge .dot{width:6px;height:6px;background:#5CB85C;border-radius:50%;display:inline-block}
+
+/* ── Page shell ── */
+.page{max-width:800px;margin:0 auto;padding:3.5rem 2rem 7rem}
+
+/* ── Header ── */
+.tool-eyebrow{font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.6rem;text-align:center}
+.tool-title{font-family:var(--font-display);font-size:3rem;line-height:1.15;text-align:center;color:var(--text-dark);margin-bottom:0.5rem}
+.tool-subtitle{font-family:var(--font-display);font-size:1.15rem;color:var(--accent);font-style:italic;text-align:center;margin-bottom:0.5rem}
+.divider{width:48px;height:3px;background:var(--accent);margin:0.75rem auto 1.75rem;border-radius:2px}
+
+/* ── Intro + callout grid ── */
+.intro-grid{display:grid;grid-template-columns:1fr 280px;gap:2rem;margin-bottom:2.5rem;align-items:start}
+.intro-body{font-size:0.95rem;color:var(--text-mid);line-height:1.75}
+.intro-body p{margin-bottom:0.85rem}
+.intro-body p:last-child{margin-bottom:0}
+.intro-strong{font-weight:700;color:var(--text-dark);display:block;margin-bottom:0.15rem}
+.intro-gold{color:var(--accent);font-weight:600}
+.callout-box{background:var(--white);border:1.5px solid var(--accent);border-radius:12px;padding:1.4rem 1.5rem}
+.callout-header{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.75rem;padding-bottom:0.75rem;border-bottom:1px solid var(--cream-deeper)}
+.callout-icon{width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.callout-icon svg{width:16px;height:16px;fill:white}
+.callout-title{font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-dark)}
+.callout-body{font-size:0.88rem;color:var(--text-mid);line-height:1.6;margin-bottom:0.85rem}
+.callout-italic{font-family:var(--font-display);font-style:italic;font-size:0.92rem;color:var(--accent);line-height:1.55}
+
+/* ── Step blocks ── */
+.step-block{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.75rem 1.75rem 1.5rem;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.step-block::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);border-radius:4px 0 0 4px}
+.step-head{display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:0.4rem}
+.step-num{width:32px;height:32px;background:var(--navy);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:700;flex-shrink:0;margin-top:0.1rem}
+.step-q{font-size:0.9rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-dark);line-height:1.35}
+.step-hint{font-size:0.9rem;color:var(--text-muted);margin-bottom:1rem;padding-left:2.75rem;line-height:1.55}
+textarea{font-family:var(--font-body);font-size:0.94rem;color:var(--text-dark);background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:0.9rem 1.1rem;width:100%;resize:none;overflow:hidden;outline:none;transition:border-color .2s,box-shadow .2s;line-height:1.65}
+textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale);background:var(--white)}
+textarea::placeholder{color:var(--text-muted);font-size:0.88rem}
+
+/* ── Checkbox grid ── */
+.checkbox-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;padding-left:2.75rem}
+.check-item{display:flex;align-items:flex-start;gap:0.65rem;padding:0.75rem 1rem;background:var(--cream);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s;user-select:none}
+.check-item:hover{border-color:var(--accent-light);background:var(--white)}
+.check-item.checked{border-color:var(--accent);background:var(--accent-pale)}
+.check-item input[type=checkbox]{display:none}
+.check-box{width:20px;height:20px;border:2px solid var(--border);border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:0.1rem}
+.check-item.checked .check-box{background:var(--accent);border-color:var(--accent)}
+.check-box svg{width:11px;height:11px;stroke:white;stroke-width:2.5;fill:none;opacity:0;transition:opacity .15s}
+.check-item.checked .check-box svg{opacity:1}
+.check-icon{font-size:1.1rem;flex-shrink:0;width:22px;text-align:center}
+.check-label{font-size:0.87rem;color:var(--text-mid);line-height:1.45}
+
+/* ── Line inputs ── */
+.line-inputs{padding-left:2.75rem}
+.line-item{display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:0.85rem}
+.line-dot{width:6px;height:6px;background:var(--accent);border-radius:50%;margin-top:0.85rem;flex-shrink:0}
+.line-wrap{flex:1}
+.line-label{font-size:0.85rem;color:var(--text-mid);margin-bottom:0.2rem}
+input[type=text]{font-family:var(--font-body);font-size:0.9rem;color:var(--text-dark);background:transparent;border:none;border-bottom:1.5px solid var(--border);width:100%;outline:none;padding:0.25rem 0 0.3rem;transition:border-color .2s}
+input[type=text]:focus{border-bottom-color:var(--accent)}
+input[type=text]::placeholder{color:var(--text-muted);font-size:0.83rem}
+
+/* ── Pattern note ── */
+.pattern-note{display:flex;align-items:flex-start;gap:0.85rem;background:var(--cream-dark);border:1px solid var(--cream-deeper);border-radius:10px;padding:1rem 1.25rem;margin-top:1.25rem}
+.pattern-icon{width:36px;height:36px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pattern-icon svg{width:16px;height:16px;fill:var(--accent-light)}
+.pattern-text{font-size:0.88rem;color:var(--text-mid);line-height:1.55}
+
+/* ── Protecting textarea with sentence starter ── */
+.sentence-starter{font-size:0.9rem;color:var(--text-mid);font-style:italic;padding-left:2.75rem;margin-bottom:0.6rem}
+.sentence-starter strong{color:var(--text-dark);font-style:normal}
+.protect-lines{padding-left:2.75rem;display:flex;flex-direction:column;gap:0.6rem}
+.protect-line{border-bottom:1.5px solid var(--border);padding:0.3rem 0;font-size:0.9rem;color:var(--text-dark);outline:none;width:100%;background:transparent;font-family:var(--font-body)}
+.protect-line:focus{border-bottom-color:var(--accent)}
+.protect-line::placeholder{color:var(--text-muted);font-size:0.83rem}
+
+/* ── On the other side ── */
+.other-side{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.5rem 1.75rem;margin-bottom:1.5rem;display:grid;grid-template-columns:80px 1fr;gap:1.25rem;align-items:start}
+.other-side-icon{width:72px;height:72px;background:var(--cream-dark);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--cream-deeper)}
+.other-side-icon svg{width:32px;height:32px}
+.other-side-title{font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem}
+.other-side-lead{font-size:0.9rem;color:var(--text-mid);margin-bottom:0.65rem}
+.other-side-list{list-style:none;display:flex;flex-direction:column;gap:0.35rem}
+.other-side-list li{display:flex;align-items:flex-start;gap:0.5rem;font-size:0.88rem;color:var(--text-mid)}
+.other-side-list li::before{content:'✓';color:var(--accent);font-weight:700;flex-shrink:0;margin-top:0.05rem}
+
+/* ── Footer callouts ── */
+.footer-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+.footer-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;display:flex;align-items:flex-start;gap:1rem}
+.footer-icon{width:40px;height:40px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.footer-icon svg{width:18px;height:18px;fill:var(--accent-light)}
+.footer-label{font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.3rem}
+.footer-body{font-size:0.88rem;color:var(--text-mid);line-height:1.55}
+
+/* ── CTA banner ── */
+.cta-banner{background:var(--navy);border-radius:12px;padding:1.5rem 1.75rem;display:flex;align-items:center;gap:1.25rem;margin-bottom:2.5rem}
+.cta-icon{width:40px;height:40px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cta-icon svg{width:18px;height:18px;fill:var(--accent-light)}
+.cta-body{flex:1}
+.cta-strong{font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent-light);margin-bottom:0.2rem}
+.cta-text{font-size:0.88rem;color:rgba(255,255,255,0.65);line-height:1.55}
+.cta-italic{font-family:var(--font-display);font-style:italic;font-size:0.92rem;color:rgba(255,255,255,0.5)}
+
+/* ── Complete button ── */
+.complete-wrap{text-align:center;padding-top:0.5rem}
+.complete-btn{background:var(--navy);color:#fff;border:none;padding:1rem 2.75rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s;letter-spacing:0.01em}
+.complete-btn:hover{opacity:0.87;transform:translateY(-1px)}
+
+/* ── Completion view ── */
+#completionView{display:none}
+.comp-inner{max-width:800px;margin:0 auto;padding:3rem 2rem 7rem}
+.completion-header{text-align:center;padding-bottom:2rem;border-bottom:1px solid var(--border);margin-bottom:2.5rem}
+.completion-icon{font-size:2.75rem;margin-bottom:0.75rem}
+.completion-header h2{font-family:var(--font-display);font-size:2rem;color:var(--text-dark);margin-bottom:0.4rem;line-height:1.25}
+.completion-tagline{font-size:0.95rem;color:var(--text-muted)}
+.summary-section{margin-bottom:2rem}
+.summary-section h3{font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+.summary-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:0.65rem}
+.summary-card .card-label{font-size:0.75rem;font-weight:600;color:var(--text-muted);margin-bottom:0.25rem}
+.summary-card .card-value{font-size:0.92rem;color:var(--text-dark);white-space:pre-wrap;line-height:1.6}
+.closing-quote{border-left:4px solid var(--accent);background:var(--accent-pale);padding:1.1rem 1.5rem;border-radius:0 10px 10px 0;font-style:italic;color:var(--text-mid);font-size:1rem;margin-bottom:2.25rem;line-height:1.6}
+.completion-actions{display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:2rem}
+.ca-btn{border:1px solid var(--border);background:var(--white);color:var(--text-mid);padding:0.65rem 1.25rem;border-radius:8px;font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:all .2s}
+.ca-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── Responsive ── */
+@media(max-width:680px){
+  .tool-title{font-size:2.2rem}
+  .intro-grid{grid-template-columns:1fr}
+  .checkbox-grid{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr}
+  .other-side{grid-template-columns:1fr}
+  .other-side-icon{width:52px;height:52px;margin:0 auto}
+  .page{padding:2.5rem 1.25rem 5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a class="back" href="index.html" onclick="history.length>1?(event.preventDefault(),history.back()):true">← Back</a>
+  <span class="logo">The Living Room</span>
+  <div style="display:flex;align-items:center;gap:0.85rem">
+    <div id="saved-badge"><span class="dot"></span> Saved</div>
+    <span class="theme-pill">Difficult Conversations</span>
+  </div>
+</div>
+
+<div id="mainView">
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="tool-eyebrow">Week 1 &nbsp;·&nbsp; Difficult Conversations</div>
+  <h1 class="tool-title">Why We Avoid Them</h1>
+  <div class="tool-subtitle">Awareness is the first step to change.</div>
+  <div class="divider"></div>
+
+  <!-- INTRO + CALLOUT -->
+  <div class="intro-grid">
+    <div class="intro-body">
+      <p>We all avoid conversations sometimes.<br>It doesn't mean we're weak or flawed. It means we're human.</p>
+      <p>This week is about noticing what gets in the way for you — with curiosity and self-compassion. The more we understand ourselves, the more choice we have.</p>
+      <p><span class="intro-strong">There's no pressure to fix anything right now.</span><span class="intro-gold">Just notice. That's enough.</span></p>
+    </div>
+    <div class="callout-box">
+      <div class="callout-header">
+        <div class="callout-icon">
+          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        </div>
+        <div class="callout-title">Self-Compassion First</div>
+      </div>
+      <p class="callout-body">Avoiding a conversation is not a character flaw. It's usually you trying to protect something important.</p>
+      <div class="callout-italic">Today, the goal isn't to change.<br>It's to understand.<br>Understanding leads to better choices.</div>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num">1</div>
+      <div class="step-q">What conversation have you been avoiding (or have avoided)?</div>
+    </div>
+    <div class="step-hint">Think of a conversation that has been on your mind, or that you've put off.</div>
+    <textarea id="s1" rows="5" placeholder="Write whatever comes to mind — there's no right answer here..." oninput="autoResize(this);save()"></textarea>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num">2</div>
+      <div class="step-q">What stops you from going towards it?</div>
+    </div>
+    <div class="step-hint">Look at the list below. Which of these feel most familiar for you? You can choose more than one.</div>
+    <div class="checkbox-grid" id="stops-grid">
+      <label class="check-item" onclick="toggleCheck(this);save()">
+        <input type="checkbox" value="damage-relationship">
+        <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+        <span class="check-icon">🛡️</span>
+        <span class="check-label">I don't want to damage the relationship.</span>
+      </label>
+      <label class="check-item" onclick="toggleCheck(this);save()">
+        <input type="checkbox" value="worried-react">
+        <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+        <span class="check-icon">😟</span>
+        <span class="check-label">I'm worried about how they'll react.</span>
+      </label>
+      <label class="check-item" onclick="toggleCheck(this);save()">
+        <input type="checkbox" value="make-worse">
+        <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+        <span class="check-icon">🌀</span>
+        <span class="check-label">I'm worried I'll make things worse.</span>
+      </label>
+      <label class="check-item" onclick="toggleCheck(this);save()">
+        <input type="checkbox" value="not-ready">
+        <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+        <span class="check-icon">⏳</span>
+        <span class="check-label">I don't feel ready.</span>
+      </label>
+      <label class="check-item" onclick="toggleCheck(this);save()">
+        <input type="checkbox" value="dont-know-what">
+        <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+        <span class="check-icon">❓</span>
+        <span class="check-label">I don't know what to say.</span>
+      </label>
+      <label class="check-item" onclick="toggleCheck(this);save()">
+        <input type="checkbox" value="not-sure-want">
+        <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+        <span class="check-icon">🎯</span>
+        <span class="check-label">I'm not even sure what I want.</span>
+      </label>
+      <label class="check-item" onclick="toggleCheck(this);save()">
+        <input type="checkbox" value="resolve-itself">
+        <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+        <span class="check-icon">🍃</span>
+        <span class="check-label">I'm hoping it will resolve itself.</span>
+      </label>
+      <label class="check-item" onclick="toggleCheck(this);save()">
+        <input type="checkbox" value="something-else">
+        <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+        <span class="check-icon">✏️</span>
+        <span class="check-label">Something else...</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num">3</div>
+      <div class="step-q">When has this shown up before?</div>
+    </div>
+    <div class="step-hint">Think of a time (not necessarily this exact conversation) when you avoided speaking up or having a difficult conversation.</div>
+    <div class="line-inputs">
+      <div class="line-item">
+        <div class="line-dot"></div>
+        <div class="line-wrap">
+          <div class="line-label">What happened?</div>
+          <input type="text" id="s3a" placeholder="Describe the situation briefly..." oninput="save()">
+        </div>
+      </div>
+      <div class="line-item">
+        <div class="line-dot"></div>
+        <div class="line-wrap">
+          <div class="line-label">What was going through your mind?</div>
+          <input type="text" id="s3b" placeholder="Your thoughts at the time..." oninput="save()">
+        </div>
+      </div>
+      <div class="line-item">
+        <div class="line-dot"></div>
+        <div class="line-wrap">
+          <div class="line-label">What were you hoping would happen?</div>
+          <input type="text" id="s3c" placeholder="What outcome were you hoping for?" oninput="save()">
+        </div>
+      </div>
+      <div class="line-item">
+        <div class="line-dot"></div>
+        <div class="line-wrap">
+          <div class="line-label">How did it work out?</div>
+          <input type="text" id="s3d" placeholder="What actually happened?" oninput="save()">
+        </div>
+      </div>
+    </div>
+    <div class="pattern-note">
+      <div class="pattern-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+      </div>
+      <div class="pattern-text">Patterns repeat so we notice. Not so we judge. So we understand.</div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num">4</div>
+      <div class="step-q">What are you protecting?</div>
+    </div>
+    <div class="step-hint">When we avoid a conversation, it's usually because we're trying to protect something that matters to us.</div>
+    <div class="sentence-starter">I'm avoiding this conversation because I'm trying to protect...</div>
+    <div class="protect-lines">
+      <input type="text" class="protect-line" id="s4a" placeholder="..." oninput="save()">
+      <input type="text" class="protect-line" id="s4b" placeholder="..." oninput="save()">
+      <input type="text" class="protect-line" id="s4c" placeholder="..." oninput="save()">
+    </div>
+  </div>
+
+  <!-- ON THE OTHER SIDE -->
+  <div class="other-side">
+    <div class="other-side-icon">
+      <svg viewBox="0 0 64 64" fill="none">
+        <circle cx="32" cy="32" r="28" stroke="#C17B2E" stroke-width="2"/>
+        <path d="M20 32 Q32 18 44 32 Q32 46 20 32z" fill="#C17B2E" opacity="0.2"/>
+        <path d="M32 16 L36 28 L32 48 L28 28 Z" fill="#C17B2E" opacity="0.4"/>
+      </svg>
+    </div>
+    <div>
+      <div class="other-side-title">On the Other Side</div>
+      <p class="other-side-lead">Better conversations lead to:</p>
+      <ul class="other-side-list">
+        <li>More honesty and trust</li>
+        <li>Less stress and mental load</li>
+        <li>Clearer decisions and boundaries</li>
+        <li>Stronger relationships</li>
+        <li>A life that feels more aligned with who you are</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- FOOTER CARDS -->
+  <div class="footer-grid">
+    <div class="footer-card">
+      <div class="footer-icon">
+        <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+      </div>
+      <div>
+        <div class="footer-label">Remember</div>
+        <div class="footer-body">Avoidance makes sense.<br>Awareness creates choice.<br>Choice creates change.</div>
+      </div>
+    </div>
+    <div class="footer-card">
+      <div class="footer-icon">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+      </div>
+      <div>
+        <div class="footer-label">This Month</div>
+        <div class="footer-body">We'll explore what gets in the way, get clearer on what matters, and build the skills and confidence to have difficult conversations in a way that fits you.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA BANNER -->
+  <div class="cta-banner">
+    <div class="cta-icon">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    </div>
+    <div class="cta-body">
+      <div class="cta-strong">This is the start of something powerful.</div>
+      <div class="cta-italic">You don't have to have it all figured out. You just have to begin.</div>
+    </div>
+  </div>
+
+  <div class="complete-wrap">
+    <button class="complete-btn" onclick="complete()">Mark as complete ✓</button>
+  </div>
+
+</div>
+</div>
+
+<!-- COMPLETION VIEW -->
+<div id="completionView">
+  <div class="comp-inner">
+    <div class="completion-header">
+      <div class="completion-icon">💬</div>
+      <h2>Awareness achieved.</h2>
+      <div class="completion-tagline">You've taken the first step — noticing. That's braver than it sounds.</div>
+    </div>
+    <div class="summary-section">
+      <h3>Your reflections</h3>
+      <div class="summary-card"><div class="card-label">The conversation I've been avoiding</div><div class="card-value" id="sum-s1"></div></div>
+      <div class="summary-card" id="sum-stops-card" style="display:none"><div class="card-label">What gets in my way</div><div class="card-value" id="sum-stops"></div></div>
+      <div class="summary-card" id="sum-s3-card" style="display:none"><div class="card-label">When this has shown up before</div><div class="card-value" id="sum-s3"></div></div>
+      <div class="summary-card" id="sum-s4-card" style="display:none"><div class="card-label">What I'm protecting</div><div class="card-value" id="sum-s4"></div></div>
+    </div>
+    <div class="closing-quote">"Avoidance makes sense. Awareness creates choice. Choice creates change."</div>
+    <div class="completion-actions">
+      <button class="ca-btn" onclick="document.getElementById('mainView').style.display='';document.getElementById('completionView').style.display='none'">← Review your answers</button>
+      <button class="ca-btn" onclick="window.location.href='index.html'">Back to library</button>
+      <button class="ca-btn" onclick="window.location.href='getting-clear-before-you-speak.html'">Next: Getting Clear Before You Speak →</button>
+    </div>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+requireAuth().then(u => { if(u) showUserBadge && showUserBadge('.logo'); });
+
+const STORAGE_KEY = 'tlr-why-we-avoid-them';
+let saveTimer;
+
+function autoResize(el){el.style.height='auto';el.style.height=el.scrollHeight+'px'}
+document.querySelectorAll('textarea').forEach(autoResize);
+
+function toggleCheck(label){
+  const cb = label.querySelector('input[type=checkbox]');
+  cb.checked = !cb.checked;
+  label.classList.toggle('checked', cb.checked);
+}
+
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{
+    const stops = [...document.querySelectorAll('#stops-grid input:checked')].map(i=>i.value);
+    const data = {
+      s1: document.getElementById('s1').value,
+      stops,
+      s3a: document.getElementById('s3a').value,
+      s3b: document.getElementById('s3b').value,
+      s3c: document.getElementById('s3c').value,
+      s3d: document.getElementById('s3d').value,
+      s4a: document.getElementById('s4a').value,
+      s4b: document.getElementById('s4b').value,
+      s4c: document.getElementById('s4c').value,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    const badge = document.getElementById('saved-badge');
+    badge.style.display='flex';
+    setTimeout(()=>badge.style.display='none',2000);
+  }, 800);
+}
+
+function load(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return;
+  try{
+    const d = JSON.parse(raw);
+    if(d.s1){ document.getElementById('s1').value=d.s1; autoResize(document.getElementById('s1')); }
+    if(d.stops) d.stops.forEach(val=>{
+      const cb = document.querySelector(`#stops-grid input[value="${val}"]`);
+      if(cb){ cb.checked=true; cb.closest('.check-item').classList.add('checked'); }
+    });
+    ['s3a','s3b','s3c','s3d','s4a','s4b','s4c'].forEach(k=>{ if(d[k]) document.getElementById(k).value=d[k]; });
+  }catch(e){}
+}
+
+function complete(){
+  // Build summary
+  const s1 = document.getElementById('s1').value.trim();
+  document.getElementById('sum-s1').textContent = s1 || '(not filled in)';
+
+  const stops = [...document.querySelectorAll('#stops-grid input:checked')].map(i=>i.closest('.check-item').querySelector('.check-label').textContent);
+  if(stops.length){
+    document.getElementById('sum-stops').textContent = stops.join('\n');
+    document.getElementById('sum-stops-card').style.display='';
+  }
+
+  const s3parts = ['s3a','s3b','s3c','s3d'].map(k=>document.getElementById(k).value.trim()).filter(Boolean);
+  if(s3parts.length){
+    document.getElementById('sum-s3').textContent = s3parts.join('\n');
+    document.getElementById('sum-s3-card').style.display='';
+  }
+
+  const s4parts = ['s4a','s4b','s4c'].map(k=>document.getElementById(k).value.trim()).filter(Boolean);
+  if(s4parts.length){
+    document.getElementById('sum-s4').textContent = s4parts.join('\n');
+    document.getElementById('sum-s4-card').style.display='';
+  }
+
+  // Mark completed
+  const raw = localStorage.getItem(STORAGE_KEY);
+  let data = {};
+  try{ data=JSON.parse(raw)||{}; }catch(e){}
+  data._completed = true;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+  document.getElementById('mainView').style.display='none';
+  document.getElementById('completionView').style.display='';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+load();
+
+// Check if already completed
+const raw = localStorage.getItem(STORAGE_KEY);
+try{
+  const d = JSON.parse(raw||'{}');
+  if(d._completed){
+    const banner = document.createElement('div');
+    banner.style.cssText='background:var(--accent-pale);border:1px solid var(--accent);border-radius:10px;padding:0.85rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;font-size:0.88rem;color:var(--text-mid)';
+    banner.innerHTML='<span style="font-size:1.1rem">✓</span> You\'ve completed this tool. Your answers are saved below — feel free to add to them or revisit anytime.';
+    document.querySelector('.page').insertBefore(banner, document.querySelector('.tool-eyebrow').nextSibling.nextSibling.nextSibling.nextSibling);
+  }
+}catch(e){}
+</script>
+</body>
+</html>

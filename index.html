@@ -1151,7 +1151,7 @@ footer a { color: var(--gold); text-decoration: none; }
             <span class="ps-stat-lbl">In Progress</span>
           </div>
           <div class="ps-stat-tile" id="pw-stat-unstarted" onclick="goToView('library');filterTools('unstarted')" title="View tools to explore">
-            <span class="ps-stat-num" id="pw-todo">22</span>
+            <span class="ps-stat-num" id="pw-todo">25</span>
             <span class="ps-stat-lbl">To Explore</span>
           </div>
         </div>
@@ -1255,15 +1255,15 @@ footer a { color: var(--gold); text-decoration: none; }
     <div class="theme-dash-inner">
       <div class="theme-dash-cols">
         <div class="theme-dash-img-col">
-          <img src="building-momentum.jpg" alt="Building Momentum" class="theme-dash-img" onerror="this.parentElement.style.display='none'">
+          <img src="difficult-conversations.jpg" alt="Difficult Conversations" class="theme-dash-img" onerror="this.parentElement.style.display='none'">
         </div>
         <div class="theme-dash-content">
           <div class="theme-dash-eyebrow">This Month's Theme</div>
           <div class="theme-dash-meta">
-            <div class="theme-dash-title">Building Momentum</div>
+            <div class="theme-dash-title">Difficult Conversations</div>
             <a href="#" onclick="event.preventDefault();goToView('library')" class="theme-dash-link">Open theme →</a>
           </div>
-          <div class="theme-dash-door">"I know what I need to do. I just can't seem to keep it going."</div>
+          <div class="theme-dash-door">"There's something I need to say. I just don't know how."</div>
           <div class="theme-dash-topics" id="td-topics"></div>
         </div>
       </div>
@@ -1405,7 +1405,7 @@ footer a { color: var(--gold); text-decoration: none; }
   </div>
 
   <div class="topic-bar">
-    <p>Current topic: My Momentum Playbook &nbsp;&middot;&nbsp; <a href="#building-momentum">Go to current theme</a></p>
+    <p>Current topic: Having the Conversation &nbsp;&middot;&nbsp; <a href="#difficult-conversations">Go to current theme</a></p>
   </div>
 
   <div class="page-layout">
@@ -1416,7 +1416,8 @@ footer a { color: var(--gold); text-decoration: none; }
       </div>
       <div class="sidebar-body">
         <ul class="sidebar-nav">
-          <li class="active"><a href="#building-momentum">Building Momentum</a></li>
+          <li class="active"><a href="#difficult-conversations">Difficult Conversations</a></li>
+          <li><a href="#building-momentum">Building Momentum</a></li>
           <li><a href="#energy-and-drive">Energy &amp; Drive</a></li>
           <li><a href="#boundaries">Boundaries &amp; Pressure</a></li>
           <li><a href="#autopilot">Autopilot &amp; Drift</a></li>
@@ -1436,23 +1437,23 @@ footer a { color: var(--gold); text-decoration: none; }
       </div>
       <div class="section-label">Current theme</div>
 
-      <div id="building-momentum" class="current-feature">
+      <div id="difficult-conversations" class="current-feature">
         <div class="feature-header" id="current-feature-header">
           <div>
             <div class="feature-tag">Current theme</div>
-            <div class="feature-title">Building Momentum</div>
-            <div class="feature-door">"I know what I need to do. I just can't seem to keep it going."</div>
+            <div class="feature-title">Difficult Conversations</div>
+            <div class="feature-door">"There's something I need to say. I just don't know how."</div>
           </div>
           <div class="feature-header-right">
-            <div class="feature-week-badge">Topic 5 of 5</div>
+            <div class="feature-week-badge">Week 3 of 4</div>
             <span class="feature-collapse-arrow">&#9660;</span>
           </div>
         </div>
         <div class="feature-body">
           <div class="theme-banner-wrap">
-            <img src="building-momentum.jpg" alt="Building Momentum" class="theme-banner-img" onerror="this.parentElement.style.display='none'">
+            <img src="difficult-conversations.jpg" alt="Difficult Conversations" class="theme-banner-img" onerror="this.parentElement.style.display='none'">
           </div>
-          <p class="feature-intro">Starting is rarely the problem. The challenge is maintaining momentum once life gets busy, motivation fades, or progress feels slower than expected. This theme explores what creates lasting momentum, why we lose it, and how small consistent actions lead to meaningful change over time.</p>
+          <p class="feature-intro">Most of us avoid difficult conversations, not because we don't care, but because we care too much. This theme helps you understand why these conversations feel so hard, how to get clear before you speak, and how to show up in them with honesty, respect and confidence.</p>
           <div class="topics-heading">Topics and tools</div>
           <div class="topics-list" id="current-topics"></div>
           <div class="workshop-block">
@@ -1922,14 +1923,25 @@ footer a { color: var(--gold); text-decoration: none; }
 <script>
 /* ── DATA ───────────────────────────────── */
 const currentTopics = [
-  { n: 1, topic: 'The Momentum Myth', focus: 'Why waiting to feel motivated is the surest way to stay stuck, and what actually creates momentum in real life.', tool: { name: 'The Momentum Ladder', file: 'momentum-ladder.html', interactive: true } },
-  { n: 2, topic: 'The Compound Effect', focus: 'How the small things we do each day accumulate into meaningful progress over time.', tool: { name: 'The Compound Effect', file: 'compound-effect.html', interactive: true } },
-  { n: 3, topic: 'Breaking the Stop-Start Cycle', focus: 'Most people do not struggle because they never start. They struggle because they keep stopping. Why it happens and how to resume faster.', tool: { name: 'The Momentum Loop', file: 'momentum-loop.html', interactive: true } },
-  { n: 4, topic: 'Momentum That Lasts', focus: 'Real momentum is not about constant progress or pushing harder. It is about creating an approach that keeps working through busy seasons and setbacks.', tool: { name: 'Momentum That Lasts', file: 'momentum-that-lasts.html', interactive: true } },
-  { n: 5, topic: 'My Momentum Playbook', focus: 'Bringing the whole theme together into your own personalised guide for building, maintaining and regaining momentum on your terms.', tool: { name: 'My Momentum Playbook', file: 'momentum-playbook.html', interactive: true } }
+  { n: 1, topic: 'Why We Avoid Them', focus: 'Understanding what stops us from having the conversations that matter most — and what it costs us when we don\'t.', tool: { name: 'Why We Avoid Them', file: 'why-we-avoid-them.html', interactive: true } },
+  { n: 2, topic: 'Getting Clear Before You Speak', focus: 'Separating fact from story, identifying what really matters, and knowing what outcome you\'re actually looking for.', tool: { name: 'Getting Clear Before You Speak', file: 'getting-clear-before-you-speak.html', interactive: true } },
+  { n: 3, topic: 'Having the Conversation', focus: 'Entering the conversation with clarity, staying grounded when it gets hard, and keeping the focus on what matters.', tool: { name: 'Having the Conversation', file: 'having-the-conversation.html', interactive: true } },
+  { n: 4, topic: 'Beyond the Conversation', focus: 'What changes after the conversation is done — and how to keep the relationship and the progress moving forward.', tool: null }
 ];
 
 const pastThemes = [
+  {
+    id: 'building-momentum', theme: 'Building Momentum', door: 'I know what I need to do. I just can\'t seem to keep it going.',
+    banner: 'building-momentum.jpg',
+    intro: 'Starting is rarely the problem. The challenge is maintaining momentum once life gets busy, motivation fades, or progress feels slower than expected. This theme explores what creates lasting momentum, why we lose it, and how small consistent actions lead to meaningful change over time.',
+    topics: [
+      { n: 1, topic: 'The Momentum Myth', focus: 'Why waiting to feel motivated is the surest way to stay stuck, and what actually creates momentum in real life.', tool: { name: 'The Momentum Ladder', file: 'momentum-ladder.html', interactive: true } },
+      { n: 2, topic: 'The Compound Effect', focus: 'How the small things we do each day accumulate into meaningful progress over time.', tool: { name: 'The Compound Effect', file: 'compound-effect.html', interactive: true } },
+      { n: 3, topic: 'Breaking the Stop-Start Cycle', focus: 'Most people do not struggle because they never start. They struggle because they keep stopping. Why it happens and how to resume faster.', tool: { name: 'The Momentum Loop', file: 'momentum-loop.html', interactive: true } },
+      { n: 4, topic: 'Momentum That Lasts', focus: 'Real momentum is not about constant progress or pushing harder. It is about creating an approach that keeps working through busy seasons and setbacks.', tool: { name: 'Momentum That Lasts', file: 'momentum-that-lasts.html', interactive: true } },
+      { n: 5, topic: 'My Momentum Playbook', focus: 'Bringing the whole theme together into your own personalised guide for building, maintaining and regaining momentum on your terms.', tool: { name: 'My Momentum Playbook', file: 'momentum-playbook.html', interactive: true } }
+    ]
+  },
   {
     id: 'energy-and-drive', theme: 'Energy &amp; Drive', door: 'I should feel better than this.',
     banner: 'energy-drive.jpg',
@@ -2157,12 +2169,12 @@ document.querySelectorAll('.tab-btn[data-view]').forEach(btn => {
 })();
 
 /* ── CURRENT THEME COLLAPSE ─────────────── */
-const currentFeature = document.getElementById('building-momentum');
+const currentFeature = document.getElementById('difficult-conversations');
 const currentHeader = document.getElementById('current-feature-header');
-currentHeader.addEventListener('click', () => { currentFeature.classList.toggle('collapsed'); setActive('building-momentum'); });
+currentHeader.addEventListener('click', () => { currentFeature.classList.toggle('collapsed'); setActive('difficult-conversations'); });
 
 /* ── SMOOTH SCROLL + DOT UPDATE ON CLICK ── */
-const themeIds = ['building-momentum', 'energy-and-drive', 'boundaries', 'autopilot', 'decision-fatigue'];
+const themeIds = ['difficult-conversations', 'building-momentum', 'energy-and-drive', 'boundaries', 'autopilot', 'decision-fatigue'];
 let scrollLocked = false;
 
 document.querySelectorAll('a[href^="#"]').forEach(link => {
@@ -2177,7 +2189,7 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
         scrollLocked = true;
         setTimeout(() => { scrollLocked = false; }, 900);
         // Auto-expand the theme when clicked from sidebar
-        if (id === 'building-momentum') {
+        if (id === 'difficult-conversations') {
           currentFeature.classList.remove('collapsed');
         } else {
           const card = document.getElementById(id);
@@ -2195,7 +2207,7 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
 
 /* ── PROGRESS WIDGET ────────────────────── */
 const ALL_TOOLS = [
-  ...currentTopics.filter(t=>t.tool?.file).map(t=>({file:t.tool.file,name:t.tool.name,theme:'Building Momentum'})),
+  ...currentTopics.filter(t=>t.tool?.file).map(t=>({file:t.tool.file,name:t.tool.name,theme:'Difficult Conversations'})),
   ...pastThemes.flatMap(pt=>pt.topics.filter(t=>t.tool?.file).map(t=>({file:t.tool.file,name:t.tool.name,theme:pt.theme.replace(/&amp;/g,'&')})))
 ];
 
@@ -2311,7 +2323,7 @@ function closeFilterPanel(){
 window.addEventListener('scroll', () => {
   if (scrollLocked) return;
   const scrollPos = window.scrollY + 200;
-  let current = 'building-momentum';
+  let current = 'difficult-conversations';
   themeIds.forEach(id => {
     const el = document.getElementById(id);
     if (el && el.offsetTop <= scrollPos) current = id;
