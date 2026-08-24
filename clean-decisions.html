@@ -20,7 +20,8 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
 .topbar a.back{color:rgba(255,255,255,0.65);text-decoration:none;font-size:0.82rem;transition:color .2s}
 .topbar a.back:hover{color:#fff}
 .topbar .logo{color:#fff;font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.04em}
-.topbar .theme-pill{background:var(--accent);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.28rem 0.85rem;border-radius:20px}
+.topbar .theme-pill{background:var(--accent,#C17B2E);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.28rem 0.85rem;border-radius:20px;text-decoration:none;cursor:pointer;transition:opacity .15s}
+.topbar .theme-pill:hover{opacity:0.8}
 #saved-badge{display:none;align-items:center;gap:0.4rem;font-size:0.72rem;color:rgba(255,255,255,0.5)}
 #saved-badge .dot{width:6px;height:6px;background:#5CB85C;border-radius:50%;display:inline-block}
 .page{max-width:780px;margin:0 auto;padding:3.5rem 2rem 7rem}
@@ -112,20 +113,39 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
   .light-action{flex-direction:column;gap:0.75rem}
 }
 @media print{.topbar,.complete-wrap,#completionView,.completion-actions{display:none!important}#toolView{display:block!important}body{background:#fff;font-size:12px}}
+
+/* ── Progress bar ── */
+.tool-progress{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:0.85rem 1.1rem;margin-bottom:2rem;cursor:pointer;transition:box-shadow .15s}
+.tool-progress:hover{box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.prog-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem}
+.prog-label{font-size:0.75rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted)}
+.prog-pct{font-size:0.82rem;font-weight:700;color:var(--navy)}
+.prog-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--gold,#E8A800);border-radius:3px;transition:width .4s ease}
+.prog-hint{font-size:0.75rem;color:var(--text-muted);margin-top:0.45rem}
+.prog-hint.done{color:#2A9D6F;font-weight:600}
+
+/* ── Bottom action buttons ── */
+.complete-wrap{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;align-items:center;padding-top:0.5rem}
+.save-btn{background:#2A9D6F;color:#fff;border:2px solid #2A9D6F;padding:0.85rem 2.25rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .18s,transform .1s;letter-spacing:0.01em;text-decoration:none;display:inline-flex;align-items:center}
+.save-btn:hover{opacity:0.87;transform:translateY(-1px)}
+.library-btn{background:var(--gold,#E8A800);color:#1a1a1a;border:2px solid var(--gold,#E8A800);padding:0.85rem 2.25rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .18s,transform .1s;letter-spacing:0.01em;text-decoration:none;display:inline-flex;align-items:center;gap:0.4rem}
+.library-btn:hover{opacity:0.87;transform:translateY(-1px)}
+.complete-btn{background:var(--navy);color:#fff;border:none;padding:1rem 2.75rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s;letter-spacing:0.01em}
+.complete-btn:hover{opacity:0.87;transform:translateY(-1px)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
-<script>requireAuth();</script>
 </head>
 <body>
 <div class="topbar">
   <a href="index.html" class="back">← Resource Library</a>
   <span class="logo">TLR</span>
-  <span class="theme-pill">Decision Fatigue</span>
-  <span id="saved-badge"><span class="dot"></span>Progress saved</span>
+  <a class="theme-pill" href="index.html#library">Decisions</a>
+  <div id="saved-badge" style="display:none;align-items:center;gap:0.4rem;font-size:0.72rem;color:rgba(255,255,255,0.5)"><span style="width:6px;height:6px;background:#2A9D6F;border-radius:50%;display:inline-block"></span> Saved</div>Progress saved</span>
 </div>
 
-<div id="toolView">
+<div id="mainView">
 <div class="page">
   <div class="tool-eyebrow">Topic 2 of 4</div>
   <h1 class="tool-title">Clean Decisions</h1>
@@ -138,6 +158,15 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
   <p class="tool-framing">Most decisions are not actually difficult. They are unclear. Noise, fear, and other people's voices get in the way of what we actually know. This tool helps you separate the noise from the decision — so you can choose from clarity, not confusion.</p>
 
   <p style="font-size:0.88rem;color:var(--text-muted);text-align:center;margin-bottom:1.25rem;font-style:italic;">For each decision, name what is holding you back — then ask: if I decided today, what would I choose?</p>
+
+  <div class="tool-progress" onclick="progressBarClick()">
+    <div class="prog-header">
+      <span class="prog-label">Your progress in this tool</span>
+      <span class="prog-pct" id="prog-pct">0%</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="prog-hint" id="prog-hint">0 of 3 sections done &middot; click to jump to next</div>
+  </div>
 
   <div class="cd-grid">
     <div class="cd-header">
@@ -192,8 +221,10 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
     </div>
   </div>
 
-  <div class="complete-wrap">
-    <button class="complete-btn" onclick="showCompletion()">I've completed this tool</button>
+    <div class="complete-wrap">
+    <a class="library-btn" href="index.html#library">← Resource library</a>
+    <button class="save-btn" onclick="saveNow()">Save progress</button>
+    <button class="complete-btn" id="mark-complete-btn" onclick="complete()" style="display:none">Mark as complete ✓</button>
   </div>
 </div>
 </div>
@@ -240,96 +271,172 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
 </div>
 
 <script>
-const STORE_KEY='tlr-clean-decisions';
+const STORAGE_KEY = 'tlr-clean-decisions';
+let saveTimer;
 
+function autoResize(el){el.style.height='auto';el.style.height=el.scrollHeight+'px'}
 function autoExpand(el){el.style.height='auto';el.style.height=el.scrollHeight+'px'}
 
-document.addEventListener('DOMContentLoaded',()=>{
-  document.querySelectorAll('textarea').forEach(t=>{t.addEventListener('input',()=>autoExpand(t));autoExpand(t);});
-  const el=document.getElementById('calDate');if(el){el.value=new Date().toISOString().split('T')[0];}
-  const circle=document.getElementById('la-circle');
-  if(circle)circle.addEventListener('click',()=>{
-    const done=circle.dataset.done==='true';
-    circle.dataset.done=String(!done);
-    circle.style.background=!done?'var(--accent)':'';
-    circle.style.borderColor=!done?'var(--accent)':'rgba(43,74,111,0.35)';
-  });
-  restoreProgress();
+function toggleCheck(label){
+  const cb=label.querySelector('input[type=checkbox]');
+  if(!cb)return;
+  cb.checked=!cb.checked;
+  label.classList.toggle('checked',cb.checked);
+}
+
+// ── DATA ─────────────────────────────────────────────────
+function collectData(){
+  const ids=['cdd1','cdh1','cdi1','cdd2','cdh2','cdi2','cdd3','cdh3','cdi3','cdd4','cdh4','cdi4','pattern','clean_look'];
+  const d={};ids.forEach(k=>{d[k]=(document.getElementById(k)?.value||'');});
+  return d;
+}
+
+function applyData(d){
+  const ids=['cdd1','cdh1','cdi1','cdd2','cdh2','cdi2','cdd3','cdh3','cdi3','cdd4','cdh4','cdi4','pattern','clean_look'];
+  ids.forEach(k=>{const el=document.getElementById(k);if(el&&d[k]){el.value=d[k];autoExpand(el);}});
+}
+
+// ── PROGRESS ───────────────────────────────────────────────
+function getSectionStatus(){
+  const d=collectData();
+  return {
+    1: ['cdd1','cdd2','cdd3','cdd4'].some(k=>d[k].trim()),
+    2: d.pattern.trim().length > 0,
+    3: d.clean_look.trim().length > 0,
+  };
+}
+
+function updateProgress(){
+  const status=getSectionStatus();
+  const done=Object.values(status).filter(Boolean).length;
+  const total=Object.keys(status).length;
+  const pct=Math.round((done/total)*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+  const hint=document.getElementById('prog-hint');
+  if(pct===100){
+    hint.textContent='✓ All sections complete — ready to finish';
+    hint.className='prog-hint done';
+  }else{
+    hint.textContent=done+' of '+total+' sections done · click to jump to next';
+    hint.className='prog-hint';
+  }
+  const btn=document.getElementById('mark-complete-btn');
+  if(btn) btn.style.display=pct===100?'':'none';
+}
+
+function progressBarClick(){
+  const status=getSectionStatus();
+  const keys=Object.keys(status).map(Number);
+  const next=keys.find(n=>!status[n]);
+  if(next) document.getElementById('section-'+next).scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ── SAVE ─────────────────────────────────────────────────
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{
+    const data=collectData();
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+    void saveProgress(STORAGE_KEY,false,data);
+    updateProgress();
+  },800);
+}
+
+function saveNow(){
+  clearTimeout(saveTimer);
+  const data=collectData();
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+  void saveProgress(STORAGE_KEY,false,data);
+  updateProgress();
+  const badge=document.getElementById('saved-badge');
+  if(badge){badge.style.display='flex';setTimeout(()=>badge.style.display='none',2000);}
+}
+
+// ── COMPLETE ─────────────────────────────────────────────────
+function complete(){doComplete();}
+
+function doComplete(){
+  const d = collectData();
+  const rows = [];
+  for(let i=1;i<=4;i++){
+    const dec = d['cdd'+i];
+    const h = d['cdh'+i];
+    const ii = d['cdi'+i];
+    if(dec) rows.push('Decision '+i+': '+dec+(h?' | Holding: '+h:'')+(ii?' | If decided: '+ii:''));
+  }
+  document.getElementById('s_decisions').textContent = rows.join('\n') || '—';
+  document.getElementById('s_pattern').textContent = d.pattern || '—';
+  document.getElementById('s_clean_look').textContent = d.clean_look || '—';
+  const data = collectData();
+  data._completed = true;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  void saveProgress(STORAGE_KEY, true, data);
+  document.getElementById('mainView').style.display = 'none';
+  document.getElementById('completionView').style.display = '';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── COMPLETED BANNER ─────────────────────────────────────────
+function showCompletedBanner(){
+  if(document.getElementById('completed-banner')) return;
+  const banner=document.createElement('div');
+  banner.id='completed-banner';
+  banner.style.cssText='background:#F0FAF5;border:1px solid #2A9D6F;border-radius:10px;padding:0.85rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;font-size:0.88rem;color:var(--text-mid,#4A4A4A)';
+  banner.innerHTML='<span style="font-size:1.1rem">✓</span> You\'ve completed this tool. Your answers are saved below — feel free to revisit or add to them anytime.';
+  const page=document.querySelector('.page')||document.querySelector('.tool-page')||document.body;
+  const progBar=document.querySelector('.tool-progress');
+  if(progBar) page.insertBefore(banner,progBar);
+  else page.prepend(banner);
+}
+
+// ── INIT ─────────────────────────────────────────────────
+try{
+  const d=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
+  applyData(d);
+  updateProgress();
+  if(d._completed){
+    const allDone=Object.values(getSectionStatus()).every(Boolean);
+    if(allDone){
+      showCompletedBanner();
+    }else{
+      delete d._completed;
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(d));
+      const done=JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+      const idx=done.indexOf(STORAGE_KEY);
+      if(idx>-1){done.splice(idx,1);localStorage.setItem('tlr_completed',JSON.stringify(done));}
+    }
+  }
+}catch(e){}
+
+requireAuth().then(user=>{
+  if(!user) return;
+  showUserBadge&&showUserBadge('.logo');
+  loadProgress().then(rows=>{
+    if(!rows) return;
+    const row=rows.find(r=>r.tool_id===STORAGE_KEY);
+    if(row&&row.data){
+      applyData(row.data);
+      updateProgress();
+      if(row.completed){
+        const allDone=Object.values(getSectionStatus()).every(Boolean);
+        if(allDone){
+          showCompletedBanner();
+        }else{
+          void saveProgress(STORAGE_KEY,false,row.data);
+          const done=JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+          const idx=done.indexOf(STORAGE_KEY);
+          if(idx>-1){done.splice(idx,1);localStorage.setItem('tlr_completed',JSON.stringify(done));}
+        }
+      }
+      const syncData={...row.data};
+      if(row.completed&&Object.values(getSectionStatus()).every(Boolean)) syncData._completed=true;
+      else delete syncData._completed;
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(syncData));
+    }
+  }).catch(()=>{});
 });
 
-function showCompletion(){
-  const rows=[];
-  for(let i=1;i<=4;i++){
-    const d=document.getElementById('cdd'+i)?.value||'';
-    const h=document.getElementById('cdh'+i)?.value||'';
-    const ii=document.getElementById('cdi'+i)?.value||'';
-    if(d)rows.push('Decision '+i+': '+d+(h?' | Holding back: '+h:'')+(ii?' | If I decided: '+ii:''));
-  }
-  document.getElementById('s_decisions').textContent=rows.join('\n')||'—';
-  document.getElementById('s_pattern').textContent=document.getElementById('pattern')?.value||'—';
-  document.getElementById('s_clean_look').textContent=document.getElementById('clean_look')?.value||'—';
-  document.getElementById('toolView').style.display='none';
-  document.getElementById('completionView').style.display='block';
-  window.scrollTo(0,0);
-}
-
-function startAgain(){
-  localStorage.removeItem(STORE_KEY);
-  document.getElementById('completionView').style.display='none';
-  document.getElementById('toolView').style.display='block';
-  document.querySelectorAll('#toolView textarea').forEach(t=>{t.value='';autoExpand(t);});
-  document.getElementById('saved-badge').style.display='none';
-  window.scrollTo(0,0);
-}
-
-function getSummaryText(){
-  let out='Clean Decisions — TLR Reflection\n\nDECISIONS:\n';
-  for(let i=1;i<=4;i++){
-    const d=document.getElementById('cdd'+i)?.value||'';
-    const h=document.getElementById('cdh'+i)?.value||'';
-    const ii=document.getElementById('cdi'+i)?.value||'';
-    if(d)out+='Decision '+i+': '+d+'\n'+(h?'  Holding back: '+h+'\n':'')+(ii?'  If I decided: '+ii+'\n':'');
-  }
-  const pattern=document.getElementById('pattern')?.value||'';
-  const clean=document.getElementById('clean_look')?.value||'';
-  if(pattern)out+='\nTHE PATTERN IN WHAT HOLDS ME BACK:\n'+pattern;
-  if(clean)out+='\n\nWHAT CLEAN DECISION-MAKING LOOKS LIKE FOR ME:\n'+clean;
-  return out;
-}
-function emailToSelf(){window.location.href='mailto:?subject='+encodeURIComponent('Clean Decisions — TLR')+'&body='+encodeURIComponent(getSummaryText())}
-function shareWhatsApp(){window.open('https://wa.me/?text='+encodeURIComponent(getSummaryText()),'_blank')}
-function toggleCalPanel(){document.getElementById('calPanel').classList.toggle('open')}
-function downloadICS(){
-  const date=document.getElementById('calDate').value||new Date().toISOString().split('T')[0];
-  const time=document.getElementById('calTime').value||'09:00';
-  const repeat=document.getElementById('calRepeat').value;
-  const dtStart=date.replace(/-/g,'')+'T'+time.replace(':','')+'00';
-  const[h,m]=time.split(':').map(Number);
-  const dtEnd=date.replace(/-/g,'')+'T'+String(h+1).padStart(2,'0')+String(m).padStart(2,'0')+'00';
-  let rrule='';if(repeat==='daily')rrule='\nRRULE:FREQ=DAILY';else if(repeat==='weekly')rrule='\nRRULE:FREQ=WEEKLY';else if(repeat==='monthly')rrule='\nRRULE:FREQ=MONTHLY';
-  const ics=`BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART:${dtStart}\nDTEND:${dtEnd}\nSUMMARY:TLR Reflection — Clean Decisions${rrule}\nEND:VEVENT\nEND:VCALENDAR`;
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));a.download='tlr-clean-decisions.ics';a.click();
-}
-function copyCommitment(btn){
-  navigator.clipboard.writeText(getSummaryText()).catch(()=>{const ta=document.createElement('textarea');ta.value=getSummaryText();document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta)});
-  if(btn){btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent='📋 Copy commitment',2500);}
-}
-function saveProgress(){
-  const s={};
-  document.querySelectorAll('textarea[id]').forEach(el=>{s[el.id]=el.value});
-  localStorage.setItem(STORE_KEY,JSON.stringify(s));
-  document.getElementById('saved-badge').style.display='flex';
-}
-function restoreProgress(){
-  const raw=localStorage.getItem(STORE_KEY);if(!raw)return;
-  try{
-    const s=JSON.parse(raw);
-    document.querySelectorAll('textarea[id]').forEach(el=>{if(el.id in s&&s[el.id]){el.value=s[el.id];el.style.height='auto';el.style.height=el.scrollHeight+'px';}});
-    const hasData=Object.values(s).some(v=>v&&v!=='');
-    if(hasData)document.getElementById('saved-badge').style.display='flex';
-  }catch(e){}
-}
-document.addEventListener('input',saveProgress);
 </script>
 </body>
 </html>
