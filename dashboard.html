@@ -1465,20 +1465,22 @@ function focusInput() {
 }
 
 // Align keyboard panel with the game grid on desktop
-// (top:0 would align with the game section header — we want the grid itself)
 function alignKeyboardWithGrid() {
   if (window.innerWidth <= 720) return;
   const section = document.querySelector('.game-section');
   const grid    = document.querySelector('.grid-wrap');
   const kb      = document.getElementById('kb-panel');
   if (!section || !grid || !kb) return;
-  kb.style.top = grid.offsetTop + 'px'; // offsetTop is already relative to .game-section
+  // getBoundingClientRect gives actual rendered positions — reliable after full paint
+  const offset = grid.getBoundingClientRect().top - section.getBoundingClientRect().top;
+  kb.style.top = offset + 'px';
 }
 
 // Auto-focus + keyboard alignment on load (desktop only)
 window.addEventListener('load', () => {
   setTimeout(focusInput, 300);
-  setTimeout(alignKeyboardWithGrid, 100);
+  // Double rAF ensures we measure after fonts + grid cells have fully painted
+  requestAnimationFrame(() => requestAnimationFrame(alignKeyboardWithGrid));
 });
 window.addEventListener('resize', alignKeyboardWithGrid);
 
