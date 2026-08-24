@@ -2090,6 +2090,12 @@ document.querySelectorAll('.tab-btn[data-view]').forEach(btn => {
   btn.addEventListener('click', () => goToView(btn.dataset.view));
 });
 
+// Navigate directly to a view via URL hash (e.g. index.html#library)
+if (window.location.hash) {
+  const hashView = window.location.hash.replace('#', '');
+  if (views[hashView]) goToView(hashView);
+}
+
 // URL hash-based tab navigation (for links from other pages)
 (function handleHash() {
   const hash = window.location.hash.replace('#', '');
