@@ -872,19 +872,17 @@ body {
 
 /* ── GAME OUTER — just centres the main column ────── */
 .game-outer {
-  position: relative;
   display: flex;
   justify-content: center;
   width: 100%;
 }
-/* .main needs to be a positioning context for the absolute keyboard */
-.main { position: relative; }
 
 /* ── ON-SCREEN KEYBOARD PANEL ─────────────────────── */
-/* Desktop: absolutely positioned to the LEFT of .main, game stays centred */
+/* Desktop: .game-section is the positioning context; keyboard floats left of it */
+.game-section { position: relative; }
 .kb-panel {
   position: absolute;
-  right: calc(100% + 24px);   /* butts up against left edge of .main */
+  right: calc(100% + 24px);   /* left of .game-section, game stays centred */
   top: 0;
   width: 360px;
   display: flex;
@@ -958,16 +956,29 @@ body {
 .key.present { background: var(--present); color: #fff; }
 .key.absent  { background: var(--absent);  color: rgba(255,255,255,0.4); }
 
-/* Mobile: keyboard sits BETWEEN game and stats bar (flows in normal document order) */
+/* Mobile: game-section becomes a flex column so we can reorder keyboard + results button */
 @media (max-width: 720px) {
+  .game-section {
+    display: flex;
+    flex-direction: column;
+  }
+  /* All existing children keep default order (0), appearing before keyboard */
   .kb-panel {
-    position: static;          /* flows in the column like any other block */
+    position: static;
+    order: 10;                 /* keyboard: directly after game grid area */
     width: 100%;
     border-radius: 0;
     border-left: none; border-right: none; border-bottom: none;
-    padding: 10px 6px 28px;
+    margin-top: 12px;
+    padding: 10px 6px 16px;
     background: var(--navy);
     gap: 6px;
+  }
+  .end-panel {
+    order: 11;                 /* "See results & share" sits below keyboard */
+    border-top: none;
+    margin-top: 0;
+    padding-top: 14px;
   }
   .kb-title, .kb-legend { display: none; }
   .key { height: 56px; font-size: 14px; border-radius: 4px; }
@@ -1095,58 +1106,60 @@ body {
       <button class="action-btn enter" onclick="handleKey('ENTER')">ENTER</button>
     </div>
 
+    <!-- ON-SCREEN KEYBOARD
+         Desktop: absolutely positioned left of .game-section (position:relative above)
+         Mobile:  order:10 in flex column — directly after game grid, before end-panel -->
+    <div class="kb-panel" id="kb-panel">
+      <div class="kb-title">Letter Guide</div>
+      <div class="kb-legend">
+        <div class="kb-legend-item">
+          <div class="kb-legend-dot" style="background:var(--correct)"></div>Correct spot
+        </div>
+        <div class="kb-legend-item">
+          <div class="kb-legend-dot" style="background:var(--present)"></div>Wrong spot
+        </div>
+        <div class="kb-legend-item">
+          <div class="kb-legend-dot" style="background:var(--absent)"></div>Not in word
+        </div>
+      </div>
+      <div class="kb-row">
+        <button class="key" data-key="Q">Q</button>
+        <button class="key" data-key="W">W</button>
+        <button class="key" data-key="E">E</button>
+        <button class="key" data-key="R">R</button>
+        <button class="key" data-key="T">T</button>
+        <button class="key" data-key="Y">Y</button>
+        <button class="key" data-key="U">U</button>
+        <button class="key" data-key="I">I</button>
+        <button class="key" data-key="O">O</button>
+        <button class="key" data-key="P">P</button>
+      </div>
+      <div class="kb-row">
+        <button class="key" data-key="A">A</button>
+        <button class="key" data-key="S">S</button>
+        <button class="key" data-key="D">D</button>
+        <button class="key" data-key="F">F</button>
+        <button class="key" data-key="G">G</button>
+        <button class="key" data-key="H">H</button>
+        <button class="key" data-key="J">J</button>
+        <button class="key" data-key="K">K</button>
+        <button class="key" data-key="L">L</button>
+      </div>
+      <div class="kb-row">
+        <button class="key wide" data-key="ENTER">Enter</button>
+        <button class="key" data-key="Z">Z</button>
+        <button class="key" data-key="X">X</button>
+        <button class="key" data-key="C">C</button>
+        <button class="key" data-key="V">V</button>
+        <button class="key" data-key="B">B</button>
+        <button class="key" data-key="N">N</button>
+        <button class="key" data-key="M">M</button>
+        <button class="key wide" data-key="⌫">⌫</button>
+      </div>
+    </div>
+
     <!-- END PANEL -->
     <div id="end-panel" style="display:none;" class="end-panel"></div>
-  </div>
-
-  <!-- ON-SCREEN KEYBOARD (desktop: abs-positioned left of game; mobile: inline here between game + stats) -->
-  <div class="kb-panel" id="kb-panel">
-    <div class="kb-title">Letter Guide</div>
-    <div class="kb-legend">
-      <div class="kb-legend-item">
-        <div class="kb-legend-dot" style="background:var(--correct)"></div>Correct spot
-      </div>
-      <div class="kb-legend-item">
-        <div class="kb-legend-dot" style="background:var(--present)"></div>Wrong spot
-      </div>
-      <div class="kb-legend-item">
-        <div class="kb-legend-dot" style="background:var(--absent)"></div>Not in word
-      </div>
-    </div>
-    <div class="kb-row">
-      <button class="key" data-key="Q">Q</button>
-      <button class="key" data-key="W">W</button>
-      <button class="key" data-key="E">E</button>
-      <button class="key" data-key="R">R</button>
-      <button class="key" data-key="T">T</button>
-      <button class="key" data-key="Y">Y</button>
-      <button class="key" data-key="U">U</button>
-      <button class="key" data-key="I">I</button>
-      <button class="key" data-key="O">O</button>
-      <button class="key" data-key="P">P</button>
-    </div>
-    <div class="kb-row">
-      <button class="key" data-key="A">A</button>
-      <button class="key" data-key="S">S</button>
-      <button class="key" data-key="D">D</button>
-      <button class="key" data-key="F">F</button>
-      <button class="key" data-key="G">G</button>
-      <button class="key" data-key="H">H</button>
-      <button class="key" data-key="J">J</button>
-      <button class="key" data-key="K">K</button>
-      <button class="key" data-key="L">L</button>
-    </div>
-    <div class="kb-row">
-      <button class="key wide" data-key="ENTER">Enter</button>
-      <button class="key" data-key="Z">Z</button>
-      <button class="key" data-key="X">X</button>
-      <button class="key" data-key="C">C</button>
-      <button class="key" data-key="V">V</button>
-      <button class="key" data-key="B">B</button>
-      <button class="key" data-key="N">N</button>
-      <button class="key" data-key="M">M</button>
-      <button class="key wide" data-key="⌫">⌫</button>
-    </div>
   </div>
 
   <!-- STATS BAR -->
