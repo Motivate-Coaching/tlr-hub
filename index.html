@@ -1062,6 +1062,59 @@ footer a { color: var(--gold); text-decoration: none; }
 .journal-invite-attr { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.28); margin-bottom: 1.85rem; }
 .journal-invite-btn { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--gold); color: var(--navy); padding: 0.75rem 1.9rem; border-radius: 4px; font-weight: 700; font-size: 0.82rem; text-decoration: none; letter-spacing: 0.04em; transition: background 0.15s, transform 0.15s; }
 .journal-invite-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+/* ── WELCOME BANNER ─────────────────────────── */
+#welcome-banner { margin: 1.25rem 1.25rem 0; }
+.wb-card {
+  background: #FAF7F2;
+  border-left: 4px solid var(--gold, #E8A800);
+  border-radius: 10px;
+  padding: 1rem 1rem 1rem 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.wb-body { flex: 1; min-width: 0; }
+.wb-greeting {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--gold, #E8A800);
+  margin-bottom: 0.3rem;
+}
+.wb-message {
+  font-size: 0.9rem;
+  color: #2C3E52;
+  line-height: 1.55;
+  margin-bottom: 0.55rem;
+}
+.wb-message strong { font-weight: 700; }
+.wb-message em { font-style: italic; }
+.wb-links { display: flex; gap: 1.1rem; flex-wrap: wrap; align-items: center; }
+.wb-link {
+  font-size: 0.77rem;
+  font-weight: 600;
+  color: var(--gold, #E8A800);
+  text-decoration: none;
+  letter-spacing: 0.03em;
+}
+.wb-link:hover { text-decoration: underline; }
+.wb-dismiss {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #bbb;
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0 0.15rem;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: -0.1rem;
+}
+.wb-dismiss:hover { color: #888; }
+@media (max-width: 600px) { #welcome-banner { margin: 1rem 0.75rem 0; } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
@@ -1076,7 +1129,7 @@ footer a { color: var(--gold); text-decoration: none; }
   }
 })();
 </script>
-<script>requireAuth().then(u => { if(u) showUserBadge("#user-badge"); });</script>
+<script>requireAuth().then(u => { if(u) { showUserBadge("#user-badge"); renderWelcomeBanner(u); } });</script>
 
 <!-- HEADER -->
 <div class="sticky-top">
@@ -1112,6 +1165,9 @@ footer a { color: var(--gold); text-decoration: none; }
 
 <!-- ════ HOME VIEW (Dashboard Command Centre) ════ -->
 <div id="view-home">
+
+  <!-- ── WELCOME BANNER (injected by renderWelcomeBanner) ── -->
+  <div id="welcome-banner"></div>
 
   <!-- ── PROGRESS STRIP ────────────────────────────── -->
   <div class="progress-strip">
@@ -2444,6 +2500,61 @@ function downloadICS(title, start, end, rrule, location, filename) {
   a.href = URL.createObjectURL(blob);
   a.download = filename + '.ics';
   a.click();
+}
+
+/* ── WELCOME BANNER ────────────────────────────── */
+const _CURRENT_THEME_NAME = 'Difficult Conversations';
+
+function renderWelcomeBanner(user) {
+  const banner = document.getElementById('welcome-banner');
+  if (!banner) return;
+
+  // Skip if already dismissed today
+  const today = new Date().toISOString().slice(0, 10);
+  if (localStorage.getItem('tlr_banner_dismissed') === today) return;
+
+  // First name
+  const meta = (user && user.user_metadata) || {};
+  let firstName = meta.first_name || meta.name || meta.full_name || '';
+  if (!firstName && user && user.email) firstName = user.email.split('@')[0].split('.')[0];
+  firstName = firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() : '';
+
+  // Time-of-day greeting
+  const hour = new Date().getHours();
+  const salutation = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const greetingText = firstName ? `${salutation}, ${firstName}` : salutation;
+
+  // Current theme progress
+  const themeTools = currentTopics.filter(t => t.tool && t.tool.file);
+  const total = themeTools.length;
+  const completedCount = themeTools.filter(t => getToolProgress(t.tool.file) === 'completed').length;
+  const startedCount  = themeTools.filter(t => getToolProgress(t.tool.file) === 'started').length;
+
+  let progressMsg;
+  if (total === 0) {
+    progressMsg = `This month's theme — <strong>${_CURRENT_THEME_NAME}</strong> — is open and waiting.`;
+  } else if (completedCount === total) {
+    progressMsg = `You've worked through all ${total} tools in <strong>${_CURRENT_THEME_NAME}</strong> this month. That's no small thing.`;
+  } else if (completedCount === 0 && startedCount === 0) {
+    progressMsg = `This month's theme is <strong>${_CURRENT_THEME_NAME}</strong> — ${total} tools ready when you are.`;
+  } else {
+    const nextTool = themeTools.find(t => getToolProgress(t.tool.file) !== 'completed');
+    const nextName = nextTool ? `<em>${nextTool.topic}</em>` : '';
+    progressMsg = `You're ${completedCount} of ${total} into <strong>${_CURRENT_THEME_NAME}</strong>.${nextName ? ` ${nextName} is your next step.` : ''}`;
+  }
+
+  banner.innerHTML = `
+    <div class="wb-card">
+      <div class="wb-body">
+        <div class="wb-greeting">${greetingText}</div>
+        <div class="wb-message">${progressMsg}</div>
+        <div class="wb-links">
+          <a class="wb-link" href="dashboard.html">Play today's word →</a>
+          <a class="wb-link" href="#" onclick="event.preventDefault();goToView('library')">Browse the library →</a>
+        </div>
+      </div>
+      <button class="wb-dismiss" onclick="document.getElementById('welcome-banner').innerHTML='';localStorage.setItem('tlr_banner_dismissed','${today}')" title="Dismiss for today">&#215;</button>
+    </div>`;
 }
 </script>
 
