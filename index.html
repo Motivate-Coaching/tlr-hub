@@ -1129,7 +1129,19 @@ footer a { color: var(--gold); text-decoration: none; }
   }
 })();
 </script>
-<script>requireAuth().then(u => { if(u) { showUserBadge("#user-badge"); renderWelcomeBanner(u); } });</script>
+<script>
+requireAuth().then(u => {
+  if (!u) return;
+  showUserBadge("#user-badge");
+  renderWelcomeBanner(u);
+  // Pull completion state from Supabase, then re-render anything that depends on it
+  loadProgress().then(() => {
+    document.getElementById('current-topics').innerHTML = currentTopics.map(topicRowHTML).join('');
+    renderProgressWidget();
+    renderWelcomeBanner(u); // refresh banner with accurate theme progress
+  }).catch(() => {});
+});
+</script>
 
 <!-- HEADER -->
 <div class="sticky-top">
@@ -2040,11 +2052,19 @@ const pastThemes = [
 function getToolProgress(file) {
   if (!file) return false;
   const key = 'tlr-' + file.replace('.html', '');
+
+  // tlr_completed is rebuilt from Supabase on every load — treat it as authoritative.
+  // This means a stale local _completed flag can never incorrectly show "Completed" in the library.
+  try {
+    const completedList = JSON.parse(localStorage.getItem('tlr_completed') || '[]');
+    if (completedList.includes(key)) return 'completed';
+  } catch(e) {}
+
+  // Not in the completed list — check if the tool has any saved content ("started")
   const raw = localStorage.getItem(key);
   if (!raw) return false;
   try {
     const data = JSON.parse(raw);
-    if (data._completed) return 'completed';
     return Object.values(data).some(v => typeof v === 'string' && v.trim().length > 0) ? 'started' : false;
   } catch(e) { return raw.length > 4 ? 'started' : false; }
 }

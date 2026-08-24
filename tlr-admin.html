@@ -121,11 +121,12 @@ body { font-family: 'Poppins', sans-serif; background: var(--navy); color: var(-
   border-radius: 8px; overflow: hidden; margin-bottom: 1.5rem;
 }
 .feed-row {
-  display: grid; grid-template-columns: 180px 1fr 140px 120px;
+  display: grid; grid-template-columns: 180px 1fr 140px 120px 80px;
   gap: 1rem; align-items: center;
   padding: 0.7rem 1.4rem; border-bottom: 1px solid rgba(255,255,255,0.04);
   font-size: 0.8rem;
 }
+.feed-dur { color: var(--muted); font-size: 0.75rem; }
 .feed-row:last-child { border-bottom: none; }
 .feed-row.header {
   font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em;
@@ -271,7 +272,7 @@ body { font-family: 'Poppins', sans-serif; background: var(--navy); color: var(-
       <button class="feed-ctrl-btn" onclick="downloadCSV()" style="margin-left:0.5rem;border-color:var(--gold);color:var(--gold);">⬇ Download CSV</button>
     </div>
     <div class="feed-row header">
-      <span>Time</span><span>Member</span><span>Page</span><span>Event</span>
+      <span>Time</span><span>Member</span><span>Page</span><span>Event</span><span>Time Spent</span>
     </div>
     <div id="feed-body"><div class="loading">Loading…</div></div>
   </div>
@@ -516,11 +517,15 @@ function toggleGroup(id) {
 }
 
 function rowHtml(r) {
+  const dur = (r.event_type === 'page_exit' && r.metadata && r.metadata.duration_seconds)
+    ? fmtDuration(r.metadata.duration_seconds)
+    : '—';
   return `<div class="feed-row">
     <span class="feed-time">${formatTime(r.created_at)}</span>
     <span class="feed-email">${r.user_email || '—'}</span>
     <span class="feed-page">${friendlyName(r.page)}</span>
     <span><span class="feed-type ${r.event_type}">${r.event_type.replace('_',' ')}</span></span>
+    <span class="feed-dur">${dur}</span>
   </div>`;
 }
 
