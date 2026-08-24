@@ -585,17 +585,52 @@ let areaVisions = {};
 let areaActions = {}; // now: { [area]: [{text,commitment}, {text,commitment}, {text,commitment}] }
 let allDisplayedAreas = [...PRESET_AREAS];
 
+// ── SAVE — localStorage + Supabase ────────
+// Single function used for every write so nothing is ever saved to one store only
+function saveWheelData(data) {
+  data.lastSaved = new Date().toISOString();
+  localStorage.setItem('tlr_wheel_data', JSON.stringify(data));
+  void saveProgress('tlr_wheel_data', false, data); // fire-and-forget to Supabase
+}
+
 // ── INIT ──────────────────────────────────
 (function init() {
+  if (navigator.share) document.getElementById('btn-share').style.display = '';
+
+  // ① Render from localStorage immediately — zero latency, instant feel
   const saved = localStorage.getItem('tlr_wheel_data');
   if (saved) {
-    showWheelView(JSON.parse(saved));
+    try { showWheelView(JSON.parse(saved)); } catch(e) {}
   } else {
+    // Nothing local — show wizard while Supabase is checked in background
     renderAreasGrid();
     renderInspirationBank();
   }
-  if (navigator.share) document.getElementById('btn-share').style.display = '';
+
   checkReminders();
+
+  // ② Async Supabase check — restores data on new device/cleared browser
+  requireAuth().then(user => {
+    if (!user) return;
+    loadProgress().then(rows => {
+      if (!rows) return;
+      const row = rows.find(r => r.tool_id === 'tlr_wheel_data');
+      if (!row || !row.data || !row.data.areas || !row.data.areas.length) return;
+
+      // Compare timestamps — only update if Supabase is newer than what we have locally
+      const local = saved ? JSON.parse(saved) : null;
+      const localTs  = local && local.lastSaved ? new Date(local.lastSaved) : new Date(0);
+      const remoteTs = row.last_updated        ? new Date(row.last_updated) : new Date(0);
+
+      if (!local || remoteTs > localTs) {
+        // Supabase data is fresher — restore it to localStorage and refresh the view
+        const freshData = row.data;
+        freshData.lastSaved = row.last_updated || new Date().toISOString();
+        localStorage.setItem('tlr_wheel_data', JSON.stringify(freshData));
+        showWheelView(freshData);
+      }
+    }).catch(() => {});
+  });
 })();
 
 function startWizard() { renderAreasGrid(); renderInspirationBank(); gotoStep(1); }
@@ -814,7 +849,7 @@ function saveWheel() {
     })),
     checkins: [{ date: today, scores: selectedAreas.map(area => areaScores[area] || 5) }]
   };
-  localStorage.setItem('tlr_wheel_data', JSON.stringify(data));
+  saveWheelData(data);
   document.getElementById('wheel-wizard').style.display = 'none';
   showWheelView(data);
 }
@@ -1015,7 +1050,7 @@ function toggleDone(areaIdx, actionIdx, checked) {
     act.completedActions.push({ text: act.text, date: new Date().toISOString().slice(0,10) });
   }
 
-  localStorage.setItem('tlr_wheel_data', JSON.stringify(data));
+  saveWheelData(data);
   const el = document.getElementById('ap-text-' + areaIdx + '-' + actionIdx);
   if (el) el.classList.toggle('done', checked);
 
@@ -1030,7 +1065,7 @@ function toggleDone(areaIdx, actionIdx, checked) {
         d.areas[areaIdx].actions[actionIdx].text = newAction.trim();
         d.areas[areaIdx].actions[actionIdx].done = false;
         d.areas[areaIdx].actions[actionIdx].reminder = null;
-        localStorage.setItem('tlr_wheel_data', JSON.stringify(d));
+        saveWheelData(d);
         renderActionPlan(d);
         renderProgressStats(d);
       }
@@ -1061,7 +1096,7 @@ function editAction(areaIdx, actionIdx) {
 function saveAction(areaIdx, actionIdx, value) {
   const data = JSON.parse(localStorage.getItem('tlr_wheel_data'));
   data.areas[areaIdx].actions[actionIdx].text = value.trim();
-  localStorage.setItem('tlr_wheel_data', JSON.stringify(data));
+  saveWheelData(data);
   renderActionPlan(data);
 }
 
@@ -1099,7 +1134,7 @@ function setReminder(areaIdx, actionIdx, daysFromNow) {
   const d = new Date();
   d.setDate(d.getDate() + daysFromNow);
   data.areas[areaIdx].actions[actionIdx].reminder = d.toISOString().slice(0,10);
-  localStorage.setItem('tlr_wheel_data', JSON.stringify(data));
+  saveWheelData(data);
   const popup = document.getElementById('rp-' + areaIdx + '-' + actionIdx);
   if (popup) popup.classList.remove('open');
   renderActionPlan(data);
@@ -1260,7 +1295,7 @@ function saveEditWheel() {
     data.checkins.push({ date: today, scores: newScores });
   }
 
-  localStorage.setItem('tlr_wheel_data', JSON.stringify(data));
+  saveWheelData(data);
   closeEditWheel();
   document.getElementById('wheel-view').classList.remove('active');
   showWheelView(data);
@@ -1298,7 +1333,7 @@ function saveCheckin() {
   data.lastCheckin = today;
   if (!data.checkins) data.checkins = [];
   data.checkins.push({ date: today, scores: newScores });
-  localStorage.setItem('tlr_wheel_data', JSON.stringify(data));
+  saveWheelData(data);
   closeCheckin();
   document.getElementById('wheel-view').classList.remove('active');
   showWheelView(data);
@@ -1388,7 +1423,7 @@ function confirmReplaceArea() {
     vision: '',
     actions: [{text:'',done:false,commitment:3,completedActions:[],reminder:null},{text:'',done:false,commitment:3,completedActions:[],reminder:null},{text:'',done:false,commitment:3,completedActions:[],reminder:null}]
   };
-  localStorage.setItem('tlr_wheel_data', JSON.stringify(data));
+  saveWheelData(data);
   closeReplaceArea();
   document.getElementById('wheel-view').classList.remove('active');
   showWheelView(data);
