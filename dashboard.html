@@ -1472,7 +1472,7 @@ function alignKeyboardWithGrid() {
   const grid    = document.querySelector('.grid-wrap');
   const kb      = document.getElementById('kb-panel');
   if (!section || !grid || !kb) return;
-  kb.style.top = (grid.offsetTop - section.offsetTop) + 'px';
+  kb.style.top = grid.offsetTop + 'px'; // offsetTop is already relative to .game-section
 }
 
 // Auto-focus + keyboard alignment on load (desktop only)
