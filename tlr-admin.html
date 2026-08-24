@@ -268,6 +268,7 @@ body { font-family: 'Poppins', sans-serif; background: var(--navy); color: var(-
       <button class="feed-ctrl-btn" id="btn-group-none" onclick="setFeedGroup('none')">None</button>
       <button class="feed-ctrl-btn" style="margin-left:auto;" onclick="toggleAllGroups(true)">Expand all</button>
       <button class="feed-ctrl-btn" onclick="toggleAllGroups(false)">Collapse all</button>
+      <button class="feed-ctrl-btn" onclick="downloadCSV()" style="margin-left:0.5rem;border-color:var(--gold);color:var(--gold);">⬇ Download CSV</button>
     </div>
     <div class="feed-row header">
       <span>Time</span><span>Member</span><span>Page</span><span>Event</span>
@@ -556,6 +557,39 @@ function renderFeed(data) {
       </div>
       <div class="feed-group-body" id="${id}">${rows.map(rowHtml).join('')}</div>`;
   }).join('');
+}
+
+// ── CSV EXPORT ───────────────────────────────────────
+function downloadCSV() {
+  if (!_feedData.length) { alert('No data loaded yet — click Refresh first.'); return; }
+
+  const cols = ['Date', 'Time', 'Member Email', 'Event Type', 'Page', 'Page (raw)', 'Duration (seconds)'];
+
+  const rows = _feedData.map(r => {
+    const dt   = new Date(r.created_at);
+    const date = dt.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+    const time = dt.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    const dur  = (r.metadata && r.metadata.duration_seconds) ? r.metadata.duration_seconds : '';
+    return [
+      date, time,
+      r.user_email || '',
+      r.event_type || '',
+      friendlyName(r.page),
+      r.page       || '',
+      dur
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+  });
+
+  const csv  = [cols.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `tlr-activity-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // ── HELPERS ──

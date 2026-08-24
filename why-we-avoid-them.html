@@ -625,8 +625,24 @@ function showCompletedBanner(){
 
 // ── INIT ─────────────────────────────────────────────
 // Immediate localStorage check so the page feels instant
-try{ const d=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'); if(d._completed) showCompletedBanner(); applyData(d); }catch(e){}
-updateProgress();
+try{
+  const d = JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
+  applyData(d);
+  updateProgress();
+  if(d._completed){
+    const allDone = Object.values(getSectionStatus()).every(Boolean);
+    if(allDone){
+      showCompletedBanner();
+    } else {
+      // Stale flag — tool was marked complete before all sections were filled; clear it
+      delete d._completed;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+      const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+      const idx = done.indexOf(STORAGE_KEY);
+      if(idx > -1){ done.splice(idx,1); localStorage.setItem('tlr_completed', JSON.stringify(done)); }
+    }
+  }
+}catch(e){}
 
 // Then try Supabase for cross-device data (may override localStorage if newer)
 requireAuth().then(user => {
@@ -637,10 +653,24 @@ requireAuth().then(user => {
     const row = rows.find(r => r.tool_id === STORAGE_KEY);
     if(row && row.data){
       applyData(row.data);
-      if(row.completed) showCompletedBanner();
       updateProgress();
+      if(row.completed){
+        const allDone = Object.values(getSectionStatus()).every(Boolean);
+        if(allDone){
+          showCompletedBanner();
+        } else {
+          // Supabase says completed but sections aren't all filled — correct server-side too
+          void saveProgress(STORAGE_KEY, false, row.data);
+          const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+          const idx = done.indexOf(STORAGE_KEY);
+          if(idx > -1){ done.splice(idx,1); localStorage.setItem('tlr_completed', JSON.stringify(done)); }
+        }
+      }
       // Keep localStorage in sync with Supabase
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({...row.data, _completed: row.completed}));
+      const syncData = {...row.data};
+      if(row.completed && Object.values(getSectionStatus()).every(Boolean)) syncData._completed = true;
+      else delete syncData._completed;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(syncData));
     }
   }).catch(()=>{});
 });
