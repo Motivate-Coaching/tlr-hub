@@ -125,6 +125,30 @@ input[type=text]::placeholder{color:var(--text-muted);font-size:0.83rem}
 .cta-text{font-size:0.88rem;color:rgba(255,255,255,0.65);line-height:1.55}
 .cta-italic{font-family:var(--font-display);font-style:italic;font-size:0.92rem;color:rgba(255,255,255,0.5)}
 
+/* ── Progress bar ── */
+.tool-progress{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-bottom:2rem;cursor:pointer;transition:border-color .2s}
+.tool-progress:hover{border-color:var(--accent)}
+.prog-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem}
+.prog-label{font-size:0.75rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted)}
+.prog-pct{font-size:0.85rem;font-weight:700;color:var(--accent)}
+.prog-track{height:7px;background:var(--cream-deeper);border-radius:4px;overflow:hidden;margin-bottom:0.45rem}
+.prog-fill{height:100%;background:var(--accent);border-radius:4px;width:0%;transition:width .4s ease}
+.prog-hint{font-size:0.77rem;color:var(--text-muted)}
+.prog-hint.done{color:var(--accent);font-weight:500}
+
+/* ── Incomplete warning ── */
+.incomplete-warning{display:none;background:#FFF8EF;border:1.5px solid var(--accent);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.25rem}
+.incomplete-title{font-size:0.88rem;font-weight:700;color:var(--text-dark);margin-bottom:0.6rem;display:flex;align-items:center;gap:0.45rem}
+.incomplete-list{list-style:none;margin-bottom:1rem}
+.incomplete-list li{font-size:0.85rem;color:var(--text-mid);padding:0.3rem 0;display:flex;align-items:center;gap:0.5rem;cursor:pointer;transition:color .15s}
+.incomplete-list li:hover{color:var(--accent)}
+.incomplete-list li::before{content:'→';color:var(--accent);flex-shrink:0}
+.incomplete-actions{display:flex;gap:0.65rem;flex-wrap:wrap}
+.btn-keep-going{background:var(--accent);color:#fff;border:none;padding:0.6rem 1.25rem;border-radius:8px;font-family:var(--font-body);font-size:0.84rem;font-weight:600;cursor:pointer;transition:opacity .15s}
+.btn-keep-going:hover{opacity:0.87}
+.btn-save-anyway{background:transparent;color:var(--text-muted);border:1px solid var(--border);padding:0.6rem 1.25rem;border-radius:8px;font-family:var(--font-body);font-size:0.84rem;cursor:pointer;transition:all .15s}
+.btn-save-anyway:hover{border-color:var(--text-muted);color:var(--text-dark)}
+
 /* ── Complete button ── */
 .complete-wrap{text-align:center;padding-top:0.5rem}
 .complete-btn{background:var(--navy);color:#fff;border:none;padding:1rem 2.75rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s;letter-spacing:0.01em}
@@ -180,6 +204,16 @@ input[type=text]::placeholder{color:var(--text-muted);font-size:0.83rem}
   <div class="tool-subtitle">Awareness is the first step to change.</div>
   <div class="divider"></div>
 
+  <!-- PROGRESS BAR -->
+  <div class="tool-progress" onclick="progressBarClick()">
+    <div class="prog-header">
+      <span class="prog-label">Your progress</span>
+      <span class="prog-pct" id="prog-pct">0%</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="prog-hint" id="prog-hint">0 of 4 sections done · tap to jump to next</div>
+  </div>
+
   <!-- INTRO + CALLOUT -->
   <div class="intro-grid">
     <div class="intro-body">
@@ -200,7 +234,7 @@ input[type=text]::placeholder{color:var(--text-muted);font-size:0.83rem}
   </div>
 
   <!-- SECTION 1 -->
-  <div class="step-block">
+  <div class="step-block" id="section-1">
     <div class="step-head">
       <div class="step-num">1</div>
       <div class="step-q">What conversation have you been avoiding (or have avoided)?</div>
@@ -210,7 +244,7 @@ input[type=text]::placeholder{color:var(--text-muted);font-size:0.83rem}
   </div>
 
   <!-- SECTION 2 -->
-  <div class="step-block">
+  <div class="step-block" id="section-2">
     <div class="step-head">
       <div class="step-num">2</div>
       <div class="step-q">What stops you from going towards it?</div>
@@ -269,7 +303,7 @@ input[type=text]::placeholder{color:var(--text-muted);font-size:0.83rem}
   </div>
 
   <!-- SECTION 3 -->
-  <div class="step-block">
+  <div class="step-block" id="section-3">
     <div class="step-head">
       <div class="step-num">3</div>
       <div class="step-q">When has this shown up before?</div>
@@ -314,7 +348,7 @@ input[type=text]::placeholder{color:var(--text-muted);font-size:0.83rem}
   </div>
 
   <!-- SECTION 4 -->
-  <div class="step-block">
+  <div class="step-block" id="section-4">
     <div class="step-head">
       <div class="step-num">4</div>
       <div class="step-q">What are you protecting?</div>
@@ -383,6 +417,17 @@ input[type=text]::placeholder{color:var(--text-muted);font-size:0.83rem}
     </div>
   </div>
 
+  <!-- INCOMPLETE WARNING — shown instead of completing when sections are missing -->
+  <div class="incomplete-warning" id="incomplete-warning">
+    <div class="incomplete-title">⚠️ A few sections still need your attention</div>
+    <p style="font-size:0.84rem;color:var(--text-mid);margin-bottom:0.75rem">No worries — it probably wasn't intentional. Here's what's still empty. Click any item to jump straight to it:</p>
+    <ul class="incomplete-list" id="incomplete-list"></ul>
+    <div class="incomplete-actions">
+      <button class="btn-keep-going" onclick="jumpToFirstMissing()">Take me there →</button>
+      <button class="btn-save-anyway" onclick="saveIncomplete()">Save progress &amp; come back later</button>
+    </div>
+  </div>
+
   <div class="complete-wrap">
     <button class="complete-btn" onclick="complete()">Mark as complete ✓</button>
   </div>
@@ -416,8 +461,6 @@ input[type=text]::placeholder{color:var(--text-muted);font-size:0.83rem}
 
 <script src="auth.js"></script>
 <script>
-requireAuth().then(u => { if(u) showUserBadge && showUserBadge('.logo'); });
-
 const STORAGE_KEY = 'tlr-why-we-avoid-them';
 let saveTimer;
 
@@ -430,90 +473,177 @@ function toggleCheck(label){
   label.classList.toggle('checked', cb.checked);
 }
 
+// ── DATA ─────────────────────────────────────────────
+function collectData(){
+  const stops = [...document.querySelectorAll('#stops-grid input:checked')].map(i=>i.value);
+  return {
+    s1:  document.getElementById('s1').value,
+    stops,
+    s3a: document.getElementById('s3a').value,
+    s3b: document.getElementById('s3b').value,
+    s3c: document.getElementById('s3c').value,
+    s3d: document.getElementById('s3d').value,
+    s4a: document.getElementById('s4a').value,
+    s4b: document.getElementById('s4b').value,
+    s4c: document.getElementById('s4c').value,
+  };
+}
+
+function applyData(d){
+  if(d.s1){ document.getElementById('s1').value=d.s1; autoResize(document.getElementById('s1')); }
+  if(d.stops) d.stops.forEach(val=>{
+    const cb = document.querySelector(`#stops-grid input[value="${val}"]`);
+    if(cb){ cb.checked=true; cb.closest('.check-item').classList.add('checked'); }
+  });
+  ['s3a','s3b','s3c','s3d','s4a','s4b','s4c'].forEach(k=>{ if(d[k]) document.getElementById(k).value=d[k]; });
+}
+
+// ── PROGRESS ─────────────────────────────────────────
+const SECTION_NAMES = {
+  1: 'The conversation you\'ve been avoiding',
+  2: 'What stops you (choose at least one)',
+  3: 'When this has shown up before',
+  4: 'What you\'re protecting'
+};
+
+function getSectionStatus(){
+  const d = collectData();
+  return {
+    1: d.s1.trim().length > 0,
+    2: d.stops.length > 0,
+    3: ['s3a','s3b','s3c','s3d'].some(k => d[k].trim()),
+    4: ['s4a','s4b','s4c'].some(k => d[k].trim()),
+  };
+}
+
+function updateProgress(){
+  const status = getSectionStatus();
+  const done = Object.values(status).filter(Boolean).length;
+  const pct  = Math.round((done / 4) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent  = pct + '%';
+  const hint = document.getElementById('prog-hint');
+  if(pct === 100){
+    hint.textContent = '✓ All 4 sections complete — ready to finish';
+    hint.className = 'prog-hint done';
+  } else {
+    hint.textContent = `${done} of 4 sections done · click to jump to next`;
+    hint.className = 'prog-hint';
+  }
+}
+
+function progressBarClick(){
+  const status = getSectionStatus();
+  const next = [1,2,3,4].find(n => !status[n]);
+  if(next) document.getElementById('section-'+next).scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ── SAVE ─────────────────────────────────────────────
 function save(){
   clearTimeout(saveTimer);
   saveTimer = setTimeout(()=>{
-    const stops = [...document.querySelectorAll('#stops-grid input:checked')].map(i=>i.value);
-    const data = {
-      s1: document.getElementById('s1').value,
-      stops,
-      s3a: document.getElementById('s3a').value,
-      s3b: document.getElementById('s3b').value,
-      s3c: document.getElementById('s3c').value,
-      s3d: document.getElementById('s3d').value,
-      s4a: document.getElementById('s4a').value,
-      s4b: document.getElementById('s4b').value,
-      s4c: document.getElementById('s4c').value,
-    };
+    const data = collectData();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    void saveProgress(STORAGE_KEY, false, data); // Supabase — fire and forget
+    updateProgress();
     const badge = document.getElementById('saved-badge');
     badge.style.display='flex';
-    setTimeout(()=>badge.style.display='none',2000);
+    setTimeout(()=>badge.style.display='none', 2000);
   }, 800);
 }
 
-function load(){
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if(!raw) return;
-  try{
-    const d = JSON.parse(raw);
-    if(d.s1){ document.getElementById('s1').value=d.s1; autoResize(document.getElementById('s1')); }
-    if(d.stops) d.stops.forEach(val=>{
-      const cb = document.querySelector(`#stops-grid input[value="${val}"]`);
-      if(cb){ cb.checked=true; cb.closest('.check-item').classList.add('checked'); }
-    });
-    ['s3a','s3b','s3c','s3d','s4a','s4b','s4c'].forEach(k=>{ if(d[k]) document.getElementById(k).value=d[k]; });
-  }catch(e){}
+// ── COMPLETE / VALIDATE ───────────────────────────────
+function complete(){
+  const status = getSectionStatus();
+  const missing = [1,2,3,4].filter(n => !status[n]);
+  if(missing.length > 0){
+    const list = document.getElementById('incomplete-list');
+    list.innerHTML = missing.map(n =>
+      `<li onclick="goToSection(${n})">${SECTION_NAMES[n]}</li>`
+    ).join('');
+    const warning = document.getElementById('incomplete-warning');
+    warning.style.display = '';
+    warning.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+  doComplete();
 }
 
-function complete(){
-  // Build summary
+function goToSection(n){
+  document.getElementById('incomplete-warning').style.display = 'none';
+  document.getElementById('section-'+n).scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function jumpToFirstMissing(){
+  const status = getSectionStatus();
+  const next = [1,2,3,4].find(n => !status[n]);
+  if(next) goToSection(next);
+}
+
+function saveIncomplete(){
+  const data = collectData();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  void saveProgress(STORAGE_KEY, false, data);
+  document.getElementById('incomplete-warning').style.display = 'none';
+  const badge = document.getElementById('saved-badge');
+  badge.style.display='flex';
+  setTimeout(()=>badge.style.display='none', 3000);
+}
+
+function doComplete(){
   const s1 = document.getElementById('s1').value.trim();
   document.getElementById('sum-s1').textContent = s1 || '(not filled in)';
 
   const stops = [...document.querySelectorAll('#stops-grid input:checked')].map(i=>i.closest('.check-item').querySelector('.check-label').textContent);
-  if(stops.length){
-    document.getElementById('sum-stops').textContent = stops.join('\n');
-    document.getElementById('sum-stops-card').style.display='';
-  }
+  if(stops.length){ document.getElementById('sum-stops').textContent=stops.join('\n'); document.getElementById('sum-stops-card').style.display=''; }
 
   const s3parts = ['s3a','s3b','s3c','s3d'].map(k=>document.getElementById(k).value.trim()).filter(Boolean);
-  if(s3parts.length){
-    document.getElementById('sum-s3').textContent = s3parts.join('\n');
-    document.getElementById('sum-s3-card').style.display='';
-  }
+  if(s3parts.length){ document.getElementById('sum-s3').textContent=s3parts.join('\n'); document.getElementById('sum-s3-card').style.display=''; }
 
   const s4parts = ['s4a','s4b','s4c'].map(k=>document.getElementById(k).value.trim()).filter(Boolean);
-  if(s4parts.length){
-    document.getElementById('sum-s4').textContent = s4parts.join('\n');
-    document.getElementById('sum-s4-card').style.display='';
-  }
+  if(s4parts.length){ document.getElementById('sum-s4').textContent=s4parts.join('\n'); document.getElementById('sum-s4-card').style.display=''; }
 
-  // Mark completed
-  const raw = localStorage.getItem(STORAGE_KEY);
-  let data = {};
-  try{ data=JSON.parse(raw)||{}; }catch(e){}
+  const data = collectData();
   data._completed = true;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  void saveProgress(STORAGE_KEY, true, data); // Supabase — mark as fully complete
 
   document.getElementById('mainView').style.display='none';
   document.getElementById('completionView').style.display='';
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-load();
+// ── COMPLETED BANNER ─────────────────────────────────
+function showCompletedBanner(){
+  if(document.getElementById('completed-banner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'completed-banner';
+  banner.style.cssText='background:var(--accent-pale);border:1px solid var(--accent);border-radius:10px;padding:0.85rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;font-size:0.88rem;color:var(--text-mid)';
+  banner.innerHTML='<span style="font-size:1.1rem">✓</span> You\'ve completed this tool. Your answers are saved below — feel free to revisit or add to them anytime.';
+  document.querySelector('.page').insertBefore(banner, document.querySelector('.tool-progress'));
+}
 
-// Check if already completed
-const raw = localStorage.getItem(STORAGE_KEY);
-try{
-  const d = JSON.parse(raw||'{}');
-  if(d._completed){
-    const banner = document.createElement('div');
-    banner.style.cssText='background:var(--accent-pale);border:1px solid var(--accent);border-radius:10px;padding:0.85rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;font-size:0.88rem;color:var(--text-mid)';
-    banner.innerHTML='<span style="font-size:1.1rem">✓</span> You\'ve completed this tool. Your answers are saved below — feel free to add to them or revisit anytime.';
-    document.querySelector('.page').insertBefore(banner, document.querySelector('.tool-eyebrow').nextSibling.nextSibling.nextSibling.nextSibling);
-  }
-}catch(e){}
+// ── INIT ─────────────────────────────────────────────
+// Immediate localStorage check so the page feels instant
+try{ const d=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'); if(d._completed) showCompletedBanner(); applyData(d); }catch(e){}
+updateProgress();
+
+// Then try Supabase for cross-device data (may override localStorage if newer)
+requireAuth().then(user => {
+  if(!user) return;
+  showUserBadge && showUserBadge('.logo');
+  loadProgress().then(rows => {
+    if(!rows) return;
+    const row = rows.find(r => r.tool_id === STORAGE_KEY);
+    if(row && row.data){
+      applyData(row.data);
+      if(row.completed) showCompletedBanner();
+      updateProgress();
+      // Keep localStorage in sync with Supabase
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({...row.data, _completed: row.completed}));
+    }
+  }).catch(()=>{});
+});
 </script>
 </body>
 </html>

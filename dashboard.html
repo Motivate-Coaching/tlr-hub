@@ -1464,8 +1464,23 @@ function focusInput() {
   }
 }
 
-// Auto-focus on load (desktop only)
-window.addEventListener('load', () => { setTimeout(focusInput, 300); });
+// Align keyboard panel with the game grid on desktop
+// (top:0 would align with the game section header — we want the grid itself)
+function alignKeyboardWithGrid() {
+  if (window.innerWidth <= 720) return;
+  const section = document.querySelector('.game-section');
+  const grid    = document.querySelector('.grid-wrap');
+  const kb      = document.getElementById('kb-panel');
+  if (!section || !grid || !kb) return;
+  kb.style.top = (grid.offsetTop - section.offsetTop) + 'px';
+}
+
+// Auto-focus + keyboard alignment on load (desktop only)
+window.addEventListener('load', () => {
+  setTimeout(focusInput, 300);
+  setTimeout(alignKeyboardWithGrid, 100);
+});
+window.addEventListener('resize', alignKeyboardWithGrid);
 
 // Re-focus when tapping the game section (desktop only — keyboard panel is outside this)
 document.querySelector('.game-section').addEventListener('click', focusInput);
