@@ -22,7 +22,8 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
 .topbar a.back{color:rgba(255,255,255,0.65);text-decoration:none;font-size:0.82rem;transition:color .2s}
 .topbar a.back:hover{color:#fff}
 .topbar .logo{color:#fff;font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.04em}
-.topbar .theme-pill{background:var(--accent);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.28rem 0.85rem;border-radius:20px}
+.topbar .theme-pill{background:var(--accent);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.28rem 0.85rem;border-radius:20px;text-decoration:none;cursor:pointer;transition:opacity .15s}
+.topbar .theme-pill:hover{opacity:0.8}
 #saved-badge{display:none;align-items:center;gap:0.4rem;font-size:0.72rem;color:rgba(255,255,255,0.5)}
 #saved-badge .dot{width:6px;height:6px;background:#5CB85C;border-radius:50%;display:inline-block}
 
@@ -183,7 +184,7 @@ input[type=text]::placeholder{color:var(--text-muted);font-size:0.83rem}
   <span class="logo">The Living Room</span>
   <div style="display:flex;align-items:center;gap:0.85rem">
     <div id="saved-badge"><span class="dot"></span> Saved</div>
-    <span class="theme-pill">Difficult Conversations</span>
+    <a class="theme-pill" href="index.html#library">Difficult Conversations</a>
   </div>
 </div>
 
