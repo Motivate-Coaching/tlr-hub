@@ -4,18 +4,27 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// _logToSupabase — internal helper; actually awaits the insert so it executes
+async function _logToSupabase(row) {
+  try {
+    await _supabase.from('activity_log').insert(row);
+  } catch (e) {
+    // silently ignore network errors — never block the page
+  }
+}
+
 // requireAuth — call on any protected page; redirects to login if no session
 async function requireAuth() {
   const { data: { session } } = await _supabase.auth.getSession();
   if (!session) { window.location.replace('login.html'); return null; }
-  // Log page view (fire and forget — never blocks the page)
+  // Log page view — fire and forget via IIFE so it never blocks
   const page = window.location.pathname.split('/').pop().replace('.html', '') || 'home';
-  _supabase.from('activity_log').insert({
+  void _logToSupabase({
     user_id: session.user.id,
     user_email: session.user.email,
     event_type: 'page_view',
     page: page
-  }).catch(() => {});
+  });
   return session.user;
 }
 
@@ -23,13 +32,13 @@ async function requireAuth() {
 async function logActivity(eventType, page, metadata = {}) {
   const { data: { session } } = await _supabase.auth.getSession();
   if (!session) return;
-  _supabase.from('activity_log').insert({
+  void _logToSupabase({
     user_id: session.user.id,
     user_email: session.user.email,
     event_type: eventType,
     page: page,
     metadata: metadata
-  }).catch(() => {});
+  });
 }
 
 async function getUser() {
@@ -50,20 +59,24 @@ async function saveProgress(toolId, completed, data = {}) {
     const done = JSON.parse(localStorage.getItem('tlr_completed') || '[]');
     if (!done.includes(toolId)) { done.push(toolId); localStorage.setItem('tlr_completed', JSON.stringify(done)); }
   }
-  await _supabase.from('member_progress').upsert(
-    { user_id: user.id, tool_id: toolId, completed, data, last_updated: new Date().toISOString() },
-    { onConflict: 'user_id,tool_id' }
-  );
+  try {
+    await _supabase.from('member_progress').upsert(
+      { user_id: user.id, tool_id: toolId, completed, data, last_updated: new Date().toISOString() },
+      { onConflict: 'user_id,tool_id' }
+    );
+  } catch (e) { /* silently ignore */ }
 }
 
 // loadProgress — pull all progress from Supabase and sync to localStorage
 async function loadProgress() {
   const user = await getUser();
   if (!user) return null;
-  const { data } = await _supabase.from('member_progress').select('*').eq('user_id', user.id);
-  if (!data) return null;
-  localStorage.setItem('tlr_completed', JSON.stringify(data.filter(r => r.completed).map(r => r.tool_id)));
-  return data;
+  try {
+    const { data } = await _supabase.from('member_progress').select('*').eq('user_id', user.id);
+    if (!data) return null;
+    localStorage.setItem('tlr_completed', JSON.stringify(data.filter(r => r.completed).map(r => r.tool_id)));
+    return data;
+  } catch (e) { return null; }
 }
 
 // showUserBadge — inject first name + sign-out into a CSS selector
