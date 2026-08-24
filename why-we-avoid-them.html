@@ -139,8 +139,10 @@ input[type=text]::placeholder{color:var(--text-muted);font-size:0.83rem}
 
 /* ── Bottom action buttons ── */
 .complete-wrap{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;align-items:center;padding-top:0.5rem}
-.save-btn{background:transparent;color:var(--navy);border:2px solid var(--navy);padding:0.85rem 2.25rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:background .18s,color .18s,transform .1s;letter-spacing:0.01em}
-.save-btn:hover{background:var(--navy);color:#fff;transform:translateY(-1px)}
+.save-btn{background:#2A9D6F;color:#fff;border:2px solid #2A9D6F;padding:0.85rem 2.25rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .18s,transform .1s;letter-spacing:0.01em;text-decoration:none;display:inline-flex;align-items:center}
+.save-btn:hover{opacity:0.87;transform:translateY(-1px)}
+.library-btn{background:var(--gold,#E8A800);color:#1a1a1a;border:2px solid var(--gold,#E8A800);padding:0.85rem 2.25rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .18s,transform .1s;letter-spacing:0.01em;text-decoration:none;display:inline-flex;align-items:center;gap:0.4rem}
+.library-btn:hover{opacity:0.87;transform:translateY(-1px)}
 .complete-btn{background:var(--navy);color:#fff;border:none;padding:1rem 2.75rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s;letter-spacing:0.01em}
 .complete-btn:hover{opacity:0.87;transform:translateY(-1px)}
 
@@ -408,7 +410,7 @@ input[type=text]::placeholder{color:var(--text-muted);font-size:0.83rem}
   </div>
 
   <div class="complete-wrap">
-    <a class="save-btn" href="index.html#library" style="text-decoration:none;display:inline-flex;align-items:center;gap:0.4rem">← Resource library</a>
+    <a class="library-btn" href="index.html#library">← Resource library</a>
     <button class="save-btn" onclick="saveNow()">Save progress</button>
     <button class="complete-btn" id="mark-complete-btn" onclick="complete()" style="display:none">Mark as complete ✓</button>
   </div>
