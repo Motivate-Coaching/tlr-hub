@@ -869,6 +869,112 @@ body {
   font-size: 11px;
   color: var(--gold);
 }
+
+/* ── GAME OUTER LAYOUT ────────────────────────────── */
+.game-outer {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 940px;
+  padding: 0 16px;
+}
+
+/* ── ON-SCREEN KEYBOARD PANEL ─────────────────────── */
+.kb-panel {
+  flex-shrink: 0;
+  width: 255px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 14px 10px 16px;
+  background: var(--navy-mid);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  position: sticky;
+  top: 115px;
+  margin-top: 18px;
+}
+.kb-title {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 7px;
+}
+.kb-legend {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.kb-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 8px;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+}
+.kb-legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.kb-row {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+.key {
+  flex: 1;
+  max-width: 24px;
+  height: 46px;
+  border: none;
+  border-radius: 4px;
+  background: var(--navy-card);
+  color: var(--cream);
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s, opacity 0.12s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+  padding: 0;
+  line-height: 1;
+}
+.key:active { opacity: 0.65; }
+.key.wide { max-width: 38px; font-size: 8px; letter-spacing: -0.02em; flex: 1.5; }
+.key.correct { background: var(--correct); color: #fff; }
+.key.present { background: var(--present); color: #fff; }
+.key.absent  { background: var(--absent);  color: rgba(255,255,255,0.38); }
+
+/* Mobile: keyboard sits BELOW the game */
+@media (max-width: 720px) {
+  .game-outer { flex-direction: column; align-items: center; gap: 0; padding: 0; max-width: 480px; }
+  .main { order: 1; width: 100%; padding-bottom: 8px; }
+  .kb-panel {
+    order: 2; position: static; width: 100%;
+    border-radius: 0; border-left: none; border-right: none; border-bottom: none;
+    margin-top: 2px; padding: 10px 6px 28px;
+    background: var(--navy); gap: 6px;
+  }
+  .kb-title, .kb-legend { display: none; }
+  .key { max-width: none; height: 56px; font-size: 14px; border-radius: 4px; }
+  .key.wide { max-width: none; font-size: 11px; flex: 1.4; }
+  body { padding-bottom: 0; }
+}
 </style>
 </head>
 <body>
@@ -921,6 +1027,59 @@ body {
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
     Dashboard
   </a>
+</div>
+
+<!-- GAME OUTER: keyboard (left on desktop, bottom on mobile) + game -->
+<div class="game-outer">
+
+<!-- ON-SCREEN KEYBOARD -->
+<div class="kb-panel" id="kb-panel">
+  <div class="kb-title">Letter Guide</div>
+  <div class="kb-legend">
+    <div class="kb-legend-item">
+      <div class="kb-legend-dot" style="background:var(--correct)"></div>Correct spot
+    </div>
+    <div class="kb-legend-item">
+      <div class="kb-legend-dot" style="background:var(--present)"></div>Wrong spot
+    </div>
+    <div class="kb-legend-item">
+      <div class="kb-legend-dot" style="background:var(--absent)"></div>Not in word
+    </div>
+  </div>
+  <div class="kb-row">
+    <button class="key" data-key="Q">Q</button>
+    <button class="key" data-key="W">W</button>
+    <button class="key" data-key="E">E</button>
+    <button class="key" data-key="R">R</button>
+    <button class="key" data-key="T">T</button>
+    <button class="key" data-key="Y">Y</button>
+    <button class="key" data-key="U">U</button>
+    <button class="key" data-key="I">I</button>
+    <button class="key" data-key="O">O</button>
+    <button class="key" data-key="P">P</button>
+  </div>
+  <div class="kb-row">
+    <button class="key" data-key="A">A</button>
+    <button class="key" data-key="S">S</button>
+    <button class="key" data-key="D">D</button>
+    <button class="key" data-key="F">F</button>
+    <button class="key" data-key="G">G</button>
+    <button class="key" data-key="H">H</button>
+    <button class="key" data-key="J">J</button>
+    <button class="key" data-key="K">K</button>
+    <button class="key" data-key="L">L</button>
+  </div>
+  <div class="kb-row">
+    <button class="key wide" data-key="ENTER">Enter</button>
+    <button class="key" data-key="Z">Z</button>
+    <button class="key" data-key="X">X</button>
+    <button class="key" data-key="C">C</button>
+    <button class="key" data-key="V">V</button>
+    <button class="key" data-key="B">B</button>
+    <button class="key" data-key="N">N</button>
+    <button class="key" data-key="M">M</button>
+    <button class="key wide" data-key="⌫">⌫</button>
+  </div>
 </div>
 
 <!-- MAIN -->
@@ -976,14 +1135,13 @@ body {
     <!-- NUDGE -->
     <div class="nudge-wrap" id="nudge-wrap"></div>
 
-    <!-- KEYBOARD -->
-    <!-- Hidden input captures phone keyboard -->
+    <!-- Hidden input captures physical keyboard on mobile if native kb preferred -->
     <input id="hidden-kb" type="text" inputmode="text"
       autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
       style="position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;"
       aria-hidden="true" tabindex="-1">
-    <!-- Just ENTER + delete — letters come from phone keyboard -->
-    <div class="action-btns" id="action-btns">
+    <!-- action-btns kept as hidden fallback; ENTER + ⌫ now live in the on-screen keyboard -->
+    <div class="action-btns" id="action-btns" style="display:none;">
       <button class="action-btn del" onclick="handleKey('⌫')">⌫</button>
       <button class="action-btn enter" onclick="handleKey('ENTER')">ENTER</button>
     </div>
@@ -1020,6 +1178,7 @@ body {
   </div>
 
 </div><!-- /main -->
+</div><!-- /game-outer -->
 
 <!-- RESULTS OVERLAY — slides in from right on game end -->
 <div class="results-overlay" id="results-overlay">
@@ -1265,20 +1424,38 @@ for (let r = 0; r < MAX_R; r++) {
 // ═══════════════════════════════════════════════════════════════
 // KEYBOARD
 // ═══════════════════════════════════════════════════════════════
-// No on-screen keyboard — use phone keyboard via hidden input
-const keyEls = {}; // kept for compatibility (key colouring skipped gracefully)
+// On-screen keyboard — build keyEls map from the #kb-panel buttons
+const keyEls = {};
+document.querySelectorAll('#kb-panel .key[data-key]').forEach(btn => {
+  const k = btn.dataset.key;
+  if (k && k.length === 1) keyEls[k] = btn; // single letters only (not ENTER / ⌫)
+});
+
+// Keyboard click handler — prevent focus change so native mobile keyboard stays closed
+const kbPanel = document.getElementById('kb-panel');
+kbPanel.addEventListener('mousedown', e => e.preventDefault());
+kbPanel.addEventListener('click', e => {
+  const btn = e.target.closest('[data-key]');
+  if (!btn) return;
+  e.stopPropagation();
+  handleKey(btn.dataset.key);
+});
 
 const hiddenKb = document.getElementById('hidden-kb');
 
-// Focus hidden input to open phone keyboard — preventScroll stops mobile jumping to top
+// Focus hidden input on desktop so physical keyboard works without clicking first
+// Skip on mobile — on-screen keyboard handles input there
 function focusInput() {
-  if (!gameOver) { hiddenKb.value = ''; hiddenKb.focus({ preventScroll: true }); }
+  if (!gameOver && window.innerWidth > 720) {
+    hiddenKb.value = '';
+    hiddenKb.focus({ preventScroll: true });
+  }
 }
 
-// Auto-focus on load
+// Auto-focus on load (desktop only)
 window.addEventListener('load', () => { setTimeout(focusInput, 300); });
 
-// Re-focus when tapping anywhere on the game section
+// Re-focus when tapping the game section (desktop only — keyboard panel is outside this)
 document.querySelector('.game-section').addEventListener('click', focusInput);
 
 // Capture letters typed on phone keyboard
@@ -1871,7 +2048,7 @@ function restoreGameState() {
     document.getElementById('results-overlay').classList.remove('open');
     setTimeout(() => showEndPanel(status === 'won', guesses.length), 200);
   } else {
-    document.getElementById('action-btns').style.display = '';
+    // action-btns hidden — ENTER/⌫ now live in the on-screen keyboard panel
     if (guesses.length >= 3) renderNudge();
   }
 }
