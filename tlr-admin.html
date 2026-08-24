@@ -154,6 +154,33 @@ body { font-family: 'Poppins', sans-serif; background: var(--navy); color: var(-
 .refresh-btn:hover { color: var(--cream); }
 .last-updated { font-size: 0.7rem; color: var(--muted); }
 
+/* ── Journey section ── */
+.journey-panel { background: var(--card); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+.journey-panel .panel-header { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
+.journey-user { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.75rem; overflow: hidden; }
+.journey-user-hdr { display: flex; align-items: center; justify-content: space-between; padding: 0.65rem 1rem; background: rgba(255,255,255,0.03); cursor: pointer; user-select: none; }
+.journey-user-hdr:hover { background: rgba(255,255,255,0.06); }
+.journey-email { font-size: 0.83rem; font-weight: 600; color: var(--text); }
+.journey-meta  { font-size: 0.72rem; color: var(--muted); }
+.journey-toggle { font-size: 0.75rem; color: var(--muted); transition: transform 0.2s; }
+.journey-user.open .journey-toggle { transform: rotate(180deg); }
+.journey-body { display: none; padding: 0.75rem 1rem 1rem; border-top: 1px solid var(--border); }
+.journey-user.open .journey-body { display: block; }
+.journey-steps { display: flex; flex-wrap: wrap; gap: 0.4rem 0; }
+.journey-step { display: flex; align-items: center; gap: 0; }
+.step-page { background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 6px; padding: 0.3rem 0.65rem; font-size: 0.77rem; color: var(--text); white-space: nowrap; }
+.step-time { font-size: 0.7rem; color: var(--gold); background: rgba(232,168,0,0.12); border-radius: 4px; padding: 0.15rem 0.4rem; margin: 0 0.25rem; white-space: nowrap; }
+.step-arrow { color: var(--muted); font-size: 0.7rem; margin: 0 0.1rem; }
+
+/* ── Collapsible feed ── */
+.feed-controls { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+.feed-ctrl-btn { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--muted); padding: 0.3rem 0.75rem; border-radius: 6px; font-size: 0.75rem; cursor: pointer; transition: all 0.15s; }
+.feed-ctrl-btn.active { background: var(--gold); color: #000; border-color: var(--gold); font-weight: 600; }
+.feed-group-hdr { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.75rem; background: rgba(255,255,255,0.04); border-radius: 6px; margin: 0.4rem 0 0.25rem; cursor: pointer; user-select: none; font-size: 0.78rem; color: var(--muted); font-weight: 600; letter-spacing: 0.04em; }
+.feed-group-hdr:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+.feed-group-body { overflow: hidden; }
+.feed-group-body.collapsed { display: none; }
+
 @media (max-width: 800px) {
   #app { padding: 1.5rem; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -226,8 +253,22 @@ body { font-family: 'Poppins', sans-serif; background: var(--navy); color: var(-
     </div>
   </div>
 
+  <!-- USER JOURNEYS -->
+  <div class="journey-panel">
+    <div class="panel-header">User Journeys — path &amp; time on each page</div>
+    <div id="journeys-body"><div class="loading">Loading…</div></div>
+  </div>
+
   <!-- ACTIVITY FEED -->
   <div class="feed-panel">
+    <div class="feed-controls">
+      <span style="font-size:0.75rem;color:var(--muted);align-self:center;margin-right:0.25rem;">Group by:</span>
+      <button class="feed-ctrl-btn active" id="btn-group-date" onclick="setFeedGroup('date')">Date</button>
+      <button class="feed-ctrl-btn" id="btn-group-user" onclick="setFeedGroup('user')">User</button>
+      <button class="feed-ctrl-btn" id="btn-group-none" onclick="setFeedGroup('none')">None</button>
+      <button class="feed-ctrl-btn" style="margin-left:auto;" onclick="toggleAllGroups(true)">Expand all</button>
+      <button class="feed-ctrl-btn" onclick="toggleAllGroups(false)">Collapse all</button>
+    </div>
     <div class="feed-row header">
       <span>Time</span><span>Member</span><span>Page</span><span>Event</span>
     </div>
@@ -299,7 +340,8 @@ async function loadAll() {
   renderStats(data);
   renderMembers(data);
   renderPages(data);
-  renderFeed(data.slice(0, 60));
+  renderJourneys(data);
+  renderFeed(data.slice(0, 200));
 
   document.getElementById('last-updated').textContent =
     'Last updated ' + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
@@ -367,18 +409,153 @@ function renderPages(data) {
   `).join('');
 }
 
+// ── JOURNEYS ─────────────────────────────────────────
+function fmtDuration(secs) {
+  if (!secs || secs < 3) return null;
+  if (secs < 60)  return secs + 's';
+  const m = Math.floor(secs / 60), s = secs % 60;
+  if (m < 60) return s > 0 ? `${m}m ${s}s` : `${m}m`;
+  const h = Math.floor(m / 60), rm = m % 60;
+  return rm > 0 ? `${h}h ${rm}m` : `${h}h`;
+}
+
+function renderJourneys(data) {
+  const el = document.getElementById('journeys-body');
+
+  // Build per-user chronological event list
+  const byUser = {};
+  [...data].reverse().forEach(r => { // oldest first
+    if (!r.user_email) return;
+    if (!byUser[r.user_email]) byUser[r.user_email] = [];
+    byUser[r.user_email].push(r);
+  });
+
+  if (!Object.keys(byUser).length) {
+    el.innerHTML = '<div class="loading">No journey data yet.</div>'; return;
+  }
+
+  const html = Object.entries(byUser).map(([email, events]) => {
+    // Build steps: pair each page_view with its matching page_exit (or next view's timestamp)
+    const views = events.filter(e => e.event_type === 'page_view');
+    const exits = events.filter(e => e.event_type === 'page_exit');
+
+    const steps = views.map((v, i) => {
+      // Find a page_exit for this page after this view
+      const exit = exits.find(e => e.page === v.page && e.created_at > v.created_at &&
+        (i === views.length - 1 || e.created_at < views[i+1].created_at));
+      let dur = null;
+      if (exit && exit.metadata && exit.metadata.duration_seconds) {
+        dur = fmtDuration(exit.metadata.duration_seconds);
+      } else if (i < views.length - 1) {
+        // Estimate from gap to next page_view (cap at 2h)
+        const gap = Math.round((new Date(views[i+1].created_at) - new Date(v.created_at)) / 1000);
+        if (gap > 0 && gap < 7200) dur = fmtDuration(gap);
+      }
+      return { page: v.page, dur, time: v.created_at };
+    });
+
+    const stepsHtml = steps.map((s, i) => `
+      <div class="journey-step">
+        ${i > 0 ? '<span class="step-arrow">→</span>' : ''}
+        <span class="step-page">${friendlyName(s.page)}</span>
+        ${s.dur ? `<span class="step-time">${s.dur}</span>` : ''}
+      </div>`).join('');
+
+    const lastSeen = timeAgo(events[events.length - 1].created_at);
+    const uid = 'j-' + email.replace(/[^a-z0-9]/gi, '-');
+
+    return `
+      <div class="journey-user" id="${uid}">
+        <div class="journey-user-hdr" onclick="toggleJourney('${uid}')">
+          <div>
+            <div class="journey-email">${email}</div>
+            <div class="journey-meta">${steps.length} pages · last active ${lastSeen}</div>
+          </div>
+          <span class="journey-toggle">▾</span>
+        </div>
+        <div class="journey-body">
+          <div class="journey-steps">${stepsHtml}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  el.innerHTML = html;
+}
+
+function toggleJourney(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+// ── COLLAPSIBLE FEED ─────────────────────────────────
+let _feedGroupMode = 'date';
+let _feedData = [];
+
+function setFeedGroup(mode) {
+  _feedGroupMode = mode;
+  ['date','user','none'].forEach(m => {
+    document.getElementById('btn-group-'+m).classList.toggle('active', m === mode);
+  });
+  renderFeed(_feedData);
+}
+
+function toggleAllGroups(open) {
+  document.querySelectorAll('.feed-group-body').forEach(el => {
+    el.classList.toggle('collapsed', !open);
+  });
+  document.querySelectorAll('.feed-group-hdr .grp-arrow').forEach(el => {
+    el.textContent = open ? '▾' : '▸';
+  });
+}
+
+function toggleGroup(id) {
+  const body = document.getElementById(id);
+  const collapsed = body.classList.toggle('collapsed');
+  const arrow = body.previousElementSibling.querySelector('.grp-arrow');
+  if (arrow) arrow.textContent = collapsed ? '▸' : '▾';
+}
+
+function rowHtml(r) {
+  return `<div class="feed-row">
+    <span class="feed-time">${formatTime(r.created_at)}</span>
+    <span class="feed-email">${r.user_email || '—'}</span>
+    <span class="feed-page">${friendlyName(r.page)}</span>
+    <span><span class="feed-type ${r.event_type}">${r.event_type.replace('_',' ')}</span></span>
+  </div>`;
+}
+
 function renderFeed(data) {
+  _feedData = data;
   const el = document.getElementById('feed-body');
   if (!data.length) { el.innerHTML = '<div class="loading">No activity yet.</div>'; return; }
 
-  el.innerHTML = data.map(r => `
-    <div class="feed-row">
-      <span class="feed-time">${formatTime(r.created_at)}</span>
-      <span class="feed-email">${r.user_email || '—'}</span>
-      <span class="feed-page">${friendlyName(r.page)}</span>
-      <span><span class="feed-type ${r.event_type}">${r.event_type.replace('_',' ')}</span></span>
-    </div>
-  `).join('');
+  if (_feedGroupMode === 'none') {
+    el.innerHTML = data.map(rowHtml).join('');
+    return;
+  }
+
+  // Group rows
+  const groups = {};
+  data.forEach(r => {
+    let key;
+    if (_feedGroupMode === 'date') {
+      key = new Date(r.created_at).toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'short', year:'numeric' });
+    } else {
+      key = r.user_email || 'Unknown';
+    }
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(r);
+  });
+
+  let gIdx = 0;
+  el.innerHTML = Object.entries(groups).map(([key, rows]) => {
+    const id = 'fg-' + (gIdx++);
+    return `
+      <div class="feed-group-hdr" onclick="toggleGroup('${id}')">
+        <span>${key} <span style="font-weight:400;opacity:0.6">(${rows.length})</span></span>
+        <span class="grp-arrow">▾</span>
+      </div>
+      <div class="feed-group-body" id="${id}">${rows.map(rowHtml).join('')}</div>`;
+  }).join('');
 }
 
 // ── HELPERS ──

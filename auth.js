@@ -17,14 +17,38 @@ async function _logToSupabase(row) {
 async function requireAuth() {
   const { data: { session } } = await _supabase.auth.getSession();
   if (!session) { window.location.replace('login.html'); return null; }
-  // Log page view — fire and forget via IIFE so it never blocks
+
   const page = window.location.pathname.split('/').pop().replace('.html', '') || 'home';
+
+  // Log page view
   void _logToSupabase({
     user_id: session.user.id,
     user_email: session.user.email,
     event_type: 'page_view',
     page: page
   });
+
+  // Track time on page — log page_exit with duration_seconds on leave
+  const _pageStart = Date.now();
+  let _exitLogged = false;
+  const _logExit = () => {
+    if (_exitLogged) return;
+    _exitLogged = true;
+    const duration = Math.round((Date.now() - _pageStart) / 1000);
+    if (duration < 3) return; // ignore accidental bounces
+    void _logToSupabase({
+      user_id: session.user.id,
+      user_email: session.user.email,
+      event_type: 'page_exit',
+      page: page,
+      metadata: { duration_seconds: duration }
+    });
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') _logExit();
+  });
+  window.addEventListener('beforeunload', _logExit);
+
   return session.user;
 }
 
