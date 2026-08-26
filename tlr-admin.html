@@ -301,7 +301,19 @@ async function adminSignOut() {
   document.getElementById('gate').style.display = 'flex';
 }
 
+const ADMIN_EMAIL = 'stuart.fairbairns@gmail.com';
+
 async function showApp() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return;
+  // Hard block — only the admin email may access this page
+  if (session.user.email !== ADMIN_EMAIL) {
+    const err = document.getElementById('g-error');
+    err.textContent = 'Access denied. This area is for administrators only.';
+    err.style.display = 'block';
+    await sb.auth.signOut();
+    return;
+  }
   document.getElementById('gate').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   await loadAll();

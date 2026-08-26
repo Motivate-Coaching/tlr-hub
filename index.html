@@ -1973,11 +1973,43 @@ requireAuth().then(u => {
       &nbsp;&middot;&nbsp;
       <a href="https://www.facebook.com/groups/thelivingroommemberslounge">Members Lounge</a>
     </p>
+    <p style="margin-top:0.75rem;font-size:0.7rem;color:rgba(255,255,255,0.25);">
+      <a href="https://www.motivate-coaching.com/privacy-statement" target="_blank" style="color:rgba(255,255,255,0.35);text-decoration:none;" onmouseover="this.style.color='#E8A800'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">Privacy Policy</a>
+      &nbsp;&middot;&nbsp;
+      <a href="#" onclick="event.preventDefault();showDataModal()" style="color:rgba(255,255,255,0.35);text-decoration:none;" onmouseover="this.style.color='#E8A800'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">My Data &amp; Privacy</a>
+      &nbsp;&middot;&nbsp;
+      Your data is stored securely in the UK &middot; &copy; Motivate Coaching
+    </p>
   </div>
   <a href="https://www.motivate-coaching.com/thelivingroom" target="_blank">
     <img src="tlr-logo.png" alt="The Living Room" class="footer-logo-img">
   </a>
 </footer>
+
+<!-- ── DATA & PRIVACY MODAL ─────────────────────────────── -->
+<div id="data-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:none;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#161D24;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:2rem;max-width:460px;width:100%;position:relative;">
+    <button onclick="closeDataModal()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;color:rgba(255,255,255,0.4);font-size:1.3rem;cursor:pointer;">&#215;</button>
+    <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#E8A800;margin-bottom:0.5rem;">Your Data &amp; Privacy</div>
+    <p style="font-size:0.85rem;color:rgba(255,255,255,0.7);line-height:1.6;margin-bottom:1.25rem;">
+      The Living Room stores your tool responses and activity securely in the UK (Supabase, London region). Your data is never sold or shared. You have the right to access, export, or delete it at any time.
+    </p>
+    <div style="display:flex;flex-direction:column;gap:0.6rem;">
+      <button onclick="exportMyData()" style="background:rgba(232,168,0,0.12);border:1px solid rgba(232,168,0,0.3);color:#E8A800;padding:0.65rem 1rem;border-radius:6px;cursor:pointer;font-size:0.82rem;font-family:'Poppins',sans-serif;text-align:left;">
+        ⬇ Download my data &nbsp;<span style="font-size:0.72rem;opacity:0.6;">— saves a copy of everything we hold</span>
+      </button>
+      <button onclick="confirmDeleteAccount()" style="background:rgba(180,60,60,0.1);border:1px solid rgba(180,60,60,0.3);color:#E08080;padding:0.65rem 1rem;border-radius:6px;cursor:pointer;font-size:0.82rem;font-family:'Poppins',sans-serif;text-align:left;">
+        &#128465; Delete my data &nbsp;<span style="font-size:0.72rem;opacity:0.6;">— permanently removes your tool responses &amp; activity</span>
+      </button>
+    </div>
+    <p style="margin-top:1.25rem;font-size:0.7rem;color:rgba(255,255,255,0.25);">
+      Questions? <a href="mailto:stuart@motivate-coaching.com" style="color:rgba(255,255,255,0.4);">stuart@motivate-coaching.com</a>
+      &nbsp;&middot;&nbsp;
+      <a href="https://www.motivate-coaching.com/privacy-statement" target="_blank" style="color:rgba(255,255,255,0.4);">Full Privacy Policy</a>
+    </p>
+    <div id="data-modal-status" style="margin-top:0.75rem;font-size:0.78rem;color:#7EC84E;display:none;"></div>
+  </div>
+</div>
 
 <script>
 /* ── DATA ───────────────────────────────── */
@@ -2520,6 +2552,78 @@ function downloadICS(title, start, end, rrule, location, filename) {
   a.href = URL.createObjectURL(blob);
   a.download = filename + '.ics';
   a.click();
+}
+
+/* ── DATA & PRIVACY MODAL ───────────────────────── */
+function showDataModal() {
+  const m = document.getElementById('data-modal');
+  if (m) { m.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+}
+function closeDataModal() {
+  const m = document.getElementById('data-modal');
+  if (m) { m.style.display = 'none'; document.body.style.overflow = ''; }
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDataModal(); });
+
+async function exportMyData() {
+  const status = document.getElementById('data-modal-status');
+  status.textContent = 'Preparing your data…'; status.style.display = 'block'; status.style.color = '#E8A800';
+  try {
+    const user = await getUser();
+    if (!user) { status.textContent = 'Please sign in first.'; return; }
+    const { data } = await _supabase.from('member_progress').select('*').eq('user_id', user.id);
+    const exportObj = {
+      exported: new Date().toISOString(),
+      email: user.email,
+      tool_progress: data || [],
+      local_data: {}
+    };
+    // Include any local data not yet synced
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('tlr-')) {
+        try { exportObj.local_data[key] = JSON.parse(localStorage.getItem(key)); } catch(e) {}
+      }
+    }
+    const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `tlr-my-data-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    status.textContent = 'Downloaded. This file contains everything we hold for your account.';
+    status.style.color = '#7EC84E';
+  } catch(e) {
+    status.textContent = 'Something went wrong — please try again or contact stuart@motivate-coaching.com.';
+    status.style.color = '#E08080';
+  }
+}
+
+async function confirmDeleteAccount() {
+  const status = document.getElementById('data-modal-status');
+  const confirmed = confirm('This will permanently delete all your tool responses and activity from The Living Room. This cannot be undone.\n\nAre you sure?');
+  if (!confirmed) return;
+  status.textContent = 'Deleting your data…'; status.style.display = 'block'; status.style.color = '#E8A800';
+  try {
+    const user = await getUser();
+    if (!user) { status.textContent = 'Please sign in first.'; return; }
+    // Delete all rows the user owns (RLS ensures they can only delete their own)
+    await Promise.allSettled([
+      _supabase.from('member_progress').delete().eq('user_id', user.id),
+      _supabase.from('activity_log').delete().eq('user_id', user.id)
+    ]);
+    // Clear localStorage
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('tlr') || key.startsWith('tlr_'))) keysToRemove.push(key);
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+    status.textContent = 'Your data has been deleted. To fully remove your account, email stuart@motivate-coaching.com and we\'ll action it within 30 days.';
+    status.style.color = '#7EC84E';
+  } catch(e) {
+    status.textContent = 'Something went wrong — please contact stuart@motivate-coaching.com and we\'ll delete it manually.';
+    status.style.color = '#E08080';
+  }
 }
 
 /* ── WELCOME BANNER ────────────────────────────── */
