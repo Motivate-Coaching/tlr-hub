@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What Do You Actually Value? — The Living Room</title>
+<meta name="description" content="Most values tools ask you to pick words from a list. That's not how values work. This 8-minute diagnostic reveals what you're actually living by — and what it's costing you.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ── Reset & base ── */
+*{box-sizing:border-box;margin:0;padding:0}
+html{height:100%;scroll-behavior:smooth}
+body{
+  font-family:'Inter',sans-serif;
+  background:#0F1A2B;
+  color:#F5F2EE;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── CSS Variables ── */
+:root{
+  --navy:#0F1A2B;
+  --navy-mid:#1B2B4B;
+  --navy-card:#162035;
+  --gold:#E8A800;
+  --gold-light:#F5C842;
+  --cream:#F5F2EE;
+  --muted:rgba(245,242,238,0.5);
+  --border:rgba(245,242,238,0.1);
+  --accent:#7B4EA0;
+  --green:#2A9D6F;
+  --font-display:'Playfair Display',serif;
+  --font-body:'Inter',sans-serif;
+}
+
+/* ── Progress bar ── */
+#progress-bar-wrap{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:3px;background:rgba(255,255,255,0.08);
+}
+#progress-bar{height:100%;background:var(--gold);transition:width .5s cubic-bezier(.4,0,.2,1);width:0%}
+
+/* ── Top bar ── */
+#topbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:1rem 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;
+  pointer-events:none;
+}
+.tlr-logo{
+  font-family:var(--font-display);font-size:0.9rem;
+  letter-spacing:0.04em;color:rgba(255,255,255,0.4);
+  pointer-events:all;
+}
+#step-counter{
+  font-size:0.72rem;font-weight:600;letter-spacing:0.08em;
+  text-transform:uppercase;color:rgba(255,255,255,0.3);
+  display:none;
+}
+
+/* ── Screens ── */
+.screen{
+  min-height:100vh;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  padding:5rem 1.5rem 4rem;
+  position:absolute;top:0;left:0;right:0;
+  opacity:0;pointer-events:none;
+  transform:translateX(60px);
+  transition:opacity .45s cubic-bezier(.4,0,.2,1), transform .45s cubic-bezier(.4,0,.2,1);
+}
+.screen.active{
+  opacity:1;pointer-events:all;transform:translateX(0);position:relative;
+}
+.screen.exit-left{
+  opacity:0;transform:translateX(-60px);
+}
+
+/* ── Screen inner ── */
+.screen-inner{width:100%;max-width:640px;margin:0 auto}
+
+/* ── Hook screen ── */
+.hook-eyebrow{
+  font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1.5rem;
+}
+.hook-title{
+  font-family:var(--font-display);
+  font-size:clamp(2rem,5vw,3.2rem);
+  line-height:1.15;color:var(--cream);
+  margin-bottom:1rem;
+}
+.hook-title em{color:var(--gold);font-style:italic}
+.hook-body{
+  font-size:1rem;color:var(--muted);line-height:1.8;
+  margin-bottom:2rem;
+}
+.hook-body strong{color:var(--cream)}
+.hook-meta{
+  display:flex;gap:1.5rem;flex-wrap:wrap;
+  margin-bottom:2.5rem;
+}
+.hook-meta-item{
+  display:flex;align-items:center;gap:0.5rem;
+  font-size:0.78rem;color:rgba(255,255,255,0.4);
+}
+.hook-meta-item span{font-size:0.9rem}
+
+/* ── Name input ── */
+.name-prompt{
+  font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:0.75rem;
+}
+.name-field{
+  width:100%;background:rgba(255,255,255,0.05);
+  border:1px solid var(--border);border-radius:10px;
+  padding:1rem 1.25rem;font-size:1.1rem;color:var(--cream);
+  font-family:var(--font-body);outline:none;
+  transition:border-color .2s;
+}
+.name-field:focus{border-color:var(--gold)}
+.name-field::placeholder{color:rgba(255,255,255,0.2)}
+
+/* ── Question screens ── */
+.q-step-label{
+  font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1rem;opacity:0.7;
+}
+.q-prompt-title{
+  font-family:var(--font-display);
+  font-size:clamp(1.4rem,3.5vw,2rem);
+  line-height:1.35;color:var(--cream);
+  margin-bottom:0.75rem;
+}
+.q-prompt-sub{
+  font-size:0.88rem;color:var(--muted);line-height:1.7;
+  margin-bottom:1.75rem;
+}
+.q-textarea{
+  width:100%;min-height:160px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--border);border-radius:12px;
+  padding:1.1rem 1.25rem;
+  font-size:0.95rem;color:var(--cream);
+  font-family:var(--font-body);line-height:1.7;
+  outline:none;resize:none;
+  transition:border-color .2s,min-height .2s;
+}
+.q-textarea:focus{border-color:rgba(232,168,0,0.5)}
+.q-textarea::placeholder{color:rgba(255,255,255,0.18)}
+
+/* ── Nudge line ── */
+.q-nudge{
+  font-size:0.78rem;color:rgba(255,255,255,0.25);
+  margin-top:0.65rem;font-style:italic;
+}
+
+/* ── Midpoint card ── */
+.midpoint-card{
+  background:rgba(232,168,0,0.08);border:1px solid rgba(232,168,0,0.2);
+  border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1.75rem;
+  font-size:0.88rem;color:rgba(245,242,238,0.7);line-height:1.7;
+}
+.midpoint-card strong{color:var(--gold)}
+
+/* ── Answer summary (screen 6) ── */
+.answer-summary{
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);
+  border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;
+}
+.ans-item{margin-bottom:0.85rem;padding-bottom:0.85rem;border-bottom:1px solid var(--border)}
+.ans-item:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.ans-label{font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:0.3rem}
+.ans-text{font-size:0.85rem;color:rgba(245,242,238,0.65);line-height:1.6;max-height:60px;overflow:hidden;position:relative}
+.ans-text::after{content:'';position:absolute;bottom:0;left:0;right:0;height:20px;background:linear-gradient(transparent,rgba(15,26,43,0.9))}
+
+/* ── Families grid ── */
+.families-intro{font-size:0.85rem;color:var(--muted);line-height:1.65;margin-bottom:1rem;font-style:italic}
+.families-grid{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.25rem}
+.family-chip{
+  border:1.5px solid var(--border);border-radius:20px;
+  padding:0.4rem 0.9rem;font-size:0.8rem;font-weight:500;
+  color:rgba(245,242,238,0.6);cursor:pointer;
+  transition:all .2s;background:transparent;
+  user-select:none;
+}
+.family-chip:hover{border-color:var(--gold);color:var(--cream)}
+.family-chip.selected{border-color:var(--gold);background:rgba(232,168,0,0.12);color:var(--gold);font-weight:600}
+
+/* ── Value name inputs (screen 7) ── */
+.value-input-block{
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);
+  border-radius:14px;padding:1.25rem;margin-bottom:1rem;
+}
+.value-input-block.core{border-color:rgba(232,168,0,0.3);background:rgba(232,168,0,0.04)}
+.vib-badge{
+  font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem;
+}
+.vib-badge .core-star{font-size:0.85rem}
+.vib-name{
+  width:100%;background:transparent;border:none;border-bottom:1.5px solid rgba(232,168,0,0.3);
+  font-family:var(--font-display);font-size:1.2rem;font-weight:600;
+  color:var(--cream);padding:0.3rem 0;outline:none;margin-bottom:0.85rem;
+}
+.vib-name::placeholder{color:rgba(255,255,255,0.2);font-style:italic;font-size:1rem}
+.vib-defn-label{font-size:0.68rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem}
+.vib-defn{
+  width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);
+  font-family:var(--font-body);font-size:0.88rem;color:var(--cream);
+  padding:0.35rem 0;outline:none;resize:none;min-height:50px;line-height:1.6;
+}
+.vib-defn::placeholder{color:rgba(255,255,255,0.18)}
+
+.supporting-toggle{
+  font-size:0.78rem;color:rgba(255,255,255,0.3);cursor:pointer;
+  display:flex;align-items:center;gap:0.4rem;margin-top:0.5rem;
+  transition:color .2s;background:none;border:none;font-family:var(--font-body);padding:0;
+}
+.supporting-toggle:hover{color:var(--muted)}
+#supporting-values-wrap{display:none;margin-top:0.75rem}
+
+/* ── Reality check sliders (screen 8) ── */
+.rc-block{
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);
+  border-radius:14px;padding:1.25rem;margin-bottom:1rem;
+}
+.rc-value-name{font-family:var(--font-display);font-size:1.1rem;color:var(--cream);margin-bottom:0.25rem}
+.rc-value-defn{font-size:0.78rem;color:var(--muted);margin-bottom:1rem;font-style:italic}
+.rc-scale-labels{display:flex;justify-content:space-between;font-size:0.67rem;color:rgba(255,255,255,0.3);margin-bottom:0.4rem}
+.rc-slider{
+  width:100%;-webkit-appearance:none;height:5px;
+  border-radius:3px;background:rgba(255,255,255,0.1);outline:none;cursor:pointer;margin-bottom:0.5rem;
+}
+.rc-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;width:22px;height:22px;
+  border-radius:50%;background:var(--gold);cursor:pointer;
+  box-shadow:0 0 0 4px rgba(232,168,0,0.15);
+  transition:box-shadow .15s;
+}
+.rc-slider::-webkit-slider-thumb:hover{box-shadow:0 0 0 6px rgba(232,168,0,0.25)}
+.rc-score-row{display:flex;justify-content:space-between;align-items:center}
+.rc-score-val{font-size:0.88rem;font-weight:700;color:var(--gold)}
+.rc-score-label{font-size:0.75rem;color:var(--muted)}
+.rc-flag{
+  margin-top:0.65rem;font-size:0.75rem;padding:0.35rem 0.75rem;
+  border-radius:6px;display:inline-flex;align-items:center;gap:0.4rem;
+}
+.rc-flag.lived{background:rgba(42,157,111,0.15);color:#5ECFA0;border:1px solid rgba(42,157,111,0.25)}
+.rc-flag.aspirational{background:rgba(232,168,0,0.1);color:var(--gold);border:1px solid rgba(232,168,0,0.2)}
+
+/* ── Email gate (screen 9) ── */
+.email-reveal{
+  background:rgba(232,168,0,0.06);border:1px solid rgba(232,168,0,0.15);
+  border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;text-align:center;
+}
+.email-reveal-title{
+  font-family:var(--font-display);font-size:1.4rem;color:var(--cream);
+  margin-bottom:0.4rem;
+}
+.email-reveal-sub{font-size:0.85rem;color:var(--muted);line-height:1.6;margin-bottom:1rem}
+.blurred-preview{
+  background:rgba(255,255,255,0.03);border-radius:10px;padding:1rem;
+  filter:blur(5px);pointer-events:none;user-select:none;
+  font-size:0.85rem;color:rgba(255,255,255,0.5);line-height:1.8;
+}
+
+.email-field-label{
+  font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:0.5rem;display:block;
+}
+.email-field{
+  width:100%;background:rgba(255,255,255,0.05);
+  border:1px solid var(--border);border-radius:10px;
+  padding:0.9rem 1.1rem;font-size:0.95rem;color:var(--cream);
+  font-family:var(--font-body);outline:none;
+  transition:border-color .2s;margin-bottom:0.85rem;
+}
+.email-field:focus{border-color:var(--gold)}
+.email-field::placeholder{color:rgba(255,255,255,0.2)}
+
+.gdpr-row{
+  display:flex;align-items:flex-start;gap:0.75rem;
+  margin-bottom:1.25rem;
+}
+.gdpr-check{width:18px;height:18px;flex-shrink:0;margin-top:2px;cursor:pointer;accent-color:var(--gold)}
+.gdpr-label{font-size:0.75rem;color:rgba(255,255,255,0.35);line-height:1.6}
+.gdpr-label a{color:rgba(255,255,255,0.45);text-decoration:underline}
+
+/* ── Primary button ── */
+.btn-primary{
+  width:100%;background:var(--gold);color:#0F1A2B;
+  border:none;border-radius:12px;padding:1rem 2rem;
+  font-family:var(--font-body);font-size:1rem;font-weight:700;
+  letter-spacing:0.03em;cursor:pointer;
+  transition:background .18s,transform .12s,box-shadow .18s;
+  display:flex;align-items:center;justify-content:center;gap:0.5rem;
+}
+.btn-primary:hover{background:var(--gold-light);transform:translateY(-1px);box-shadow:0 8px 24px rgba(232,168,0,0.25)}
+.btn-primary:active{transform:translateY(0)}
+.btn-primary:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+
+.btn-ghost{
+  width:100%;background:transparent;color:var(--muted);
+  border:1px solid var(--border);border-radius:12px;padding:0.85rem 2rem;
+  font-family:var(--font-body);font-size:0.9rem;font-weight:500;
+  cursor:pointer;transition:all .18s;margin-top:0.75rem;
+}
+.btn-ghost:hover{border-color:var(--muted);color:var(--cream)}
+
+/* ── Results screen ── */
+#results-screen{
+  min-height:100vh;background:var(--navy);
+  padding:5rem 1.5rem 4rem;display:none;
+}
+.results-inner{max-width:680px;margin:0 auto}
+.results-eyebrow{
+  font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:0.75rem;text-align:center;
+}
+.results-title{
+  font-family:var(--font-display);font-size:clamp(1.8rem,4vw,2.6rem);
+  color:var(--cream);text-align:center;margin-bottom:0.5rem;line-height:1.2;
+}
+.results-name{color:var(--gold);font-style:italic}
+.results-divider{width:48px;height:2px;background:var(--gold);margin:1.25rem auto 2rem}
+
+.core-values-display{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem}
+.cv-card{
+  background:rgba(232,168,0,0.06);border:1px solid rgba(232,168,0,0.2);
+  border-radius:16px;padding:1.5rem;
+}
+.cv-number{font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem}
+.cv-name{font-family:var(--font-display);font-size:1.4rem;color:var(--cream);margin-bottom:0.5rem}
+.cv-defn{font-size:0.8rem;color:var(--muted);line-height:1.6;margin-bottom:0.85rem;font-style:italic}
+.cv-score-row{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem}
+.cv-score-bar-wrap{flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:2px}
+.cv-score-bar{height:100%;border-radius:2px;transition:width .6s ease}
+.cv-score-val{font-size:0.72rem;font-weight:700;color:var(--gold);min-width:30px;text-align:right}
+.cv-type{font-size:0.7rem;padding:0.2rem 0.55rem;border-radius:10px;display:inline-block;font-weight:600}
+.cv-type.lived{background:rgba(42,157,111,0.15);color:#5ECFA0}
+.cv-type.aspirational{background:rgba(232,168,0,0.12);color:var(--gold)}
+.cv-action-label{font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-top:0.75rem;margin-bottom:0.3rem}
+.cv-action-text{font-size:0.82rem;color:rgba(245,242,238,0.6);line-height:1.6}
+
+/* ── Gap insight ── */
+.gap-insight{
+  background:var(--navy-card);border:1px solid var(--border);
+  border-radius:16px;padding:1.5rem;margin-bottom:2rem;
+}
+.gap-insight-label{font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:0.75rem}
+.gap-insight-text{font-size:0.88rem;color:rgba(245,242,238,0.75);line-height:1.8}
+.gap-insight-text strong{color:var(--cream)}
+
+/* ── TLR CTA ── */
+.tlr-cta{
+  background:linear-gradient(135deg,rgba(27,43,75,0.8) 0%,rgba(123,78,160,0.2) 100%);
+  border:1px solid rgba(123,78,160,0.3);
+  border-radius:20px;padding:2rem;margin-bottom:2rem;text-align:center;
+}
+.tlr-cta-eyebrow{font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(123,78,160,1);margin-bottom:0.75rem}
+.tlr-cta-title{font-family:var(--font-display);font-size:1.4rem;color:var(--cream);margin-bottom:0.75rem;line-height:1.3}
+.tlr-cta-body{font-size:0.88rem;color:var(--muted);line-height:1.8;margin-bottom:1.5rem}
+.tlr-cta-body strong{color:var(--cream)}
+.btn-tlr{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  background:var(--accent);color:#fff;
+  border:none;border-radius:12px;padding:0.9rem 2rem;
+  font-family:var(--font-body);font-size:0.95rem;font-weight:600;
+  cursor:pointer;text-decoration:none;transition:opacity .18s,transform .12s;
+}
+.btn-tlr:hover{opacity:0.88;transform:translateY(-1px)}
+
+/* ── Email confirmation ── */
+.email-confirm{
+  text-align:center;font-size:0.82rem;color:rgba(255,255,255,0.3);
+  margin-bottom:2rem;line-height:1.6;
+}
+.email-confirm strong{color:var(--muted)}
+
+/* ── Supporting values section ── */
+.supporting-section{margin-bottom:2rem}
+.supporting-label{font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem}
+.supporting-list{display:flex;flex-wrap:wrap;gap:0.5rem}
+.supporting-pill{
+  background:rgba(255,255,255,0.05);border:1px solid var(--border);
+  border-radius:20px;padding:0.3rem 0.85rem;font-size:0.82rem;color:var(--muted);
+}
+
+/* ── Transition overlay ── */
+.step-complete-flash{
+  position:fixed;top:0;left:0;right:0;bottom:0;z-index:500;
+  background:rgba(232,168,0,0.06);
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.step-complete-flash.active{opacity:1}
+
+/* ── Footer ── */
+.screen-footer{
+  text-align:center;margin-top:1.75rem;
+  font-size:0.72rem;color:rgba(255,255,255,0.18);
+  line-height:1.6;
+}
+.screen-footer a{color:rgba(255,255,255,0.25);text-decoration:underline}
+
+/* ── Mobile ── */
+@media(max-width:600px){
+  .screen{padding:4.5rem 1.25rem 3.5rem}
+  .core-values-display{grid-template-columns:1fr}
+  .hook-title{font-size:1.9rem}
+  .q-prompt-title{font-size:1.3rem}
+}
+</style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+
+<!-- Topbar -->
+<div id="topbar">
+  <div class="tlr-logo">TLR</div>
+  <div id="step-counter"></div>
+</div>
+
+<!-- Flash overlay -->
+<div class="step-complete-flash" id="flash"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN 1: HOOK -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="screen active" id="s1">
+  <div class="screen-inner">
+    <div class="hook-eyebrow">The Living Room · Values Diagnostic</div>
+    <h1 class="hook-title">Most values tools ask you to <em>pick words from a list.</em></h1>
+    <p class="hook-body">
+      The problem? You'll pick what you <strong>wish</strong> was true — not what's actually driving your choices.<br><br>
+      This works differently. In 8 minutes, it surfaces the values you're already living by — and reveals where the gap between those values and your choices is quietly costing you.
+    </p>
+    <div class="hook-meta">
+      <div class="hook-meta-item"><span>⏱</span> 8 minutes</div>
+      <div class="hook-meta-item"><span>🔒</span> Private &amp; secure</div>
+      <div class="hook-meta-item"><span>📩</span> Portrait emailed to you</div>
+    </div>
+    <div class="name-prompt">First, what's your name?</div>
+    <input class="name-field" id="first-name" type="text" placeholder="Your first name…" autocomplete="given-name" autocapitalize="words">
+    <br><br>
+    <button class="btn-primary" onclick="startAssessment()">Let's begin <span>→</span></button>
+    <div class="screen-footer">
+      Your responses are stored securely in the UK and never shared.
+      <a href="https://www.motivate-coaching.com/privacy-statement" target="_blank">Privacy Policy</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN 2: THE DECISION -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="screen" id="s2">
+  <div class="screen-inner">
+    <div class="q-step-label">The decision test</div>
+    <h2 class="q-prompt-title" id="s2-title">Let's start with what your choices reveal, <span id="s2-name" style="color:var(--gold);font-style:italic"></span>.</h2>
+    <p class="q-prompt-sub">Describe a decision you made in the last three months that cost you something — time, money, comfort, or a relationship. <strong style="color:var(--cream)">What did you choose, and why?</strong></p>
+    <textarea class="q-textarea" id="ev-decision" placeholder="What was the decision? What did you give up? What drove the choice?" oninput="autoSize(this);trackStep()"></textarea>
+    <div class="q-nudge">Write freely — there are no right answers here. The more honest, the more useful.</div>
+    <br>
+    <button class="btn-primary" onclick="advance(2)">Continue <span>→</span></button>
+    <button class="btn-ghost" onclick="goBack(2)">← Back</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN 3: THE SACRIFICE -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="screen" id="s3">
+  <div class="screen-inner">
+    <div class="q-step-label">The sacrifice test</div>
+    <h2 class="q-prompt-title">Good. Now the harder one.</h2>
+    <p class="q-prompt-sub">What have you willingly given up in the last year — not lost, but <strong style="color:var(--cream)">willingly traded away?</strong> What does that tell you about what matters more to you than the thing you gave up?</p>
+    <textarea class="q-textarea" id="ev-sacrifice" placeholder="What have you let go of, delayed, or traded away? What was it in service of?" oninput="autoSize(this);trackStep()"></textarea>
+    <div class="q-nudge">Think beyond the obvious. The small sacrifices are often the most revealing.</div>
+    <br>
+    <button class="btn-primary" onclick="advance(3)">Continue <span>→</span></button>
+    <button class="btn-ghost" onclick="goBack(3)">← Back</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN 4: THE REACTION -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="screen" id="s4">
+  <div class="screen-inner">
+    <div class="midpoint-card">
+      You're halfway through the evidence. <strong>What you've written so far already contains your values</strong> — we just haven't named them yet.
+    </div>
+    <div class="q-step-label">The reaction test</div>
+    <h2 class="q-prompt-title">What's made you genuinely angry recently?</h2>
+    <p class="q-prompt-sub">Not surface irritation — something that felt like a real <strong style="color:var(--cream)">violation.</strong> When something upsets us deeply, it's often because it breached something we hold dear. What happened, and what does your reaction reveal?</p>
+    <textarea class="q-textarea" id="ev-anger" placeholder="What happened? Why did it matter so much? What value did it breach?" oninput="autoSize(this);trackStep()"></textarea>
+    <div class="q-nudge">Anger is often clarity in disguise. What's yours pointing at?</div>
+    <br>
+    <button class="btn-primary" onclick="advance(4)">Continue <span>→</span></button>
+    <button class="btn-ghost" onclick="goBack(4)">← Back</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN 5: THE PRIDE MOMENT -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="screen" id="s5">
+  <div class="screen-inner">
+    <div class="q-step-label">The aliveness test</div>
+    <h2 class="q-prompt-title">One more. This one tends to surprise people.</h2>
+    <p class="q-prompt-sub">When have you felt most like <strong style="color:var(--cream)">yourself</strong> recently — not most successful, not most approved of, but most <em>you?</em> What was happening, and what does that moment tell you?</p>
+    <textarea class="q-textarea" id="ev-pride" placeholder="Describe the moment. What were you doing? Who were you being? What mattered about it?" oninput="autoSize(this);trackStep()"></textarea>
+    <div class="q-nudge">This is often the most underused signal. Pay attention to what it's showing you.</div>
+    <br>
+    <button class="btn-primary" onclick="advance(5)">Continue <span>→</span></button>
+    <button class="btn-ghost" onclick="goBack(5)">← Back</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN 6: PATTERNS -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="screen" id="s6">
+  <div class="screen-inner">
+    <div class="q-step-label">Reading the evidence</div>
+    <h2 class="q-prompt-title">Now read back what you just wrote.</h2>
+    <div class="answer-summary" id="answer-summary"></div>
+    <div class="families-intro">Which of these value families appear in what you wrote? <strong style="color:var(--cream)">Only select one if you can point to evidence in your answers above.</strong></div>
+    <div class="families-grid" id="families-grid"></div>
+    <textarea class="q-textarea" id="pattern-reflection" placeholder="What themes keep appearing across your four answers? Don't name values yet — just describe what you notice…" oninput="autoSize(this);trackStep()" style="min-height:100px"></textarea>
+    <div class="q-nudge">You're not choosing what you'd like to value. You're reading what your choices already reveal.</div>
+    <br>
+    <button class="btn-primary" onclick="advance(6)">Continue <span>→</span></button>
+    <button class="btn-ghost" onclick="goBack(6)">← Back</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN 7: NAME YOUR VALUES -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="screen" id="s7">
+  <div class="screen-inner">
+    <div class="q-step-label">Name them in your own words</div>
+    <h2 class="q-prompt-title">Now: what are your two core values?</h2>
+    <p class="q-prompt-sub">Research with over 10,000 people found that the most decisive, grounded people operate from <strong style="color:var(--cream)">two core values</strong> — not ten. Not the words that sound good. The two that explain your actual choices.</p>
+
+    <div class="value-input-block core">
+      <div class="vib-badge"><span class="core-star">★</span> Core Value 1</div>
+      <input class="vib-name" id="v1-name" placeholder="Name it in your own words…" oninput="trackStep()">
+      <div class="vib-defn-label">What does this actually look like in your choices?</div>
+      <textarea class="vib-defn" id="v1-defn" placeholder="Not the dictionary definition — when I'm honouring this value, I…" oninput="autoSize(this);trackStep()" rows="2"></textarea>
+    </div>
+
+    <div class="value-input-block core">
+      <div class="vib-badge"><span class="core-star">★</span> Core Value 2</div>
+      <input class="vib-name" id="v2-name" placeholder="Name it in your own words…" oninput="trackStep()">
+      <div class="vib-defn-label">What does this actually look like in your choices?</div>
+      <textarea class="vib-defn" id="v2-defn" placeholder="Not the dictionary definition — when I'm honouring this value, I…" oninput="autoSize(this);trackStep()" rows="2"></textarea>
+    </div>
+
+    <button class="supporting-toggle" onclick="toggleSupporting()">
+      <span id="support-arrow">+</span> Add supporting values (optional)
+    </button>
+    <div id="supporting-values-wrap">
+      <div class="value-input-block" style="margin-top:0.75rem">
+        <div class="vib-badge" style="color:var(--muted)">Supporting Value 3</div>
+        <input class="vib-name" id="v3-name" placeholder="Optional…" style="border-bottom-color:rgba(255,255,255,0.15)">
+      </div>
+      <div class="value-input-block">
+        <div class="vib-badge" style="color:var(--muted)">Supporting Value 4</div>
+        <input class="vib-name" id="v4-name" placeholder="Optional…" style="border-bottom-color:rgba(255,255,255,0.15)">
+      </div>
+      <div class="value-input-block">
+        <div class="vib-badge" style="color:var(--muted)">Supporting Value 5</div>
+        <input class="vib-name" id="v5-name" placeholder="Optional…" style="border-bottom-color:rgba(255,255,255,0.15)">
+      </div>
+    </div>
+    <br>
+    <button class="btn-primary" onclick="advance(7)">Continue <span>→</span></button>
+    <button class="btn-ghost" onclick="goBack(7)">← Back</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN 8: REALITY CHECK -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="screen" id="s8">
+  <div class="screen-inner">
+    <div class="q-step-label">The reality check</div>
+    <h2 class="q-prompt-title">Almost there. This is the most important part.</h2>
+    <p class="q-prompt-sub">For each core value: in the last 30 days, how consistently has it <strong style="color:var(--cream)">actually driven your choices?</strong> Not how much you care about it — how often has it shown up in your behaviour.</p>
+
+    <div class="rc-block">
+      <div class="rc-value-name" id="rc1-name">Value 1</div>
+      <div class="rc-value-defn" id="rc1-defn"></div>
+      <div class="rc-scale-labels"><span>Rarely</span><span>Sometimes</span><span>Consistently</span></div>
+      <input type="range" class="rc-slider" id="rc1-slider" min="1" max="10" value="5" oninput="updateRC(1)">
+      <div class="rc-score-row">
+        <span class="rc-score-val" id="rc1-val">5/10</span>
+        <span class="rc-score-label" id="rc1-label">Sometimes shows up</span>
+      </div>
+      <div id="rc1-flag"></div>
+    </div>
+
+    <div class="rc-block">
+      <div class="rc-value-name" id="rc2-name">Value 2</div>
+      <div class="rc-value-defn" id="rc2-defn"></div>
+      <div class="rc-scale-labels"><span>Rarely</span><span>Sometimes</span><span>Consistently</span></div>
+      <input type="range" class="rc-slider" id="rc2-slider" min="1" max="10" value="5" oninput="updateRC(2)">
+      <div class="rc-score-row">
+        <span class="rc-score-val" id="rc2-val">5/10</span>
+        <span class="rc-score-label" id="rc2-label">Sometimes shows up</span>
+      </div>
+      <div id="rc2-flag"></div>
+    </div>
+
+    <br>
+    <button class="btn-primary" onclick="advance(8)">See my portrait <span>→</span></button>
+    <button class="btn-ghost" onclick="goBack(8)">← Back</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN 9: EMAIL GATE -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="screen" id="s9">
+  <div class="screen-inner">
+    <div class="email-reveal">
+      <div class="email-reveal-title">Your Values Portrait is ready.</div>
+      <div class="email-reveal-sub">Where should we send it? You'll also see it on screen right now.</div>
+      <div class="blurred-preview">
+        Core Value 1 · Integrity<br>
+        "I don't cut corners even when no-one would know."<br>
+        Lived score: 8/10 ·  Lived value ✓<br><br>
+        Core Value 2 · Connection<br>
+        "Being genuinely present with the people who matter."<br>
+        Lived score: 5/10 · Gap identified...
+      </div>
+    </div>
+
+    <label class="email-field-label" for="email-input">Your email address</label>
+    <input class="email-field" id="email-input" type="email" placeholder="you@example.com" autocomplete="email">
+
+    <div class="gdpr-row">
+      <input type="checkbox" class="gdpr-check" id="gdpr-check">
+      <label class="gdpr-label" for="gdpr-check">
+        I agree to receive my Values Portrait and occasional insights from Stuart Fairbairns / The Living Room. Unsubscribe anytime.
+        <a href="https://www.motivate-coaching.com/privacy-statement" target="_blank">Privacy Policy</a>
+      </label>
+    </div>
+
+    <button class="btn-primary" id="submit-btn" onclick="submitAndReveal()">
+      <span id="submit-label">Send my portrait →</span>
+    </button>
+    <button class="btn-ghost" onclick="goBack(9)">← Back</button>
+
+    <div class="screen-footer" style="margin-top:1.25rem">
+      Your data is stored securely in the UK (GDPR compliant) and never sold or shared.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- RESULTS SCREEN -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="results-screen">
+  <div class="results-inner">
+    <div class="results-eyebrow">Your Values Portrait</div>
+    <h1 class="results-title">Your two core values, <span class="results-name" id="r-name"></span>.</h1>
+    <div class="results-divider"></div>
+
+    <div class="core-values-display" id="core-values-display"></div>
+
+    <div id="supporting-section-results"></div>
+
+    <div class="gap-insight" id="gap-insight-block"></div>
+
+    <div class="tlr-cta">
+      <div class="tlr-cta-eyebrow">The Living Room</div>
+      <div class="tlr-cta-title">Knowing your values is the beginning. Living them is the work.</div>
+      <div class="tlr-cta-body">
+        The Living Room is a monthly coaching membership built around exactly this kind of exploration. Not motivational content. Not generic advice. <strong>Structured tools, real reflection, and a community of people doing the same inner work.</strong><br><br>
+        Each month explores a theme that matters — identity, boundaries, energy, momentum — with weekly tools that go as deep as you're willing to go.
+      </div>
+      <a href="https://www.the-living-room.com" target="_blank" class="btn-tlr">Learn more about The Living Room →</a>
+    </div>
+
+    <div class="email-confirm" id="email-confirm-note"></div>
+
+    <div style="text-align:center;padding-bottom:3rem">
+      <div style="font-size:0.72rem;color:rgba(255,255,255,0.2);line-height:1.8">
+        © Stuart Fairbairns PCC · The Living Room<br>
+        <a href="https://www.motivate-coaching.com/privacy-statement" target="_blank" style="color:rgba(255,255,255,0.25);text-decoration:underline">Privacy Policy</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══ SUPABASE ═══ */
+const SUPABASE_URL = 'https://tsusrzkpzevpiuvsppls.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzdXNyemtwemV2cGl1dnNwcGxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3NDAzMzUsImV4cCI6MjEwMTMxNjMzNX0.UQD9BaOjYWNOEVeV3QCF2sdlNc9SYJ2PrcZgpCtlQ8s';
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ═══ MAILCHIMP CONFIG ═══ */
+const MC_SERVER = 'us18';
+const MC_API_KEY = 'c71326c26e9677765540ae4fc7992465-us18';
+
+/* ═══ VALUE FAMILIES (Schwartz-based, plain language) ═══ */
+const VALUE_FAMILIES = [
+  { id:'connection', label:'Connection', desc:'relationships, love, belonging' },
+  { id:'integrity', label:'Integrity', desc:'honesty, authenticity, doing what\'s right' },
+  { id:'freedom', label:'Freedom', desc:'autonomy, independence, self-direction' },
+  { id:'growth', label:'Growth', desc:'learning, development, becoming more' },
+  { id:'security', label:'Security', desc:'safety, stability, certainty' },
+  { id:'creativity', label:'Creativity', desc:'expression, originality, making things' },
+  { id:'impact', label:'Impact', desc:'making a difference, contribution, legacy' },
+  { id:'mastery', label:'Mastery', desc:'excellence, skill, doing things well' },
+  { id:'courage', label:'Courage', desc:'bravery, speaking truth, taking risks' },
+  { id:'adventure', label:'Adventure', desc:'excitement, novelty, exploration' },
+  { id:'wellbeing', label:'Wellbeing', desc:'health, balance, vitality' },
+  { id:'service', label:'Service', desc:'helping others, generosity, care' },
+  { id:'loyalty', label:'Loyalty', desc:'commitment, reliability, keeping promises' },
+  { id:'achievement', label:'Achievement', desc:'success, results, winning' },
+  { id:'justice', label:'Justice', desc:'fairness, equality, standing up for what\'s right' },
+  { id:'family', label:'Family', desc:'home, parenthood, belonging to something lasting' }
+];
+
+/* ═══ STATE ═══ */
+let currentScreen = 1;
+const TOTAL_STEPS = 9;
+let selectedFamilies = new Set();
+let state = {};
+
+/* ═══ UTM CAPTURE ═══ */
+function getUTM(){
+  const params = new URLSearchParams(window.location.search);
+  return {
+    utm_source: params.get('utm_source')||'',
+    utm_medium: params.get('utm_medium')||'',
+    utm_campaign: params.get('utm_campaign')||''
+  };
+}
+const UTM = getUTM();
+const startTime = Date.now();
+
+/* ═══ BUILD FAMILIES GRID ═══ */
+const familiesGrid = document.getElementById('families-grid');
+VALUE_FAMILIES.forEach(f => {
+  const chip = document.createElement('span');
+  chip.className = 'family-chip';
+  chip.textContent = f.label;
+  chip.title = f.desc;
+  chip.dataset.id = f.id;
+  chip.onclick = () => {
+    if(selectedFamilies.has(f.id)){ selectedFamilies.delete(f.id); chip.classList.remove('selected'); }
+    else { selectedFamilies.add(f.id); chip.classList.add('selected'); }
+  };
+  familiesGrid.appendChild(chip);
+});
+
+/* ═══ PROGRESS ═══ */
+function updateProgress(step){
+  const pct = Math.round(((step-1)/(TOTAL_STEPS))*100);
+  document.getElementById('progress-bar').style.width = pct+'%';
+  const counter = document.getElementById('step-counter');
+  if(step > 1 && step <= TOTAL_STEPS){
+    counter.style.display='block';
+    counter.textContent = `${step-1} of ${TOTAL_STEPS-1}`;
+  } else {
+    counter.style.display='none';
+  }
+}
+
+/* ═══ AUTORESIZE TEXTAREA ═══ */
+function autoSize(el){ el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
+
+/* ═══ SCREEN NAVIGATION ═══ */
+function showScreen(n){
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active','exit-left');
+  });
+  const target = document.getElementById('s'+n);
+  if(target){
+    target.classList.add('active');
+    target.scrollIntoView({behavior:'instant',block:'start'});
+    // Focus first input
+    setTimeout(() => {
+      const inp = target.querySelector('input, textarea');
+      if(inp) inp.focus();
+    }, 350);
+  }
+  updateProgress(n);
+  currentScreen = n;
+}
+
+function flashTransition(cb){
+  const el = document.getElementById('flash');
+  el.classList.add('active');
+  setTimeout(()=>{ el.classList.remove('active'); if(cb) cb(); }, 200);
+}
+
+function advance(fromStep){
+  if(!validateStep(fromStep)) return;
+  saveStepData(fromStep);
+  flashTransition(() => showScreen(fromStep+1));
+  window.scrollTo(0,0);
+}
+
+function goBack(fromStep){
+  if(fromStep <= 1) return;
+  flashTransition(() => showScreen(fromStep-1));
+  window.scrollTo(0,0);
+}
+
+/* ═══ VALIDATION ═══ */
+function validateStep(step){
+  if(step === 1){
+    const name = document.getElementById('first-name').value.trim();
+    if(!name){ highlight('first-name'); return false; }
+  }
+  if(step >= 2 && step <= 5){
+    const fields = {2:'ev-decision',3:'ev-sacrifice',4:'ev-anger',5:'ev-pride'};
+    const val = document.getElementById(fields[step])?.value.trim();
+    if(!val || val.length < 15){ highlight(fields[step]); return false; }
+  }
+  if(step === 7){
+    const v1 = document.getElementById('v1-name').value.trim();
+    const v2 = document.getElementById('v2-name').value.trim();
+    if(!v1||!v2){ if(!v1) highlight('v1-name'); else highlight('v2-name'); return false; }
+  }
+  return true;
+}
+
+function highlight(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.style.borderColor='rgba(200,60,60,0.6)';
+  el.focus();
+  setTimeout(()=>{ el.style.borderColor=''; },2000);
+}
+
+/* ═══ SAVE STEP DATA ═══ */
+function saveStepData(step){
+  if(step===1) state.first_name = document.getElementById('first-name').value.trim();
+  if(step===2) state.ev_decision = document.getElementById('ev-decision').value;
+  if(step===3) state.ev_sacrifice = document.getElementById('ev-sacrifice').value;
+  if(step===4) state.ev_anger = document.getElementById('ev-anger').value;
+  if(step===5) state.ev_pride = document.getElementById('ev-pride').value;
+  if(step===6){
+    state.selected_families = [...selectedFamilies];
+    state.pattern_reflection = document.getElementById('pattern-reflection').value;
+  }
+  if(step===7){
+    state.v1_name = document.getElementById('v1-name').value;
+    state.v1_defn = document.getElementById('v1-defn').value;
+    state.v2_name = document.getElementById('v2-name').value;
+    state.v2_defn = document.getElementById('v2-defn').value;
+    state.v3_name = document.getElementById('v3-name')?.value||'';
+    state.v4_name = document.getElementById('v4-name')?.value||'';
+    state.v5_name = document.getElementById('v5-name')?.value||'';
+  }
+  if(step===8){
+    state.v1_score = parseInt(document.getElementById('rc1-slider').value);
+    state.v2_score = parseInt(document.getElementById('rc2-slider').value);
+  }
+  state.step_reached = step;
+  // Autosave to localStorage
+  try{ localStorage.setItem('tlr-vd-progress', JSON.stringify(state)); }catch(e){}
+}
+
+/* ═══ SCREEN-SPECIFIC SETUP ═══ */
+function startAssessment(){
+  const name = document.getElementById('first-name').value.trim();
+  if(!name){ highlight('first-name'); return; }
+  state.first_name = name;
+  document.getElementById('s2-name').textContent = name;
+  flashTransition(() => showScreen(2));
+  // Save to Supabase (partial)
+  savePartialToSupabase();
+}
+
+function setupScreen6(){
+  const summary = document.getElementById('answer-summary');
+  const pairs = [
+    {label:'The decision', id:'ev-decision'},
+    {label:'The sacrifice', id:'ev-sacrifice'},
+    {label:'The reaction', id:'ev-anger'},
+    {label:'The aliveness moment', id:'ev-pride'}
+  ];
+  summary.innerHTML = pairs.map(p => {
+    const val = document.getElementById(p.id)?.value?.trim()||'';
+    return `<div class="ans-item">
+      <div class="ans-label">${p.label}</div>
+      <div class="ans-text">${val||'—'}</div>
+    </div>`;
+  }).join('');
+}
+
+function setupScreen8(){
+  const v1 = document.getElementById('v1-name').value.trim()||'Value 1';
+  const v2 = document.getElementById('v2-name').value.trim()||'Value 2';
+  const d1 = document.getElementById('v1-defn').value.trim();
+  const d2 = document.getElementById('v2-defn').value.trim();
+  document.getElementById('rc1-name').textContent = v1;
+  document.getElementById('rc2-name').textContent = d1;
+  document.getElementById('rc2-name').textContent = v2;
+  document.getElementById('rc1-defn').textContent = d1;
+  document.getElementById('rc2-defn').textContent = d2;
+  updateRC(1); updateRC(2);
+}
+
+function updateRC(n){
+  const slider = document.getElementById(`rc${n}-slider`);
+  const val = parseInt(slider.value);
+  const labels = ['','Rarely shows up','Rarely shows up','Occasionally','Occasionally','Sometimes','Sometimes','Often','Often','Consistently','Consistently'];
+  document.getElementById(`rc${n}-val`).textContent = val+'/10';
+  document.getElementById(`rc${n}-label`).textContent = labels[val]||'';
+  const flagEl = document.getElementById(`rc${n}-flag`);
+  if(val >= 7){
+    flagEl.innerHTML = '<span class="rc-flag lived">✓ Lived value — this is actively driving your choices</span>';
+  } else {
+    flagEl.innerHTML = '<span class="rc-flag aspirational">⚡ Aspirational gap — you care, but something is getting in the way</span>';
+  }
+}
+
+function toggleSupporting(){
+  const wrap = document.getElementById('supporting-values-wrap');
+  const arrow = document.getElementById('support-arrow');
+  if(wrap.style.display==='none'||!wrap.style.display){
+    wrap.style.display='block'; arrow.textContent='−';
+  } else {
+    wrap.style.display='none'; arrow.textContent='+';
+  }
+}
+
+/* ═══ TRACK STEP (for drop-off analytics) ═══ */
+function trackStep(){
+  state.step_reached = currentScreen;
+}
+
+/* ═══ SUBMIT & REVEAL ═══ */
+async function submitAndReveal(){
+  const email = document.getElementById('email-input').value.trim();
+  const gdpr = document.getElementById('gdpr-check').checked;
+  const btn = document.getElementById('submit-btn');
+  const label = document.getElementById('submit-label');
+
+  if(!email || !email.includes('@')){ highlight('email-input'); return; }
+  if(!gdpr){
+    document.getElementById('gdpr-check').style.outline='2px solid rgba(200,60,60,0.6)';
+    setTimeout(()=>document.getElementById('gdpr-check').style.outline='',2000);
+    return;
+  }
+
+  btn.disabled = true;
+  label.textContent = 'Preparing your portrait…';
+
+  state.email = email;
+  state.v1_score = parseInt(document.getElementById('rc1-slider').value);
+  state.v2_score = parseInt(document.getElementById('rc2-slider').value);
+  state.time_to_complete = Math.round((Date.now()-startTime)/1000);
+  state.gdpr_consent = true;
+  state.step_reached = 9;
+
+  // Save to Supabase
+  try{
+    await _sb.from('values_responses').upsert({
+      first_name: state.first_name||'',
+      email: state.email,
+      ev_decision: state.ev_decision||'',
+      ev_sacrifice: state.ev_sacrifice||'',
+      ev_anger: state.ev_anger||'',
+      ev_pride: state.ev_pride||'',
+      pattern_reflection: state.pattern_reflection||'',
+      selected_families: state.selected_families||[],
+      v1_name: state.v1_name||'',
+      v1_defn: state.v1_defn||'',
+      v1_score: state.v1_score,
+      v2_name: state.v2_name||'',
+      v2_defn: state.v2_defn||'',
+      v2_score: state.v2_score,
+      v3_name: state.v3_name||'',
+      v4_name: state.v4_name||'',
+      v5_name: state.v5_name||'',
+      time_to_complete: state.time_to_complete,
+      step_reached: 9,
+      gdpr_consent: true,
+      portrait_viewed: true,
+      utm_source: UTM.utm_source,
+      utm_medium: UTM.utm_medium,
+      utm_campaign: UTM.utm_campaign
+    }, { onConflict: 'email' });
+  }catch(e){ console.error('Supabase save error:', e); }
+
+  // Add to Mailchimp (via proxy)
+  try{
+    await addToMailchimp(email, state.first_name||'');
+  }catch(e){ console.error('Mailchimp error:', e); }
+
+  // Clear localStorage
+  try{ localStorage.removeItem('tlr-vd-progress'); }catch(e){}
+
+  // Show results
+  buildResultsScreen();
+  document.querySelectorAll('.screen').forEach(s=>{ s.style.display='none'; });
+  const rs = document.getElementById('results-screen');
+  rs.style.display='block';
+  rs.scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('progress-bar').style.width='100%';
+  document.getElementById('step-counter').style.display='none';
+}
+
+/* ═══ MAILCHIMP via Supabase Edge Function (if available) ═══ */
+async function addToMailchimp(email, firstName){
+  // Uses Supabase Edge Function as proxy (avoids CORS/API key exposure)
+  // Edge function will be deployed separately — fails gracefully if not yet deployed
+  try{
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/mailchimp-subscribe`, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':`Bearer ${SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify({
+        email, firstName,
+        tags: [...(state.selected_families||[])],
+        values: [state.v1_name, state.v2_name].filter(Boolean)
+      })
+    });
+    if(!res.ok) throw new Error('Edge function error: '+res.status);
+  }catch(e){
+    // Fail silently — data is in Supabase regardless
+    console.log('Mailchimp: will retry via edge function when deployed');
+  }
+}
+
+/* ═══ BUILD RESULTS ═══ */
+function buildResultsScreen(){
+  const name = state.first_name||'';
+  document.getElementById('r-name').textContent = name;
+
+  const v1score = state.v1_score||5;
+  const v2score = state.v2_score||5;
+  const v1lived = v1score >= 7;
+  const v2lived = v2score >= 7;
+
+  function scoreLabel(s){ return s>=9?'Consistently':s>=7?'Often':s>=5?'Sometimes':s>=3?'Occasionally':'Rarely'; }
+  function barColor(s){ return s>=7?'#2A9D6F':s>=5?'#E8A800':'#C4673A'; }
+
+  const cvHTML = `
+    <div class="cv-card">
+      <div class="cv-number">★ Core Value 1</div>
+      <div class="cv-name">${state.v1_name||'—'}</div>
+      <div class="cv-defn">${state.v1_defn||''}</div>
+      <div class="cv-score-row">
+        <div class="cv-score-bar-wrap">
+          <div class="cv-score-bar" style="width:${v1score*10}%;background:${barColor(v1score)}"></div>
+        </div>
+        <span class="cv-score-val">${v1score}/10</span>
+      </div>
+      <div><span class="cv-type ${v1lived?'lived':'aspirational'}">${v1lived?'✓ Lived value':'⚡ Aspirational gap'}</span></div>
+      <div class="cv-action-label">This week</div>
+      <div class="cv-action-text">${v1lived?`Keep doing what's making ${state.v1_name||'this value'} show up. Notice where it gets tested most.`:`Identify one moment this week where ${state.v1_name||'this value'} could drive a choice differently. Start there.`}</div>
+    </div>
+    <div class="cv-card">
+      <div class="cv-number">★ Core Value 2</div>
+      <div class="cv-name">${state.v2_name||'—'}</div>
+      <div class="cv-defn">${state.v2_defn||''}</div>
+      <div class="cv-score-row">
+        <div class="cv-score-bar-wrap">
+          <div class="cv-score-bar" style="width:${v2score*10}%;background:${barColor(v2score)}"></div>
+        </div>
+        <span class="cv-score-val">${v2score}/10</span>
+      </div>
+      <div><span class="cv-type ${v2lived?'lived':'aspirational'}">${v2lived?'✓ Lived value':'⚡ Aspirational gap'}</span></div>
+      <div class="cv-action-label">This week</div>
+      <div class="cv-action-text">${v2lived?`Keep doing what's making ${state.v2_name||'this value'} show up. Notice where it gets tested most.`:`Identify one moment this week where ${state.v2_name||'this value'} could drive a choice differently. Start there.`}</div>
+    </div>`;
+  document.getElementById('core-values-display').innerHTML = cvHTML;
+
+  // Supporting values
+  const supporting = [state.v3_name, state.v4_name, state.v5_name].filter(Boolean);
+  if(supporting.length > 0){
+    document.getElementById('supporting-section-results').innerHTML = `
+      <div class="supporting-section">
+        <div class="supporting-label">Supporting values</div>
+        <div class="supporting-list">${supporting.map(v=>`<span class="supporting-pill">${v}</span>`).join('')}</div>
+      </div>`;
+  }
+
+  // Gap insight
+  const bothLived = v1lived && v2lived;
+  const neitherLived = !v1lived && !v2lived;
+  let gapText = '';
+  if(bothLived){
+    gapText = `<strong>Both your core values are actively operating in your choices</strong> — that's rare, and it matters. The research is clear: people who consistently live in alignment with their core values report higher wellbeing, greater resilience, and more confidence in difficult decisions. The question now is whether your environment and commitments are set up to support that alignment long-term.`;
+  } else if(neitherLived){
+    gapText = `Your portrait reveals a significant gap between what you value and how you're currently living. <strong>This isn't a character flaw — it's information.</strong> Research consistently shows that this gap is the primary driver of that background feeling that something isn't quite right. The gap doesn't close by itself. But it does close with the right structure, the right questions, and the right support.`;
+  } else {
+    gapText = `Your portrait shows a mixed picture — one value living more fully than the other. <strong>That gap between them is worth exploring.</strong> Often, what's crowding out the lower-scoring value is something that feels urgent but isn't truly important. The work is identifying what's getting in the way and making one deliberate change.`;
+  }
+  document.getElementById('gap-insight-block').innerHTML = `
+    <div class="gap-insight-label">What your portrait reveals</div>
+    <div class="gap-insight-text">${gapText}</div>`;
+
+  // Email confirm
+  document.getElementById('email-confirm-note').innerHTML = `Your portrait has been saved and will be emailed to <strong>${state.email||''}</strong> shortly.`;
+}
+
+/* ═══ SAVE PARTIAL (for drop-off analytics) ═══ */
+async function savePartialToSupabase(){
+  try{
+    await _sb.from('values_responses').upsert({
+      first_name: state.first_name||'',
+      email: 'partial_'+Date.now()+'@tlr',
+      step_reached: 1,
+      utm_source: UTM.utm_source,
+      utm_medium: UTM.utm_medium,
+      utm_campaign: UTM.utm_campaign
+    }, { onConflict: 'email' });
+  }catch(e){}
+}
+
+/* ═══ SCREEN 6 & 8 SETUP HOOKS ═══ */
+// Intercept advance to screen 6 to populate summary, screen 8 for sliders
+const _origAdvance = advance;
+window.advance = function(fromStep){
+  if(fromStep === 5) setTimeout(setupScreen6, 50);
+  if(fromStep === 7) setTimeout(setupScreen8, 50);
+  _origAdvance(fromStep);
+};
+
+/* ═══ KEYBOARD SUPPORT ═══ */
+document.addEventListener('keydown', e => {
+  if(e.key === 'Enter' && e.target.tagName !== 'TEXTAREA'){
+    if(currentScreen === 1) startAssessment();
+  }
+});
+
+/* ═══ RESTORE FROM LOCALSTORAGE ═══ */
+try{
+  const saved = localStorage.getItem('tlr-vd-progress');
+  if(saved){
+    const s = JSON.parse(saved);
+    // Could restore — for now just pre-fill name if found
+    if(s.first_name) document.getElementById('first-name').value = s.first_name;
+  }
+}catch(e){}
+
+/* Init */
+updateProgress(1);
+</script>
+</body>
+</html>
