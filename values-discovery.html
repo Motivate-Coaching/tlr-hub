@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>What Do You Actually Value? — The Living Room</title>
-<meta name="description" content="Most values tools ask you to pick words from a list. That's not how values work. This 8-minute diagnostic reveals what you're actually living by — and what it's costing you.">
+<title>The Values Engine — The Living Room</title>
+<meta name="description" content="8 minutes. Evidence-based. Your values portrait — built from what you actually do, not what you wish you were. Discover what's driving you and where the gap is costing you.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -94,7 +94,7 @@ body{
 }
 .hook-title em{color:var(--gold);font-style:italic}
 .hook-body{
-  font-size:1rem;color:var(--muted);line-height:1.8;
+  font-size:1rem;color:rgba(245,242,238,0.82);line-height:1.85;
   margin-bottom:2rem;
 }
 .hook-body strong{color:var(--cream)}
@@ -433,11 +433,11 @@ body{
 <!-- ═══════════════════════════════════════════ -->
 <div class="screen active" id="s1">
   <div class="screen-inner">
-    <div class="hook-eyebrow">The Living Room · Values Diagnostic</div>
-    <h1 class="hook-title">Most values tools ask you to <em>pick words from a list.</em></h1>
+    <div class="hook-eyebrow">The Living Room · Values Engine</div>
+    <h1 class="hook-title">Find out what you <em>actually</em> value. Not what you think you should.</h1>
     <p class="hook-body">
-      The problem? You'll pick what you <strong>wish</strong> was true — not what's actually driving your choices.<br><br>
-      This works differently. In 8 minutes, it surfaces the values you're already living by — and reveals where the gap between those values and your choices is quietly costing you.
+      Your values are already written into every choice you've made, every sacrifice you've accepted, every moment you've felt most like yourself.<br><br>
+      This 8-minute exercise reads that evidence and gives you a clear picture of what you're actually living by, where the gap is, and one concrete action for each value that matters most.
     </p>
     <div class="hook-meta">
       <div class="hook-meta-item"><span>⏱</span> 8 minutes</div>
@@ -462,9 +462,9 @@ body{
   <div class="screen-inner">
     <div class="q-step-label">The decision test</div>
     <h2 class="q-prompt-title" id="s2-title">Let's start with what your choices reveal, <span id="s2-name" style="color:var(--gold);font-style:italic"></span>.</h2>
-    <p class="q-prompt-sub">Describe a decision you made in the last three months that cost you something — time, money, comfort, or a relationship. <strong style="color:var(--cream)">What did you choose, and why?</strong></p>
+    <p class="q-prompt-sub">Describe a decision you made in the last three months that cost you something: time, money, comfort, or a relationship. <strong style="color:var(--cream)">What did you choose, and why?</strong></p>
     <textarea class="q-textarea" id="ev-decision" placeholder="What was the decision? What did you give up? What drove the choice?" oninput="autoSize(this);trackStep()"></textarea>
-    <div class="q-nudge">Write freely — there are no right answers here. The more honest, the more useful.</div>
+    <div class="q-nudge">Write freely. There are no right answers here. The more honest you are, the more useful this gets.</div>
     <br>
     <button class="btn-primary" onclick="advance(2)">Continue <span>→</span></button>
     <button class="btn-ghost" onclick="goBack(2)">← Back</button>
@@ -478,9 +478,9 @@ body{
   <div class="screen-inner">
     <div class="q-step-label">The sacrifice test</div>
     <h2 class="q-prompt-title">Good. Now the harder one.</h2>
-    <p class="q-prompt-sub">What have you willingly given up in the last year — not lost, but <strong style="color:var(--cream)">willingly traded away?</strong> What does that tell you about what matters more to you than the thing you gave up?</p>
+    <p class="q-prompt-sub">What have you willingly given up in the last year? Not lost through bad luck, but <strong style="color:var(--cream)">traded away on purpose.</strong> What does that tell you about what matters more to you than the thing you gave up?</p>
     <textarea class="q-textarea" id="ev-sacrifice" placeholder="What have you let go of, delayed, or traded away? What was it in service of?" oninput="autoSize(this);trackStep()"></textarea>
-    <div class="q-nudge">Think beyond the obvious. The small sacrifices are often the most revealing.</div>
+    <div class="q-nudge">Think beyond the obvious. The small sacrifices are often the most telling.</div>
     <br>
     <button class="btn-primary" onclick="advance(3)">Continue <span>→</span></button>
     <button class="btn-ghost" onclick="goBack(3)">← Back</button>
@@ -493,13 +493,13 @@ body{
 <div class="screen" id="s4">
   <div class="screen-inner">
     <div class="midpoint-card">
-      You're halfway through the evidence. <strong>What you've written so far already contains your values</strong> — we just haven't named them yet.
+      Halfway there. <strong>What you've written already contains your values.</strong> We just haven't named them yet.
     </div>
     <div class="q-step-label">The reaction test</div>
     <h2 class="q-prompt-title">What's made you genuinely angry recently?</h2>
-    <p class="q-prompt-sub">Not surface irritation — something that felt like a real <strong style="color:var(--cream)">violation.</strong> When something upsets us deeply, it's often because it breached something we hold dear. What happened, and what does your reaction reveal?</p>
-    <textarea class="q-textarea" id="ev-anger" placeholder="What happened? Why did it matter so much? What value did it breach?" oninput="autoSize(this);trackStep()"></textarea>
-    <div class="q-nudge">Anger is often clarity in disguise. What's yours pointing at?</div>
+    <p class="q-prompt-sub">Not surface irritation. Something that felt like a genuine <strong style="color:var(--cream)">violation.</strong> When something upsets us at that level, it's usually because it hit something we care deeply about. What happened, and what does your reaction tell you?</p>
+    <textarea class="q-textarea" id="ev-anger" placeholder="What happened? Why did it matter so much? What was it touching on?" oninput="autoSize(this);trackStep()"></textarea>
+    <div class="q-nudge">Anger is often useful information. What's yours pointing at?</div>
     <br>
     <button class="btn-primary" onclick="advance(4)">Continue <span>→</span></button>
     <button class="btn-ghost" onclick="goBack(4)">← Back</button>
@@ -513,9 +513,9 @@ body{
   <div class="screen-inner">
     <div class="q-step-label">The aliveness test</div>
     <h2 class="q-prompt-title">One more. This one tends to surprise people.</h2>
-    <p class="q-prompt-sub">When have you felt most like <strong style="color:var(--cream)">yourself</strong> recently — not most successful, not most approved of, but most <em>you?</em> What was happening, and what does that moment tell you?</p>
+    <p class="q-prompt-sub">When have you felt most like <strong style="color:var(--cream)">yourself</strong> recently? Not most successful, not most approved of. Just most <em>you.</em> What was happening, and what does that moment tell you?</p>
     <textarea class="q-textarea" id="ev-pride" placeholder="Describe the moment. What were you doing? Who were you being? What mattered about it?" oninput="autoSize(this);trackStep()"></textarea>
-    <div class="q-nudge">This is often the most underused signal. Pay attention to what it's showing you.</div>
+    <div class="q-nudge">People underuse this one. It tends to be the most honest signal of the four.</div>
     <br>
     <button class="btn-primary" onclick="advance(5)">Continue <span>→</span></button>
     <button class="btn-ghost" onclick="goBack(5)">← Back</button>
@@ -547,7 +547,7 @@ body{
   <div class="screen-inner">
     <div class="q-step-label">Name them in your own words</div>
     <h2 class="q-prompt-title">Now: what are your two core values?</h2>
-    <p class="q-prompt-sub">Research with over 10,000 people found that the most decisive, grounded people operate from <strong style="color:var(--cream)">two core values</strong> — not ten. Not the words that sound good. The two that explain your actual choices.</p>
+    <p class="q-prompt-sub">Research with over 10,000 people found that the most grounded, decisive people tend to operate from <strong style="color:var(--cream)">two core values,</strong> not ten. Not the ones that sound impressive. The two that actually explain the choices you make.</p>
 
     <div class="value-input-block core">
       <div class="vib-badge"><span class="core-star">★</span> Core Value 1</div>
@@ -593,7 +593,7 @@ body{
   <div class="screen-inner">
     <div class="q-step-label">The reality check</div>
     <h2 class="q-prompt-title">Almost there. This is the most important part.</h2>
-    <p class="q-prompt-sub">For each core value: in the last 30 days, how consistently has it <strong style="color:var(--cream)">actually driven your choices?</strong> Not how much you care about it — how often has it shown up in your behaviour.</p>
+    <p class="q-prompt-sub">For each value: in the last 30 days, how often has it <strong style="color:var(--cream)">actually driven your choices?</strong> Not how much you care about it. How often has it shown up in what you actually do.</p>
 
     <div class="rc-block">
       <div class="rc-value-name" id="rc1-name">Value 1</div>
@@ -682,10 +682,10 @@ body{
 
     <div class="tlr-cta">
       <div class="tlr-cta-eyebrow">The Living Room</div>
-      <div class="tlr-cta-title">Knowing your values is the beginning. Living them is the work.</div>
+      <div class="tlr-cta-title">Knowing your values is just the start. Doing something with them is where most people need support.</div>
       <div class="tlr-cta-body">
-        The Living Room is a monthly coaching membership built around exactly this kind of exploration. Not motivational content. Not generic advice. <strong>Structured tools, real reflection, and a community of people doing the same inner work.</strong><br><br>
-        Each month explores a theme that matters — identity, boundaries, energy, momentum — with weekly tools that go as deep as you're willing to go.
+        The Living Room is a monthly coaching membership built around exactly this kind of work. No motivational fluff, no generic advice. <strong>Structured tools, honest conversation, and a group of people doing the same thing.</strong><br><br>
+        Each month goes deep into one theme that matters: identity, boundaries, energy, momentum. Weekly tools that go as far as you're willing to take them.
       </div>
       <a href="https://www.the-living-room.com" target="_blank" class="btn-tlr">Learn more about The Living Room →</a>
     </div>
@@ -922,9 +922,9 @@ function updateRC(n){
   document.getElementById(`rc${n}-label`).textContent = labels[val]||'';
   const flagEl = document.getElementById(`rc${n}-flag`);
   if(val >= 7){
-    flagEl.innerHTML = '<span class="rc-flag lived">✓ Lived value — this is actively driving your choices</span>';
+    flagEl.innerHTML = '<span class="rc-flag lived">✓ Showing up — this is actively driving your choices</span>';
   } else {
-    flagEl.innerHTML = '<span class="rc-flag aspirational">⚡ Aspirational gap — you care, but something is getting in the way</span>';
+    flagEl.innerHTML = '<span class="rc-flag aspirational">⚡ Room to grow — you care about this, but something is getting in the way</span>';
   }
 }
 
@@ -1063,13 +1063,13 @@ function buildResultsScreen(){
         </div>
         <span class="cv-score-val">${v1score}/10</span>
       </div>
-      <div><span class="cv-type ${v1lived?'lived':'aspirational'}">${v1lived?'✓ Lived value':'⚡ Aspirational gap'}</span></div>
+      <div><span class="cv-type ${v1lived?'lived':'aspirational'}">${v1lived?'✓ Showing up':'⚡ Room to grow'}</span></div>
       <div class="cv-action-label">This week</div>
-      <div class="cv-action-text">${v1lived?`Keep doing what's making ${state.v1_name||'this value'} show up. Notice where it gets tested most.`:`Identify one moment this week where ${state.v1_name||'this value'} could drive a choice differently. Start there.`}</div>
+      <div class="cv-action-text">${v1lived?`Stay with what's working. Notice where ${state.v1_name||'this value'} gets tested and how you respond.`:`Pick one moment this week where ${state.v1_name||'this value'} could shape a choice. Start small.`}</div>
     </div>
     <div class="cv-card">
       <div class="cv-number">★ Core Value 2</div>
-      <div class="cv-name">${state.v2_name||'—'}</div>
+      <div class="cv-name">${state.v2_name||''}</div>
       <div class="cv-defn">${state.v2_defn||''}</div>
       <div class="cv-score-row">
         <div class="cv-score-bar-wrap">
@@ -1077,9 +1077,9 @@ function buildResultsScreen(){
         </div>
         <span class="cv-score-val">${v2score}/10</span>
       </div>
-      <div><span class="cv-type ${v2lived?'lived':'aspirational'}">${v2lived?'✓ Lived value':'⚡ Aspirational gap'}</span></div>
+      <div><span class="cv-type ${v2lived?'lived':'aspirational'}">${v2lived?'✓ Showing up':'⚡ Room to grow'}</span></div>
       <div class="cv-action-label">This week</div>
-      <div class="cv-action-text">${v2lived?`Keep doing what's making ${state.v2_name||'this value'} show up. Notice where it gets tested most.`:`Identify one moment this week where ${state.v2_name||'this value'} could drive a choice differently. Start there.`}</div>
+      <div class="cv-action-text">${v2lived?`Stay with what's working. Notice where ${state.v2_name||'this value'} gets tested and how you respond.`:`Pick one moment this week where ${state.v2_name||'this value'} could shape a choice. Start small.`}</div>
     </div>`;
   document.getElementById('core-values-display').innerHTML = cvHTML;
 
@@ -1098,11 +1098,11 @@ function buildResultsScreen(){
   const neitherLived = !v1lived && !v2lived;
   let gapText = '';
   if(bothLived){
-    gapText = `<strong>Both your core values are actively operating in your choices</strong> — that's rare, and it matters. The research is clear: people who consistently live in alignment with their core values report higher wellbeing, greater resilience, and more confidence in difficult decisions. The question now is whether your environment and commitments are set up to support that alignment long-term.`;
+    gapText = `<strong>Both your values are actively showing up in your choices.</strong> That's rarer than you might think. Research with thousands of people shows that those who live in genuine alignment with what they care about tend to make clearer decisions, handle pressure better, and feel less of that background unease that's hard to name. The question worth sitting with: is your environment set up to keep this going?`;
   } else if(neitherLived){
-    gapText = `Your portrait reveals a significant gap between what you value and how you're currently living. <strong>This isn't a character flaw — it's information.</strong> Research consistently shows that this gap is the primary driver of that background feeling that something isn't quite right. The gap doesn't close by itself. But it does close with the right structure, the right questions, and the right support.`;
+    gapText = `There's a real gap here between what you value and how you've been living lately. <strong>That's not a character issue.</strong> It's useful information. The research is clear: that background feeling that something isn't quite right usually traces back to exactly this. The gap doesn't close on its own, but it does close with the right questions and a bit of honest structure.`;
   } else {
-    gapText = `Your portrait shows a mixed picture — one value living more fully than the other. <strong>That gap between them is worth exploring.</strong> Often, what's crowding out the lower-scoring value is something that feels urgent but isn't truly important. The work is identifying what's getting in the way and making one deliberate change.`;
+    gapText = `One value is showing up more than the other. That gap is worth looking at. <strong>Often what's crowding out the lower-scoring value isn't important</strong> — it just feels urgent. The work is working out what's getting in the way and making one change.`;
   }
   document.getElementById('gap-insight-block').innerHTML = `
     <div class="gap-insight-label">What your portrait reveals</div>
