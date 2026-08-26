@@ -1262,17 +1262,76 @@ document.addEventListener('keydown', e => {
 });
 
 /* ═══ RESTORE FROM LOCALSTORAGE ═══ */
-try{
-  const saved = localStorage.getItem('tlr-vd-progress');
-  if(saved){
+function restoreSession(){
+  try{
+    const saved = localStorage.getItem('tlr-vd-progress');
+    if(!saved) return;
     const s = JSON.parse(saved);
-    // Could restore — for now just pre-fill name if found
-    if(s.first_name) document.getElementById('first-name').value = s.first_name;
-  }
-}catch(e){}
+    if(!s || !s.first_name) return;
+
+    // Restore state object
+    Object.assign(state, s);
+
+    // Pre-fill screen 1
+    document.getElementById('first-name').value = s.first_name || '';
+    document.getElementById('s2-name').textContent = s.first_name || '';
+
+    // Restore scenario selections (screens 2-5)
+    const scenarioMap = {
+      s2: s.ev_decision,
+      s3: s.ev_sacrifice,
+      s4: s.ev_anger,
+      s5: s.ev_pride
+    };
+    Object.entries(scenarioMap).forEach(([screen, val]) => {
+      if(!val) return;
+      scenarioSelections[screen] = val;
+      // Try to find and highlight the matching button
+      const grid = document.getElementById(`${screen}-grid`);
+      if(grid){
+        const btn = [...grid.querySelectorAll('.scenario-btn')].find(b => b.dataset.value === val);
+        if(btn) btn.classList.add('selected');
+        // If no matching button, the value came from custom text — show the detail textarea
+        else {
+          const detail = document.getElementById(`${screen}-detail`);
+          if(detail){ detail.classList.add('visible'); detail.value = val; }
+        }
+      }
+    });
+
+    // Restore screen 7 values
+    if(s.v1_name) document.getElementById('v1-name').value = s.v1_name;
+    if(s.v1_defn) document.getElementById('v1-defn').value = s.v1_defn;
+    if(s.v2_name) document.getElementById('v2-name').value = s.v2_name;
+    if(s.v2_defn) document.getElementById('v2-defn').value = s.v2_defn;
+
+    // Restore family chip selections
+    if(s.selected_families && Array.isArray(s.selected_families)){
+      s.selected_families.forEach(id => {
+        selectedFamilies.add(id);
+        const chip = document.querySelector(`.family-chip[data-id="${id}"]`);
+        if(chip) chip.classList.add('selected');
+      });
+    }
+
+    // Restore sliders
+    if(s.v1_score) document.getElementById('rc1-slider').value = s.v1_score;
+    if(s.v2_score) document.getElementById('rc2-slider').value = s.v2_score;
+
+    // Resume at the right screen (go back one so they can re-confirm)
+    const resumeAt = Math.max(1, Math.min(s.step_reached || 1, 9));
+    if(resumeAt > 1){
+      // Show a resume banner briefly, then go to screen
+      showScreen(resumeAt);
+      if(resumeAt === 6) setTimeout(setupScreen6, 60);
+      if(resumeAt === 8) setTimeout(setupScreen8, 60);
+    }
+  }catch(e){}
+}
+restoreSession();
 
 /* Init */
-updateProgress(1);
+updateProgress(currentScreen);
 </script>
 </body>
 </html>
