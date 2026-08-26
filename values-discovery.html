@@ -6,7 +6,7 @@
 <title>The Values Engine — The Living Room</title>
 <meta name="description" content="8 minutes. Evidence-based. Your values portrait — built from what you actually do, not what you wish you were. Discover what's driving you and where the gap is costing you.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ── Reset & base ── */
@@ -28,12 +28,12 @@ body{
   --gold:#E8A800;
   --gold-light:#F5C842;
   --cream:#F5F2EE;
-  --muted:rgba(245,242,238,0.5);
+  --muted:rgba(245,242,238,0.75);
   --border:rgba(245,242,238,0.1);
   --accent:#7B4EA0;
   --green:#2A9D6F;
   --font-display:'Playfair Display',serif;
-  --font-body:'Inter',sans-serif;
+  --font-body:'Poppins',sans-serif;
 }
 
 /* ── Progress bar ── */
@@ -135,7 +135,7 @@ body{
   margin-bottom:0.75rem;
 }
 .q-prompt-sub{
-  font-size:0.88rem;color:var(--muted);line-height:1.7;
+  font-size:0.95rem;color:rgba(245,242,238,0.85);line-height:1.75;
   margin-bottom:1.75rem;
 }
 .q-textarea{
@@ -153,7 +153,7 @@ body{
 
 /* ── Nudge line ── */
 .q-nudge{
-  font-size:0.78rem;color:rgba(255,255,255,0.25);
+  font-size:0.8rem;color:rgba(255,255,255,0.5);
   margin-top:0.65rem;font-style:italic;
 }
 
@@ -421,7 +421,7 @@ body{
 
 <!-- Topbar -->
 <div id="topbar">
-  <div class="tlr-logo">TLR</div>
+  <a href="https://www.the-living-room.com" target="_blank"><img src="tlr-logo.png" alt="The Living Room" style="height:32px;opacity:0.75;filter:brightness(0) invert(1);"></a>
   <div id="step-counter"></div>
 </div>
 
@@ -433,12 +433,19 @@ body{
 <!-- ═══════════════════════════════════════════ -->
 <div class="screen active" id="s1">
   <div class="screen-inner">
-    <div class="hook-eyebrow">The Living Room · Values Engine</div>
-    <h1 class="hook-title">Find out what you <em>actually</em> value. Not what you think you should.</h1>
+    <div class="hook-eyebrow">The Living Room · Values Exercise</div>
+    <h1 class="hook-title">Your choices already know what you value. <em>Do you?</em></h1>
     <p class="hook-body">
-      Your values are already written into every choice you've made, every sacrifice you've accepted, every moment you've felt most like yourself.<br><br>
-      This 8-minute exercise reads that evidence and gives you a clear picture of what you're actually living by, where the gap is, and one concrete action for each value that matters most.
+      Most people sense a gap between the life they're living and the one they know they're capable of. They can't always explain it — but it shows up in the choices they make, the things that frustrate them, and the moments they feel most like themselves.<br><br>
+      This 8-minute exercise reads that evidence and shows you exactly what's going on — what you're actually living by, where the gap is, and one practical step for each value that matters most to you.
     </p>
+    <div style="display:flex;align-items:center;gap:1rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:0.85rem 1.1rem;margin-bottom:1.75rem;">
+      <img src="stuart-photo.jpg" alt="Stuart Fairbairns" style="width:52px;height:52px;border-radius:50%;object-fit:cover;object-position:center top;flex-shrink:0;border:2px solid rgba(232,168,0,0.3);">
+      <div>
+        <div style="font-size:0.82rem;font-weight:600;color:var(--cream);margin-bottom:0.15rem;">Stuart Fairbairns PCC</div>
+        <div style="font-size:0.75rem;color:rgba(245,242,238,0.55);line-height:1.5;">Professional Certified Coach · This exercise draws on the same values work used in one-to-one coaching.</div>
+      </div>
+    </div>
     <div class="hook-meta">
       <div class="hook-meta-item"><span>⏱</span> 8 minutes</div>
       <div class="hook-meta-item"><span>🔒</span> Private &amp; secure</div>
