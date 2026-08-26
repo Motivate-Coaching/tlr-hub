@@ -405,12 +405,59 @@ body{
 }
 .screen-footer a{color:rgba(255,255,255,0.25);text-decoration:underline}
 
+/* ── Scenario picker ── */
+.scenario-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;
+  margin:1.25rem 0 1rem;
+}
+.scenario-btn{
+  background:rgba(255,255,255,0.04);
+  border:1.5px solid rgba(245,242,238,0.12);
+  border-radius:14px;padding:0.9rem 1rem;
+  text-align:left;cursor:pointer;transition:all .18s;
+  color:var(--muted);font-family:var(--font-body);
+  font-size:0.85rem;line-height:1.5;width:100%;
+}
+.scenario-btn:hover{
+  border-color:rgba(232,168,0,0.4);
+  background:rgba(232,168,0,0.06);color:var(--cream);
+}
+.scenario-btn.selected{
+  border-color:var(--gold);background:rgba(232,168,0,0.1);
+  color:var(--cream);
+}
+.scenario-btn.selected::before{
+  content:'✓ ';color:var(--gold);font-weight:700;
+}
+.scenario-other-toggle{
+  font-size:0.78rem;color:rgba(245,242,238,0.4);
+  background:none;border:none;cursor:pointer;
+  font-family:var(--font-body);padding:0;
+  text-decoration:underline;text-underline-offset:3px;
+  display:block;margin-bottom:0.75rem;transition:color .15s;
+}
+.scenario-other-toggle:hover{color:var(--muted)}
+.scenario-detail{
+  width:100%;background:rgba(255,255,255,0.03);
+  border:1px solid rgba(245,242,238,0.1);border-radius:10px;
+  color:var(--cream);font-family:var(--font-body);font-size:0.88rem;
+  padding:0.75rem 1rem;resize:none;min-height:72px;
+  transition:border-color .18s;display:none;
+}
+.scenario-detail.visible{display:block}
+.scenario-detail:focus{outline:none;border-color:rgba(232,168,0,0.35)}
+.scenario-error{
+  font-size:0.78rem;color:rgba(200,80,80,0.9);
+  margin-top:-0.5rem;margin-bottom:0.75rem;display:none;
+}
+
 /* ── Mobile ── */
 @media(max-width:600px){
   .screen{padding:4.5rem 1.25rem 3.5rem}
   .core-values-display{grid-template-columns:1fr}
   .hook-title{font-size:1.9rem}
   .q-prompt-title{font-size:1.3rem}
+  .scenario-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -449,7 +496,7 @@ body{
     <div class="hook-meta">
       <div class="hook-meta-item"><span>⏱</span> 8 minutes</div>
       <div class="hook-meta-item"><span>🔒</span> Private &amp; secure</div>
-      <div class="hook-meta-item"><span>📩</span> Portrait emailed to you</div>
+      <div class="hook-meta-item"><span>📩</span> Your values portrait emailed to you</div>
     </div>
     <div class="name-prompt">First, what's your name?</div>
     <input class="name-field" id="first-name" type="text" placeholder="Your first name…" autocomplete="given-name" autocapitalize="words">
@@ -469,9 +516,17 @@ body{
   <div class="screen-inner">
     <div class="q-step-label">The decision test</div>
     <h2 class="q-prompt-title" id="s2-title">Let's start with what your choices reveal, <span id="s2-name" style="color:var(--gold);font-style:italic"></span>.</h2>
-    <p class="q-prompt-sub">Describe a decision you made in the last three months that cost you something: time, money, comfort, or a relationship. <strong style="color:var(--cream)">What did you choose, and why?</strong></p>
-    <textarea class="q-textarea" id="ev-decision" placeholder="What was the decision? What did you give up? What drove the choice?" oninput="autoSize(this);trackStep()"></textarea>
-    <div class="q-nudge">Write freely. There are no right answers here. The more honest you are, the more useful this gets.</div>
+    <p class="q-prompt-sub">Think about a decision you made in the last few months that <strong style="color:var(--cream)">cost you something</strong> — time, money, comfort, or a relationship. Which comes closest to what drove that choice?</p>
+    <div class="scenario-grid" id="s2-grid">
+      <button class="scenario-btn" data-screen="s2" data-value="I put people ahead of a professional opportunity or financial gain" onclick="selectScenario('s2',this)">I put people ahead of a professional opportunity or financial gain</button>
+      <button class="scenario-btn" data-screen="s2" data-value="I chose honesty or integrity, even when it wasn't the easy option" onclick="selectScenario('s2',this)">I chose honesty or integrity, even when it wasn't the easy option</button>
+      <button class="scenario-btn" data-screen="s2" data-value="I backed my own judgement over what others expected of me" onclick="selectScenario('s2',this)">I backed my own judgement over what others expected of me</button>
+      <button class="scenario-btn" data-screen="s2" data-value="I chose meaning or purpose over comfort or convenience" onclick="selectScenario('s2',this)">I chose meaning or purpose over comfort or convenience</button>
+    </div>
+    <div class="scenario-error" id="s2-error">Please select the option that fits best, or add your own below.</div>
+    <button class="scenario-other-toggle" onclick="toggleDetail('s2-detail')">My situation is different — describe it instead</button>
+    <textarea class="scenario-detail" id="s2-detail" placeholder="Describe the decision in your own words…" oninput="autoSize(this)"></textarea>
+    <div class="q-nudge">There's no right answer. Pick the one that fits closest — you can add detail below if you want.</div>
     <br>
     <button class="btn-primary" onclick="advance(2)">Continue <span>→</span></button>
     <button class="btn-ghost" onclick="goBack(2)">← Back</button>
@@ -485,9 +540,17 @@ body{
   <div class="screen-inner">
     <div class="q-step-label">The sacrifice test</div>
     <h2 class="q-prompt-title">Good. Now the harder one.</h2>
-    <p class="q-prompt-sub">What have you willingly given up in the last year? Not lost through bad luck, but <strong style="color:var(--cream)">traded away on purpose.</strong> What does that tell you about what matters more to you than the thing you gave up?</p>
-    <textarea class="q-textarea" id="ev-sacrifice" placeholder="What have you let go of, delayed, or traded away? What was it in service of?" oninput="autoSize(this);trackStep()"></textarea>
-    <div class="q-nudge">Think beyond the obvious. The small sacrifices are often the most telling.</div>
+    <p class="q-prompt-sub">What have you <strong style="color:var(--cream)">willingly given up</strong> in the last year? Not lost through bad luck — traded away on purpose. Which of these is closest?</p>
+    <div class="scenario-grid" id="s3-grid">
+      <button class="scenario-btn" data-screen="s3" data-value="I stepped back from status, money, or career advancement for something that matters more" onclick="selectScenario('s3',this)">I stepped back from status, money, or career advancement for something that matters more</button>
+      <button class="scenario-btn" data-screen="s3" data-value="I gave time or energy to others, even when I had little to spare" onclick="selectScenario('s3',this)">I gave time or energy to others, even when I had little to spare</button>
+      <button class="scenario-btn" data-screen="s3" data-value="I let go of a relationship or dynamic that wasn't aligned with who I'm becoming" onclick="selectScenario('s3',this)">I let go of a relationship or dynamic that wasn't aligned with who I'm becoming</button>
+      <button class="scenario-btn" data-screen="s3" data-value="I chose depth over breadth — fewer things, done properly" onclick="selectScenario('s3',this)">I chose depth over breadth — fewer things, done properly</button>
+    </div>
+    <div class="scenario-error" id="s3-error">Please select the option that fits best, or add your own below.</div>
+    <button class="scenario-other-toggle" onclick="toggleDetail('s3-detail')">My situation is different — describe it instead</button>
+    <textarea class="scenario-detail" id="s3-detail" placeholder="Describe what you gave up, and what it was in service of…" oninput="autoSize(this)"></textarea>
+    <div class="q-nudge">The small sacrifices are often the most telling. Trust your first instinct.</div>
     <br>
     <button class="btn-primary" onclick="advance(3)">Continue <span>→</span></button>
     <button class="btn-ghost" onclick="goBack(3)">← Back</button>
@@ -500,13 +563,21 @@ body{
 <div class="screen" id="s4">
   <div class="screen-inner">
     <div class="midpoint-card">
-      Halfway there. <strong>What you've written already contains your values.</strong> We just haven't named them yet.
+      Halfway there. <strong>What you've selected already contains your values.</strong> We just haven't named them yet.
     </div>
     <div class="q-step-label">The reaction test</div>
     <h2 class="q-prompt-title">What's made you genuinely angry recently?</h2>
-    <p class="q-prompt-sub">Not surface irritation. Something that felt like a genuine <strong style="color:var(--cream)">violation.</strong> When something upsets us at that level, it's usually because it hit something we care deeply about. What happened, and what does your reaction tell you?</p>
-    <textarea class="q-textarea" id="ev-anger" placeholder="What happened? Why did it matter so much? What was it touching on?" oninput="autoSize(this);trackStep()"></textarea>
-    <div class="q-nudge">Anger is often useful information. What's yours pointing at?</div>
+    <p class="q-prompt-sub">Not surface irritation. Something that felt like a real <strong style="color:var(--cream)">violation.</strong> When anger hits that level, it's usually because something we care deeply about was touched. Which of these is closest?</p>
+    <div class="scenario-grid" id="s4-grid">
+      <button class="scenario-btn" data-screen="s4" data-value="When someone was dishonest, manipulative, or let people down" onclick="selectScenario('s4',this)">When someone was dishonest, manipulative, or let people down</button>
+      <button class="scenario-btn" data-screen="s4" data-value="When I saw someone's potential being wasted or held back" onclick="selectScenario('s4',this)">When I saw someone's potential being wasted or held back</button>
+      <button class="scenario-btn" data-screen="s4" data-value="When something I care about was dismissed, devalued, or ignored" onclick="selectScenario('s4',this)">When something I care about was dismissed, devalued, or ignored</button>
+      <button class="scenario-btn" data-screen="s4" data-value="When injustice went unchallenged — someone being treated unfairly" onclick="selectScenario('s4',this)">When injustice went unchallenged — someone being treated unfairly</button>
+    </div>
+    <div class="scenario-error" id="s4-error">Please select the option that fits best, or add your own below.</div>
+    <button class="scenario-other-toggle" onclick="toggleDetail('s4-detail')">My situation is different — describe it instead</button>
+    <textarea class="scenario-detail" id="s4-detail" placeholder="What happened? What was it really touching on?…" oninput="autoSize(this)"></textarea>
+    <div class="q-nudge">Anger is useful information. It points directly at what matters.</div>
     <br>
     <button class="btn-primary" onclick="advance(4)">Continue <span>→</span></button>
     <button class="btn-ghost" onclick="goBack(4)">← Back</button>
@@ -519,10 +590,18 @@ body{
 <div class="screen" id="s5">
   <div class="screen-inner">
     <div class="q-step-label">The aliveness test</div>
-    <h2 class="q-prompt-title">One more. This one tends to surprise people.</h2>
-    <p class="q-prompt-sub">When have you felt most like <strong style="color:var(--cream)">yourself</strong> recently? Not most successful, not most approved of. Just most <em>you.</em> What was happening, and what does that moment tell you?</p>
-    <textarea class="q-textarea" id="ev-pride" placeholder="Describe the moment. What were you doing? Who were you being? What mattered about it?" oninput="autoSize(this);trackStep()"></textarea>
-    <div class="q-nudge">People underuse this one. It tends to be the most honest signal of the four.</div>
+    <h2 class="q-prompt-title">Last one. This one tends to surprise people.</h2>
+    <p class="q-prompt-sub">When have you felt most like <strong style="color:var(--cream)">yourself</strong> recently? Not most successful. Not most approved of. Just most <em>you.</em> Which comes closest?</p>
+    <div class="scenario-grid" id="s5-grid">
+      <button class="scenario-btn" data-screen="s5" data-value="When I was creating or building something that mattered to me" onclick="selectScenario('s5',this)">When I was creating or building something that mattered to me</button>
+      <button class="scenario-btn" data-screen="s5" data-value="When I was deeply connected with someone I care about" onclick="selectScenario('s5',this)">When I was deeply connected with someone I care about</button>
+      <button class="scenario-btn" data-screen="s5" data-value="When I was contributing to something bigger than myself" onclick="selectScenario('s5',this)">When I was contributing to something bigger than myself</button>
+      <button class="scenario-btn" data-screen="s5" data-value="When I was growing — learning, stretching, or doing something new" onclick="selectScenario('s5',this)">When I was growing — learning, stretching, or doing something new</button>
+    </div>
+    <div class="scenario-error" id="s5-error">Please select the option that fits best, or add your own below.</div>
+    <button class="scenario-other-toggle" onclick="toggleDetail('s5-detail')">My situation is different — describe it instead</button>
+    <textarea class="scenario-detail" id="s5-detail" placeholder="Describe the moment. What were you doing? Who were you being?…" oninput="autoSize(this)"></textarea>
+    <div class="q-nudge">People underuse this one. It's often the most honest signal of the four.</div>
     <br>
     <button class="btn-primary" onclick="advance(5)">Continue <span>→</span></button>
     <button class="btn-ghost" onclick="goBack(5)">← Back</button>
@@ -824,6 +903,34 @@ function goBack(fromStep){
   window.scrollTo(0,0);
 }
 
+/* ═══ SCENARIO PICKER HELPERS ═══ */
+const scenarioSelections = {s2:null, s3:null, s4:null, s5:null};
+
+function selectScenario(screen, btn){
+  // Deselect all in this grid
+  document.querySelectorAll(`#${screen}-grid .scenario-btn`).forEach(b => b.classList.remove('selected'));
+  // Select clicked
+  btn.classList.add('selected');
+  scenarioSelections[screen] = btn.dataset.value;
+  // Hide error if showing
+  const err = document.getElementById(`${screen}-error`);
+  if(err) err.style.display = 'none';
+}
+
+function toggleDetail(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.toggle('visible');
+  if(el.classList.contains('visible')) el.focus();
+}
+
+function getScenarioValue(screenKey, detailId){
+  const selected = scenarioSelections[screenKey];
+  const detail = document.getElementById(detailId)?.value.trim()||'';
+  if(detail.length >= 8) return detail; // custom text overrides
+  return selected || '';
+}
+
 /* ═══ VALIDATION ═══ */
 function validateStep(step){
   if(step === 1){
@@ -831,9 +938,14 @@ function validateStep(step){
     if(!name){ highlight('first-name'); return false; }
   }
   if(step >= 2 && step <= 5){
-    const fields = {2:'ev-decision',3:'ev-sacrifice',4:'ev-anger',5:'ev-pride'};
-    const val = document.getElementById(fields[step])?.value.trim();
-    if(!val || val.length < 15){ highlight(fields[step]); return false; }
+    const map = {2:['s2','s2-detail'], 3:['s3','s3-detail'], 4:['s4','s4-detail'], 5:['s5','s5-detail']};
+    const [sk, detailId] = map[step];
+    const val = getScenarioValue(sk, detailId);
+    if(!val){
+      const err = document.getElementById(`${sk}-error`);
+      if(err){ err.style.display='block'; }
+      return false;
+    }
   }
   if(step === 7){
     const v1 = document.getElementById('v1-name').value.trim();
@@ -854,10 +966,10 @@ function highlight(id){
 /* ═══ SAVE STEP DATA ═══ */
 function saveStepData(step){
   if(step===1) state.first_name = document.getElementById('first-name').value.trim();
-  if(step===2) state.ev_decision = document.getElementById('ev-decision').value;
-  if(step===3) state.ev_sacrifice = document.getElementById('ev-sacrifice').value;
-  if(step===4) state.ev_anger = document.getElementById('ev-anger').value;
-  if(step===5) state.ev_pride = document.getElementById('ev-pride').value;
+  if(step===2) state.ev_decision = getScenarioValue('s2','s2-detail');
+  if(step===3) state.ev_sacrifice = getScenarioValue('s3','s3-detail');
+  if(step===4) state.ev_anger = getScenarioValue('s4','s4-detail');
+  if(step===5) state.ev_pride = getScenarioValue('s5','s5-detail');
   if(step===6){
     state.selected_families = [...selectedFamilies];
     state.pattern_reflection = document.getElementById('pattern-reflection').value;
@@ -894,16 +1006,16 @@ function startAssessment(){
 function setupScreen6(){
   const summary = document.getElementById('answer-summary');
   const pairs = [
-    {label:'The decision', id:'ev-decision'},
-    {label:'The sacrifice', id:'ev-sacrifice'},
-    {label:'The reaction', id:'ev-anger'},
-    {label:'The aliveness moment', id:'ev-pride'}
+    {label:'The decision', key:'ev_decision'},
+    {label:'The sacrifice', key:'ev_sacrifice'},
+    {label:'The reaction', key:'ev_anger'},
+    {label:'The aliveness moment', key:'ev_pride'}
   ];
   summary.innerHTML = pairs.map(p => {
-    const val = document.getElementById(p.id)?.value?.trim()||'';
+    const val = state[p.key]||'—';
     return `<div class="ans-item">
       <div class="ans-label">${p.label}</div>
-      <div class="ans-text">${val||'—'}</div>
+      <div class="ans-text">${val}</div>
     </div>`;
   }).join('');
 }
