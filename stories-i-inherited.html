@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Stories I Inherited — The Living Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+<style>
+:root{
+  --navy:#1B2B4B;
+  --gold:#E8A800;
+  --accent:#3A6B4A;
+  --accent-pale:#EEF7F1;
+  --cream:#FAF8F4;
+  --white:#FFFFFF;
+  --border:#E8E4DC;
+  --text-dark:#1A1A1A;
+  --text-mid:#4A4A4A;
+  --text-muted:#888;
+  --font-display:'Playfair Display',serif;
+  --font-body:'Inter',sans-serif;
+  --s1-color:#3A6B4A;
+  --s2-color:#5B4FCE;
+  --s3-color:#B5583C;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark);min-height:100vh}
+
+.topbar{background:var(--navy);padding:0.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar .logo{color:#fff;font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.04em}
+.topbar .theme-pill{background:var(--accent);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.28rem 0.85rem;border-radius:20px;text-decoration:none;cursor:pointer;transition:opacity .15s}
+.topbar .theme-pill:hover{opacity:0.8}
+#saved-badge{display:none;align-items:center;gap:0.4rem;font-size:0.72rem;color:rgba(255,255,255,0.5)}
+#saved-badge .dot{width:6px;height:6px;background:#2A9D6F;border-radius:50%;display:inline-block}
+
+.page{max-width:720px;margin:0 auto;padding:2.5rem 1.5rem 4rem}
+.tool-eyebrow{font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.6rem;text-align:center}
+.tool-title{font-family:var(--font-display);font-size:3rem;line-height:1.15;text-align:center;color:var(--text-dark);margin-bottom:0.5rem}
+.tool-subtitle{font-family:var(--font-display);font-size:1.15rem;color:var(--accent);font-style:italic;text-align:center;margin-bottom:0.5rem}
+.tool-divider{width:48px;height:2px;background:var(--gold);margin:1rem auto 1.75rem}
+.tool-intro{font-size:0.95rem;color:var(--text-mid);line-height:1.75;text-align:center;margin-bottom:0.5rem}
+.tool-instruction{display:flex;align-items:flex-start;gap:0.75rem;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin:1.25rem 0 2rem;font-size:0.88rem;color:var(--text-mid);line-height:1.6}
+.tool-instruction .inst-icon{font-size:1.25rem;flex-shrink:0;margin-top:0.05rem}
+
+.tool-progress{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:0.85rem 1.1rem;margin-bottom:2rem}
+.prog-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem}
+.prog-label{font-size:0.75rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted)}
+.prog-pct{font-size:0.82rem;font-weight:700;color:var(--navy)}
+.prog-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--gold);border-radius:3px;transition:width .4s ease}
+.prog-hint{font-size:0.75rem;color:var(--text-muted);margin-top:0.45rem}
+.prog-hint.done{color:#2A9D6F;font-weight:600}
+
+.step-block{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.75rem 1.5rem;margin-bottom:1.5rem}
+.step-head{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.25rem}
+.step-num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:700;color:#fff;flex-shrink:0;margin-top:0.1rem}
+.step-num.c1{background:var(--s1-color)}
+.step-num.c2{background:var(--s2-color)}
+.step-num.c3{background:var(--s3-color)}
+.step-q{font-size:1rem;font-weight:700;letter-spacing:0.01em;color:var(--text-dark);margin-bottom:0.2rem;text-transform:uppercase}
+.step-sub{font-size:0.84rem;color:var(--text-muted);line-height:1.55}
+
+/* ── Section 1: 4 life areas ── */
+.areas-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.area-card{border:1px solid var(--border);border-radius:10px;padding:1.1rem}
+.area-icon{font-size:1.4rem;margin-bottom:0.4rem;display:block}
+.area-label{font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.75rem;display:block}
+.area-ta{width:100%;border:none;background:transparent;font-family:var(--font-body);font-size:0.88rem;color:var(--text-dark);line-height:1.65;padding:0;outline:none;resize:none;min-height:100px}
+.area-ta::placeholder{color:#C8C4BB}
+.area-prompt{font-size:0.75rem;color:var(--accent);margin-top:0.5rem;font-style:italic}
+
+.choose-cue{text-align:center;font-family:var(--font-display);font-size:0.95rem;font-style:italic;color:var(--text-mid);margin:1rem 0 0.25rem;padding-top:1rem;border-top:1px dashed var(--border)}
+
+/* ── Section 2: Explore one story ── */
+.explore-note{font-size:0.85rem;color:var(--text-mid);background:var(--accent-pale);border-left:3px solid var(--accent);border-radius:8px;padding:0.85rem 1rem;margin-bottom:1.25rem;line-height:1.6}
+.story-input-group{margin-bottom:1.25rem}
+.story-q{font-size:0.73rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.4rem;display:flex;align-items:center;gap:0.5rem}
+.story-q .q-icon{font-size:0.95rem}
+.story-field{width:100%;border:none;border-bottom:1.5px solid var(--border);background:transparent;font-family:var(--font-body);font-size:0.92rem;color:var(--text-dark);padding:0.5rem 0;outline:none;resize:none;line-height:1.6;min-height:64px;transition:border-color .2s}
+.story-field:focus{border-bottom-color:var(--s2-color)}
+.story-field::placeholder{color:#C8C4BB}
+.story-stmt-field{font-size:1rem;font-weight:600;min-height:auto;padding:0.4rem 0}
+
+/* ── Section 3: Whose rule? ── */
+.should-note{font-size:0.85rem;color:var(--text-mid);line-height:1.7;margin-bottom:1rem}
+.should-examples{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.25rem}
+.should-chip{background:var(--accent-pale);border:1px solid #C0D9C8;border-radius:20px;font-size:0.78rem;color:var(--s1-color);padding:0.3rem 0.75rem}
+.rule-prompt{background:var(--navy);color:#fff;border-radius:12px;padding:1.25rem 1.5rem;text-align:center}
+.rule-prompt .rule-q{font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem}
+.rule-prompt .rule-text{font-family:var(--font-display);font-size:1.35rem;color:#fff}
+.rule-reflection{margin-top:1.25rem}
+.rule-reflection-ta{width:100%;border:none;border-bottom:1.5px solid var(--border);background:transparent;font-family:var(--font-body);font-size:0.9rem;color:var(--text-dark);padding:0.5rem 0;outline:none;resize:none;min-height:70px;line-height:1.6;transition:border-color .2s}
+.rule-reflection-ta:focus{border-bottom-color:var(--s3-color)}
+.rule-reflection-ta::placeholder{color:#C8C4BB}
+.rule-reflection-q{font-size:0.73rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.4rem}
+
+/* ── Insight block ── */
+.insight-block{background:var(--navy);color:#fff;border-radius:14px;padding:1.5rem 1.75rem;margin:2rem 0;display:flex;gap:1rem;align-items:flex-start}
+.insight-icon{font-size:1.4rem;flex-shrink:0;margin-top:0.1rem}
+.insight-label{font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem}
+.insight-text{font-size:0.88rem;line-height:1.7;color:rgba(255,255,255,0.85)}
+
+.principles{display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem 1.5rem;margin:1.5rem 0;padding:1rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.principles span{font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)}
+
+.complete-wrap{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;align-items:center;padding-top:0.5rem}
+.save-btn{background:#2A9D6F;color:#fff;border:2px solid #2A9D6F;padding:0.85rem 2.25rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .18s,transform .1s;display:inline-flex;align-items:center}
+.save-btn:hover{opacity:0.87;transform:translateY(-1px)}
+.library-btn{background:var(--gold);color:#1a1a1a;border:2px solid var(--gold);padding:0.85rem 2.25rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .18s,transform .1s;text-decoration:none;display:inline-flex;align-items:center;gap:0.4rem}
+.library-btn:hover{opacity:0.87;transform:translateY(-1px)}
+.complete-btn{background:var(--navy);color:#fff;border:none;padding:1rem 2.75rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s}
+.complete-btn:hover{opacity:0.87;transform:translateY(-1px)}
+#completed-banner{background:#F0FAF5;border:1px solid #2A9D6F;border-radius:10px;padding:0.85rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;font-size:0.88rem;color:var(--text-mid)}
+
+@media(max-width:600px){
+  .tool-title{font-size:2.1rem}
+  .page{padding:1.75rem 1rem 3rem}
+  .areas-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="logo">The Living Room</span>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <div id="saved-badge"><span class="dot"></span> Saved</div>
+    <span class="theme-pill" onclick="history.back()">← Back</span>
+  </div>
+</div>
+
+<div class="page" id="mainView">
+  <div class="tool-eyebrow">Identity Is Not Fixed · Week 2</div>
+  <h1 class="tool-title">The Stories I Inherited</h1>
+  <div class="tool-subtitle">Who taught me what life was supposed to look like?</div>
+  <div class="tool-divider"></div>
+  <p class="tool-intro">Long before we were consciously deciding what mattered, we were learning what success, love, money, work, family, relationships, and a "good life" were supposed to look like. We absorbed these stories. This week, let's bring them into the light.</p>
+
+  <div class="tool-instruction">
+    <span class="inst-icon">✏️</span>
+    <span>Work through each section in order. Your answers auto-save as you type.</span>
+  </div>
+
+  <div class="tool-progress">
+    <div class="prog-header">
+      <span class="prog-label">Your progress</span>
+      <span class="prog-pct" id="prog-pct">0%</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog-hint" id="prog-hint">Start by writing what you were taught in each life area</div>
+  </div>
+
+  <div id="completed-banner" style="display:none">
+    ✅ <span>You've completed this tool. Your responses are saved. <button onclick="resetComplete()" style="background:none;border:none;color:#2A9D6F;cursor:pointer;font-size:0.88rem;text-decoration:underline;padding:0;margin-left:0.25rem">Mark as not complete</button></span>
+  </div>
+
+  <!-- ── SECTION 1 ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num c1">1</div>
+      <div class="step-text">
+        <div class="step-q">Growing Up, I Learnt That…</div>
+        <div class="step-sub">For each area, write the messages you were taught — spoken or unspoken. What was the "rule"?</div>
+      </div>
+    </div>
+    <div class="areas-grid">
+      <div class="area-card">
+        <span class="area-icon">💼</span>
+        <span class="area-label">Work &amp; Success</span>
+        <textarea class="area-ta" id="area-work" placeholder="Work means… Success looks like… Hard work requires…" oninput="autoSize(this);autoSave()"></textarea>
+      </div>
+      <div class="area-card">
+        <span class="area-icon">💰</span>
+        <span class="area-label">Money</span>
+        <textarea class="area-ta" id="area-money" placeholder="Money is… People with money… You earn money by…" oninput="autoSize(this);autoSave()"></textarea>
+      </div>
+      <div class="area-card">
+        <span class="area-icon">❤️</span>
+        <span class="area-label">Relationships &amp; Family</span>
+        <textarea class="area-ta" id="area-relationships" placeholder="Love means… Family should… A good partner…" oninput="autoSize(this);autoSave()"></textarea>
+      </div>
+      <div class="area-card">
+        <span class="area-icon">🌱</span>
+        <span class="area-label">Life &amp; Self</span>
+        <textarea class="area-ta" id="area-life" placeholder="A good life is… I should be… People like me…" oninput="autoSize(this);autoSave()"></textarea>
+      </div>
+    </div>
+    <div class="choose-cue">↓ Now choose ONE statement from above that catches your attention most</div>
+  </div>
+
+  <!-- ── SECTION 2 ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num c2">2</div>
+      <div class="step-text">
+        <div class="step-q">Explore One Story</div>
+        <div class="step-sub">Pick the message that feels most significant — the one with the most charge. Write it below, then dig in.</div>
+      </div>
+    </div>
+    <div class="explore-note">
+      Not "is it right or wrong?" — that's not the question. The question is: <strong>if nobody had handed me this rule, would I choose it for myself today?</strong>
+    </div>
+    <div class="story-input-group">
+      <div class="story-q"><span class="q-icon">📌</span>The story I'm exploring</div>
+      <textarea class="story-field story-stmt-field" id="story-stmt" placeholder="Write the message or belief you absorbed…" oninput="autoSize(this);autoSave()" rows="2"></textarea>
+    </div>
+    <div class="story-input-group">
+      <div class="story-q"><span class="q-icon">📍</span>Where did I learn it?</div>
+      <textarea class="story-field" id="story-origin" placeholder="Who or what taught me this? Family, culture, school, religion, community, something I witnessed or experienced…" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+    </div>
+    <div class="story-input-group">
+      <div class="story-q"><span class="q-icon">🔄</span>How has it shaped me?</div>
+      <textarea class="story-field" id="story-shaped" placeholder="Where can I see this story influencing how I live, choose, behave or judge myself or others today?" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+    </div>
+    <div class="story-input-group">
+      <div class="story-q"><span class="q-icon">🤔</span>Do I actually believe it?</div>
+      <textarea class="story-field" id="story-believe" placeholder="If nobody had handed me this rule, would I choose it for myself today? What do I actually think is true?" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+    </div>
+  </div>
+
+  <!-- ── SECTION 3 ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num c3">3</div>
+      <div class="step-text">
+        <div class="step-q">This Week's Experiment</div>
+        <div class="step-sub">Notice the word "should" — and ask one question when it appears.</div>
+      </div>
+    </div>
+    <div class="should-note">Inherited stories often show up as "should" statements. This week, when you catch one — in your own thinking or in conversation — pause and ask:</div>
+    <div class="should-examples">
+      <span class="should-chip">I should be further ahead</span>
+      <span class="should-chip">Parents should…</span>
+      <span class="should-chip">I should earn more</span>
+      <span class="should-chip">At my age I should…</span>
+      <span class="should-chip">A successful person should…</span>
+    </div>
+    <div class="rule-prompt">
+      <div class="rule-q">When you catch a "should", ask:</div>
+      <div class="rule-text">Whose rule is this?</div>
+    </div>
+    <div class="rule-reflection" style="margin-top:1.25rem">
+      <div class="rule-reflection-q">Reflection — which "should" is showing up most in your life right now?</div>
+      <textarea class="rule-reflection-ta" id="should-reflection" placeholder="Write it here. Where does it come from? Whose rule is it really?" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+    </div>
+  </div>
+
+  <div class="insight-block">
+    <span class="insight-icon">💡</span>
+    <div>
+      <div class="insight-label">Remember</div>
+      <div class="insight-text">Inheriting a story doesn't mean you have to keep living by it without ever reading it for yourself. Keep what serves you. Redefine what doesn't. You get to choose your next chapter.</div>
+    </div>
+  </div>
+
+  <div class="principles">
+    <span>👁 Aware — See the stories. Without judgement.</span>
+    <span>🧭 Explore — Question the rules.</span>
+    <span>✨ Choose — Release what doesn't fit.</span>
+  </div>
+
+  <p style="text-align:center;font-family:var(--font-display);font-size:1rem;font-style:italic;color:var(--text-muted);margin-bottom:2rem;">Your identity is a choice. Your life is yours to shape.</p>
+
+  <div class="complete-wrap">
+    <button class="save-btn" onclick="doSave()">💾 Save my answers</button>
+    <a class="library-btn" href="index.html">← Back to hub</a>
+    <button class="complete-btn" id="complete-btn" onclick="markComplete()">Mark as Complete ✓</button>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'tlr-stories-i-inherited';
+
+function autoSize(el){ el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
+
+function collectData(){
+  return {
+    area_work: document.getElementById('area-work').value,
+    area_money: document.getElementById('area-money').value,
+    area_relationships: document.getElementById('area-relationships').value,
+    area_life: document.getElementById('area-life').value,
+    story_stmt: document.getElementById('story-stmt').value,
+    story_origin: document.getElementById('story-origin').value,
+    story_shaped: document.getElementById('story-shaped').value,
+    story_believe: document.getElementById('story-believe').value,
+    should_reflection: document.getElementById('should-reflection').value
+  };
+}
+
+function populateData(d){
+  if(!d) return;
+  const map = {
+    'area-work':'area_work','area-money':'area_money',
+    'area-relationships':'area_relationships','area-life':'area_life',
+    'story-stmt':'story_stmt','story-origin':'story_origin',
+    'story-shaped':'story_shaped','story-believe':'story_believe',
+    'should-reflection':'should_reflection'
+  };
+  Object.entries(map).forEach(([id,key]) => {
+    const el = document.getElementById(id);
+    if(el && d[key]){ el.value = d[key]; autoSize(el); }
+  });
+}
+
+function updateProgress(){
+  const area1 = document.getElementById('area-work').value.trim().length > 10;
+  const area2 = document.getElementById('area-money').value.trim().length > 10;
+  const area3 = document.getElementById('area-relationships').value.trim().length > 10;
+  const area4 = document.getElementById('area-life').value.trim().length > 10;
+  const areaScore = [area1,area2,area3,area4].filter(Boolean).length / 4;
+
+  const storyStmt = document.getElementById('story-stmt').value.trim().length > 10;
+  const storyOrigin = document.getElementById('story-origin').value.trim().length > 15;
+  const storyShaped = document.getElementById('story-shaped').value.trim().length > 15;
+  const storyBelieve = document.getElementById('story-believe').value.trim().length > 15;
+  const storyScore = [storyStmt,storyOrigin,storyShaped,storyBelieve].filter(Boolean).length / 4;
+
+  const shouldScore = document.getElementById('should-reflection').value.trim().length > 10 ? 1 : 0;
+
+  const pct = Math.round((areaScore*0.35 + storyScore*0.5 + shouldScore*0.15)*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'%';
+  const hint = document.getElementById('prog-hint');
+  if(pct>=80){ hint.textContent = 'Excellent depth — ready to mark complete.'; hint.className='prog-hint done'; }
+  else if(pct>=40){ hint.textContent = 'Good progress — keep exploring.'; hint.className='prog-hint'; }
+  else { hint.textContent = 'Start by writing what you learned in each area.'; hint.className='prog-hint'; }
+}
+
+let saveTimer;
+function autoSave(){ updateProgress(); clearTimeout(saveTimer); saveTimer=setTimeout(doSave,1200); }
+
+async function doSave(){
+  const data = collectData();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const badge = document.getElementById('saved-badge');
+  badge.style.display='flex'; setTimeout(()=>badge.style.display='none',2000);
+  await saveProgress(STORAGE_KEY, false, data);
+}
+
+async function markComplete(){
+  const data = collectData();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  if(!done.includes(STORAGE_KEY)) done.push(STORAGE_KEY);
+  localStorage.setItem('tlr_completed', JSON.stringify(done));
+  await saveProgress(STORAGE_KEY, true, data);
+  document.getElementById('completed-banner').style.display='flex';
+  document.getElementById('complete-btn').style.display='none';
+  document.getElementById('prog-hint').textContent='Completed ✓';
+  document.getElementById('prog-hint').className='prog-hint done';
+  document.getElementById('prog-fill').style.width='100%';
+  document.getElementById('prog-pct').textContent='100%';
+}
+
+async function resetComplete(){
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  const idx = done.indexOf(STORAGE_KEY);
+  if(idx>-1){ done.splice(idx,1); localStorage.setItem('tlr_completed',JSON.stringify(done)); }
+  const data = collectData();
+  await saveProgress(STORAGE_KEY, false, data);
+  document.getElementById('completed-banner').style.display='none';
+  document.getElementById('complete-btn').style.display='';
+}
+
+requireAuth().then(user => {
+  if(!user) return;
+  loadProgress().then(rows => {
+    const row = rows && rows.find(r => r.tool_key === STORAGE_KEY);
+    if(row && row.data){
+      populateData(row.data);
+      if(row.completed){
+        const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+        if(!done.includes(STORAGE_KEY)){ done.push(STORAGE_KEY); localStorage.setItem('tlr_completed',JSON.stringify(done)); }
+        document.getElementById('completed-banner').style.display='flex';
+        document.getElementById('complete-btn').style.display='none';
+      }
+    } else {
+      const local = localStorage.getItem(STORAGE_KEY);
+      if(local){ try{ populateData(JSON.parse(local)); }catch(e){} }
+    }
+    updateProgress();
+  }).catch(()=>{ const local=localStorage.getItem(STORAGE_KEY); if(local){ try{ populateData(JSON.parse(local)); }catch(e){} } updateProgress(); });
+});
+</script>
+</body>
+</html>

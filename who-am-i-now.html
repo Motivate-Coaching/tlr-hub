@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Who Am I Now — The Living Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+<style>
+:root{
+  --navy:#1B2B4B;
+  --gold:#E8A800;
+  --accent:#7B4EA0;
+  --accent-pale:#F5EEFF;
+  --cream:#FAF8F4;
+  --white:#FFFFFF;
+  --border:#E8E4DC;
+  --text-dark:#1A1A1A;
+  --text-mid:#4A4A4A;
+  --text-muted:#888;
+  --font-display:'Playfair Display',serif;
+  --font-body:'Inter',sans-serif;
+  --s1-color:#7B4EA0;
+  --s2-color:#3A6B4A;
+  --s3-color:#B5583C;
+  --s4-color:#3A6B8A;
+  --s5-color:#1B2B4B;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark);min-height:100vh}
+
+.topbar{background:var(--navy);padding:0.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar .logo{color:#fff;font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.04em}
+.topbar .theme-pill{background:var(--accent);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.28rem 0.85rem;border-radius:20px;text-decoration:none;cursor:pointer;transition:opacity .15s}
+.topbar .theme-pill:hover{opacity:0.8}
+#saved-badge{display:none;align-items:center;gap:0.4rem;font-size:0.72rem;color:rgba(255,255,255,0.5)}
+#saved-badge .dot{width:6px;height:6px;background:#2A9D6F;border-radius:50%;display:inline-block}
+
+.page{max-width:720px;margin:0 auto;padding:2.5rem 1.5rem 4rem}
+.tool-eyebrow{font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.6rem;text-align:center}
+.tool-title{font-family:var(--font-display);font-size:3rem;line-height:1.15;text-align:center;color:var(--text-dark);margin-bottom:0.5rem}
+.tool-subtitle{font-family:var(--font-display);font-size:1.15rem;color:var(--accent);font-style:italic;text-align:center;margin-bottom:0.5rem}
+.tool-divider{width:48px;height:2px;background:var(--gold);margin:1rem auto 1.75rem}
+.tool-intro{font-size:0.95rem;color:var(--text-mid);line-height:1.75;text-align:center;margin-bottom:0.5rem}
+.tool-instruction{display:flex;align-items:flex-start;gap:0.75rem;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin:1.25rem 0 2rem;font-size:0.88rem;color:var(--text-mid);line-height:1.6}
+.tool-instruction .inst-icon{font-size:1.25rem;flex-shrink:0;margin-top:0.05rem}
+
+.tool-progress{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:0.85rem 1.1rem;margin-bottom:2rem}
+.prog-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem}
+.prog-label{font-size:0.75rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted)}
+.prog-pct{font-size:0.82rem;font-weight:700;color:var(--navy)}
+.prog-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--gold);border-radius:3px;transition:width .4s ease}
+.prog-hint{font-size:0.75rem;color:var(--text-muted);margin-top:0.45rem}
+.prog-hint.done{color:#2A9D6F;font-weight:600}
+
+.step-block{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.75rem 1.5rem;margin-bottom:1.5rem;scroll-margin-top:80px}
+.step-head{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.25rem}
+.step-num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:700;color:#fff;flex-shrink:0;margin-top:0.1rem}
+.step-num.c1{background:var(--s1-color)}
+.step-num.c2{background:var(--s2-color)}
+.step-num.c3{background:var(--s3-color)}
+.step-num.c4{background:var(--s4-color)}
+.step-num.c5{background:var(--s5-color)}
+.step-q{font-size:1rem;font-weight:700;letter-spacing:0.01em;color:var(--text-dark);margin-bottom:0.2rem;text-transform:uppercase}
+.step-sub{font-size:0.84rem;color:var(--text-muted);line-height:1.55}
+
+/* ── Evidence questions ── */
+.evidence-q{margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+.evidence-q:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.ev-header{display:flex;gap:0.75rem;align-items:flex-start;margin-bottom:0.75rem}
+.ev-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;margin-top:0.1rem}
+.ev-label{font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.2rem}
+.ev-prompt{font-size:0.95rem;font-weight:600;color:var(--text-dark);line-height:1.45}
+.ev-field{width:100%;border:none;border-bottom:1.5px solid var(--border);background:transparent;font-family:var(--font-body);font-size:0.9rem;color:var(--text-dark);padding:0.5rem 0;outline:none;resize:none;line-height:1.65;min-height:80px;transition:border-color .2s}
+.ev-field:focus{border-bottom-color:var(--s1-color)}
+.ev-field::placeholder{color:#C8C4BB}
+
+/* ── Pattern bridge ── */
+.pattern-bridge{background:linear-gradient(135deg,#F5EEFF 0%,#EEF7FF 100%);border:1px solid #D4C0F0;border-radius:14px;padding:1.5rem;margin-bottom:1.5rem;text-align:center}
+.pattern-bridge h3{font-family:var(--font-display);font-size:1.2rem;color:var(--s1-color);margin-bottom:0.5rem}
+.pattern-bridge p{font-size:0.88rem;color:var(--text-mid);line-height:1.65;margin-bottom:1rem}
+.pattern-field{width:100%;border:none;border-bottom:1.5px solid #D4C0F0;background:transparent;font-family:var(--font-body);font-size:0.92rem;color:var(--text-dark);padding:0.5rem 0;outline:none;resize:none;line-height:1.65;min-height:70px;text-align:left}
+.pattern-field:focus{border-bottom-color:var(--s1-color)}
+.pattern-field::placeholder{color:#C8C4BB}
+
+/* ── Values family browser ── */
+.families-note{font-size:0.82rem;color:var(--text-mid);line-height:1.6;margin-bottom:1rem;font-style:italic}
+.families-grid{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.25rem}
+.family-chip{border:2px solid var(--border);border-radius:20px;padding:0.35rem 0.85rem;font-size:0.8rem;font-weight:600;color:var(--text-mid);cursor:pointer;transition:all .2s;background:var(--white)}
+.family-chip:hover{border-color:var(--s1-color);color:var(--s1-color)}
+.family-chip.selected{border-color:var(--s1-color);background:var(--accent-pale);color:var(--s1-color)}
+
+/* ── Value definition cards ── */
+.values-container{margin-top:1.25rem}
+.value-card{border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:0.85rem;background:var(--cream);transition:border-color .2s}
+.value-card:hover{border-color:var(--s3-color)}
+.value-card-header{display:flex;align-items:center;gap:0.75rem;margin-bottom:0.85rem}
+.value-badge{background:var(--s3-color);color:#fff;font-size:0.68rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:0.2rem 0.6rem;border-radius:12px;flex-shrink:0}
+.value-name-input{flex:1;border:none;border-bottom:2px solid var(--s3-color);background:transparent;font-family:var(--font-body);font-size:1rem;font-weight:700;color:var(--text-dark);padding:0.25rem 0.25rem;outline:none}
+.value-name-input::placeholder{color:#C8C4BB;font-weight:400;font-size:0.9rem}
+.value-defn-label{font-size:0.68rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.3rem}
+.value-defn-input{width:100%;border:none;border-bottom:1.5px solid var(--border);background:transparent;font-family:var(--font-body);font-size:0.88rem;color:var(--text-dark);padding:0.4rem 0;outline:none;resize:none;min-height:50px;line-height:1.55;transition:border-color .2s}
+.value-defn-input:focus{border-bottom-color:var(--s3-color)}
+.value-defn-input::placeholder{color:#C8C4BB}
+
+/* ── Reality check sliders ── */
+.reality-intro{font-size:0.85rem;color:var(--text-mid);line-height:1.65;margin-bottom:1.25rem;background:var(--accent-pale);border-left:3px solid var(--s4-color);border-radius:8px;padding:0.85rem 1rem}
+.reality-card{border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:0.85rem;background:var(--cream)}
+.rc-name{font-size:1rem;font-weight:700;color:var(--text-dark);margin-bottom:0.15rem;min-height:1.2rem}
+.rc-defn{font-size:0.8rem;color:var(--text-muted);margin-bottom:0.85rem;min-height:1rem}
+.rc-label-row{display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text-muted);margin-bottom:0.3rem}
+.rc-slider{width:100%;-webkit-appearance:none;height:6px;border-radius:3px;background:var(--border);outline:none;cursor:pointer;margin-bottom:0.5rem}
+.rc-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--s4-color);cursor:pointer;transition:transform .15s}
+.rc-slider::-webkit-slider-thumb:hover{transform:scale(1.15)}
+.rc-score-display{text-align:center;font-size:0.8rem;color:var(--s4-color);font-weight:700}
+.rc-flag{font-size:0.75rem;margin-top:0.3rem;padding:0.3rem 0.6rem;border-radius:6px;display:inline-block}
+.rc-flag.aspirational{background:#FFF9E6;color:#8B6F00;border:1px solid #E8D47A}
+.rc-flag.lived{background:#F0FAF5;color:#1B7A45;border:1px solid #9EDBB8}
+
+/* ── Portrait / action ── */
+.portrait-card{border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:0.85rem;background:var(--cream)}
+.portrait-name{font-size:1rem;font-weight:700;color:var(--text-dark);margin-bottom:0.1rem;min-height:1.2rem}
+.portrait-type{font-size:0.7rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:0.75rem;padding:0.15rem 0.5rem;border-radius:10px;display:inline-block}
+.portrait-type.lived{background:#F0FAF5;color:#1B7A45}
+.portrait-type.aspirational{background:#FFF9E6;color:#8B6F00}
+.portrait-action-label{font-size:0.68rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.3rem}
+.portrait-action-input{width:100%;border:none;border-bottom:1.5px solid var(--border);background:transparent;font-family:var(--font-body);font-size:0.88rem;color:var(--text-dark);padding:0.4rem 0;outline:none;resize:none;min-height:44px;line-height:1.55;transition:border-color .2s}
+.portrait-action-input:focus{border-bottom-color:var(--s5-color)}
+.portrait-action-input::placeholder{color:#C8C4BB}
+
+/* ── Becoming & gap (worksheet sections) ── */
+.becoming-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.becoming-item{padding:0.85rem;border:1px solid var(--border);border-radius:10px;background:var(--cream)}
+.becoming-icon{font-size:1.25rem;display:block;margin-bottom:0.3rem}
+.becoming-label{font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.5rem}
+.becoming-ta{width:100%;border:none;background:transparent;font-family:var(--font-body);font-size:0.88rem;color:var(--text-dark);line-height:1.6;padding:0;outline:none;resize:none;min-height:70px}
+.becoming-ta::placeholder{color:#C8C4BB}
+
+.gap-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:0.5rem}
+.gap-item-label{font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.5rem}
+.gap-ta{width:100%;border:none;border-bottom:1.5px solid var(--border);background:transparent;font-family:var(--font-body);font-size:0.9rem;color:var(--text-dark);padding:0.4rem 0;outline:none;resize:none;min-height:60px;line-height:1.6;transition:border-color .2s}
+.gap-ta:focus{border-bottom-color:var(--s5-color)}
+.gap-ta::placeholder{color:#C8C4BB}
+
+/* ── Reflection block ── */
+.reflection-block{background:var(--navy);color:#fff;border-radius:14px;padding:1.5rem 1.75rem;margin:2rem 0}
+.ref-eyebrow{font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem}
+.ref-q{font-family:var(--font-display);font-size:1.1rem;line-height:1.5;color:#fff;margin-bottom:1rem}
+.ref-ta{width:100%;border:none;border-bottom:1px solid rgba(255,255,255,0.2);background:transparent;font-family:var(--font-body);font-size:0.9rem;color:rgba(255,255,255,0.85);padding:0.5rem 0;outline:none;resize:none;min-height:70px;line-height:1.6}
+.ref-ta::placeholder{color:rgba(255,255,255,0.25)}
+.ref-ta:focus{border-bottom-color:rgba(255,255,255,0.5)}
+
+.principles{display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem 1.5rem;margin:1.5rem 0;padding:1rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.principles span{font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)}
+
+.complete-wrap{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;align-items:center;padding-top:0.5rem}
+.save-btn{background:#2A9D6F;color:#fff;border:2px solid #2A9D6F;padding:0.85rem 2.25rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .18s,transform .1s;display:inline-flex;align-items:center}
+.save-btn:hover{opacity:0.87;transform:translateY(-1px)}
+.library-btn{background:var(--gold);color:#1a1a1a;border:2px solid var(--gold);padding:0.85rem 2.25rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .18s,transform .1s;text-decoration:none;display:inline-flex;align-items:center;gap:0.4rem}
+.library-btn:hover{opacity:0.87;transform:translateY(-1px)}
+.complete-btn{background:var(--navy);color:#fff;border:none;padding:1rem 2.75rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s}
+.complete-btn:hover{opacity:0.87;transform:translateY(-1px)}
+#completed-banner{background:#F0FAF5;border:1px solid #2A9D6F;border-radius:10px;padding:0.85rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;font-size:0.88rem;color:var(--text-mid)}
+
+.add-value-btn{width:100%;border:2px dashed var(--border);border-radius:12px;padding:0.85rem;background:transparent;font-family:var(--font-body);font-size:0.88rem;color:var(--text-muted);cursor:pointer;transition:all .2s;margin-top:0.5rem}
+.add-value-btn:hover{border-color:var(--s3-color);color:var(--s3-color)}
+
+@media(max-width:600px){
+  .tool-title{font-size:2.1rem}
+  .page{padding:1.75rem 1rem 3rem}
+  .becoming-grid,.gap-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="logo">The Living Room</span>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <div id="saved-badge"><span class="dot"></span> Saved</div>
+    <span class="theme-pill" onclick="history.back()">← Back</span>
+  </div>
+</div>
+
+<div class="page" id="mainView">
+  <div class="tool-eyebrow">Identity Is Not Fixed · Week 3</div>
+  <h1 class="tool-title">Who Am I Now?</h1>
+  <div class="tool-subtitle">What matters to me — not just what I've absorbed.</div>
+  <div class="tool-divider"></div>
+  <p class="tool-intro">We've explored the identity I've learned (Week 1) and the stories I inherited (Week 2). This week is about <em>me</em> — what I actually value, what I'm becoming, and what matters most right now. Not who I was told to be. Not who I had to be. <strong>Who I choose to be.</strong></p>
+
+  <div class="tool-instruction">
+    <span class="inst-icon">✏️</span>
+    <span>This tool works in phases. Each phase builds on the last — the questions in Phase 1 contain the answer to Phase 3. Work through them in order. Your answers auto-save as you type.</span>
+  </div>
+
+  <div class="tool-progress">
+    <div class="prog-header">
+      <span class="prog-label">Your progress</span>
+      <span class="prog-pct" id="prog-pct">0%</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog-hint" id="prog-hint">Start with Phase 1 — the evidence questions</div>
+  </div>
+
+  <div id="completed-banner" style="display:none">
+    ✅ <span>You've completed this tool. Your responses are saved. <button onclick="resetComplete()" style="background:none;border:none;color:#2A9D6F;cursor:pointer;font-size:0.88rem;text-decoration:underline;padding:0;margin-left:0.25rem">Mark as not complete</button></span>
+  </div>
+
+  <!-- ── PHASE 1: EVIDENCE ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num c1">1</div>
+      <div class="step-text">
+        <div class="step-q">Phase 1 — What the evidence says</div>
+        <div class="step-sub">Before we name any values, let's look at the evidence. Your choices, sacrifices, and reactions already reveal what matters most to you — you just haven't named it yet. Answer these four questions honestly.</div>
+      </div>
+    </div>
+
+    <div class="evidence-q">
+      <div class="ev-header">
+        <div class="ev-icon" style="background:#F0EAFF">⚖️</div>
+        <div>
+          <div class="ev-label">The decision test</div>
+          <div class="ev-prompt">Describe a decision you made in the last three months that cost you something — time, money, comfort, or a relationship. What did you choose, and why?</div>
+        </div>
+      </div>
+      <textarea class="ev-field" id="ev-decision" placeholder="What was the decision? What did you give up? What drove the choice?" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+    </div>
+
+    <div class="evidence-q">
+      <div class="ev-header">
+        <div class="ev-icon" style="background:#EEF7F0">🎁</div>
+        <div>
+          <div class="ev-label">The sacrifice test</div>
+          <div class="ev-prompt">What have you willingly given up in the last year? What does that tell you about what matters more to you than the thing you gave up?</div>
+        </div>
+      </div>
+      <textarea class="ev-field" id="ev-sacrifice" placeholder="What have you let go of, delayed, or traded away? What was it in service of?" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+    </div>
+
+    <div class="evidence-q">
+      <div class="ev-header">
+        <div class="ev-icon" style="background:#FFF0EC">🔥</div>
+        <div>
+          <div class="ev-label">The anger / frustration test</div>
+          <div class="ev-prompt">What's made you genuinely angry or frustrated recently — not surface irritation, but something that felt like a real violation? What does that reaction reveal about what you hold dear?</div>
+        </div>
+      </div>
+      <textarea class="ev-field" id="ev-anger" placeholder="What happened? Why did it matter so much? What value did it violate?" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+    </div>
+
+    <div class="evidence-q">
+      <div class="ev-header">
+        <div class="ev-icon" style="background:#E8F4FF">⭐</div>
+        <div>
+          <div class="ev-label">The pride test</div>
+          <div class="ev-prompt">When have you felt most like yourself recently — not most successful, not most approved of, but most <em>you</em>? What was happening, and what does that moment tell you?</div>
+        </div>
+      </div>
+      <textarea class="ev-field" id="ev-pride" placeholder="Describe the moment. What were you doing? Who were you being? What mattered about it?" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+    </div>
+  </div>
+
+  <!-- ── PHASE 2: PATTERNS ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num c2">2</div>
+      <div class="step-text">
+        <div class="step-q">Phase 2 — What patterns appear</div>
+        <div class="step-sub">Read back what you just wrote. Don't analyse it — just read it as if someone else wrote it. What themes keep appearing?</div>
+      </div>
+    </div>
+
+    <div class="pattern-bridge">
+      <h3>Reading the evidence…</h3>
+      <p>What words, themes, or qualities keep showing up across your four answers? What seems to be driving your choices, even when it's inconvenient or costly?</p>
+      <textarea class="pattern-field" id="pattern-reflection" placeholder="Write freely — what themes do you notice? Don't name values yet, just describe what you see…" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+    </div>
+
+    <div class="families-note">
+      Now look at the value families below. Only select a family if you can point to specific evidence in what you wrote above. This is not about what sounds good — it's about what's actually there.
+    </div>
+    <div class="families-grid" id="families-grid">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+
+  <!-- ── PHASE 3: NAME YOUR VALUES ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num c3">3</div>
+      <div class="step-text">
+        <div class="step-q">Phase 3 — Name it in your own words</div>
+        <div class="step-sub">For each value you identify, name it the way <em>you</em> would say it — not a dictionary word, but the lived version. Then write your personal definition: what does this actually look like in your choices?</div>
+      </div>
+    </div>
+    <div id="values-container"></div>
+    <button class="add-value-btn" onclick="addValueCard()">+ Add another value</button>
+  </div>
+
+  <!-- ── PHASE 4: REALITY CHECK ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num c4">4</div>
+      <div class="step-text">
+        <div class="step-q">Phase 4 — The reality check</div>
+        <div class="step-sub">For each value, rate honestly: in the last 30 days, how consistently has this actually driven your choices? Not how much you care about it — how often has it <em>shown up in your behaviour?</em></div>
+      </div>
+    </div>
+    <div class="reality-intro">
+      A score of 7+ means this is a <strong>lived value</strong> — it's actually operating in your life. Below 7 means it may be <strong>aspirational</strong> — you care about it, but something else is taking priority. Both are useful to know.
+    </div>
+    <div id="reality-container">
+      <p style="font-size:0.85rem;color:var(--text-muted);font-style:italic">Complete Phase 3 first — your values will appear here.</p>
+    </div>
+  </div>
+
+  <!-- ── PHASE 5: YOUR VALUES PORTRAIT ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num c5">5</div>
+      <div class="step-text">
+        <div class="step-q">Phase 5 — Your values portrait</div>
+        <div class="step-sub">This is your portrait — not an aspiration, but a honest picture of where you are now. For each value, what one thing would you do differently this week to live it more fully?</div>
+      </div>
+    </div>
+    <div id="portrait-container">
+      <p style="font-size:0.85rem;color:var(--text-muted);font-style:italic">Complete Phases 3 and 4 — your portrait will build here.</p>
+    </div>
+  </div>
+
+  <!-- ── THE PERSON I AM BECOMING ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num" style="background:#9B59B6">✦</div>
+      <div class="step-text">
+        <div class="step-q">The Person I Am Becoming</div>
+        <div class="step-sub">If you were designing your life from scratch — who would you be proud to become? Describe that person.</div>
+      </div>
+    </div>
+    <div class="becoming-grid">
+      <div class="becoming-item">
+        <span class="becoming-icon">🧠</span>
+        <span class="becoming-label">How I Think</span>
+        <textarea class="becoming-ta" id="become-think" placeholder="My mindset and beliefs…" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+      </div>
+      <div class="becoming-item">
+        <span class="becoming-icon">❤️</span>
+        <span class="becoming-label">How I Relate</span>
+        <textarea class="becoming-ta" id="become-relate" placeholder="To others and myself…" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+      </div>
+      <div class="becoming-item">
+        <span class="becoming-icon">🌟</span>
+        <span class="becoming-label">How I Show Up</span>
+        <textarea class="becoming-ta" id="become-showup" placeholder="Daily habits and behaviours…" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+      </div>
+      <div class="becoming-item">
+        <span class="becoming-icon">🌿</span>
+        <span class="becoming-label">What I Care About</span>
+        <textarea class="becoming-ta" id="become-care" placeholder="What I want to contribute…" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+      </div>
+      <div class="becoming-item" style="grid-column:1/-1">
+        <span class="becoming-icon">☀️</span>
+        <span class="becoming-label">How I Live</span>
+        <textarea class="becoming-ta" id="become-live" placeholder="My ideal way of living…" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── GAP & NEXT STEP ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num" style="background:#2C6B6A">→</div>
+      <div class="step-text">
+        <div class="step-q">The Gap &amp; The Next Step</div>
+        <div class="step-sub">What's one small step you can take this week that brings you closer to who you want to be?</div>
+      </div>
+    </div>
+    <div class="gap-grid">
+      <div>
+        <div class="gap-item-label">🎯 The gap — what's the biggest gap right now?</div>
+        <textarea class="gap-ta" id="gap-gap" placeholder="Between who I am now and who I'm becoming, the biggest gap is…" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+      </div>
+      <div>
+        <div class="gap-item-label">👣 The next step — one small, doable action this week</div>
+        <textarea class="gap-ta" id="gap-step" placeholder="This week, I will…" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── REFLECTION ── -->
+  <div class="reflection-block">
+    <div class="ref-eyebrow">A Moment of Reflection</div>
+    <div class="ref-q">When I look back in 5 years, what will matter most to me about how I lived?</div>
+    <textarea class="ref-ta" id="reflection" placeholder="Write freely…" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+  </div>
+
+  <div class="principles">
+    <span>👁 Aware — See clearly. Without judgement.</span>
+    <span>🧭 Explore — Question everything.</span>
+    <span>✨ Choose — Release what doesn't fit. Create what does.</span>
+  </div>
+
+  <p style="text-align:center;font-family:var(--font-display);font-size:1rem;font-style:italic;color:var(--text-muted);margin-bottom:2rem;">I get to choose who I am. I get to design the life I want.</p>
+
+  <div class="complete-wrap">
+    <button class="save-btn" onclick="doSave()">💾 Save my answers</button>
+    <a class="library-btn" href="index.html">← Back to hub</a>
+    <button class="complete-btn" id="complete-btn" onclick="markComplete()">Mark as Complete ✓</button>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'tlr-who-am-i-now';
+const VALUE_FAMILIES = [
+  'Connection','Integrity','Freedom','Growth','Security',
+  'Creativity','Impact','Mastery','Belonging','Courage',
+  'Balance','Adventure','Family','Service','Authenticity',
+  'Achievement','Wellbeing','Contribution','Faith','Simplicity'
+];
+let selectedFamilies = new Set();
+let valueCards = [];
+let realityScores = {};
+let actionInputs = {};
+
+function autoSize(el){ el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
+
+// ── Build families chips ──
+const familiesGrid = document.getElementById('families-grid');
+VALUE_FAMILIES.forEach(f => {
+  const chip = document.createElement('span');
+  chip.className = 'family-chip';
+  chip.textContent = f;
+  chip.dataset.family = f;
+  chip.onclick = () => {
+    if(selectedFamilies.has(f)){ selectedFamilies.delete(f); chip.classList.remove('selected'); }
+    else { selectedFamilies.add(f); chip.classList.add('selected'); }
+    autoSave();
+  };
+  familiesGrid.appendChild(chip);
+});
+
+// ── Value cards ──
+let valueCount = 0;
+function addValueCard(name='', defn=''){
+  valueCount++;
+  const idx = valueCount;
+  valueCards.push(idx);
+  if(!realityScores[idx]) realityScores[idx] = 5;
+  if(!actionInputs[idx]) actionInputs[idx] = '';
+
+  const container = document.getElementById('values-container');
+  const card = document.createElement('div');
+  card.className = 'value-card';
+  card.id = `value-card-${idx}`;
+  card.innerHTML = `
+    <div class="value-card-header">
+      <span class="value-badge">Value ${idx}</span>
+      <input class="value-name-input" id="vname-${idx}" placeholder="Name it in your own words…" value="${name}" oninput="autoSave();syncReality()">
+      <button onclick="removeValue(${idx})" style="background:none;border:none;font-size:1rem;color:var(--text-muted);cursor:pointer;margin-left:0.5rem;flex-shrink:0" title="Remove">✕</button>
+    </div>
+    <div class="value-defn-label">What does this actually look like in your choices?</div>
+    <textarea class="value-defn-input" id="vdefn-${idx}" placeholder="Not the dictionary definition — the lived version. When I'm honouring this value, I…" oninput="autoSize(this);autoSave();syncReality()" rows="2">${defn}</textarea>
+  `;
+  container.appendChild(card);
+  syncReality();
+  autoSave();
+}
+
+function removeValue(idx){
+  const card = document.getElementById(`value-card-${idx}`);
+  if(card) card.remove();
+  valueCards = valueCards.filter(v => v !== idx);
+  delete realityScores[idx];
+  delete actionInputs[idx];
+  syncReality();
+  autoSave();
+}
+
+function syncReality(){
+  const container = document.getElementById('reality-container');
+  const portraitContainer = document.getElementById('portrait-container');
+  const activeCards = valueCards.filter(idx => document.getElementById(`value-card-${idx}`));
+
+  if(activeCards.length === 0){
+    container.innerHTML = '<p style="font-size:0.85rem;color:var(--text-muted);font-style:italic">Complete Phase 3 first — your values will appear here.</p>';
+    portraitContainer.innerHTML = '<p style="font-size:0.85rem;color:var(--text-muted);font-style:italic">Complete Phases 3 and 4 — your portrait will build here.</p>';
+    return;
+  }
+
+  // Build reality cards
+  let rHTML = '';
+  let pHTML = '';
+  activeCards.forEach(idx => {
+    const nameEl = document.getElementById(`vname-${idx}`);
+    const defnEl = document.getElementById(`vdefn-${idx}`);
+    const name = nameEl ? nameEl.value.trim() : `Value ${idx}`;
+    const defn = defnEl ? defnEl.value.trim() : '';
+    const score = realityScores[idx] || 5;
+    const isLived = score >= 7;
+    const scoreLabel = score <= 3 ? 'Rarely shows up' : score <= 6 ? 'Sometimes shows up' : score <= 8 ? 'Often shows up' : 'Consistently showing up';
+    const flag = isLived
+      ? '<span class="rc-flag lived">✅ Lived value — this is actually operating in your life</span>'
+      : '<span class="rc-flag aspirational">⭐ Aspirational — you care, but something else is taking priority</span>';
+
+    rHTML += `
+      <div class="reality-card">
+        <div class="rc-name">${name || `Value ${idx}`}</div>
+        <div class="rc-defn">${defn ? defn.substring(0,80)+(defn.length>80?'…':'') : ''}</div>
+        <div class="rc-label-row"><span>Rarely</span><span>Sometimes</span><span>Consistently</span></div>
+        <input type="range" class="rc-slider" id="rc-${idx}" min="1" max="10" value="${score}"
+          oninput="realityScores[${idx}]=parseInt(this.value);document.getElementById('rc-score-${idx}').textContent=this.value+'/10 — '+(['','Rarely','','Low','','Sometimes','','','Often','','Consistently'][parseInt(this.value)]||scoreLabel);syncPortrait();autoSave()">
+        <div class="rc-score-display" id="rc-score-${idx}">${score}/10 — ${scoreLabel}</div>
+        <div style="margin-top:0.5rem">${flag}</div>
+      </div>`;
+
+    // Portrait card
+    const typeLabel = isLived ? 'lived' : 'aspirational';
+    const typeText = isLived ? 'Lived value' : 'Aspirational value';
+    const actionPlaceholder = isLived
+      ? `To honour ${name || 'this value'} more fully this week, I will…`
+      : `To start living ${name || 'this value'} more consistently, one small shift I could make is…`;
+    const savedAction = actionInputs[idx] || '';
+    pHTML += `
+      <div class="portrait-card">
+        <div class="portrait-name">${name || `Value ${idx}`}</div>
+        <span class="portrait-type ${typeLabel}">${typeText} — ${score}/10</span>
+        <div class="portrait-action-label">This week's action</div>
+        <textarea class="portrait-action-input" id="paction-${idx}" placeholder="${actionPlaceholder}" oninput="actionInputs[${idx}]=this.value;autoSave()" rows="2">${savedAction}</textarea>
+      </div>`;
+  });
+
+  container.innerHTML = rHTML;
+  portraitContainer.innerHTML = pHTML;
+}
+
+function syncPortrait(){ syncReality(); }
+
+// Initialise with 3 empty value cards
+addValueCard();
+addValueCard();
+addValueCard();
+
+function updateProgress(){
+  const ev1 = document.getElementById('ev-decision').value.trim().length > 20;
+  const ev2 = document.getElementById('ev-sacrifice').value.trim().length > 20;
+  const ev3 = document.getElementById('ev-anger').value.trim().length > 20;
+  const ev4 = document.getElementById('ev-pride').value.trim().length > 20;
+  const evScore = [ev1,ev2,ev3,ev4].filter(Boolean).length / 4;
+
+  const patternScore = document.getElementById('pattern-reflection').value.trim().length > 20 ? 0.5 : 0;
+  const familyScore = selectedFamilies.size > 0 ? 0.5 : 0;
+
+  const activeCards = valueCards.filter(idx => {
+    const el = document.getElementById(`vname-${idx}`);
+    return el && el.value.trim().length > 2;
+  });
+  const valuesScore = Math.min(activeCards.length / 2, 1);
+
+  const actionScore = activeCards.filter(idx => {
+    const el = document.getElementById(`paction-${idx}`);
+    return el && el.value.trim().length > 5;
+  }).length / Math.max(activeCards.length, 1);
+
+  const becomingFilled = ['become-think','become-relate','become-showup','become-care','become-live'].filter(id => document.getElementById(id)?.value.trim().length > 10).length;
+  const becomingScore = becomingFilled / 5;
+
+  const pct = Math.round((evScore*0.3 + (patternScore+familyScore)*0.15 + valuesScore*0.2 + actionScore*0.15 + becomingScore*0.1 + (document.getElementById('gap-step').value.trim().length>5 ? 0.1:0))*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'%';
+  const hint = document.getElementById('prog-hint');
+  if(pct>=80){ hint.textContent='Deep work done — ready to mark complete.'; hint.className='prog-hint done'; }
+  else if(pct>=40){ hint.textContent='Good progress — keep working through the phases.'; hint.className='prog-hint'; }
+  else { hint.textContent='Start with Phase 1 — the four evidence questions.'; hint.className='prog-hint'; }
+}
+
+function collectData(){
+  const values = [];
+  valueCards.filter(idx => document.getElementById(`value-card-${idx}`)).forEach(idx => {
+    const nameEl = document.getElementById(`vname-${idx}`);
+    const defnEl = document.getElementById(`vdefn-${idx}`);
+    const actionEl = document.getElementById(`paction-${idx}`);
+    values.push({
+      idx, name: nameEl?.value||'', defn: defnEl?.value||'',
+      score: realityScores[idx]||5, action: actionEl?.value||actionInputs[idx]||''
+    });
+  });
+  return {
+    ev_decision: document.getElementById('ev-decision').value,
+    ev_sacrifice: document.getElementById('ev-sacrifice').value,
+    ev_anger: document.getElementById('ev-anger').value,
+    ev_pride: document.getElementById('ev-pride').value,
+    pattern_reflection: document.getElementById('pattern-reflection').value,
+    selected_families: [...selectedFamilies],
+    values,
+    become_think: document.getElementById('become-think').value,
+    become_relate: document.getElementById('become-relate').value,
+    become_showup: document.getElementById('become-showup').value,
+    become_care: document.getElementById('become-care').value,
+    become_live: document.getElementById('become-live').value,
+    gap_gap: document.getElementById('gap-gap').value,
+    gap_step: document.getElementById('gap-step').value,
+    reflection: document.getElementById('reflection').value
+  };
+}
+
+function populateData(d){
+  if(!d) return;
+  const fields = ['ev-decision','ev-sacrifice','ev-anger','ev-pride','pattern-reflection',
+    'become-think','become-relate','become-showup','become-care','become-live','gap-gap','gap-step','reflection'];
+  const keys = ['ev_decision','ev_sacrifice','ev_anger','ev_pride','pattern_reflection',
+    'become_think','become_relate','become_showup','become_care','become_live','gap_gap','gap_step','reflection'];
+  fields.forEach((id,i) => {
+    const el = document.getElementById(id);
+    if(el && d[keys[i]]){ el.value = d[keys[i]]; autoSize(el); }
+  });
+  if(d.selected_families){
+    d.selected_families.forEach(f => {
+      selectedFamilies.add(f);
+      const chip = familiesGrid.querySelector(`[data-family="${f}"]`);
+      if(chip) chip.classList.add('selected');
+    });
+  }
+  if(d.values && d.values.length > 0){
+    // Remove default empty cards
+    valueCards.forEach(idx => { const c = document.getElementById(`value-card-${idx}`); if(c) c.remove(); });
+    valueCards = [];
+    valueCount = 0;
+    document.getElementById('values-container').innerHTML = '';
+    d.values.forEach(v => {
+      realityScores[valueCount+1] = v.score;
+      actionInputs[valueCount+1] = v.action;
+      addValueCard(v.name, v.defn);
+    });
+    // Restore sliders and actions after render
+    setTimeout(() => {
+      d.values.forEach((v,i) => {
+        const idx = valueCards[i];
+        if(!idx) return;
+        const slider = document.getElementById(`rc-${idx}`);
+        const scoreDisp = document.getElementById(`rc-score-${idx}`);
+        if(slider){ slider.value = v.score; realityScores[idx] = v.score; }
+        if(scoreDisp) scoreDisp.textContent = v.score+'/10';
+        const actionEl = document.getElementById(`paction-${idx}`);
+        if(actionEl) actionEl.value = v.action || '';
+      });
+    }, 100);
+  }
+}
+
+let saveTimer;
+function autoSave(){ updateProgress(); clearTimeout(saveTimer); saveTimer=setTimeout(doSave,1200); }
+
+async function doSave(){
+  const data = collectData();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const badge = document.getElementById('saved-badge');
+  badge.style.display='flex'; setTimeout(()=>badge.style.display='none',2000);
+  await saveProgress(STORAGE_KEY, false, data);
+}
+
+async function markComplete(){
+  const data = collectData();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  if(!done.includes(STORAGE_KEY)) done.push(STORAGE_KEY);
+  localStorage.setItem('tlr_completed', JSON.stringify(done));
+  await saveProgress(STORAGE_KEY, true, data);
+  document.getElementById('completed-banner').style.display='flex';
+  document.getElementById('complete-btn').style.display='none';
+  document.getElementById('prog-fill').style.width='100%';
+  document.getElementById('prog-pct').textContent='100%';
+  document.getElementById('prog-hint').textContent='Completed ✓';
+  document.getElementById('prog-hint').className='prog-hint done';
+}
+
+async function resetComplete(){
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  const idx = done.indexOf(STORAGE_KEY);
+  if(idx>-1){ done.splice(idx,1); localStorage.setItem('tlr_completed',JSON.stringify(done)); }
+  const data = collectData();
+  await saveProgress(STORAGE_KEY, false, data);
+  document.getElementById('completed-banner').style.display='none';
+  document.getElementById('complete-btn').style.display='';
+}
+
+requireAuth().then(user => {
+  if(!user) return;
+  loadProgress().then(rows => {
+    const row = rows && rows.find(r => r.tool_key === STORAGE_KEY);
+    if(row && row.data){
+      populateData(row.data);
+      if(row.completed){
+        const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+        if(!done.includes(STORAGE_KEY)){ done.push(STORAGE_KEY); localStorage.setItem('tlr_completed',JSON.stringify(done)); }
+        document.getElementById('completed-banner').style.display='flex';
+        document.getElementById('complete-btn').style.display='none';
+      }
+    } else {
+      const local = localStorage.getItem(STORAGE_KEY);
+      if(local){ try{ populateData(JSON.parse(local)); }catch(e){} }
+    }
+    updateProgress();
+  }).catch(()=>{ const local=localStorage.getItem(STORAGE_KEY); if(local){ try{ populateData(JSON.parse(local)); }catch(e){} } updateProgress(); });
+});
+</script>
+</body>
+</html>

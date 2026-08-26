@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Identity Audit — The Living Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+<style>
+:root{
+  --navy:#1B2B4B;
+  --gold:#E8A800;
+  --accent:#5B4FCE;
+  --accent-pale:#F0EEFF;
+  --cream:#FAF8F4;
+  --white:#FFFFFF;
+  --border:#E8E4DC;
+  --text-dark:#1A1A1A;
+  --text-mid:#4A4A4A;
+  --text-muted:#888;
+  --font-display:'Playfair Display',serif;
+  --font-body:'Inter',sans-serif;
+  --s1-color:#5B4FCE;
+  --s2-color:#3A6B6A;
+  --s3-color:#B5583C;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark);min-height:100vh}
+
+.topbar{background:var(--navy);padding:0.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar .logo{color:#fff;font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.04em}
+.topbar .theme-pill{background:var(--accent);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.28rem 0.85rem;border-radius:20px;text-decoration:none;cursor:pointer;transition:opacity .15s}
+.topbar .theme-pill:hover{opacity:0.8}
+#saved-badge{display:none;align-items:center;gap:0.4rem;font-size:0.72rem;color:rgba(255,255,255,0.5)}
+#saved-badge .dot{width:6px;height:6px;background:#2A9D6F;border-radius:50%;display:inline-block}
+
+.page{max-width:720px;margin:0 auto;padding:2.5rem 1.5rem 4rem}
+
+.tool-eyebrow{font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.6rem;text-align:center}
+.tool-title{font-family:var(--font-display);font-size:3rem;line-height:1.15;text-align:center;color:var(--text-dark);margin-bottom:0.5rem}
+.tool-subtitle{font-family:var(--font-display);font-size:1.15rem;color:var(--accent);font-style:italic;text-align:center;margin-bottom:0.5rem}
+.tool-divider{width:48px;height:2px;background:var(--gold);margin:1rem auto 1.75rem}
+.tool-intro{font-size:0.95rem;color:var(--text-mid);line-height:1.75;text-align:center;margin-bottom:0.5rem}
+.tool-instruction{display:flex;align-items:flex-start;gap:0.75rem;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin:1.25rem 0 2rem;font-size:0.88rem;color:var(--text-mid);line-height:1.6}
+.tool-instruction .inst-icon{font-size:1.25rem;flex-shrink:0;margin-top:0.05rem}
+
+.tool-progress{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:0.85rem 1.1rem;margin-bottom:2rem;cursor:pointer;transition:box-shadow .15s}
+.tool-progress:hover{box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.prog-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem}
+.prog-label{font-size:0.75rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted)}
+.prog-pct{font-size:0.82rem;font-weight:700;color:var(--navy)}
+.prog-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--gold);border-radius:3px;transition:width .4s ease}
+.prog-hint{font-size:0.75rem;color:var(--text-muted);margin-top:0.45rem}
+.prog-hint.done{color:#2A9D6F;font-weight:600}
+
+.step-block{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.75rem 1.5rem;margin-bottom:1.5rem}
+.step-head{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.25rem}
+.step-num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:700;color:#fff;flex-shrink:0;margin-top:0.1rem}
+.step-num.c1{background:var(--s1-color)}
+.step-num.c2{background:var(--s2-color)}
+.step-num.c3{background:var(--s3-color)}
+.step-q{font-size:1rem;font-weight:700;letter-spacing:0.01em;color:var(--text-dark);margin-bottom:0.2rem;text-transform:uppercase}
+.step-sub{font-size:0.84rem;color:var(--text-muted);line-height:1.55}
+
+/* ── Section 1: I AM completions ── */
+.iam-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem}
+.iam-item{display:flex;align-items:flex-start;gap:0.6rem;border-bottom:1.5px solid var(--border);padding-bottom:0.35rem}
+.iam-num{font-size:0.75rem;font-weight:700;color:var(--s1-color);min-width:18px;margin-top:0.6rem;flex-shrink:0}
+.iam-prefix{font-size:0.8rem;color:var(--text-muted);margin-top:0.55rem;white-space:nowrap;flex-shrink:0}
+.iam-input{flex:1;border:none;background:transparent;font-family:var(--font-body);font-size:0.9rem;color:var(--text-dark);padding:0.5rem 0.25rem;outline:none}
+.iam-input::placeholder{color:#C8C4BB}
+
+/* ── Section 2: Trace back cards ── */
+.trace-intro{font-size:0.85rem;color:var(--text-mid);margin-bottom:1.25rem;padding:0.85rem 1rem;background:var(--accent-pale);border-radius:8px;border-left:3px solid var(--accent);line-height:1.6}
+.trace-card{border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem;background:var(--cream)}
+.trace-card-header{display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem}
+.trace-badge{background:var(--s2-color);color:#fff;font-size:0.7rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:0.25rem 0.7rem;border-radius:20px;flex-shrink:0}
+.trace-stmt-input{flex:1;border:none;border-bottom:2px solid var(--s2-color);background:transparent;font-family:var(--font-body);font-size:0.95rem;font-weight:600;color:var(--text-dark);padding:0.3rem 0.25rem;outline:none}
+.trace-stmt-input::placeholder{color:#C8C4BB;font-weight:400}
+.trace-questions{display:grid;grid-template-columns:1fr;gap:0.75rem}
+.trace-q{font-size:0.73rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.3rem}
+.trace-a{width:100%;border:none;border-bottom:1.5px solid var(--border);background:transparent;font-family:var(--font-body);font-size:0.88rem;color:var(--text-dark);padding:0.45rem 0;outline:none;resize:none;line-height:1.55;min-height:50px;transition:border-color .2s}
+.trace-a:focus{border-bottom-color:var(--s2-color)}
+.trace-a::placeholder{color:#C8C4BB}
+
+/* ── Section 3: Still me? ── */
+.still-intro{font-size:0.85rem;color:var(--text-mid);margin-bottom:1.25rem;line-height:1.6;font-style:italic}
+.still-card{border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem;background:var(--cream)}
+.still-stmt{font-size:0.9rem;font-weight:600;color:var(--text-dark);margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);font-style:italic;color:var(--text-muted);min-height:1.5rem}
+.still-options{display:flex;gap:0.6rem;flex-wrap:wrap}
+.still-opt{flex:1;min-width:100px;border:2px solid var(--border);border-radius:10px;padding:0.7rem 0.5rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--white)}
+.still-opt .opt-icon{font-size:1.1rem;margin-bottom:0.25rem}
+.still-opt .opt-label{font-size:0.72rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;display:block}
+.still-opt .opt-sub{font-size:0.68rem;color:var(--text-muted);display:block;margin-top:0.15rem}
+.still-opt:hover{border-color:var(--s3-color);background:var(--accent-pale)}
+.still-opt.selected.still-me{border-color:#2A9D6F;background:#F0FAF5}
+.still-opt.selected.partly-me{border-color:var(--gold);background:#FFF9E6}
+.still-opt.selected.not-sure{border-color:var(--s3-color);background:#FFF0EE}
+
+/* ── Experiment block ── */
+.experiment-block{background:var(--navy);color:#fff;border-radius:14px;padding:1.5rem 1.75rem;margin:2rem 0}
+.exp-eyebrow{font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:0.6rem}
+.exp-title{font-family:var(--font-display);font-size:1.2rem;margin-bottom:0.75rem;line-height:1.3}
+.exp-body{font-size:0.85rem;line-height:1.75;color:rgba(255,255,255,0.8);margin-bottom:1rem}
+.exp-question{font-family:var(--font-display);font-size:1.05rem;font-style:italic;color:var(--gold);margin-top:0.75rem;border-top:1px solid rgba(255,255,255,0.1);padding-top:0.85rem}
+
+/* ── Principles ── */
+.principles{display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem 1.5rem;margin:1.5rem 0;padding:1rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.principles span{font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)}
+
+/* ── Bottom CTAs ── */
+.complete-wrap{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;align-items:center;padding-top:0.5rem}
+.save-btn{background:#2A9D6F;color:#fff;border:2px solid #2A9D6F;padding:0.85rem 2.25rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .18s,transform .1s;display:inline-flex;align-items:center}
+.save-btn:hover{opacity:0.87;transform:translateY(-1px)}
+.library-btn{background:var(--gold);color:#1a1a1a;border:2px solid var(--gold);padding:0.85rem 2.25rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .18s,transform .1s;text-decoration:none;display:inline-flex;align-items:center;gap:0.4rem}
+.library-btn:hover{opacity:0.87;transform:translateY(-1px)}
+.complete-btn{background:var(--navy);color:#fff;border:none;padding:1rem 2.75rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s}
+.complete-btn:hover{opacity:0.87;transform:translateY(-1px)}
+
+#completed-banner{background:#F0FAF5;border:1px solid #2A9D6F;border-radius:10px;padding:0.85rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;font-size:0.88rem;color:var(--text-mid)}
+
+@media(max-width:600px){
+  .tool-title{font-size:2.1rem}
+  .page{padding:1.75rem 1rem 3rem}
+  .iam-grid{grid-template-columns:1fr}
+  .still-options{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="logo">The Living Room</span>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <div id="saved-badge"><span class="dot"></span> Saved</div>
+    <span class="theme-pill" onclick="history.back()">← Back</span>
+  </div>
+</div>
+
+<div class="page" id="mainView">
+  <div class="tool-eyebrow">Identity Is Not Fixed · Week 1</div>
+  <h1 class="tool-title">Identity Audit</h1>
+  <div class="tool-subtitle">Who have I learnt to be?</div>
+  <div class="tool-divider"></div>
+  <p class="tool-intro">We don't choose most of who we believe we are. We learn it — over time, from people, experiences, and the stories we repeat. This week, get curious about yours.</p>
+
+  <div class="tool-instruction">
+    <span class="inst-icon">✏️</span>
+    <span>Work through each section in order. Your answers auto-save as you type. Complete the tool when you've reflected on all three sections.</span>
+  </div>
+
+  <div class="tool-progress" onclick="scrollToFirstEmpty()">
+    <div class="prog-header">
+      <span class="prog-label">Your progress</span>
+      <span class="prog-pct" id="prog-pct">0%</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog-hint" id="prog-hint">Start by completing the sentences below</div>
+  </div>
+
+  <div id="completed-banner" style="display:none">
+    ✅ <span>You've completed this tool. Your responses are saved. <button onclick="resetComplete()" style="background:none;border:none;color:#2A9D6F;cursor:pointer;font-size:0.88rem;text-decoration:underline;padding:0;margin-left:0.25rem">Mark as not complete</button></span>
+  </div>
+
+  <!-- ── SECTION 1 ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num c1">1</div>
+      <div class="step-text">
+        <div class="step-q">Complete these without overthinking</div>
+        <div class="step-sub">Write 8–10 endings to "I am someone who…" — anything goes. Don't filter.</div>
+      </div>
+    </div>
+    <div class="iam-grid" id="iam-grid">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+
+  <!-- ── SECTION 2 ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num c2">2</div>
+      <div class="step-text">
+        <div class="step-q">Now Trace Them Back</div>
+        <div class="step-sub">Choose three that feel particularly significant and explore where they came from.</div>
+      </div>
+    </div>
+    <div class="trace-intro">
+      From your list above, pick three statements that feel heavy, significant, or surprising. Copy each one below, then explore it.
+    </div>
+    <div id="trace-cards">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+
+  <!-- ── SECTION 3 ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num c3">3</div>
+      <div class="step-text">
+        <div class="step-q">The Important Question</div>
+        <div class="step-sub">For each of your three chosen statements, ask yourself honestly:</div>
+      </div>
+    </div>
+    <p class="still-intro">"If I met myself today — without knowing my history — would I still describe myself this way? Not is it true or false. Just: how true is it <em>now</em>?"</p>
+    <div id="still-cards">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+
+  <!-- ── EXPERIMENT ── -->
+  <div class="experiment-block">
+    <div class="exp-eyebrow">Your Experiment This Week</div>
+    <div class="exp-title">Notice the language of identity</div>
+    <div class="exp-body">
+      This week, pay attention whenever <em>"I am…"</em> <em>"I'm not…"</em> <em>"I always…"</em> <em>"I never…"</em> or <em>"I'm just the kind of person who…"</em> appears in your thinking or conversation.<br><br>
+      Don't correct it. Don't change anything. Just notice it.
+    </div>
+    <div class="exp-question">Is that who I am — or who I've learnt to be?</div>
+  </div>
+
+  <div class="principles">
+    <span>👁 Aware — See clearly. Without judgement.</span>
+    <span>🧭 Explore — Question everything.</span>
+    <span>✨ Choose — Release what doesn't fit.</span>
+  </div>
+
+  <p style="text-align:center;font-family:var(--font-display);font-size:1rem;font-style:italic;color:var(--text-muted);margin-bottom:2rem;">Your identity is a choice. Your life is yours to shape.</p>
+
+  <div class="complete-wrap">
+    <button class="save-btn" onclick="doSave()">💾 Save my answers</button>
+    <a class="library-btn" href="index.html">← Back to hub</a>
+    <button class="complete-btn" id="complete-btn" onclick="markComplete()">Mark as Complete ✓</button>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'tlr-identity-audit';
+
+// ── Render Section 1: I AM completions ──
+const iamGrid = document.getElementById('iam-grid');
+for(let i=1;i<=10;i++){
+  iamGrid.innerHTML += `
+    <div class="iam-item">
+      <span class="iam-num">${i}.</span>
+      <span class="iam-prefix">I am someone who…</span>
+      <input class="iam-input" id="iam-${i}" placeholder="complete this…" oninput="autoSave()">
+    </div>`;
+}
+
+// ── Render Section 2: Trace back cards ──
+const traceCards = document.getElementById('trace-cards');
+const traceLabels = ['First', 'Second', 'Third'];
+const traceColors = ['#5B4FCE','#3A6B6A','#B5583C'];
+for(let t=1;t<=3;t++){
+  traceCards.innerHTML += `
+    <div class="trace-card">
+      <div class="trace-card-header">
+        <span class="trace-badge" style="background:${traceColors[t-1]}">${traceLabels[t-1]} statement</span>
+        <input class="trace-stmt-input" id="trace-stmt-${t}" placeholder="I am someone who…" oninput="autoSave();syncStillStmt(${t})" style="border-bottom-color:${traceColors[t-1]}">
+      </div>
+      <div class="trace-questions">
+        <div>
+          <div class="trace-q">📍 Where did I learn this about myself?</div>
+          <textarea class="trace-a" id="trace-origin-${t}" placeholder="A person, experience, repeated message, role I had to play…" oninput="autoSize(this);autoSave()" rows="2"></textarea>
+        </div>
+        <div>
+          <div class="trace-q">🎁 What has this identity given me?</div>
+          <textarea class="trace-a" id="trace-gift-${t}" placeholder="How has it helped, protected or supported me?" oninput="autoSize(this);autoSave()" rows="2"></textarea>
+        </div>
+        <div>
+          <div class="trace-q">💸 What has it cost me?</div>
+          <textarea class="trace-a" id="trace-cost-${t}" placeholder="What might I avoid, dismiss or make harder because 'that's just not who I am'?" oninput="autoSize(this);autoSave()" rows="2"></textarea>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── Render Section 3: Still me? ──
+const stillCards = document.getElementById('still-cards');
+for(let s=1;s<=3;s++){
+  stillCards.innerHTML += `
+    <div class="still-card">
+      <div class="still-stmt" id="still-stmt-${s}">Statement ${s} — fill in Section 2 above</div>
+      <div class="still-options">
+        <div class="still-opt" id="still-${s}-1" onclick="selectStill(${s},1)">
+          <div class="opt-icon">✅</div>
+          <span class="opt-label">Still Me</span>
+          <span class="opt-sub">Very true today</span>
+        </div>
+        <div class="still-opt" id="still-${s}-2" onclick="selectStill(${s},2)">
+          <div class="opt-icon">◑</div>
+          <span class="opt-label">Partly Me</span>
+          <span class="opt-sub">Some of it is true, some is changing</span>
+        </div>
+        <div class="still-opt" id="still-${s}-3" onclick="selectStill(${s},3)">
+          <div class="opt-icon">○</div>
+          <span class="opt-label">Not So Sure</span>
+          <span class="opt-sub">May have been true, but doesn't fit now</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+const stillSelections = {1:0, 2:0, 3:0};
+
+function selectStill(card, opt){
+  [1,2,3].forEach(o => {
+    const el = document.getElementById(`still-${card}-${o}`);
+    el.classList.remove('selected','still-me','partly-me','not-sure');
+  });
+  const classes = ['','still-me','partly-me','not-sure'];
+  const el = document.getElementById(`still-${card}-${opt}`);
+  el.classList.add('selected', classes[opt]);
+  stillSelections[card] = opt;
+  autoSave();
+  updateProgress();
+}
+
+function syncStillStmt(t){
+  const val = document.getElementById(`trace-stmt-${t}`).value.trim();
+  const stillEl = document.getElementById(`still-stmt-${t}`);
+  stillEl.textContent = val || `Statement ${t} — fill in Section 2 above`;
+  stillEl.style.color = val ? 'var(--text-dark)' : '';
+  stillEl.style.fontStyle = val ? 'normal' : '';
+}
+
+function autoSize(el){
+  el.style.height='auto';
+  el.style.height=el.scrollHeight+'px';
+}
+
+function collectData(){
+  const iam = {};
+  for(let i=1;i<=10;i++) iam[`iam_${i}`] = document.getElementById(`iam-${i}`).value;
+  const trace = {};
+  for(let t=1;t<=3;t++){
+    trace[`stmt_${t}`] = document.getElementById(`trace-stmt-${t}`).value;
+    trace[`origin_${t}`] = document.getElementById(`trace-origin-${t}`).value;
+    trace[`gift_${t}`] = document.getElementById(`trace-gift-${t}`).value;
+    trace[`cost_${t}`] = document.getElementById(`trace-cost-${t}`).value;
+  }
+  return { iam, trace, still: {...stillSelections} };
+}
+
+function populateData(d){
+  if(!d) return;
+  if(d.iam) for(let i=1;i<=10;i++){
+    const el = document.getElementById(`iam-${i}`);
+    if(el && d.iam[`iam_${i}`]) el.value = d.iam[`iam_${i}`];
+  }
+  if(d.trace) for(let t=1;t<=3;t++){
+    const s = document.getElementById(`trace-stmt-${t}`);
+    const o = document.getElementById(`trace-origin-${t}`);
+    const g = document.getElementById(`trace-gift-${t}`);
+    const c = document.getElementById(`trace-cost-${t}`);
+    if(s && d.trace[`stmt_${t}`]){ s.value = d.trace[`stmt_${t}`]; syncStillStmt(t); }
+    if(o && d.trace[`origin_${t}`]){ o.value = d.trace[`origin_${t}`]; autoSize(o); }
+    if(g && d.trace[`gift_${t}`]){ g.value = d.trace[`gift_${t}`]; autoSize(g); }
+    if(c && d.trace[`cost_${t}`]){ c.value = d.trace[`cost_${t}`]; autoSize(c); }
+  }
+  if(d.still) [1,2,3].forEach(s => { if(d.still[s]) selectStill(s, d.still[s]); });
+}
+
+function updateProgress(){
+  // Count filled iam (at least 5)
+  let iamFilled = 0;
+  for(let i=1;i<=10;i++) if(document.getElementById(`iam-${i}`).value.trim()) iamFilled++;
+  const iamScore = Math.min(iamFilled/5, 1); // 0–1
+
+  // Trace: at least stmt + one answer per card
+  let traceFilled = 0;
+  for(let t=1;t<=3;t++){
+    const stmt = document.getElementById(`trace-stmt-${t}`).value.trim();
+    const origin = document.getElementById(`trace-origin-${t}`).value.trim();
+    if(stmt && origin) traceFilled++;
+  }
+  const traceScore = traceFilled / 3;
+
+  // Still: all 3 selected
+  const stillScore = Object.values(stillSelections).filter(v=>v>0).length / 3;
+
+  const pct = Math.round((iamScore * 0.35 + traceScore * 0.4 + stillScore * 0.25) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+  const hint = document.getElementById('prog-hint');
+  if(pct >= 80){
+    hint.textContent = 'Great depth — ready to mark complete when you\'re done.';
+    hint.className = 'prog-hint done';
+  } else if(pct >= 40){
+    hint.textContent = 'Good progress — keep going through the sections.';
+    hint.className = 'prog-hint';
+  } else {
+    hint.textContent = 'Start by completing the sentences below.';
+    hint.className = 'prog-hint';
+  }
+}
+
+function scrollToFirstEmpty(){
+  for(let i=1;i<=10;i++){
+    const el = document.getElementById(`iam-${i}`);
+    if(el && !el.value.trim()){ el.scrollIntoView({behavior:'smooth',block:'center'}); el.focus(); return; }
+  }
+}
+
+let saveTimer;
+function autoSave(){
+  updateProgress();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(doSave, 1200);
+}
+
+async function doSave(){
+  const data = collectData();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const badge = document.getElementById('saved-badge');
+  badge.style.display = 'flex';
+  setTimeout(() => badge.style.display = 'none', 2000);
+  await saveProgress(STORAGE_KEY, false, data);
+}
+
+async function markComplete(){
+  const data = collectData();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  if(!done.includes(STORAGE_KEY)) done.push(STORAGE_KEY);
+  localStorage.setItem('tlr_completed', JSON.stringify(done));
+  await saveProgress(STORAGE_KEY, true, data);
+  document.getElementById('completed-banner').style.display = 'flex';
+  document.getElementById('complete-btn').style.display = 'none';
+  document.getElementById('prog-hint').textContent = 'Completed ✓';
+  document.getElementById('prog-hint').className = 'prog-hint done';
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('prog-pct').textContent = '100%';
+}
+
+async function resetComplete(){
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  const idx = done.indexOf(STORAGE_KEY);
+  if(idx > -1){ done.splice(idx,1); localStorage.setItem('tlr_completed', JSON.stringify(done)); }
+  const data = collectData();
+  await saveProgress(STORAGE_KEY, false, data);
+  document.getElementById('completed-banner').style.display = 'none';
+  document.getElementById('complete-btn').style.display = '';
+}
+
+requireAuth().then(user => {
+  if(!user) return;
+  loadProgress().then(rows => {
+    const row = rows && rows.find(r => r.tool_key === STORAGE_KEY);
+    if(row && row.data){
+      populateData(row.data);
+      if(row.completed){
+        const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+        if(!done.includes(STORAGE_KEY)){ done.push(STORAGE_KEY); localStorage.setItem('tlr_completed', JSON.stringify(done)); }
+        document.getElementById('completed-banner').style.display = 'flex';
+        document.getElementById('complete-btn').style.display = 'none';
+      }
+    } else {
+      const local = localStorage.getItem(STORAGE_KEY);
+      if(local){ try{ populateData(JSON.parse(local)); }catch(e){} }
+    }
+    updateProgress();
+  }).catch(() => {
+    const local = localStorage.getItem(STORAGE_KEY);
+    if(local){ try{ populateData(JSON.parse(local)); }catch(e){} }
+    updateProgress();
+  });
+});
+</script>
+</body>
+</html>

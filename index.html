@@ -1323,15 +1323,15 @@ requireAuth().then(u => {
     <div class="theme-dash-inner">
       <div class="theme-dash-cols">
         <div class="theme-dash-img-col">
-          <img src="difficult-conversations.jpg" alt="Difficult Conversations" class="theme-dash-img" onerror="this.parentElement.style.display='none'">
+          <img src="identity-is-not-fixed.jpg" alt="Identity Is Not Fixed" class="theme-dash-img" onerror="this.parentElement.style.display='none'">
         </div>
         <div class="theme-dash-content">
           <div class="theme-dash-eyebrow">This Month's Theme</div>
           <div class="theme-dash-meta">
-            <div class="theme-dash-title">Difficult Conversations</div>
+            <div class="theme-dash-title">Identity Is Not Fixed</div>
             <a href="#" onclick="event.preventDefault();goToView('library')" class="theme-dash-link">Open theme →</a>
           </div>
-          <div class="theme-dash-door">"There's something I need to say. I just don't know how."</div>
+          <div class="theme-dash-door">"Not who I was told to be. Not who I had to be. Who I choose to be."</div>
           <div class="theme-dash-topics" id="td-topics"></div>
         </div>
       </div>
@@ -1473,7 +1473,7 @@ requireAuth().then(u => {
   </div>
 
   <div class="topic-bar">
-    <p>Current topic: Having the Conversation &nbsp;&middot;&nbsp; <a href="#difficult-conversations">Go to current theme</a></p>
+    <p>Current topic: Who Am I Now? &nbsp;&middot;&nbsp; <a href="#identity-is-not-fixed">Go to current theme</a></p>
   </div>
 
   <div class="page-layout">
@@ -1484,7 +1484,8 @@ requireAuth().then(u => {
       </div>
       <div class="sidebar-body">
         <ul class="sidebar-nav">
-          <li class="active"><a href="#difficult-conversations">Difficult Conversations</a></li>
+          <li class="active"><a href="#identity-is-not-fixed">Identity Is Not Fixed</a></li>
+          <li><a href="#difficult-conversations">Difficult Conversations</a></li>
           <li><a href="#building-momentum">Building Momentum</a></li>
           <li><a href="#energy-and-drive">Energy &amp; Drive</a></li>
           <li><a href="#boundaries">Boundaries &amp; Pressure</a></li>
@@ -1505,12 +1506,12 @@ requireAuth().then(u => {
       </div>
       <div class="section-label">Current theme</div>
 
-      <div id="difficult-conversations" class="current-feature">
+      <div id="identity-is-not-fixed" class="current-feature">
         <div class="feature-header" id="current-feature-header">
           <div>
             <div class="feature-tag">Current theme</div>
-            <div class="feature-title">Difficult Conversations</div>
-            <div class="feature-door">"There's something I need to say. I just don't know how."</div>
+            <div class="feature-title">Identity Is Not Fixed</div>
+            <div class="feature-door">"Not who I was told to be. Not who I had to be. Who I choose to be."</div>
           </div>
           <div class="feature-header-right">
             <div class="feature-week-badge">Week 3 of 4</div>
@@ -1519,12 +1520,11 @@ requireAuth().then(u => {
         </div>
         <div class="feature-body">
           <div class="theme-banner-wrap">
-            <img src="difficult-conversations.jpg" alt="Difficult Conversations" class="theme-banner-img" onerror="this.parentElement.style.display='none'">
+            <img src="identity-is-not-fixed.jpg" alt="Identity Is Not Fixed" class="theme-banner-img" onerror="this.parentElement.style.display='none'">
           </div>
-          <p class="feature-intro">Most of us avoid difficult conversations, not because we don't care, but because we care too much. This theme helps you understand why these conversations feel so hard, how to get clear before you speak, and how to show up in them with honesty, respect and confidence.</p>
+          <p class="feature-intro">We don't choose most of who we believe we are. We learn it — over time, from people, experiences, and the stories we repeat. This theme invites you to examine the identity you've inherited, understand what you actually value, and consciously choose who you want to become.</p>
           <div class="topics-heading">Topics and tools</div>
           <div class="topics-list" id="current-topics"></div>
-          <div class="workshop-placeholder">The Difficult Conversations masterclass recording will be added here shortly.</div>
         </div>
       </div>
 
@@ -2014,13 +2014,24 @@ requireAuth().then(u => {
 <script>
 /* ── DATA ───────────────────────────────── */
 const currentTopics = [
-  { n: 1, topic: 'Why We Avoid Them', focus: 'Understanding what stops us from having the conversations that matter most — and what it costs us when we don\'t.', tool: { name: 'Why We Avoid Them', file: 'why-we-avoid-them.html', interactive: true } },
-  { n: 2, topic: 'Getting Clear Before You Speak', focus: 'Separating fact from story, identifying what really matters, and knowing what outcome you\'re actually looking for.', tool: { name: 'Getting Clear Before You Speak', file: 'getting-clear-before-you-speak.html', interactive: true } },
-  { n: 3, topic: 'Having the Conversation', focus: 'Entering the conversation with clarity, staying grounded when it gets hard, and keeping the focus on what matters.', tool: { name: 'Having the Conversation', file: 'having-the-conversation.html', interactive: true } },
-  { n: 4, topic: 'After the Conversation', focus: 'Reflecting on what happened, what went well, where it got hard, and what you\'d carry forward — so every difficult conversation makes the next one a little easier.', tool: { name: 'After the Conversation', file: 'after-the-conversation.html', interactive: true } }
+  { n: 1, topic: 'Who Have I Learnt to Be?', focus: 'Exploring the identity we inherited — the stories repeated about us, the roles we adopted, and the beliefs we\'ve never examined. Surfacing what\'s actually driving how we see ourselves.', tool: { name: 'Identity Audit', file: 'identity-audit.html', interactive: true } },
+  { n: 2, topic: 'The Stories I Inherited', focus: 'The messages we absorbed about work, money, relationships, and life — often before we were old enough to question them. Bringing them into the light and asking: is this actually mine?', tool: { name: 'The Stories I Inherited', file: 'stories-i-inherited.html', interactive: true } },
+  { n: 3, topic: 'Who Am I Now?', focus: 'Moving beyond what we were told to be, to what we actually value. An evidence-first exploration of the values that are genuinely driving our choices — lived versus aspirational.', tool: { name: 'Who Am I Now?', file: 'who-am-i-now.html', interactive: true } },
+  { n: 4, topic: 'The Identity I Choose', focus: 'Bringing the whole theme together with intention. Choosing to let go of old stories, deciding who we want to become, and committing to the small daily actions that make that real.', tool: { name: 'The Identity I Choose', file: 'identity-i-choose.html', interactive: true } }
 ];
 
 const pastThemes = [
+  {
+    id: 'difficult-conversations', theme: 'Difficult Conversations', door: '"There\'s something I need to say. I just don\'t know how."',
+    banner: 'difficult-conversations.jpg',
+    intro: 'Most of us avoid difficult conversations — not because we don\'t care, but because we care too much. This theme helps you understand why these conversations feel so hard, how to get clear before you speak, and how to show up in them with honesty, respect and confidence.',
+    topics: [
+      { n: 1, topic: 'Why We Avoid Them', focus: 'Understanding what stops us from having the conversations that matter most — and what it costs us when we don\'t.', tool: { name: 'Why We Avoid Them', file: 'why-we-avoid-them.html', interactive: true } },
+      { n: 2, topic: 'Getting Clear Before You Speak', focus: 'Separating fact from story, identifying what really matters, and knowing what outcome you\'re actually looking for.', tool: { name: 'Getting Clear Before You Speak', file: 'getting-clear-before-you-speak.html', interactive: true } },
+      { n: 3, topic: 'Having the Conversation', focus: 'Entering the conversation with clarity, staying grounded when it gets hard, and keeping the focus on what matters.', tool: { name: 'Having the Conversation', file: 'having-the-conversation.html', interactive: true } },
+      { n: 4, topic: 'After the Conversation', focus: 'Reflecting on what happened, what went well, where it got hard, and what you\'d carry forward.', tool: { name: 'After the Conversation', file: 'after-the-conversation.html', interactive: true } }
+    ], workshop: { title: 'Difficult Conversations, with Stuart Fairbairns PCC', youtubeId: '' }
+  },
   {
     id: 'building-momentum', theme: 'Building Momentum', door: 'I know what I need to do. I just can\'t seem to keep it going.',
     banner: 'building-momentum.jpg',
@@ -2274,12 +2285,12 @@ if (window.location.hash) {
 })();
 
 /* ── CURRENT THEME COLLAPSE ─────────────── */
-const currentFeature = document.getElementById('difficult-conversations');
+const currentFeature = document.getElementById('identity-is-not-fixed');
 const currentHeader = document.getElementById('current-feature-header');
-currentHeader.addEventListener('click', () => { currentFeature.classList.toggle('collapsed'); setActive('difficult-conversations'); });
+currentHeader.addEventListener('click', () => { currentFeature.classList.toggle('collapsed'); setActive('identity-is-not-fixed'); });
 
 /* ── SMOOTH SCROLL + DOT UPDATE ON CLICK ── */
-const themeIds = ['difficult-conversations', 'building-momentum', 'energy-and-drive', 'boundaries', 'autopilot', 'decision-fatigue'];
+const themeIds = ['identity-is-not-fixed', 'difficult-conversations', 'building-momentum', 'energy-and-drive', 'boundaries', 'autopilot', 'decision-fatigue'];
 let scrollLocked = false;
 
 document.querySelectorAll('a[href^="#"]').forEach(link => {
@@ -2294,7 +2305,7 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
         scrollLocked = true;
         setTimeout(() => { scrollLocked = false; }, 900);
         // Auto-expand the theme when clicked from sidebar
-        if (id === 'difficult-conversations') {
+        if (id === 'identity-is-not-fixed') {
           currentFeature.classList.remove('collapsed');
         } else {
           const card = document.getElementById(id);
@@ -2312,7 +2323,7 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
 
 /* ── PROGRESS WIDGET ────────────────────── */
 const ALL_TOOLS = [
-  ...currentTopics.filter(t=>t.tool?.file).map(t=>({file:t.tool.file,name:t.tool.name,theme:'Difficult Conversations'})),
+  ...currentTopics.filter(t=>t.tool?.file).map(t=>({file:t.tool.file,name:t.tool.name,theme:'Identity Is Not Fixed'})),
   ...pastThemes.flatMap(pt=>pt.topics.filter(t=>t.tool?.file).map(t=>({file:t.tool.file,name:t.tool.name,theme:pt.theme.replace(/&amp;/g,'&')})))
 ];
 
@@ -2428,7 +2439,7 @@ function closeFilterPanel(){
 window.addEventListener('scroll', () => {
   if (scrollLocked) return;
   const scrollPos = window.scrollY + 200;
-  let current = 'difficult-conversations';
+  let current = 'identity-is-not-fixed';
   themeIds.forEach(id => {
     const el = document.getElementById(id);
     if (el && el.offsetTop <= scrollPos) current = id;
@@ -2627,7 +2638,7 @@ async function confirmDeleteAccount() {
 }
 
 /* ── WELCOME BANNER ────────────────────────────── */
-const _CURRENT_THEME_NAME = 'Difficult Conversations';
+const _CURRENT_THEME_NAME = 'Identity Is Not Fixed';
 
 function renderWelcomeBanner(user) {
   const banner = document.getElementById('welcome-banner');

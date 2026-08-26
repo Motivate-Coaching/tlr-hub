@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Identity I Choose — The Living Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+<style>
+:root{
+  --navy:#1B2B4B;
+  --gold:#E8A800;
+  --accent:#2C5F8A;
+  --accent-pale:#EAF3FB;
+  --cream:#FAF8F4;
+  --white:#FFFFFF;
+  --border:#E8E4DC;
+  --text-dark:#1A1A1A;
+  --text-mid:#4A4A4A;
+  --text-muted:#888;
+  --font-display:'Playfair Display',serif;
+  --font-body:'Inter',sans-serif;
+  --s1-color:#2C5F8A;
+  --s2-color:#5B4FCE;
+  --s3-color:#3A6B4A;
+  --s4-color:#B5583C;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark);min-height:100vh}
+
+.topbar{background:var(--navy);padding:0.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar .logo{color:#fff;font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.04em}
+.topbar .theme-pill{background:var(--accent);color:#fff;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.28rem 0.85rem;border-radius:20px;text-decoration:none;cursor:pointer;transition:opacity .15s}
+.topbar .theme-pill:hover{opacity:0.8}
+#saved-badge{display:none;align-items:center;gap:0.4rem;font-size:0.72rem;color:rgba(255,255,255,0.5)}
+#saved-badge .dot{width:6px;height:6px;background:#2A9D6F;border-radius:50%;display:inline-block}
+
+.page{max-width:720px;margin:0 auto;padding:2.5rem 1.5rem 4rem}
+.tool-eyebrow{font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.6rem;text-align:center}
+.tool-title{font-family:var(--font-display);font-size:3rem;line-height:1.15;text-align:center;color:var(--text-dark);margin-bottom:0.5rem}
+.tool-subtitle{font-family:var(--font-display);font-size:1.15rem;color:var(--accent);font-style:italic;text-align:center;margin-bottom:0.5rem}
+.tool-divider{width:48px;height:2px;background:var(--gold);margin:1rem auto 1.75rem}
+.tool-intro{font-size:0.95rem;color:var(--text-mid);line-height:1.75;text-align:center;margin-bottom:0.5rem}
+.tool-instruction{display:flex;align-items:flex-start;gap:0.75rem;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin:1.25rem 0 2rem;font-size:0.88rem;color:var(--text-mid);line-height:1.6}
+.tool-instruction .inst-icon{font-size:1.25rem;flex-shrink:0;margin-top:0.05rem}
+
+.tool-progress{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:0.85rem 1.1rem;margin-bottom:2rem}
+.prog-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem}
+.prog-label{font-size:0.75rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted)}
+.prog-pct{font-size:0.82rem;font-weight:700;color:var(--navy)}
+.prog-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--gold);border-radius:3px;transition:width .4s ease}
+.prog-hint{font-size:0.75rem;color:var(--text-muted);margin-top:0.45rem}
+.prog-hint.done{color:#2A9D6F;font-weight:600}
+
+.step-block{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.75rem 1.5rem;margin-bottom:1.5rem}
+.step-head{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.25rem}
+.step-num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:700;color:#fff;flex-shrink:0;margin-top:0.1rem}
+.step-num.c1{background:var(--s1-color)}
+.step-num.c2{background:var(--s2-color)}
+.step-num.c3{background:var(--s3-color)}
+.step-num.c4{background:var(--s4-color)}
+.step-q{font-size:1rem;font-weight:700;letter-spacing:0.01em;color:var(--text-dark);margin-bottom:0.2rem;text-transform:uppercase}
+.step-sub{font-size:0.84rem;color:var(--text-muted);line-height:1.55}
+
+/* ── Section 1: Future Self Snapshot ── */
+.snapshot-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem}
+.snap-card{border:1px solid var(--border);border-radius:10px;padding:1rem}
+.snap-icon{font-size:1.2rem;display:block;margin-bottom:0.3rem}
+.snap-label{font-size:0.67rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.5rem}
+.snap-ta{width:100%;border:none;background:transparent;font-family:var(--font-body);font-size:0.85rem;color:var(--text-dark);line-height:1.6;padding:0;outline:none;resize:none;min-height:80px}
+.snap-ta::placeholder{color:#C8C4BB;font-size:0.82rem}
+.snap-note{font-size:0.72rem;color:var(--text-muted);font-style:italic;margin-bottom:1rem;text-align:right}
+
+/* ── Section 2: Identity Shifts ── */
+.shifts-flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:0.5rem;align-items:start;margin-top:0.5rem}
+.shift-card{border:1px solid var(--border);border-radius:12px;padding:1.1rem;background:var(--cream)}
+.shift-badge{display:flex;align-items:center;gap:0.4rem;margin-bottom:0.75rem}
+.shift-badge-icon{font-size:1rem}
+.shift-badge-label{font-size:0.67rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase}
+.shift-ta{width:100%;border:none;background:transparent;font-family:var(--font-body);font-size:0.85rem;color:var(--text-dark);line-height:1.6;padding:0;outline:none;resize:none;min-height:80px}
+.shift-ta::placeholder{color:#C8C4BB;font-size:0.82rem}
+.shift-arrow{font-size:1.4rem;color:var(--gold);align-self:center;text-align:center;flex-shrink:0}
+.shift-badge-label.red{color:#B5583C}
+.shift-badge-label.blue{color:#5B4FCE}
+.shift-badge-label.green{color:#3A6B4A}
+
+/* ── Section 3: Proof Points ── */
+.proof-note{font-size:0.85rem;color:var(--text-mid);line-height:1.6;margin-bottom:1.1rem}
+.proof-items{display:flex;flex-direction:column;gap:0.6rem}
+.proof-item{display:flex;align-items:flex-start;gap:0.75rem;border-bottom:1.5px solid var(--border);padding-bottom:0.35rem}
+.proof-num{font-size:0.75rem;font-weight:700;color:var(--s3-color);min-width:20px;margin-top:0.55rem;flex-shrink:0}
+.proof-input{flex:1;border:none;background:transparent;font-family:var(--font-body);font-size:0.9rem;color:var(--text-dark);padding:0.45rem 0;outline:none}
+.proof-input::placeholder{color:#C8C4BB}
+
+/* ── Section 4: Next 7 Days ── */
+.days-note{font-size:0.82rem;color:var(--text-mid);margin-bottom:1rem;font-style:italic}
+.days-grid{display:flex;flex-direction:column;gap:0.5rem}
+.day-row{display:flex;align-items:center;gap:0.85rem;border-bottom:1.5px solid var(--border);padding-bottom:0.3rem}
+.day-label{font-size:0.72rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gold);min-width:40px;flex-shrink:0}
+.day-input{flex:1;border:none;background:transparent;font-family:var(--font-body);font-size:0.88rem;color:var(--text-dark);padding:0.45rem 0;outline:none}
+.day-input::placeholder{color:#C8C4BB}
+
+/* ── Reflection ── */
+.reflection-block{background:var(--navy);color:#fff;border-radius:14px;padding:1.5rem 1.75rem;margin:2rem 0}
+.ref-eyebrow{font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem}
+.ref-q{font-family:var(--font-display);font-size:1.1rem;line-height:1.5;color:#fff;margin-bottom:1rem}
+.ref-ta{width:100%;border:none;border-bottom:1px solid rgba(255,255,255,0.2);background:transparent;font-family:var(--font-body);font-size:0.9rem;color:rgba(255,255,255,0.85);padding:0.5rem 0;outline:none;resize:none;min-height:70px;line-height:1.6}
+.ref-ta::placeholder{color:rgba(255,255,255,0.25)}
+.ref-ta:focus{border-bottom-color:rgba(255,255,255,0.5)}
+
+/* ── Sign card ── */
+.sign-card{border:2px solid var(--gold);border-radius:14px;padding:1.5rem;text-align:center;margin-bottom:2rem}
+.sign-eyebrow{font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem}
+.sign-text{font-family:var(--font-display);font-size:1.1rem;line-height:1.6;color:var(--text-dark);margin-bottom:1rem}
+.sign-strip{display:flex;justify-content:center;gap:2rem;flex-wrap:wrap}
+.sign-item{font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted)}
+
+.principles{display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem 1.5rem;margin:1.5rem 0;padding:1rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.principles span{font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)}
+
+.complete-wrap{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;align-items:center;padding-top:0.5rem}
+.save-btn{background:#2A9D6F;color:#fff;border:2px solid #2A9D6F;padding:0.85rem 2.25rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .18s,transform .1s;display:inline-flex;align-items:center}
+.save-btn:hover{opacity:0.87;transform:translateY(-1px)}
+.library-btn{background:var(--gold);color:#1a1a1a;border:2px solid var(--gold);padding:0.85rem 2.25rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .18s,transform .1s;text-decoration:none;display:inline-flex;align-items:center;gap:0.4rem}
+.library-btn:hover{opacity:0.87;transform:translateY(-1px)}
+.complete-btn{background:var(--navy);color:#fff;border:none;padding:1rem 2.75rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s}
+.complete-btn:hover{opacity:0.87;transform:translateY(-1px)}
+#completed-banner{background:#F0FAF5;border:1px solid #2A9D6F;border-radius:10px;padding:0.85rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;font-size:0.88rem;color:var(--text-mid)}
+
+@media(max-width:600px){
+  .tool-title{font-size:2.1rem}
+  .page{padding:1.75rem 1rem 3rem}
+  .snapshot-grid{grid-template-columns:1fr 1fr}
+  .shifts-flow{grid-template-columns:1fr;gap:0.75rem}
+  .shift-arrow{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="logo">The Living Room</span>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <div id="saved-badge"><span class="dot"></span> Saved</div>
+    <span class="theme-pill" onclick="history.back()">← Back</span>
+  </div>
+</div>
+
+<div class="page" id="mainView">
+  <div class="tool-eyebrow">Identity Is Not Fixed · Week 4</div>
+  <h1 class="tool-title">The Identity I Choose</h1>
+  <div class="tool-subtitle">I get to decide who I am becoming.</div>
+  <div class="tool-divider"></div>
+  <p class="tool-intro">We've explored who I've learnt to be, the stories I inherited, and who I am now. This week is about intention. I don't have to wait to become someone else. I can choose, design, and practise the identity I want to live.</p>
+
+  <div class="tool-instruction">
+    <span class="inst-icon">✏️</span>
+    <span>This is the week everything you've explored comes together. Take your time. Write freely. Be specific — the more specific, the more real it becomes. Your answers auto-save.</span>
+  </div>
+
+  <div class="tool-progress">
+    <div class="prog-header">
+      <span class="prog-label">Your progress</span>
+      <span class="prog-pct" id="prog-pct">0%</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog-hint" id="prog-hint">Start with your Future Self Snapshot</div>
+  </div>
+
+  <div id="completed-banner" style="display:none">
+    ✅ <span>You've completed this tool. Your responses are saved. <button onclick="resetComplete()" style="background:none;border:none;color:#2A9D6F;cursor:pointer;font-size:0.88rem;text-decoration:underline;padding:0;margin-left:0.25rem">Mark as not complete</button></span>
+  </div>
+
+  <!-- ── SECTION 1: FUTURE SELF ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num c1">1</div>
+      <div class="step-text">
+        <div class="step-q">My Future Self Snapshot</div>
+        <div class="step-sub">Imagine it's 12 months from now and you've been living with intention. Who have you become? Write freely. Be specific.</div>
+      </div>
+    </div>
+    <div class="snap-note">Describe that person in as much detail as you can →</div>
+    <div class="snapshot-grid">
+      <div class="snap-card">
+        <span class="snap-icon">🧠</span>
+        <span class="snap-label">How do I think about myself?</span>
+        <textarea class="snap-ta" id="snap-think" placeholder="My relationship with myself, my self-talk, my beliefs…" oninput="autoSize(this);autoSave()" rows="4"></textarea>
+      </div>
+      <div class="snap-card">
+        <span class="snap-icon">❤️</span>
+        <span class="snap-label">How do I relate to others?</span>
+        <textarea class="snap-ta" id="snap-relate" placeholder="My relationships, how I show up for people, what I give…" oninput="autoSize(this);autoSave()" rows="4"></textarea>
+      </div>
+      <div class="snap-card">
+        <span class="snap-icon">🌟</span>
+        <span class="snap-label">How do I show up each day?</span>
+        <textarea class="snap-ta" id="snap-showup" placeholder="My energy, habits, presence, consistency…" oninput="autoSize(this);autoSave()" rows="4"></textarea>
+      </div>
+      <div class="snap-card">
+        <span class="snap-icon">🎯</span>
+        <span class="snap-label">What matters most to me?</span>
+        <textarea class="snap-ta" id="snap-matters" placeholder="What I'm focused on, what I've let go of…" oninput="autoSize(this);autoSave()" rows="4"></textarea>
+      </div>
+      <div class="snap-card">
+        <span class="snap-icon">🌱</span>
+        <span class="snap-label">What habits support me?</span>
+        <textarea class="snap-ta" id="snap-habits" placeholder="The daily practices that ground me…" oninput="autoSize(this);autoSave()" rows="4"></textarea>
+      </div>
+      <div class="snap-card">
+        <span class="snap-icon">☀️</span>
+        <span class="snap-label">How do I want my life to feel?</span>
+        <textarea class="snap-ta" id="snap-feel" placeholder="The quality, tone and texture of my daily life…" oninput="autoSize(this);autoSave()" rows="4"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 2: IDENTITY SHIFTS ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num c2">2</div>
+      <div class="step-text">
+        <div class="step-q">The Identity Shifts</div>
+        <div class="step-sub">What do you want to stop believing about yourself? What do you want to start believing? What do you want to become known for?</div>
+      </div>
+    </div>
+    <div class="shifts-flow">
+      <div class="shift-card" style="border-color:#B5583C">
+        <div class="shift-badge">
+          <span class="shift-badge-icon">✕</span>
+          <span class="shift-badge-label red">I'm letting go of…</span>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:0.6rem;font-style:italic">Old stories / limiting beliefs</div>
+        <textarea class="shift-ta" id="shift-letting" placeholder="I'm letting go of believing that I… / The story that… / The identity of being someone who…" oninput="autoSize(this);autoSave()" rows="5"></textarea>
+      </div>
+      <div class="shift-arrow">→</div>
+      <div class="shift-card" style="border-color:#5B4FCE">
+        <div class="shift-badge">
+          <span class="shift-badge-icon">✓</span>
+          <span class="shift-badge-label blue">I choose to believe…</span>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:0.6rem;font-style:italic">New stories / empowering beliefs</div>
+        <textarea class="shift-ta" id="shift-choosing" placeholder="I choose to believe that I am… / I am someone who… / A true thing about me is…" oninput="autoSize(this);autoSave()" rows="5"></textarea>
+      </div>
+      <div class="shift-arrow">→</div>
+      <div class="shift-card" style="border-color:#3A6B4A">
+        <div class="shift-badge">
+          <span class="shift-badge-icon">❤️</span>
+          <span class="shift-badge-label green">I am becoming…</span>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:0.6rem;font-style:italic">The identity I choose</div>
+        <textarea class="shift-ta" id="shift-becoming" placeholder="I am becoming the kind of person who… / People will experience me as… / My identity is…" oninput="autoSize(this);autoSave()" rows="5"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 3: PROOF POINTS ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num c3">3</div>
+      <div class="step-text">
+        <div class="step-q">Proof Points</div>
+        <div class="step-sub">What evidence will show you that you're living this new identity? What will you see, feel, or hear that tells you you're on the right track?</div>
+      </div>
+    </div>
+    <div class="proof-note">These are not goals — they're signs. Things you'd notice if you were genuinely becoming this person. They should feel specific and real.</div>
+    <div class="proof-items">
+      <div class="proof-item"><span class="proof-num">1</span><input class="proof-input" id="proof-1" placeholder="I will notice that…" oninput="autoSave()"></div>
+      <div class="proof-item"><span class="proof-num">2</span><input class="proof-input" id="proof-2" placeholder="I will notice that…" oninput="autoSave()"></div>
+      <div class="proof-item"><span class="proof-num">3</span><input class="proof-input" id="proof-3" placeholder="Others will start to…" oninput="autoSave()"></div>
+      <div class="proof-item"><span class="proof-num">4</span><input class="proof-input" id="proof-4" placeholder="I will feel…" oninput="autoSave()"></div>
+      <div class="proof-item"><span class="proof-num">5</span><input class="proof-input" id="proof-5" placeholder="I will have stopped…" oninput="autoSave()"></div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 4: NEXT 7 DAYS ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num c4">4</div>
+      <div class="step-text">
+        <div class="step-q">My Next 7 Days</div>
+        <div class="step-sub">One small action each day that moves you closer to who you choose to be. Small steps. Big direction.</div>
+      </div>
+    </div>
+    <div class="days-note">These don't have to be dramatic. The most powerful identity shifts happen in small, consistent choices. What would the person you're becoming do today?</div>
+    <div class="days-grid">
+      <div class="day-row"><span class="day-label">Day 1</span><input class="day-input" id="day-1" placeholder="" oninput="autoSave()"></div>
+      <div class="day-row"><span class="day-label">Day 2</span><input class="day-input" id="day-2" placeholder="" oninput="autoSave()"></div>
+      <div class="day-row"><span class="day-label">Day 3</span><input class="day-input" id="day-3" placeholder="" oninput="autoSave()"></div>
+      <div class="day-row"><span class="day-label">Day 4</span><input class="day-input" id="day-4" placeholder="" oninput="autoSave()"></div>
+      <div class="day-row"><span class="day-label">Day 5</span><input class="day-input" id="day-5" placeholder="" oninput="autoSave()"></div>
+      <div class="day-row"><span class="day-label">Day 6</span><input class="day-input" id="day-6" placeholder="" oninput="autoSave()"></div>
+      <div class="day-row"><span class="day-label">Day 7</span><input class="day-input" id="day-7" placeholder="" oninput="autoSave()"></div>
+    </div>
+  </div>
+
+  <!-- ── REFLECTION ── -->
+  <div class="reflection-block">
+    <div class="ref-eyebrow">A Moment of Reflection</div>
+    <div class="ref-q">What will I thank myself for in 12 months' time because I started choosing who I am today?</div>
+    <textarea class="ref-ta" id="reflection" placeholder="Write freely…" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+  </div>
+
+  <!-- ── SIGN ── -->
+  <div class="sign-card">
+    <div class="sign-eyebrow">Your Declaration</div>
+    <div class="sign-text">"I get to choose who I am.<br>I get to design the life I want."</div>
+    <div class="sign-strip">
+      <span class="sign-item">👁 Aware Today</span>
+      <span class="sign-item">🎯 Intentional Choices</span>
+      <span class="sign-item">🔄 Consistent Actions</span>
+      <span class="sign-item">✨ Who I Choose to Be</span>
+    </div>
+  </div>
+
+  <div class="principles">
+    <span>👁 Aware — See clearly. Without judgement.</span>
+    <span>🧭 Explore — Question everything.</span>
+    <span>✨ Choose — Release what doesn't fit. Create what does.</span>
+  </div>
+
+  <div class="complete-wrap">
+    <button class="save-btn" onclick="doSave()">💾 Save my answers</button>
+    <a class="library-btn" href="index.html">← Back to hub</a>
+    <button class="complete-btn" id="complete-btn" onclick="markComplete()">Mark as Complete ✓</button>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'tlr-identity-i-choose';
+function autoSize(el){ el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
+
+function collectData(){
+  return {
+    snap_think: document.getElementById('snap-think').value,
+    snap_relate: document.getElementById('snap-relate').value,
+    snap_showup: document.getElementById('snap-showup').value,
+    snap_matters: document.getElementById('snap-matters').value,
+    snap_habits: document.getElementById('snap-habits').value,
+    snap_feel: document.getElementById('snap-feel').value,
+    shift_letting: document.getElementById('shift-letting').value,
+    shift_choosing: document.getElementById('shift-choosing').value,
+    shift_becoming: document.getElementById('shift-becoming').value,
+    proof_1: document.getElementById('proof-1').value,
+    proof_2: document.getElementById('proof-2').value,
+    proof_3: document.getElementById('proof-3').value,
+    proof_4: document.getElementById('proof-4').value,
+    proof_5: document.getElementById('proof-5').value,
+    day_1: document.getElementById('day-1').value,
+    day_2: document.getElementById('day-2').value,
+    day_3: document.getElementById('day-3').value,
+    day_4: document.getElementById('day-4').value,
+    day_5: document.getElementById('day-5').value,
+    day_6: document.getElementById('day-6').value,
+    day_7: document.getElementById('day-7').value,
+    reflection: document.getElementById('reflection').value
+  };
+}
+
+function populateData(d){
+  if(!d) return;
+  Object.entries(d).forEach(([key, val]) => {
+    const id = key.replace(/_/g, '-');
+    const el = document.getElementById(id);
+    if(el && val){ el.value = val; if(el.tagName==='TEXTAREA') autoSize(el); }
+  });
+}
+
+function updateProgress(){
+  const snapIds = ['snap-think','snap-relate','snap-showup','snap-matters','snap-habits','snap-feel'];
+  const snapFilled = snapIds.filter(id => document.getElementById(id)?.value.trim().length > 10).length;
+  const snapScore = snapFilled / 6;
+
+  const shiftFilled = ['shift-letting','shift-choosing','shift-becoming'].filter(id => document.getElementById(id)?.value.trim().length > 15).length;
+  const shiftScore = shiftFilled / 3;
+
+  const proofFilled = [1,2,3,4,5].filter(n => document.getElementById(`proof-${n}`)?.value.trim().length > 5).length;
+  const proofScore = proofFilled / 5;
+
+  const daysFilled = [1,2,3,4,5,6,7].filter(n => document.getElementById(`day-${n}`)?.value.trim().length > 3).length;
+  const daysScore = daysFilled / 7;
+
+  const refScore = document.getElementById('reflection')?.value.trim().length > 20 ? 1 : 0;
+
+  const pct = Math.round((snapScore*0.3 + shiftScore*0.25 + proofScore*0.2 + daysScore*0.15 + refScore*0.1)*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'%';
+  const hint = document.getElementById('prog-hint');
+  if(pct>=80){ hint.textContent='Powerful work — ready to mark complete.'; hint.className='prog-hint done'; }
+  else if(pct>=40){ hint.textContent='Keep going — you\'re building something real.'; hint.className='prog-hint'; }
+  else { hint.textContent='Start with your Future Self Snapshot.'; hint.className='prog-hint'; }
+}
+
+let saveTimer;
+function autoSave(){ updateProgress(); clearTimeout(saveTimer); saveTimer=setTimeout(doSave,1200); }
+
+async function doSave(){
+  const data = collectData();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const badge = document.getElementById('saved-badge');
+  badge.style.display='flex'; setTimeout(()=>badge.style.display='none',2000);
+  await saveProgress(STORAGE_KEY, false, data);
+}
+
+async function markComplete(){
+  const data = collectData();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  if(!done.includes(STORAGE_KEY)) done.push(STORAGE_KEY);
+  localStorage.setItem('tlr_completed', JSON.stringify(done));
+  await saveProgress(STORAGE_KEY, true, data);
+  document.getElementById('completed-banner').style.display='flex';
+  document.getElementById('complete-btn').style.display='none';
+  document.getElementById('prog-fill').style.width='100%';
+  document.getElementById('prog-pct').textContent='100%';
+  document.getElementById('prog-hint').textContent='Completed ✓';
+  document.getElementById('prog-hint').className='prog-hint done';
+}
+
+async function resetComplete(){
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  const idx = done.indexOf(STORAGE_KEY);
+  if(idx>-1){ done.splice(idx,1); localStorage.setItem('tlr_completed',JSON.stringify(done)); }
+  const data = collectData();
+  await saveProgress(STORAGE_KEY, false, data);
+  document.getElementById('completed-banner').style.display='none';
+  document.getElementById('complete-btn').style.display='';
+}
+
+requireAuth().then(user => {
+  if(!user) return;
+  loadProgress().then(rows => {
+    const row = rows && rows.find(r => r.tool_key === STORAGE_KEY);
+    if(row && row.data){
+      populateData(row.data);
+      if(row.completed){
+        const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+        if(!done.includes(STORAGE_KEY)){ done.push(STORAGE_KEY); localStorage.setItem('tlr_completed',JSON.stringify(done)); }
+        document.getElementById('completed-banner').style.display='flex';
+        document.getElementById('complete-btn').style.display='none';
+      }
+    } else {
+      const local = localStorage.getItem(STORAGE_KEY);
+      if(local){ try{ populateData(JSON.parse(local)); }catch(e){} }
+    }
+    updateProgress();
+  }).catch(()=>{ const local=localStorage.getItem(STORAGE_KEY); if(local){ try{ populateData(JSON.parse(local)); }catch(e){} } updateProgress(); });
+});
+</script>
+</body>
+</html>
