@@ -78,8 +78,181 @@ body{
   opacity:0;transform:translateX(-60px);
 }
 
-/* ── Screen inner ── */
-.screen-inner{width:100%;max-width:640px;margin:0 auto}
+/* ── Screen inner — light card on dark bg ── */
+.screen-inner{
+  width:100%;max-width:600px;margin:0 auto;
+  background:#FAF8F5;
+  border-radius:20px;
+  padding:2.5rem 2rem 2rem;
+  box-shadow:0 24px 64px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.2);
+  color:#1A1A2E;
+}
+/* Invert text colours inside card */
+.screen-inner .hook-eyebrow,
+.screen-inner .q-step-label{color:var(--gold)}
+.screen-inner .hook-title,
+.screen-inner .q-prompt-title{color:#1A1A2E}
+.screen-inner .hook-title em,
+.screen-inner .q-prompt-title em{color:var(--gold);font-style:italic}
+.screen-inner .hook-body{color:rgba(26,26,46,0.78)}
+.screen-inner .hook-body strong{color:#1A1A2E}
+.screen-inner .name-prompt{color:rgba(26,26,46,0.65);margin-top:1.25rem;margin-bottom:0.5rem;font-size:0.88rem;font-weight:500}
+.screen-inner .name-field{
+  background:rgba(26,26,46,0.05);
+  border-bottom-color:rgba(26,26,46,0.2);
+  color:#1A1A2E;
+}
+.screen-inner .name-field::placeholder{color:rgba(26,26,46,0.35)}
+.screen-inner .name-field:focus{border-bottom-color:var(--gold)}
+.screen-inner .hook-meta{background:rgba(26,26,46,0.05);border-color:rgba(26,26,46,0.1)}
+.screen-inner .hook-meta-item{color:rgba(26,26,46,0.6)}
+/* credential strip */
+.screen-inner div[style*="rgba(255,255,255,0.04)"]{
+  background:rgba(26,26,46,0.06)!important;
+  border-color:rgba(26,26,46,0.1)!important;
+}
+.screen-inner .btn-ghost{
+  border-color:rgba(26,26,46,0.2);
+  color:rgba(26,26,46,0.5);
+}
+.screen-inner .btn-ghost:hover{border-color:rgba(26,26,46,0.4);color:#1A1A2E}
+/* Scenario buttons on light bg */
+.screen-inner .scenario-btn{
+  background:rgba(26,26,46,0.05);
+  border-color:rgba(26,26,46,0.15);
+  color:#1A1A2E;
+}
+.screen-inner .scenario-btn::before{
+  background:rgba(26,26,46,0.07);
+  border-color:rgba(26,26,46,0.18);
+  color:rgba(26,26,46,0.4);
+}
+.screen-inner .scenario-btn:hover{
+  border-color:rgba(232,168,0,0.6);
+  background:rgba(232,168,0,0.08);
+  color:#1A1A2E;
+}
+.screen-inner .scenario-btn.selected{
+  border-color:var(--gold);
+  background:rgba(232,168,0,0.12);
+}
+.screen-inner .scenario-other-toggle{color:rgba(26,26,46,0.4)}
+.screen-inner .scenario-other-toggle:hover{color:rgba(26,26,46,0.65)}
+.screen-inner .scenario-detail{
+  background:rgba(26,26,46,0.04);
+  border-color:rgba(26,26,46,0.15);
+  color:#1A1A2E;
+}
+.screen-inner .scenario-detail::placeholder{color:rgba(26,26,46,0.35)}
+.screen-inner .scenario-detail:focus{border-color:var(--gold)}
+/* Tap instruction */
+.tap-hint{
+  font-size:0.75rem;color:rgba(26,26,46,0.45);
+  margin-bottom:0.25rem;margin-top:0.1rem;
+  letter-spacing:0.02em;
+}
+/* Midpoint card */
+.screen-inner .midpoint-card{
+  background:rgba(232,168,0,0.08);
+  border-color:rgba(232,168,0,0.25);
+  color:rgba(26,26,46,0.8);
+}
+.screen-inner .midpoint-card strong{color:#1A1A2E}
+/* Families */
+.screen-inner .families-intro{color:rgba(26,26,46,0.75)}
+.screen-inner .families-intro strong{color:#1A1A2E}
+.screen-inner .family-chip{
+  background:rgba(26,26,46,0.06);
+  border-color:rgba(26,26,46,0.15);
+  color:rgba(26,26,46,0.7);
+}
+.screen-inner .family-chip.selected{
+  background:rgba(232,168,0,0.15);
+  border-color:var(--gold);
+  color:#1A1A2E;
+}
+/* Answer summary */
+.screen-inner .ans-item{border-bottom-color:rgba(26,26,46,0.08)}
+.screen-inner .ans-label{color:var(--gold)}
+.screen-inner .ans-text{color:rgba(26,26,46,0.72)}
+/* Pattern textarea */
+.screen-inner .q-textarea{
+  background:rgba(26,26,46,0.04);
+  border-color:rgba(26,26,46,0.15);
+  color:#1A1A2E;
+}
+.screen-inner .q-textarea::placeholder{color:rgba(26,26,46,0.35)}
+.screen-inner .q-textarea:focus{border-color:var(--gold)}
+/* Value input blocks */
+.screen-inner .value-input-block{border-color:rgba(26,26,46,0.1)}
+.screen-inner .vib-badge{color:var(--gold)}
+.screen-inner .core-star{color:var(--gold)}
+.screen-inner .vib-defn-label{color:rgba(26,26,46,0.55)}
+.screen-inner .vib-name{
+  background:transparent;
+  border-bottom-color:rgba(26,26,46,0.2);
+  color:#1A1A2E;
+}
+.screen-inner .vib-name::placeholder{color:rgba(26,26,46,0.35)}
+.screen-inner .vib-defn{
+  background:rgba(26,26,46,0.04);
+  border-color:rgba(26,26,46,0.15);
+  color:#1A1A2E;
+}
+.screen-inner .supporting-toggle{color:rgba(26,26,46,0.5);border-color:rgba(26,26,46,0.15)}
+/* Reality check */
+.screen-inner .rc-block{border-color:rgba(26,26,46,0.1)}
+.screen-inner .rc-value-name{color:#1A1A2E}
+.screen-inner .rc-value-defn{color:rgba(26,26,46,0.6)}
+.screen-inner .rc-scale-labels{color:rgba(26,26,46,0.4)}
+.screen-inner .rc-score-val{color:var(--gold)}
+.screen-inner .rc-score-label{color:rgba(26,26,46,0.6)}
+/* Email gate */
+.screen-inner .email-reveal-title{color:#1A1A2E}
+.screen-inner .email-reveal-sub{color:rgba(26,26,46,0.65)}
+.screen-inner .blurred-preview{border-color:rgba(26,26,46,0.1);color:rgba(26,26,46,0.35)}
+.screen-inner .email-field-label{color:rgba(26,26,46,0.6)}
+.screen-inner .email-field{
+  background:rgba(26,26,46,0.05);
+  border-color:rgba(26,26,46,0.2);
+  color:#1A1A2E;
+}
+.screen-inner .email-field::placeholder{color:rgba(26,26,46,0.35)}
+.screen-inner .gdpr-label{color:rgba(26,26,46,0.6)}
+.screen-inner .gdpr-label a{color:rgba(26,26,46,0.5)}
+.screen-inner .screen-footer{color:rgba(26,26,46,0.4)}
+.screen-inner .screen-footer a{color:rgba(26,26,46,0.45)}
+/* Derived values reveal (screen 7) */
+.derived-intro{
+  font-size:0.9rem;color:rgba(26,26,46,0.65);
+  line-height:1.7;margin-bottom:1.5rem;
+}
+.derived-cards{display:flex;flex-direction:column;gap:0.85rem;margin-bottom:1.75rem}
+.derived-card{
+  background:rgba(232,168,0,0.07);
+  border:1.5px solid rgba(232,168,0,0.3);
+  border-radius:16px;padding:1.25rem 1.4rem;
+}
+.derived-card-num{
+  font-size:0.65rem;font-weight:700;letter-spacing:0.12em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:0.35rem;
+}
+.derived-card-name{
+  font-family:var(--font-display);font-size:1.6rem;
+  color:#1A1A2E;margin-bottom:0.3rem;line-height:1.2;
+}
+.derived-card-desc{
+  font-size:0.82rem;color:rgba(26,26,46,0.6);
+  font-style:italic;line-height:1.6;
+}
+.derived-note{
+  font-size:0.78rem;color:rgba(26,26,46,0.45);
+  line-height:1.7;margin-bottom:1.25rem;
+  padding:0.85rem 1rem;
+  background:rgba(26,26,46,0.04);
+  border-radius:10px;
+  border:1px solid rgba(26,26,46,0.1);
+}
 
 /* ── Hook screen ── */
 .hook-eyebrow{
@@ -536,7 +709,8 @@ body{
 <div class="screen" id="s2">
   <div class="screen-inner">
     <div class="q-step-label">Question 1 of 4</div>
-    <h2 class="q-prompt-title" id="s2-title">A recent decision that <em>cost</em> you something. Which of these comes closest?</h2>
+    <h2 class="q-prompt-title" id="s2-title">A recent decision that <em>cost</em> you something. Which comes closest?</h2>
+    <p class="tap-hint">Tap the option that fits best</p>
     <div class="scenario-grid" id="s2-grid">
       <button class="scenario-btn" data-screen="s2" data-value="I put people ahead of a professional opportunity or financial gain" onclick="selectScenario('s2',this)">I put people ahead of a professional opportunity or financial gain</button>
       <button class="scenario-btn" data-screen="s2" data-value="I chose honesty or integrity, even when it wasn't the easy option" onclick="selectScenario('s2',this)">I chose honesty or integrity, even when it wasn't the easy option</button>
@@ -559,6 +733,7 @@ body{
   <div class="screen-inner">
     <div class="q-step-label">Question 2 of 4</div>
     <h2 class="q-prompt-title">Something you willingly gave up in the last year. Which fits?</h2>
+    <p class="tap-hint">Tap the option that fits best</p>
     <div class="scenario-grid" id="s3-grid">
       <button class="scenario-btn" data-screen="s3" data-value="I stepped back from status, money, or career advancement for something that matters more" onclick="selectScenario('s3',this)">I stepped back from status, money, or career advancement for something that matters more</button>
       <button class="scenario-btn" data-screen="s3" data-value="I gave time or energy to others, even when I had little to spare" onclick="selectScenario('s3',this)">I gave time or energy to others, even when I had little to spare</button>
@@ -584,6 +759,7 @@ body{
     </div>
     <div class="q-step-label">Question 3 of 4</div>
     <h2 class="q-prompt-title">What's genuinely angered you recently — not irritation, a real <em>violation</em>?</h2>
+    <p class="tap-hint">Tap the option that fits best</p>
     <div class="scenario-grid" id="s4-grid">
       <button class="scenario-btn" data-screen="s4" data-value="When someone was dishonest, manipulative, or let people down" onclick="selectScenario('s4',this)">When someone was dishonest, manipulative, or let people down</button>
       <button class="scenario-btn" data-screen="s4" data-value="When I saw someone's potential being wasted or held back" onclick="selectScenario('s4',this)">When I saw someone's potential being wasted or held back</button>
@@ -606,6 +782,7 @@ body{
   <div class="screen-inner">
     <div class="q-step-label">Question 4 of 4</div>
     <h2 class="q-prompt-title">When did you last feel most like <em>yourself</em> — not successful, just <em>you</em>?</h2>
+    <p class="tap-hint">Tap the option that fits best</p>
     <div class="scenario-grid" id="s5-grid">
       <button class="scenario-btn" data-screen="s5" data-value="When I was creating or building something that mattered to me" onclick="selectScenario('s5',this)">When I was creating or building something that mattered to me</button>
       <button class="scenario-btn" data-screen="s5" data-value="When I was deeply connected with someone I care about" onclick="selectScenario('s5',this)">When I was deeply connected with someone I care about</button>
@@ -640,47 +817,19 @@ body{
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
-<!-- SCREEN 7: NAME YOUR VALUES -->
+<!-- SCREEN 7: DERIVED VALUES REVEAL -->
 <!-- ═══════════════════════════════════════════ -->
 <div class="screen" id="s7">
   <div class="screen-inner">
-    <div class="q-step-label">Name them in your own words</div>
-    <h2 class="q-prompt-title">Now: what are your two core values?</h2>
-    <p class="q-prompt-sub">Research with over 10,000 people found that the most grounded, decisive people tend to operate from <strong style="color:var(--cream)">two core values,</strong> not ten. Not the ones that sound impressive. The two that actually explain the choices you make.</p>
-
-    <div class="value-input-block core">
-      <div class="vib-badge"><span class="core-star">★</span> Core Value 1</div>
-      <input class="vib-name" id="v1-name" placeholder="Name it in your own words…" oninput="trackStep()">
-      <div class="vib-defn-label">What does this actually look like in your choices?</div>
-      <textarea class="vib-defn" id="v1-defn" placeholder="Not the dictionary definition — when I'm honouring this value, I…" oninput="autoSize(this);trackStep()" rows="2"></textarea>
+    <div class="q-step-label">Your values — read from your choices</div>
+    <h2 class="q-prompt-title">Here's what your answers reveal.</h2>
+    <p class="derived-intro">You didn't tell us these. We read them from the four decisions you described. This is what's actually driving your choices.</p>
+    <div class="derived-cards" id="derived-cards">
+      <!-- Populated by setupScreen7() -->
     </div>
-
-    <div class="value-input-block core">
-      <div class="vib-badge"><span class="core-star">★</span> Core Value 2</div>
-      <input class="vib-name" id="v2-name" placeholder="Name it in your own words…" oninput="trackStep()">
-      <div class="vib-defn-label">What does this actually look like in your choices?</div>
-      <textarea class="vib-defn" id="v2-defn" placeholder="Not the dictionary definition — when I'm honouring this value, I…" oninput="autoSize(this);trackStep()" rows="2"></textarea>
-    </div>
-
-    <button class="supporting-toggle" onclick="toggleSupporting()">
-      <span id="support-arrow">+</span> Add supporting values (optional)
-    </button>
-    <div id="supporting-values-wrap">
-      <div class="value-input-block" style="margin-top:0.75rem">
-        <div class="vib-badge" style="color:var(--muted)">Supporting Value 3</div>
-        <input class="vib-name" id="v3-name" placeholder="Optional…" style="border-bottom-color:rgba(255,255,255,0.15)">
-      </div>
-      <div class="value-input-block">
-        <div class="vib-badge" style="color:var(--muted)">Supporting Value 4</div>
-        <input class="vib-name" id="v4-name" placeholder="Optional…" style="border-bottom-color:rgba(255,255,255,0.15)">
-      </div>
-      <div class="value-input-block">
-        <div class="vib-badge" style="color:var(--muted)">Supporting Value 5</div>
-        <input class="vib-name" id="v5-name" placeholder="Optional…" style="border-bottom-color:rgba(255,255,255,0.15)">
-      </div>
-    </div>
+    <div class="derived-note" id="derived-note"></div>
     <br>
-    <button class="btn-primary" onclick="advance(7)">Continue <span>→</span></button>
+    <button class="btn-primary" onclick="advance(7)">This lands — continue <span>→</span></button>
     <button class="btn-ghost" onclick="goBack(7)">← Back</button>
   </div>
 </div>
@@ -692,7 +841,7 @@ body{
   <div class="screen-inner">
     <div class="q-step-label">The reality check</div>
     <h2 class="q-prompt-title">Almost there. This is the most important part.</h2>
-    <p class="q-prompt-sub">For each value: in the last 30 days, how often has it <strong style="color:var(--cream)">actually driven your choices?</strong> Not how much you care about it. How often has it shown up in what you actually do.</p>
+    <p class="q-prompt-sub" style="color:rgba(26,26,46,0.65)">For each value: in the last 30 days, how often has it <strong style="color:#1A1A2E">actually driven your choices?</strong> Not how much you care about it — how often it shows up in what you do.</p>
 
     <div class="rc-block">
       <div class="rc-value-name" id="rc1-name">Value 1</div>
@@ -961,9 +1110,7 @@ function validateStep(step){
     }
   }
   if(step === 7){
-    const v1 = document.getElementById('v1-name').value.trim();
-    const v2 = document.getElementById('v2-name').value.trim();
-    if(!v1||!v2){ if(!v1) highlight('v1-name'); else highlight('v2-name'); return false; }
+    // Derived values — always valid if we reached this screen
   }
   return true;
 }
@@ -988,13 +1135,8 @@ function saveStepData(step){
     state.pattern_reflection = document.getElementById('pattern-reflection').value;
   }
   if(step===7){
-    state.v1_name = document.getElementById('v1-name').value;
-    state.v1_defn = document.getElementById('v1-defn').value;
-    state.v2_name = document.getElementById('v2-name').value;
-    state.v2_defn = document.getElementById('v2-defn').value;
-    state.v3_name = document.getElementById('v3-name')?.value||'';
-    state.v4_name = document.getElementById('v4-name')?.value||'';
-    state.v5_name = document.getElementById('v5-name')?.value||'';
+    // Values already set in state by setupScreen7() / deriveValues()
+    // Nothing extra to collect here
   }
   if(step===8){
     state.v1_score = parseInt(document.getElementById('rc1-slider').value);
@@ -1005,15 +1147,79 @@ function saveStepData(step){
   try{ localStorage.setItem('tlr-vd-progress', JSON.stringify(state)); }catch(e){}
 }
 
+/* ═══ SCENARIO → VALUE FAMILY MAPPING ═══ */
+const SCENARIO_VALUE_MAP = {
+  // Screen 2 - Decision
+  "I put people ahead of a professional opportunity or financial gain": ['connection','loyalty','service'],
+  "I chose honesty or integrity, even when it wasn't the easy option": ['integrity','courage','loyalty'],
+  "I backed my own judgement over what others expected of me": ['freedom','courage','integrity'],
+  "I chose meaning or purpose over comfort or convenience": ['impact','growth','freedom'],
+  // Screen 3 - Sacrifice
+  "I stepped back from status, money, or career advancement for something that matters more": ['integrity','wellbeing','freedom'],
+  "I gave time or energy to others, even when I had little to spare": ['service','connection','loyalty'],
+  "I let go of a relationship or dynamic that wasn't aligned with who I'm becoming": ['growth','courage','freedom'],
+  "I chose depth over breadth — fewer things, done properly": ['mastery','integrity','achievement'],
+  // Screen 4 - Anger
+  "When someone was dishonest, manipulative, or let people down": ['integrity','loyalty','justice'],
+  "When I saw someone's potential being wasted or held back": ['growth','impact','service'],
+  "When something I care about was dismissed, devalued, or ignored": ['impact','courage','integrity'],
+  "When injustice went unchallenged — someone being treated unfairly": ['justice','courage','service'],
+  // Screen 5 - Aliveness
+  "When I was creating or building something that mattered to me": ['creativity','mastery','impact'],
+  "When I was deeply connected with someone I care about": ['connection','family','loyalty'],
+  "When I was contributing to something bigger than myself": ['impact','service','growth'],
+  "When I was growing — learning, stretching, or doing something new": ['growth','adventure','mastery']
+};
+
+function deriveValues(){
+  const scores = {};
+  [state.ev_decision, state.ev_sacrifice, state.ev_anger, state.ev_pride].forEach(sel => {
+    const families = SCENARIO_VALUE_MAP[sel] || [];
+    families.forEach((id, i) => {
+      scores[id] = (scores[id] || 0) + (families.length - i); // weighted: 1st gets most
+    });
+  });
+  const sorted = Object.entries(scores)
+    .sort((a,b) => b[1]-a[1])
+    .map(([id]) => VALUE_FAMILIES.find(f => f.id === id))
+    .filter(Boolean);
+  return sorted.slice(0,2);
+}
+
 /* ═══ SCREEN-SPECIFIC SETUP ═══ */
 function startAssessment(){
   const name = document.getElementById('first-name').value.trim();
   if(!name){ highlight('first-name'); return; }
-  state.first_name = name;
+  // Reset all state cleanly
+  state = { first_name: name };
+  scenarioSelections = {s2:null, s3:null, s4:null, s5:null};
+  selectedFamilies = new Set();
+  try{ localStorage.removeItem('tlr-vd-progress'); }catch(e){}
   document.getElementById('s2-name').textContent = name;
   flashTransition(() => showScreen(2));
-  // Save to Supabase (partial)
   savePartialToSupabase();
+}
+
+function setupScreen7(){
+  const derived = deriveValues();
+  state.v1_name = derived[0]?.label || '';
+  state.v1_defn = derived[0]?.desc || '';
+  state.v2_name = derived[1]?.label || '';
+  state.v2_defn = derived[1]?.desc || '';
+
+  const container = document.getElementById('derived-cards');
+  container.innerHTML = derived.map((v,i) => `
+    <div class="derived-card">
+      <div class="derived-card-num">Core Value ${i+1}</div>
+      <div class="derived-card-name">${v.label}</div>
+      <div class="derived-card-desc">${v.desc}</div>
+    </div>
+  `).join('');
+
+  const note = document.getElementById('derived-note');
+  if(derived.length === 2){
+    note.innerHTML = `These two values appear consistently across your four answers. The reality check on the next screen will show you how often they're actually showing up in your life right now.`;
+  }
 }
 
 function setupScreen6(){
@@ -1263,6 +1469,7 @@ async function savePartialToSupabase(){
 const _origAdvance = advance;
 window.advance = function(fromStep){
   if(fromStep === 5) setTimeout(setupScreen6, 50);
+  if(fromStep === 6) setTimeout(setupScreen7, 50);
   if(fromStep === 7) setTimeout(setupScreen8, 50);
   _origAdvance(fromStep);
 };
