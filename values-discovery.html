@@ -46,8 +46,11 @@ body{
 /* ── Top bar ── */
 #topbar{
   position:fixed;top:0;left:0;right:0;z-index:100;
-  padding:1rem 1.5rem;
+  padding:0.85rem 1.5rem;
   display:flex;align-items:center;justify-content:space-between;
+  background:rgba(15,26,43,0.92);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid rgba(255,255,255,0.07);
   pointer-events:none;
 }
 .tlr-logo{
@@ -63,6 +66,7 @@ body{
 
 /* ── Screens ── */
 .screen{
+  width:100%;
   min-height:100vh;
   display:flex;flex-direction:column;justify-content:center;align-items:center;
   padding:5rem 1.25rem 3.5rem;
@@ -72,11 +76,8 @@ body{
   transition:opacity .45s cubic-bezier(.4,0,.2,1), transform .45s cubic-bezier(.4,0,.2,1);
 }
 .screen.active{
+  width:100%;
   opacity:1;pointer-events:all;transform:translateX(0);position:relative;
-}
-/* Centre card explicitly */
-.screen > .screen-inner{
-  margin-left:auto;margin-right:auto;
 }
 .screen.exit-left{
   opacity:0;transform:translateX(-60px);
@@ -669,7 +670,9 @@ body{
 
 <!-- Topbar -->
 <div id="topbar">
-  <a href="https://www.the-living-room.com" target="_blank"><img src="tlr-logo.png" alt="The Living Room" style="height:34px;opacity:0.7;mix-blend-mode:screen;" onerror="this.style.display='none'"></a>
+  <a href="https://www.the-living-room.com" target="_blank" style="pointer-events:all;display:flex;align-items:center;gap:0.6rem;text-decoration:none;">
+  <img src="tlr-logo.png" alt="The Living Room" style="height:44px;opacity:0.95;mix-blend-mode:screen;" onerror="this.style.display='none'">
+</a>
   <div id="step-counter"></div>
 </div>
 
