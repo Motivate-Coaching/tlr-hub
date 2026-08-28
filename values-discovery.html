@@ -407,48 +407,69 @@ body{
 
 /* ── Scenario picker ── */
 .scenario-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;
-  margin:1.25rem 0 1rem;
+  counter-reset:opt;
+  display:flex;flex-direction:column;gap:0.55rem;
+  margin:1.5rem 0 0.75rem;
 }
 .scenario-btn{
-  background:rgba(255,255,255,0.04);
-  border:1.5px solid rgba(245,242,238,0.12);
-  border-radius:14px;padding:0.9rem 1rem;
-  text-align:left;cursor:pointer;transition:all .18s;
-  color:var(--muted);font-family:var(--font-body);
-  font-size:0.85rem;line-height:1.5;width:100%;
+  counter-increment:opt;
+  display:flex;align-items:center;gap:0.9rem;
+  background:rgba(255,255,255,0.07);
+  border:1.5px solid rgba(245,242,238,0.18);
+  border-radius:14px;padding:1.05rem 1.1rem;
+  text-align:left;cursor:pointer;
+  transition:background .15s,border-color .15s,transform .12s;
+  color:var(--cream);font-family:var(--font-body);
+  font-size:0.92rem;line-height:1.45;width:100%;
+}
+.scenario-btn::before{
+  content:counter(opt,upper-alpha);
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:30px;height:30px;border-radius:8px;
+  background:rgba(255,255,255,0.08);
+  border:1.5px solid rgba(255,255,255,0.18);
+  font-size:0.72rem;font-weight:700;
+  color:rgba(255,255,255,0.5);flex-shrink:0;
+  transition:background .15s,border-color .15s,color .15s;
 }
 .scenario-btn:hover{
-  border-color:rgba(232,168,0,0.4);
-  background:rgba(232,168,0,0.06);color:var(--cream);
+  border-color:rgba(232,168,0,0.5);
+  background:rgba(232,168,0,0.09);
+  transform:translateX(3px);
+}
+.scenario-btn:hover::before{
+  background:rgba(232,168,0,0.15);
+  border-color:rgba(232,168,0,0.45);
+  color:var(--gold);
 }
 .scenario-btn.selected{
-  border-color:var(--gold);background:rgba(232,168,0,0.1);
-  color:var(--cream);
+  border-color:var(--gold);
+  background:rgba(232,168,0,0.13);
 }
 .scenario-btn.selected::before{
-  content:'✓ ';color:var(--gold);font-weight:700;
+  content:'✓';background:var(--gold);
+  border-color:var(--gold);color:#0F1A2B;font-size:0.9rem;
 }
 .scenario-other-toggle{
-  font-size:0.78rem;color:rgba(245,242,238,0.4);
+  font-size:0.75rem;color:rgba(245,242,238,0.35);
   background:none;border:none;cursor:pointer;
-  font-family:var(--font-body);padding:0;
+  font-family:var(--font-body);padding:0.25rem 0;
   text-decoration:underline;text-underline-offset:3px;
-  display:block;margin-bottom:0.75rem;transition:color .15s;
+  display:block;margin-bottom:0.6rem;transition:color .15s;
 }
 .scenario-other-toggle:hover{color:var(--muted)}
 .scenario-detail{
-  width:100%;background:rgba(255,255,255,0.03);
-  border:1px solid rgba(245,242,238,0.1);border-radius:10px;
+  width:100%;background:rgba(255,255,255,0.04);
+  border:1.5px solid rgba(245,242,238,0.15);border-radius:10px;
   color:var(--cream);font-family:var(--font-body);font-size:0.88rem;
   padding:0.75rem 1rem;resize:none;min-height:72px;
   transition:border-color .18s;display:none;
 }
 .scenario-detail.visible{display:block}
-.scenario-detail:focus{outline:none;border-color:rgba(232,168,0,0.35)}
+.scenario-detail:focus{outline:none;border-color:rgba(232,168,0,0.4)}
 .scenario-error{
-  font-size:0.78rem;color:rgba(200,80,80,0.9);
-  margin-top:-0.5rem;margin-bottom:0.75rem;display:none;
+  font-size:0.78rem;color:rgba(220,90,90,0.95);
+  margin-top:0.25rem;margin-bottom:0.5rem;display:none;
 }
 
 /* ── Mobile ── */
@@ -457,7 +478,7 @@ body{
   .core-values-display{grid-template-columns:1fr}
   .hook-title{font-size:1.9rem}
   .q-prompt-title{font-size:1.3rem}
-  .scenario-grid{grid-template-columns:1fr}
+  .scenario-btn{font-size:0.88rem}
 }
 </style>
 </head>
@@ -514,19 +535,17 @@ body{
 <!-- ═══════════════════════════════════════════ -->
 <div class="screen" id="s2">
   <div class="screen-inner">
-    <div class="q-step-label">The decision test</div>
-    <h2 class="q-prompt-title" id="s2-title">Let's start with what your choices reveal, <span id="s2-name" style="color:var(--gold);font-style:italic"></span>.</h2>
-    <p class="q-prompt-sub">Think about a decision you made in the last few months that <strong style="color:var(--cream)">cost you something</strong> — time, money, comfort, or a relationship. Which comes closest to what drove that choice?</p>
+    <div class="q-step-label">Question 1 of 4</div>
+    <h2 class="q-prompt-title" id="s2-title">A recent decision that <em>cost</em> you something. Which of these comes closest?</h2>
     <div class="scenario-grid" id="s2-grid">
       <button class="scenario-btn" data-screen="s2" data-value="I put people ahead of a professional opportunity or financial gain" onclick="selectScenario('s2',this)">I put people ahead of a professional opportunity or financial gain</button>
       <button class="scenario-btn" data-screen="s2" data-value="I chose honesty or integrity, even when it wasn't the easy option" onclick="selectScenario('s2',this)">I chose honesty or integrity, even when it wasn't the easy option</button>
       <button class="scenario-btn" data-screen="s2" data-value="I backed my own judgement over what others expected of me" onclick="selectScenario('s2',this)">I backed my own judgement over what others expected of me</button>
       <button class="scenario-btn" data-screen="s2" data-value="I chose meaning or purpose over comfort or convenience" onclick="selectScenario('s2',this)">I chose meaning or purpose over comfort or convenience</button>
     </div>
-    <div class="scenario-error" id="s2-error">Please select the option that fits best, or add your own below.</div>
-    <button class="scenario-other-toggle" onclick="toggleDetail('s2-detail')">My situation is different — describe it instead</button>
-    <textarea class="scenario-detail" id="s2-detail" placeholder="Describe the decision in your own words…" oninput="autoSize(this)"></textarea>
-    <div class="q-nudge">There's no right answer. Pick the one that fits closest — you can add detail below if you want.</div>
+    <div class="scenario-error" id="s2-error">Please pick the closest option, or describe your own below.</div>
+    <button class="scenario-other-toggle" onclick="toggleDetail('s2-detail')">None of these — describe it in your own words</button>
+    <textarea class="scenario-detail" id="s2-detail" placeholder="Describe the decision briefly…" oninput="autoSize(this)"></textarea>
     <br>
     <button class="btn-primary" onclick="advance(2)">Continue <span>→</span></button>
     <button class="btn-ghost" onclick="goBack(2)">← Back</button>
@@ -538,9 +557,8 @@ body{
 <!-- ═══════════════════════════════════════════ -->
 <div class="screen" id="s3">
   <div class="screen-inner">
-    <div class="q-step-label">The sacrifice test</div>
-    <h2 class="q-prompt-title">Good. Now the harder one.</h2>
-    <p class="q-prompt-sub">What have you <strong style="color:var(--cream)">willingly given up</strong> in the last year? Not lost through bad luck — traded away on purpose. Which of these is closest?</p>
+    <div class="q-step-label">Question 2 of 4</div>
+    <h2 class="q-prompt-title">Something you willingly gave up in the last year. Which fits?</h2>
     <div class="scenario-grid" id="s3-grid">
       <button class="scenario-btn" data-screen="s3" data-value="I stepped back from status, money, or career advancement for something that matters more" onclick="selectScenario('s3',this)">I stepped back from status, money, or career advancement for something that matters more</button>
       <button class="scenario-btn" data-screen="s3" data-value="I gave time or energy to others, even when I had little to spare" onclick="selectScenario('s3',this)">I gave time or energy to others, even when I had little to spare</button>
@@ -548,9 +566,8 @@ body{
       <button class="scenario-btn" data-screen="s3" data-value="I chose depth over breadth — fewer things, done properly" onclick="selectScenario('s3',this)">I chose depth over breadth — fewer things, done properly</button>
     </div>
     <div class="scenario-error" id="s3-error">Please select the option that fits best, or add your own below.</div>
-    <button class="scenario-other-toggle" onclick="toggleDetail('s3-detail')">My situation is different — describe it instead</button>
+    <button class="scenario-other-toggle" onclick="toggleDetail('s3-detail')">None of these — describe it in your own words</button>
     <textarea class="scenario-detail" id="s3-detail" placeholder="Describe what you gave up, and what it was in service of…" oninput="autoSize(this)"></textarea>
-    <div class="q-nudge">The small sacrifices are often the most telling. Trust your first instinct.</div>
     <br>
     <button class="btn-primary" onclick="advance(3)">Continue <span>→</span></button>
     <button class="btn-ghost" onclick="goBack(3)">← Back</button>
@@ -563,11 +580,10 @@ body{
 <div class="screen" id="s4">
   <div class="screen-inner">
     <div class="midpoint-card">
-      Halfway there. <strong>What you've selected already contains your values.</strong> We just haven't named them yet.
+      Halfway there. <strong>What you've chosen already contains your values.</strong> We just haven't named them yet.
     </div>
-    <div class="q-step-label">The reaction test</div>
-    <h2 class="q-prompt-title">What's made you genuinely angry recently?</h2>
-    <p class="q-prompt-sub">Not surface irritation. Something that felt like a real <strong style="color:var(--cream)">violation.</strong> When anger hits that level, it's usually because something we care deeply about was touched. Which of these is closest?</p>
+    <div class="q-step-label">Question 3 of 4</div>
+    <h2 class="q-prompt-title">What's genuinely angered you recently — not irritation, a real <em>violation</em>?</h2>
     <div class="scenario-grid" id="s4-grid">
       <button class="scenario-btn" data-screen="s4" data-value="When someone was dishonest, manipulative, or let people down" onclick="selectScenario('s4',this)">When someone was dishonest, manipulative, or let people down</button>
       <button class="scenario-btn" data-screen="s4" data-value="When I saw someone's potential being wasted or held back" onclick="selectScenario('s4',this)">When I saw someone's potential being wasted or held back</button>
@@ -575,9 +591,8 @@ body{
       <button class="scenario-btn" data-screen="s4" data-value="When injustice went unchallenged — someone being treated unfairly" onclick="selectScenario('s4',this)">When injustice went unchallenged — someone being treated unfairly</button>
     </div>
     <div class="scenario-error" id="s4-error">Please select the option that fits best, or add your own below.</div>
-    <button class="scenario-other-toggle" onclick="toggleDetail('s4-detail')">My situation is different — describe it instead</button>
+    <button class="scenario-other-toggle" onclick="toggleDetail('s4-detail')">None of these — describe it in your own words</button>
     <textarea class="scenario-detail" id="s4-detail" placeholder="What happened? What was it really touching on?…" oninput="autoSize(this)"></textarea>
-    <div class="q-nudge">Anger is useful information. It points directly at what matters.</div>
     <br>
     <button class="btn-primary" onclick="advance(4)">Continue <span>→</span></button>
     <button class="btn-ghost" onclick="goBack(4)">← Back</button>
@@ -589,9 +604,8 @@ body{
 <!-- ═══════════════════════════════════════════ -->
 <div class="screen" id="s5">
   <div class="screen-inner">
-    <div class="q-step-label">The aliveness test</div>
-    <h2 class="q-prompt-title">Last one. This one tends to surprise people.</h2>
-    <p class="q-prompt-sub">When have you felt most like <strong style="color:var(--cream)">yourself</strong> recently? Not most successful. Not most approved of. Just most <em>you.</em> Which comes closest?</p>
+    <div class="q-step-label">Question 4 of 4</div>
+    <h2 class="q-prompt-title">When did you last feel most like <em>yourself</em> — not successful, just <em>you</em>?</h2>
     <div class="scenario-grid" id="s5-grid">
       <button class="scenario-btn" data-screen="s5" data-value="When I was creating or building something that mattered to me" onclick="selectScenario('s5',this)">When I was creating or building something that mattered to me</button>
       <button class="scenario-btn" data-screen="s5" data-value="When I was deeply connected with someone I care about" onclick="selectScenario('s5',this)">When I was deeply connected with someone I care about</button>
@@ -599,9 +613,8 @@ body{
       <button class="scenario-btn" data-screen="s5" data-value="When I was growing — learning, stretching, or doing something new" onclick="selectScenario('s5',this)">When I was growing — learning, stretching, or doing something new</button>
     </div>
     <div class="scenario-error" id="s5-error">Please select the option that fits best, or add your own below.</div>
-    <button class="scenario-other-toggle" onclick="toggleDetail('s5-detail')">My situation is different — describe it instead</button>
+    <button class="scenario-other-toggle" onclick="toggleDetail('s5-detail')">None of these — describe it in your own words</button>
     <textarea class="scenario-detail" id="s5-detail" placeholder="Describe the moment. What were you doing? Who were you being?…" oninput="autoSize(this)"></textarea>
-    <div class="q-nudge">People underuse this one. It's often the most honest signal of the four.</div>
     <br>
     <button class="btn-primary" onclick="advance(5)">Continue <span>→</span></button>
     <button class="btn-ghost" onclick="goBack(5)">← Back</button>
