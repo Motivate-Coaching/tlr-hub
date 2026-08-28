@@ -65,7 +65,7 @@ body{
 .screen{
   min-height:100vh;
   display:flex;flex-direction:column;justify-content:center;align-items:center;
-  padding:5rem 1.5rem 4rem;
+  padding:5rem 1.25rem 3.5rem;
   position:absolute;top:0;left:0;right:0;
   opacity:0;pointer-events:none;
   transform:translateX(60px);
@@ -73,6 +73,10 @@ body{
 }
 .screen.active{
   opacity:1;pointer-events:all;transform:translateX(0);position:relative;
+}
+/* Centre card explicitly */
+.screen > .screen-inner{
+  margin-left:auto;margin-right:auto;
 }
 .screen.exit-left{
   opacity:0;transform:translateX(-60px);
@@ -95,6 +99,9 @@ body{
 .screen-inner .hook-title em,
 .screen-inner .q-prompt-title em{color:var(--gold);font-style:italic}
 .screen-inner .hook-body{color:rgba(26,26,46,0.78)}
+.screen-inner .q-prompt-sub{color:rgba(26,26,46,0.68)!important}
+.screen-inner .q-prompt-sub strong{color:#1A1A2E!important}
+.screen-inner .q-nudge{color:rgba(26,26,46,0.45)!important}
 .screen-inner .hook-body strong{color:#1A1A2E}
 .screen-inner .name-prompt{color:rgba(26,26,46,0.65);margin-top:1.25rem;margin-bottom:0.5rem;font-size:0.88rem;font-weight:500}
 .screen-inner .name-field{
@@ -680,11 +687,11 @@ body{
       Most people sense a gap between the life they're living and the one they know they're capable of. They can't always explain it, but it shows up in the choices they make, the things that frustrate them, and the moments they feel most like themselves.<br><br>
       This 8-minute exercise reads that evidence and shows you exactly what's going on: what you're actually living by, where the gap is, and one practical step for each value that matters most to you.
     </p>
-    <div style="display:flex;align-items:center;gap:1rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:0.85rem 1.1rem;margin-bottom:1.75rem;">
-      <img src="stuart-photo.jpg" alt="Stuart Fairbairns" style="width:52px;height:52px;border-radius:50%;object-fit:cover;object-position:center top;flex-shrink:0;border:2px solid rgba(232,168,0,0.3);">
+    <div style="display:flex;align-items:center;gap:1.1rem;background:rgba(232,168,0,0.07);border:1.5px solid rgba(232,168,0,0.25);border-radius:14px;padding:1rem 1.2rem;margin-bottom:1.75rem;">
+      <img src="stuart-photo.jpg" alt="Stuart Fairbairns" style="width:68px;height:68px;border-radius:50%;object-fit:cover;object-position:center top;flex-shrink:0;border:2.5px solid rgba(232,168,0,0.5);">
       <div>
-        <div style="font-size:0.82rem;font-weight:600;color:var(--cream);margin-bottom:0.15rem;">Stuart Fairbairns PCC</div>
-        <div style="font-size:0.75rem;color:rgba(245,242,238,0.55);line-height:1.5;">Professional Certified Coach · This exercise draws on the same values work used in one-to-one coaching.</div>
+        <div style="font-size:0.92rem;font-weight:700;color:#1A1A2E;margin-bottom:0.2rem;letter-spacing:-0.01em;">Stuart Fairbairns PCC</div>
+        <div style="font-size:0.78rem;color:rgba(26,26,46,0.65);line-height:1.55;">Professional Certified Coach · This exercise uses the same values methodology as one-to-one coaching sessions.</div>
       </div>
     </div>
     <div class="hook-meta">
