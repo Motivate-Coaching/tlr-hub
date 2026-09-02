@@ -1205,7 +1205,6 @@ function startAssessment(){
   scenarioSelections = {s2:null, s3:null, s4:null, s5:null};
   selectedFamilies = new Set();
   try{ localStorage.removeItem('tlr-vd-progress'); }catch(e){}
-  document.getElementById('s2-name').textContent = name;
   flashTransition(() => showScreen(2));
   savePartialToSupabase();
 }
