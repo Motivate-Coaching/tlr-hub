@@ -1,0 +1,1198 @@
+<title>Clarity Scorecard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ── Tokens ── */
+:root {
+  --bg:           #f5f3ef;
+  --surface:      #ffffff;
+  --surface-2:    #eae7e1;
+  --text:         #1c1a18;
+  --text-muted:   #6b6460;
+  --accent:       #b5901e;
+  --accent-rgb:   181,144,30;
+  --border:       rgba(28,26,24,0.09);
+  --high:         #4e9d61;
+  --mid:          #b5901e;
+  --low:          #b03c31;
+  --radius:       14px;
+  --shadow:       0 2px 16px rgba(28,26,24,0.07);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:          #181a1c;
+    --surface:     #21252a;
+    --surface-2:   #292e35;
+    --text:        #ede9e3;
+    --text-muted:  #8a847d;
+    --accent:      #c9a84b;
+    --accent-rgb:  201,168,75;
+    --border:      rgba(237,233,227,0.07);
+    --high:        #6ab87a;
+    --mid:         #c9a84b;
+    --low:         #c05642;
+    --shadow:      0 2px 20px rgba(0,0,0,0.3);
+  }
+}
+:root[data-theme="dark"] {
+  --bg:          #181a1c;
+  --surface:     #21252a;
+  --surface-2:   #292e35;
+  --text:        #ede9e3;
+  --text-muted:  #8a847d;
+  --accent:      #c9a84b;
+  --accent-rgb:  201,168,75;
+  --border:      rgba(237,233,227,0.07);
+  --high:        #6ab87a;
+  --mid:         #c9a84b;
+  --low:         #c05642;
+  --shadow:      0 2px 20px rgba(0,0,0,0.3);
+}
+
+/* ── Reset ── */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body {
+  font-family: 'Jost', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Screens ── */
+.screen { display:none; }
+.screen.active { display:flex; flex-direction:column; min-height:100vh; }
+
+/* ══════════════════════════════════════
+   INTRO SCREEN
+══════════════════════════════════════ */
+#screen-intro {
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Radial warm glow behind the card */
+#screen-intro::before {
+  content: '';
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(ellipse at center,
+    rgba(var(--accent-rgb),0.07) 0%,
+    transparent 70%);
+  pointer-events: none;
+}
+
+.intro-wrap {
+  position: relative;
+  z-index: 1;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+}
+
+.tlr-mark {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 2rem;
+}
+
+.intro-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2.6rem,8vw,3.8rem);
+  font-weight: 300;
+  line-height: 1.08;
+  text-wrap: balance;
+  color: var(--text);
+  margin-bottom: 0.6rem;
+}
+.intro-title em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.intro-rule {
+  width: 36px;
+  height: 1.5px;
+  background: var(--accent);
+  opacity: 0.45;
+  margin: 1.4rem auto;
+}
+
+.intro-desc {
+  font-size: 0.97rem;
+  font-weight: 300;
+  color: var(--text-muted);
+  line-height: 1.75;
+  max-width: 420px;
+  margin: 0 auto 0.75rem;
+  text-wrap: balance;
+}
+
+.intro-meta {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 2.25rem;
+}
+.intro-meta span {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.intro-meta span::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.6;
+}
+
+.lead-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.75rem 1.75rem 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-bottom: 1.1rem;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-align: left;
+}
+.field label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.field input {
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  padding: 0.72rem 0.9rem;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.97rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  width: 100%;
+}
+.field input::placeholder { color: var(--text-muted); opacity: 0.55; }
+.field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb),0.12);
+}
+
+.btn-start {
+  width: 100%;
+  padding: 0.85rem 1.5rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: opacity 0.18s, transform 0.1s;
+}
+.btn-start:hover { opacity: 0.88; }
+.btn-start:active { transform: scale(0.99); }
+
+.form-fine {
+  margin-top: 0.85rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  opacity: 0.75;
+  line-height: 1.55;
+}
+
+/* ══════════════════════════════════════
+   QUIZ SCREEN
+══════════════════════════════════════ */
+#screen-quiz { justify-content: flex-start; }
+
+.quiz-head {
+  padding: 1.4rem 1.25rem 0.5rem;
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.q-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.45rem;
+}
+.q-cat {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.q-num {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-track {
+  height: 2.5px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.45s cubic-bezier(0.4,0,0.2,1);
+}
+
+.quiz-body {
+  flex: 1;
+  padding: 2rem 1.25rem 1.5rem;
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.q-text {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(1.45rem,4vw,1.95rem);
+  font-weight: 400;
+  line-height: 1.28;
+  text-wrap: balance;
+  color: var(--text);
+  margin-bottom: 1.75rem;
+}
+
+/* Likert */
+.likert-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.likert-opt {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.8rem 1rem;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.14s, background 0.14s;
+  user-select: none;
+}
+.likert-opt:hover {
+  border-color: rgba(var(--accent-rgb),0.5);
+  background: rgba(var(--accent-rgb),0.04);
+}
+.likert-opt.sel {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb),0.07);
+}
+
+.opt-radio {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--text-muted);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.14s, background 0.14s;
+}
+.likert-opt.sel .opt-radio {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+.opt-radio::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+  transition: background 0.14s;
+}
+.likert-opt.sel .opt-radio::after { background: #fff; }
+
+.opt-text { font-size: 0.9rem; color: var(--text); }
+
+/* Choice */
+.choice-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.choice-opt {
+  padding: 1rem 1.1rem;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.93rem;
+  color: var(--text);
+  text-align: left;
+  transition: border-color 0.14s, background 0.14s, transform 0.1s;
+  width: 100%;
+}
+.choice-opt:hover {
+  border-color: rgba(var(--accent-rgb),0.5);
+  background: rgba(var(--accent-rgb),0.04);
+}
+.choice-opt.sel {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb),0.07);
+  transform: scale(1.005);
+}
+
+/* Quiz footer */
+.quiz-foot {
+  padding: 0.75rem 1.25rem 2rem;
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-back {
+  padding: 0.7rem 1.1rem;
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  color: var(--text-muted);
+  font-family: 'Jost', sans-serif;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: border-color 0.14s, color 0.14s;
+}
+.btn-back:hover:not(:disabled) { border-color: var(--text-muted); color: var(--text); }
+.btn-back:disabled { opacity: 0.28; cursor: not-allowed; }
+
+.btn-next {
+  padding: 0.7rem 1.75rem;
+  background: var(--accent);
+  border: none;
+  border-radius: 9px;
+  color: #fff;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.18s;
+}
+.btn-next:disabled { opacity: 0.32; cursor: not-allowed; }
+.btn-next:not(:disabled):hover { opacity: 0.86; }
+
+/* ── Fade-in ── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(10px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.fade-in { animation: fadeUp 0.28s ease both; }
+
+/* ══════════════════════════════════════
+   RESULTS SCREEN
+══════════════════════════════════════ */
+#screen-results {
+  align-items: center;
+  padding: 2.5rem 1.25rem 5rem;
+}
+
+.results-wrap {
+  max-width: 680px;
+  width: 100%;
+}
+
+.res-mark {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 1.25rem;
+}
+
+.res-greeting {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2rem,5.5vw,2.8rem);
+  font-weight: 300;
+  line-height: 1.15;
+  text-wrap: balance;
+  margin-bottom: 0.4rem;
+}
+
+.res-sub {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 300;
+  margin-bottom: 2rem;
+}
+
+/* Overall tile */
+.overall-tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow);
+}
+.overall-big {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 4.2rem;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.overall-big sub {
+  font-size: 1.4rem;
+  color: var(--text-muted);
+  vertical-align: middle;
+}
+.overall-text h3 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+}
+.overall-text p {
+  font-size: 0.87rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+/* Radar */
+.radar-wrap {
+  max-width: 420px;
+  margin: 0 auto 2.25rem;
+}
+.radar-wrap svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  color: var(--text);
+}
+
+/* Dimensions heading */
+.dim-heading {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  margin-bottom: 1rem;
+}
+
+/* Category cards */
+.cat-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.cat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: box-shadow 0.18s;
+}
+.cat-card:hover { box-shadow: var(--shadow); }
+
+.cat-header {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1.1rem 1.25rem;
+  cursor: pointer;
+}
+.cat-name {
+  flex: 1;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+.cat-pill {
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  padding: 0.22rem 0.55rem;
+  border-radius: 20px;
+  color: #fff;
+  flex-shrink: 0;
+}
+.cat-toggle {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: transform 0.22s;
+  line-height: 1;
+}
+.cat-card.open .cat-toggle { transform: rotate(45deg); }
+
+.cat-bar-wrap { padding: 0 1.25rem 0.65rem; }
+.cat-bar {
+  height: 3px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.cat-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  width: 0;
+  transition: width 0.9s cubic-bezier(0.4,0,0.2,1) var(--delay, 0s);
+}
+
+.cat-body {
+  display: none;
+  padding: 0 1.25rem 1.25rem;
+}
+.cat-card.open .cat-body { display: block; }
+
+.cat-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 0.9rem;
+}
+
+.tip {
+  background: var(--surface-2);
+  border-left: 2.5px solid var(--accent);
+  padding: 0.8rem 1rem;
+  border-radius: 0 8px 8px 0;
+}
+.tip strong {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+}
+.tip p {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+/* CTA */
+.res-cta {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2.25rem 1.75rem;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.res-cta h3 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.55rem;
+  font-weight: 400;
+  margin-bottom: 0.65rem;
+  text-wrap: balance;
+}
+.res-cta p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  max-width: 380px;
+  margin: 0 auto 1.5rem;
+  text-wrap: balance;
+}
+.btn-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.85rem 2rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.18s;
+}
+.btn-cta:hover { opacity: 0.86; }
+
+/* Responsive */
+@media (max-width: 480px) {
+  .overall-tile { flex-direction: column; gap: 0.75rem; text-align: center; }
+  .quiz-body { padding: 1.5rem 1rem 1rem; }
+  .quiz-head { padding: 1.2rem 1rem 0.4rem; }
+  .quiz-foot { padding: 0.75rem 1rem 1.75rem; }
+}
+</style>
+
+<div id="app">
+
+  <!-- ══ INTRO ══ -->
+  <section id="screen-intro" class="screen active">
+    <div class="intro-wrap">
+      <span class="tlr-mark">The Living Room</span>
+
+      <h1 class="intro-title">The <em>Clarity</em><br>Scorecard</h1>
+      <div class="intro-rule"></div>
+
+      <p class="intro-desc">Five dimensions of inner clarity — your mental space, energy, self-trust, direction, and support. Honest answers, useful insight.</p>
+
+      <div class="intro-meta">
+        <span>15 questions</span>
+        <span>~5 minutes</span>
+        <span>Instant results</span>
+      </div>
+
+      <div class="lead-card">
+        <div class="form-fields">
+          <div class="field">
+            <label for="inp-name">First name</label>
+            <input type="text" id="inp-name" placeholder="Your first name" autocomplete="given-name">
+          </div>
+          <div class="field">
+            <label for="inp-email">Email address</label>
+            <input type="email" id="inp-email" placeholder="hello@example.com" autocomplete="email">
+          </div>
+        </div>
+        <button class="btn-start" id="btn-start">Begin the scorecard →</button>
+        <p class="form-fine">Your results are private. We'll only be in touch if you ask us to be.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ QUIZ ══ -->
+  <section id="screen-quiz" class="screen">
+    <div class="quiz-head">
+      <div class="q-meta">
+        <span class="q-cat" id="q-cat">Mental Clarity</span>
+        <span class="q-num" id="q-num">1 of 15</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="quiz-body" id="quiz-body"></div>
+
+    <div class="quiz-foot">
+      <button class="btn-back" id="btn-back">← Back</button>
+      <button class="btn-next" id="btn-next" disabled>Next →</button>
+    </div>
+  </section>
+
+  <!-- ══ RESULTS ══ -->
+  <section id="screen-results" class="screen">
+    <div class="results-wrap">
+      <span class="res-mark">The Living Room</span>
+      <h2 class="res-greeting" id="res-greeting">Here are your results</h2>
+      <p class="res-sub">Your Clarity Scorecard across five dimensions</p>
+
+      <div class="overall-tile">
+        <div class="overall-big" id="overall-num">—<sub>/10</sub></div>
+        <div class="overall-text">
+          <h3 id="overall-title"></h3>
+          <p id="overall-desc"></p>
+        </div>
+      </div>
+
+      <div class="radar-wrap">
+        <svg id="radar" viewBox="0 0 500 430" aria-label="Radar chart showing scores across five dimensions"></svg>
+      </div>
+
+      <h3 class="dim-heading">Your five dimensions</h3>
+      <div class="cat-cards" id="cat-cards"></div>
+
+      <div class="res-cta">
+        <h3>Ready to take this further?</h3>
+        <p>The Living Room is a space for people who want to think more clearly, choose more intentionally, and build something that actually fits who they are.</p>
+        <a id="cta-btn" href="#" class="btn-cta" target="_blank" rel="noopener">Join The Living Room →</a>
+      </div>
+    </div>
+  </section>
+
+</div><!-- #app -->
+
+<script>
+// ═══════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════
+const CONFIG = {
+  mailchimpUrl: 'https://motivate-coaching.us18.list-manage.com/subscribe/post?u=575cbfd47d142d3fee69ff0b1&id=75e72f8d2a',
+  joinUrl:      'https://www.motivate-coaching.com/thelivingroom',
+};
+
+// ═══════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════
+const CATS = [
+  {
+    name: 'Mental Clarity',
+    descs: {
+      low: "Your mind is working overtime. The constant mental noise is real — and it's costing you more than you realise. When the background hum won't quiet, even simple decisions feel heavier than they should.",
+      mid: "You have moments of genuine clarity, but they're fragile. The busyness creeps back in — especially when things get full. There's real potential here to create more consistent mental space.",
+      high: "You've cultivated genuine mental clarity. The background noise is mostly quiet, and you're able to show up to what matters without being pulled in every direction."
+    },
+    tips: {
+      low: "Try a daily 'brain drain' — five minutes of writing out everything that's circling in your head. Not to solve it, just to externalise it. Getting it out of your head and onto paper reduces the mental load significantly.",
+      mid: "Identify the two or three open loops that take up the most mental space. Unfinished things drain energy even when we're not consciously thinking about them. Closing them — or consciously deciding to park them — frees up more capacity than you'd expect.",
+      high: "Protect what you've built. Mental clarity is easily eroded by over-commitment and under-recovery. Pay attention to the early warning signs — that subtle sense of mental noise returning — and respond before they build."
+    }
+  },
+  {
+    name: 'Energy & Agency',
+    descs: {
+      low: "You're giving your energy away — to obligations, to other people's priorities, to things that don't truly align with what you value. The drain is real, and it's worth paying attention to.",
+      mid: "You're making some intentional choices, but old patterns of over-commitment or people-pleasing still pull at you. There's room to reclaim more of your energy for what actually matters.",
+      high: "You're living with a real sense of agency. Your time and energy are largely directed by intention rather than obligation — and that's a foundation worth protecting."
+    },
+    tips: {
+      low: "Before saying yes to anything this week, pause and ask: 'Would I be saying yes to this if it started tomorrow?' That small gap between request and response is where agency lives.",
+      mid: "Map your current commitments and rate each one: does this energise or drain me? Does this align with what I actually value? Even one honest answer can begin to shift things.",
+      high: "Notice what you're unconsciously protecting — the boundaries and defaults that make your energy sustainable. Making them explicit helps you keep them when things get busy."
+    }
+  },
+  {
+    name: 'Self-Trust',
+    descs: {
+      low: "The second-guessing is exhausting. When we can't trust our own judgement, we either over-research everything or look to others for reassurance — neither of which builds the confidence you're after.",
+      mid: "You trust yourself in some areas, but in others the doubt creeps in. With the right conditions, you could build a more consistent foundation of self-trust.",
+      high: "You back yourself — and that's more powerful than most people realise. Self-trust doesn't mean certainty; it means being willing to move forward anyway. You've found that."
+    },
+    tips: {
+      low: "Start collecting evidence of past decisions that turned out well. Self-trust is built on a track record — but most of us only remember what went wrong. Deliberately looking for evidence of your good judgement starts to shift the internal narrative.",
+      mid: "Notice which decisions you trust yourself on and which you don't. The pattern usually reveals something: it's often not about the size of the decision, but a specific domain where old doubt lives. Naming it is the first step to working with it.",
+      high: "Keep making decisions without asking for permission you don't need. Self-trust is maintained by using it. The moment you start deferring decisions you're capable of making, the muscle starts to weaken."
+    }
+  },
+  {
+    name: 'Direction',
+    descs: {
+      low: "There's a gap between what you say matters and how you're actually spending your time. When we're pulled in multiple directions without a clear compass, even hard work can feel strangely hollow.",
+      mid: "You have a sense of what matters, but the alignment between your values and your daily reality isn't quite there yet. That gap is worth exploring — because closing it changes everything.",
+      high: "Your life and work are largely aligned with what you value. That alignment is rare — and when it breaks down, you notice. Keep paying attention to that signal."
+    },
+    tips: {
+      low: "Do a time audit for one week. Where does your time actually go? Compare that honestly with what you say matters most. The gap between those two things is your starting point.",
+      mid: "Pick one area where you feel the misalignment most acutely. Not all of them — just one. What would it look like to bring that one area into closer alignment with what you actually value? Start there.",
+      high: "The challenge at your level is usually maintenance — keeping alignment as life evolves. Schedule a quarterly check-in to make sure the direction you set still fits who you're becoming."
+    }
+  },
+  {
+    name: 'Support',
+    descs: {
+      low: "You're navigating this mostly alone — and while independence is valuable, we all need people who genuinely challenge and stretch us. The right support doesn't just comfort; it accelerates.",
+      mid: "You have people around you, but the support isn't quite as active or challenging as it could be. There may be relationships worth deepening, or gaps worth filling.",
+      high: "You've built — or found — a support system that doesn't just hold you but helps push you forward. That's rare, and worth nurturing."
+    },
+    tips: {
+      low: "Identify one person who both understands your world and isn't afraid to challenge you. That combination is rarer than either quality alone. If no one comes to mind, that itself is important information — and a place to start.",
+      mid: "Think about the difference between support that comforts and support that stretches. Both have their place, but growth tends to happen in the stretch. Are there relationships you could deepen to get more of that honest, challenging input?",
+      high: "Consider how you show up in return. The best support systems are reciprocal — people invest in you partly because you invest in them. Actively maintaining that reciprocity keeps the relationship strong and generative."
+    }
+  }
+];
+
+const QS = [
+  // Cat 0 – Mental Clarity
+  {cat:0, text:"My mind feels busy even when nothing urgent is happening.", type:"likert", neg:true},
+  {cat:0, text:"Unfinished tasks or unresolved issues play on my mind and drain my energy.", type:"likert", neg:true},
+  {cat:0, text:"I struggle to focus on one thing without thinking about everything else I should be doing.", type:"likert", neg:true},
+  // Cat 1 – Energy & Agency
+  {cat:1, text:"I often feel drained by things I've agreed to but don't actually want to be doing.", type:"likert", neg:true},
+  {cat:1, text:"I feel in control of how I choose to spend my time and energy.", type:"likert", neg:false},
+  {cat:1, text:"I regularly say yes to things out of obligation rather than intention.", type:"likert", neg:true},
+  // Cat 2 – Self-Trust
+  {cat:2, text:"I tend to second-guess my decisions after I make them.", type:"likert", neg:true},
+  {cat:2, text:"I feel confident backing my own judgement, even when others disagree.", type:"likert", neg:false},
+  {cat:2, text:"After making an important decision, I usually feel:", type:"choice",
+   scores:[5,4,2,1], opts:["Clear and settled","Mostly OK, with minor doubts","Unsure and replaying it","Anxious, looking for reassurance"]},
+  // Cat 3 – Direction
+  {cat:3, text:"There is clear alignment between what I say matters and how I spend my time.", type:"likert", neg:false},
+  {cat:3, text:"I feel pulled in multiple directions and struggle to prioritise what matters.", type:"likert", neg:true},
+  {cat:3, text:"If I redesigned my current work or life structure from scratch today, I would:", type:"choice",
+   scores:[5,4,2,1], opts:["Keep most of it as it is","Adjust a few key areas","Change several significant parts","Start almost entirely differently"]},
+  // Cat 4 – Support
+  {cat:4, text:"The people in my current support system don't just reassure me — they help push me forward.", type:"likert", neg:false},
+  {cat:4, text:"When I need help, I ask the right people rather than staying silent.", type:"likert", neg:false},
+  {cat:4, text:"Right now, I would describe my support around growth as:", type:"choice",
+   scores:[5,4,2,1], opts:["Active and challenging in a healthy way","Supportive but mostly reassuring","Inconsistent or unclear","Largely absent"]}
+];
+
+const LIKERT_LABELS = [
+  "Strongly agree",
+  "Agree",
+  "Neutral",
+  "Disagree",
+  "Strongly disagree"
+];
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let S = {
+  name:    '',
+  email:   '',
+  qi:      0,
+  answers: Array(QS.length).fill(null),
+};
+
+// ═══════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════
+const $  = id => document.getElementById(id);
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function getVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function levelFor(score) {
+  return score <= 3 ? 'low' : score <= 6 ? 'mid' : 'high';
+}
+
+function colorFor(score) {
+  const l = levelFor(score);
+  return l === 'high' ? getVar('--high') : l === 'mid' ? getVar('--mid') : getVar('--low');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════════
+//  INTRO
+// ═══════════════════════════════════════════
+$('btn-start').addEventListener('click', () => {
+  const name  = $('inp-name').value.trim();
+  const email = $('inp-email').value.trim();
+  if (!name)                   { $('inp-name').focus(); return; }
+  if (!email || !email.includes('@')) { $('inp-email').focus(); return; }
+
+  S.name    = name;
+  S.email   = email;
+  S.qi      = 0;
+  S.answers = Array(QS.length).fill(null);
+
+  if (CONFIG.mailchimpUrl) pingMailchimp(name, email);
+
+  showScreen('screen-quiz');
+  renderQ();
+});
+
+function pingMailchimp(name, email) {
+  try {
+    const [first, ...rest] = name.split(' ');
+    const p = new URLSearchParams({ EMAIL: email, FNAME: first, LNAME: rest.join(' ') });
+    new Image().src = CONFIG.mailchimpUrl + '&' + p;
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════
+//  QUIZ
+// ═══════════════════════════════════════════
+function renderQ() {
+  const q   = QS[S.qi];
+  const pct = Math.round((S.qi / QS.length) * 100);
+  const sel = S.answers[S.qi];
+
+  $('progress-fill').style.width = pct + '%';
+  $('q-num').textContent         = `${S.qi + 1} of ${QS.length}`;
+  $('q-cat').textContent         = CATS[q.cat].name;
+  $('btn-back').disabled         = S.qi === 0;
+  $('btn-next').disabled         = sel === null;
+  $('btn-next').textContent      = S.qi === QS.length - 1 ? 'See my results →' : 'Next →';
+
+  let html = `<p class="q-text fade-in">${esc(q.text)}</p>`;
+
+  if (q.type === 'likert') {
+    html += '<div class="likert-stack fade-in">';
+    LIKERT_LABELS.forEach((lbl, i) => {
+      html += `<div class="likert-opt${sel===i?' sel':''}" data-i="${i}" role="radio" aria-checked="${sel===i}" tabindex="0">
+        <div class="opt-radio"></div>
+        <span class="opt-text">${esc(lbl)}</span>
+      </div>`;
+    });
+    html += '</div>';
+  } else {
+    html += '<div class="choice-stack fade-in">';
+    q.opts.forEach((opt, i) => {
+      html += `<button class="choice-opt${sel===i?' sel':''}" data-i="${i}">${esc(opt)}</button>`;
+    });
+    html += '</div>';
+  }
+
+  $('quiz-body').innerHTML = html;
+
+  // Events
+  if (q.type === 'likert') {
+    $('quiz-body').querySelectorAll('.likert-opt').forEach(el => {
+      el.addEventListener('click', () => pickLikert(+el.dataset.i));
+      el.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickLikert(+el.dataset.i); }
+      });
+    });
+  } else {
+    $('quiz-body').querySelectorAll('.choice-opt').forEach(el => {
+      el.addEventListener('click', () => pickChoice(+el.dataset.i));
+    });
+  }
+}
+
+function pickLikert(i) {
+  S.answers[S.qi] = i;
+  renderQ();
+}
+
+function pickChoice(i) {
+  S.answers[S.qi] = i;
+  renderQ();
+  setTimeout(() => advance(), 360);
+}
+
+$('btn-back').addEventListener('click', () => { if (S.qi > 0) { S.qi--; renderQ(); } });
+$('btn-next').addEventListener('click', advance);
+
+function advance() {
+  if (S.answers[S.qi] === null) return;
+  if (S.qi < QS.length - 1) { S.qi++; renderQ(); }
+  else showResults();
+}
+
+// ═══════════════════════════════════════════
+//  SCORING
+// ═══════════════════════════════════════════
+function calcScores() {
+  const totals = [0, 0, 0, 0, 0];
+  QS.forEach((q, i) => {
+    const a = S.answers[i];
+    if (a === null) return;
+    let s;
+    if (q.type === 'likert') {
+      s = q.neg ? (a + 1) : (5 - a);
+    } else {
+      s = q.scores[a];
+    }
+    totals[q.cat] += s;
+  });
+  const catScores = totals.map(t => Math.round((t / 15) * 10));
+  const overall   = Math.round(catScores.reduce((a, b) => a + b, 0) / 5);
+  return { catScores, overall };
+}
+
+// ═══════════════════════════════════════════
+//  RESULTS
+// ═══════════════════════════════════════════
+function showResults() {
+  const { catScores, overall } = calcScores();
+  showScreen('screen-results');
+
+  // Greeting
+  $('res-greeting').textContent = `${S.name}, here are your results`;
+  $('cta-btn').href = CONFIG.joinUrl || '#';
+
+  // Overall
+  $('overall-num').innerHTML = `${overall}<sub>/10</sub>`;
+  const ol = levelFor(overall);
+  const overallTitles = {
+    low: 'Significant clarity to unlock',
+    mid: 'Real foundations to build on',
+    high: 'Strong clarity across the board'
+  };
+  const overallDescs = {
+    low: "Your scores suggest you're carrying more mental weight than necessary across several areas. The good news: clarity builds on itself, and even small shifts can create significant change.",
+    mid: "You're doing well in some areas and have clear opportunities in others. You have a solid foundation — the work now is about deepening it and closing the gaps.",
+    high: "You're operating with genuine clarity across most dimensions. The challenge at your level is maintaining it, and continuing to challenge yourself from a position of strength."
+  };
+  $('overall-title').textContent = overallTitles[ol];
+  $('overall-desc').textContent  = overallDescs[ol];
+
+  // Radar
+  drawRadar(catScores);
+
+  // Category cards
+  const container = $('cat-cards');
+  container.innerHTML = '';
+  catScores.forEach((score, i) => {
+    const cat   = CATS[i];
+    const level = levelFor(score);
+    const color = colorFor(score);
+    const pct   = (score / 10) * 100;
+
+    const el = document.createElement('div');
+    el.className = 'cat-card';
+    el.innerHTML = `
+      <div class="cat-header">
+        <div class="cat-name">${esc(cat.name)}</div>
+        <div class="cat-pill" style="background:${color}">${score}/10</div>
+        <div class="cat-toggle" aria-hidden="true">+</div>
+      </div>
+      <div class="cat-bar-wrap">
+        <div class="cat-bar">
+          <div class="cat-bar-fill" style="background:${color};--delay:${0.1 + i * 0.08}s"></div>
+        </div>
+      </div>
+      <div class="cat-body">
+        <p class="cat-desc">${esc(cat.descs[level])}</p>
+        <div class="tip">
+          <strong>Something to try</strong>
+          <p>${esc(cat.tips[level])}</p>
+        </div>
+      </div>`;
+
+    el.querySelector('.cat-header').addEventListener('click', () => {
+      el.classList.toggle('open');
+    });
+    container.appendChild(el);
+
+    // Animate bar after brief delay
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const fill = el.querySelector('.cat-bar-fill');
+        if (fill) fill.style.width = pct + '%';
+      }, 100 + i * 80);
+    });
+  });
+
+  // Auto-open lowest score
+  const minIdx = catScores.indexOf(Math.min(...catScores));
+  const cards = container.querySelectorAll('.cat-card');
+  if (cards[minIdx]) {
+    setTimeout(() => cards[minIdx].classList.add('open'), 350);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  RADAR CHART
+// ═══════════════════════════════════════════
+function drawRadar(scores) {
+  const svg  = $('radar');
+  const cx   = 250, cy = 215, maxR = 130;
+  const n    = 5;
+  const TWO_PI = Math.PI * 2;
+  const angles = Array.from({length: n}, (_, i) => (i / n) * TWO_PI - Math.PI / 2);
+
+  const pt = (angle, r) => [
+    cx + r * Math.cos(angle),
+    cy + r * Math.sin(angle)
+  ];
+
+  const accent = getVar('--accent') || '#c9a84b';
+  let h = '';
+
+  // Grid rings
+  [0.2, 0.4, 0.6, 0.8, 1.0].forEach(frac => {
+    const pts = angles.map(a => pt(a, frac * maxR).join(',')).join(' ');
+    h += `<polygon points="${pts}" fill="none" stroke="currentColor" stroke-width="1"
+           opacity="${frac === 1 ? 0.22 : 0.08}"/>`;
+  });
+
+  // Spokes
+  angles.forEach(a => {
+    const [x2, y2] = pt(a, maxR);
+    h += `<line x1="${cx}" y1="${cy}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"
+           stroke="currentColor" stroke-width="1" opacity="0.1"/>`;
+  });
+
+  // User score polygon
+  const userPts = angles.map((a, i) => pt(a, (scores[i] / 10) * maxR));
+  const polyStr = userPts.map(p => p.map(v => v.toFixed(1)).join(',')).join(' ');
+  h += `<polygon points="${polyStr}" fill="${accent}" fill-opacity="0.15"
+         stroke="${accent}" stroke-width="2" stroke-linejoin="round"/>`;
+
+  // Score dots
+  userPts.forEach(([x, y]) => {
+    h += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5"
+           fill="${accent}" stroke="var(--bg)" stroke-width="2"/>`;
+  });
+
+  // Labels — positioned outside the outer ring
+  const labelR = maxR + 30;
+  const scoreR = maxR + 46;
+  const labels = ['Mental Clarity', 'Energy & Agency', 'Self-Trust', 'Direction', 'Support'];
+  const anchors = ['middle', 'start', 'start', 'end', 'end'];
+
+  angles.forEach((a, i) => {
+    const [lx, ly] = pt(a, labelR);
+    const [sx, sy] = pt(a, scoreR);
+    const anch = anchors[i];
+    // Nudge top label up a little more
+    const yOff = i === 0 ? -4 : 0;
+    h += `<text x="${lx.toFixed(1)}" y="${(ly + yOff).toFixed(1)}" text-anchor="${anch}"
+           dominant-baseline="middle" font-family="Jost,sans-serif" font-size="10.5"
+           fill="currentColor" opacity="0.65">${esc(labels[i])}</text>`;
+    h += `<text x="${sx.toFixed(1)}" y="${(sy + yOff).toFixed(1)}" text-anchor="${anch}"
+           dominant-baseline="middle" font-family="Jost,sans-serif" font-size="11.5"
+           font-weight="600" fill="${accent}">${scores[i]}/10</text>`;
+  });
+
+  // Center word
+  h += `<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle"
+         font-family="Cormorant Garamond,Georgia,serif" font-size="18" font-weight="300"
+         fill="currentColor" opacity="0.3" font-style="italic">clarity</text>`;
+
+  svg.innerHTML = h;
+}
+
+// ═══════════════════════════════════════════
+//  ENTER key on intro form
+// ═══════════════════════════════════════════
+['inp-name','inp-email'].forEach(id => {
+  $(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') $('btn-start').click();
+  });
+});
+</script>
