@@ -1,0 +1,982 @@
+<title>The 5 Ways We Get Lost</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap">
+<style>
+:root {
+  --bg: #0e0e0e;
+  --surface: #161616;
+  --surface2: #1e1e1e;
+  --border: rgba(255,255,255,0.08);
+  --gold: #c8a96e;
+  --gold-light: #e2c99a;
+  --gold-dim: rgba(200,169,110,0.18);
+  --text: #f0ede8;
+  --text-dim: rgba(240,237,232,0.55);
+  --text-muted: rgba(240,237,232,0.35);
+  --radius: 4px;
+  --drift: #7ba7c4;
+  --noise: #c47b7b;
+  --carry: #8bc47b;
+  --replay: #c4a87b;
+  --whisper: #a87bc4;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f7f4ef;
+    --surface: #ffffff;
+    --surface2: #f0ede8;
+    --border: rgba(0,0,0,0.08);
+    --text: #1a1815;
+    --text-dim: rgba(26,24,21,0.55);
+    --text-muted: rgba(26,24,21,0.35);
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f7f4ef;
+  --surface: #ffffff;
+  --surface2: #f0ede8;
+  --border: rgba(0,0,0,0.08);
+  --text: #1a1815;
+  --text-dim: rgba(26,24,21,0.55);
+  --text-muted: rgba(26,24,21,0.35);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Jost', system-ui, sans-serif;
+  font-weight: 300;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── HEADER ── */
+.site-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 28px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky; top: 0; z-index: 10;
+}
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.logo-mark {
+  width: 36px; height: 36px;
+  border: 1px solid var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px; color: var(--gold); letter-spacing: 0.05em;
+}
+.logo-text { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); }
+.quiz-label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
+
+/* ── SCREENS ── */
+.screen { display: none; flex: 1; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* ── INTRO SCREEN ── */
+.intro-wrap {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 48px 24px;
+}
+.intro-box {
+  max-width: 540px; width: 100%;
+  text-align: center;
+}
+.intro-eyebrow {
+  font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 20px;
+}
+.intro-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  font-weight: 300; line-height: 1.1;
+  color: var(--text); margin-bottom: 20px;
+  text-wrap: balance;
+}
+.intro-body {
+  font-size: 15px; line-height: 1.75;
+  color: var(--text-dim); margin-bottom: 36px;
+  max-width: 420px; margin-left: auto; margin-right: auto;
+}
+.form-row { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+.form-field { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.form-field label { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); }
+.form-field input {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px; font-size: 15px; color: var(--text);
+  font-family: 'Jost', sans-serif; font-weight: 300;
+  outline: none; transition: border-color 0.2s;
+}
+.form-field input:focus { border-color: var(--gold); }
+.form-field input::placeholder { color: var(--text-muted); }
+.btn-primary {
+  display: inline-block; width: 100%;
+  background: var(--gold); color: #0e0e0e;
+  border: none; border-radius: var(--radius);
+  padding: 16px 32px; font-size: 13px; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.2s, transform 0.15s;
+  font-family: 'Jost', sans-serif;
+  margin-top: 8px;
+}
+.btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); }
+.intro-note { font-size: 12px; color: var(--text-muted); margin-top: 12px; }
+
+/* ── PROGRESS BAR ── */
+.progress-bar-wrap {
+  padding: 0 28px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.progress-track {
+  height: 2px; background: var(--border); border-radius: 2px;
+  overflow: hidden; margin: 0 auto; max-width: 640px;
+}
+.progress-fill {
+  height: 100%; background: var(--gold);
+  border-radius: 2px; transition: width 0.4s ease;
+  width: 0%;
+}
+.progress-label {
+  text-align: center; font-size: 11px; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--text-muted);
+  padding: 10px 0 8px;
+}
+
+/* ── QUIZ SCREEN ── */
+.quiz-wrap {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 36px 24px;
+}
+.question-box { max-width: 600px; width: 100%; }
+.q-number { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
+.q-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.5rem, 4vw, 2.1rem);
+  font-weight: 300; line-height: 1.3;
+  color: var(--text); margin-bottom: 32px;
+  text-wrap: balance;
+}
+
+/* Multiple choice */
+.options-list { display: flex; flex-direction: column; gap: 10px; }
+.option-btn {
+  display: flex; align-items: flex-start; gap: 14px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 20px;
+  cursor: pointer; transition: border-color 0.2s, background 0.2s;
+  text-align: left; font-family: 'Jost', sans-serif;
+  font-size: 15px; font-weight: 300; color: var(--text);
+  line-height: 1.5;
+}
+.option-btn:hover { border-color: var(--gold); background: var(--gold-dim); }
+.option-btn.selected { border-color: var(--gold); background: var(--gold-dim); color: var(--text); }
+.option-dot {
+  width: 18px; height: 18px; min-width: 18px;
+  border-radius: 50%; border: 1.5px solid var(--border);
+  margin-top: 2px; transition: border-color 0.2s, background 0.2s;
+}
+.option-btn.selected .option-dot { border-color: var(--gold); background: var(--gold); }
+
+/* Scale */
+.scale-wrap { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.scale-track { display: flex; gap: 12px; align-items: center; }
+.scale-btn {
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 1.5px solid var(--border); background: var(--surface);
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
+  color: var(--text-dim); cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.scale-btn:hover { border-color: var(--gold); color: var(--text); }
+.scale-btn.selected { border-color: var(--gold); background: var(--gold); color: #0e0e0e; }
+.scale-labels {
+  display: flex; justify-content: space-between; width: 100%;
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Yes / No */
+.yn-wrap { display: flex; gap: 14px; }
+.yn-btn {
+  flex: 1; padding: 18px; border-radius: var(--radius);
+  border: 1px solid var(--border); background: var(--surface);
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
+  color: var(--text); cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.yn-btn:hover { border-color: var(--gold); background: var(--gold-dim); }
+.yn-btn.selected { border-color: var(--gold); background: var(--gold-dim); }
+
+/* Open text */
+.open-wrap { display: flex; flex-direction: column; gap: 14px; }
+.open-textarea {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px;
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 300;
+  color: var(--text); line-height: 1.6; resize: vertical; min-height: 120px;
+  outline: none; transition: border-color 0.2s;
+}
+.open-textarea:focus { border-color: var(--gold); }
+.open-textarea::placeholder { color: var(--text-muted); }
+.open-skip { font-size: 13px; color: var(--text-muted); text-align: center; cursor: pointer; }
+.open-skip:hover { color: var(--gold); }
+
+/* Nav buttons */
+.q-nav { display: flex; gap: 12px; margin-top: 28px; align-items: center; }
+.btn-next {
+  background: var(--gold); color: #0e0e0e;
+  border: none; border-radius: var(--radius);
+  padding: 14px 36px; font-size: 13px; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  cursor: pointer; font-family: 'Jost', sans-serif;
+  transition: background 0.2s; margin-left: auto;
+}
+.btn-next:hover { background: var(--gold-light); }
+.btn-next:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-back {
+  background: transparent; border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 20px;
+  font-size: 13px; font-weight: 400; letter-spacing: 0.1em;
+  color: var(--text-dim); cursor: pointer; font-family: 'Jost', sans-serif;
+  transition: border-color 0.2s;
+}
+.btn-back:hover { border-color: var(--text-muted); }
+
+/* ── RESULTS SCREEN ── */
+.results-wrap { flex: 1; padding: 48px 24px 64px; max-width: 780px; margin: 0 auto; width: 100%; }
+.results-hero { text-align: center; margin-bottom: 48px; }
+.results-eyebrow { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+.results-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 5vw, 3rem); font-weight: 300;
+  color: var(--text); line-height: 1.1; margin-bottom: 14px;
+  text-wrap: balance;
+}
+.results-sub { font-size: 15px; color: var(--text-dim); line-height: 1.7; max-width: 500px; margin: 0 auto; }
+
+/* Radar chart */
+.radar-section { margin-bottom: 48px; }
+.radar-container { display: flex; justify-content: center; padding: 12px 0; }
+#radarSvg { max-width: 380px; width: 100%; height: auto; }
+
+/* State labels on radar */
+.state-label { font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 400; fill: var(--text-dim); }
+.data-dot { fill: var(--gold); stroke: var(--bg); stroke-width: 2; }
+.grid-line { stroke: var(--border); stroke-width: 1; fill: none; }
+.data-polygon { fill: rgba(200,169,110,0.15); stroke: var(--gold); stroke-width: 1.5; }
+
+/* Dominant state section */
+.dominant-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 36px; margin-bottom: 32px;
+}
+.dominant-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+.dominant-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 300;
+  color: var(--gold); line-height: 1.1; margin-bottom: 20px;
+}
+.dominant-desc { font-size: 15px; line-height: 1.8; color: var(--text-dim); margin-bottom: 32px; }
+
+.result-block { margin-bottom: 28px; }
+.result-block-title {
+  font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 12px;
+}
+.result-block ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.result-block li {
+  font-size: 15px; line-height: 1.7; color: var(--text-dim);
+  padding-left: 16px; position: relative;
+}
+.result-block li::before { content: '—'; position: absolute; left: 0; color: var(--gold); }
+
+.insights-grid { display: flex; flex-direction: column; gap: 14px; }
+.insight-item {
+  background: var(--gold-dim); border-radius: var(--radius);
+  padding: 18px 20px; font-size: 15px; line-height: 1.7; color: var(--text);
+  border-left: 2px solid var(--gold);
+}
+
+/* State bars */
+.state-bars { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; }
+.state-bar-row { display: flex; align-items: center; gap: 14px; }
+.state-bar-name { font-size: 13px; font-weight: 400; color: var(--text-dim); min-width: 100px; }
+.state-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.state-bar-fill { height: 100%; border-radius: 3px; transition: width 1s ease; background: var(--gold); }
+.state-bar-pct { font-size: 12px; color: var(--text-muted); min-width: 36px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* CTA */
+.results-cta {
+  text-align: center; padding: 40px 24px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+}
+.results-cta h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.4rem, 3.5vw, 1.9rem); font-weight: 300;
+  color: var(--text); margin-bottom: 14px;
+}
+.results-cta p { font-size: 15px; color: var(--text-dim); line-height: 1.7; margin-bottom: 24px; max-width: 440px; margin-left: auto; margin-right: auto; }
+.results-cta .btn-primary { max-width: 320px; }
+
+/* PDF button */
+.pdf-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px 24px;
+  font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 400;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim);
+  cursor: pointer; margin: 0 auto 36px; transition: border-color 0.2s, color 0.2s;
+}
+.pdf-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* Print */
+@media print {
+  .site-header, .pdf-btn, .results-cta, .btn-primary { display: none !important; }
+  body { background: white; color: #1a1815; }
+  :root { --bg: white; --surface: #f7f7f7; --text: #1a1815; --text-dim: #444; --text-muted: #888; --border: #ddd; --gold: #a07840; --gold-dim: rgba(160,120,64,0.08); }
+  .results-wrap { padding: 20px; max-width: 100%; }
+  .dominant-section { break-inside: avoid; }
+  .insight-item { background: #faf6f0; }
+}
+
+@media (max-width: 480px) {
+  .scale-track { gap: 7px; }
+  .scale-btn { width: 40px; height: 40px; font-size: 13px; }
+  .yn-wrap { flex-direction: column; }
+  .state-bar-name { min-width: 82px; font-size: 12px; }
+}
+</style>
+
+<!-- HEADER -->
+<header class="site-header">
+  <a class="logo" href="#">
+    <div class="logo-mark">TLR</div>
+    <span class="logo-text">The Living Room</span>
+  </a>
+  <span class="quiz-label">5 States Quiz</span>
+</header>
+
+<!-- INTRO SCREEN -->
+<div class="screen active" id="screenIntro">
+  <div class="intro-wrap">
+    <div class="intro-box">
+      <div class="intro-eyebrow">The 5 States Framework</div>
+      <h1 class="intro-title">The 5 Ways We Get Lost</h1>
+      <p class="intro-body">Most people experience all five patterns to some degree. This short quiz reveals which ones are having the greatest influence on your life right now — and what they may be trying to show you.</p>
+      <form id="introForm" onsubmit="startQuiz(event)">
+        <div class="form-row">
+          <div class="form-field">
+            <label for="nameInput">Your first name</label>
+            <input type="text" id="nameInput" placeholder="First name" required autocomplete="given-name">
+          </div>
+          <div class="form-field">
+            <label for="emailInput">Email address</label>
+            <input type="email" id="emailInput" placeholder="you@example.com" required autocomplete="email">
+          </div>
+        </div>
+        <button type="submit" class="btn-primary">Begin the Quiz</button>
+      </form>
+      <p class="intro-note">Takes about 4 minutes. 17 questions.</p>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div class="screen" id="screenQuiz">
+  <div class="progress-bar-wrap">
+    <div class="progress-label" id="progressLabel">Question 1 of 17</div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+  <div class="quiz-wrap">
+    <div class="question-box">
+      <div class="q-number" id="qNumber"></div>
+      <div class="q-text" id="qText"></div>
+      <div id="qAnswerArea"></div>
+      <div class="q-nav">
+        <button class="btn-back" id="btnBack" onclick="goBack()">← Back</button>
+        <button class="btn-next" id="btnNext" onclick="goNext()" disabled>Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS SCREEN -->
+<div class="screen" id="screenResults">
+  <div class="results-wrap">
+    <div class="results-hero">
+      <div class="results-eyebrow">Your Results</div>
+      <h1 class="results-title" id="resultsName">Your 5 States Profile</h1>
+      <p class="results-sub">Most people experience all five patterns to some degree. The difference is simply which ones are having the greatest influence on your life right now.</p>
+    </div>
+
+    <div class="radar-section">
+      <div class="radar-container">
+        <svg id="radarSvg" viewBox="0 0 400 380" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+
+    <div class="state-bars" id="stateBars"></div>
+
+    <button class="pdf-btn" onclick="window.print()">↓ Save as PDF</button>
+
+    <div class="dominant-section" id="dominantSection">
+      <div class="dominant-label">Your strongest pattern right now is</div>
+      <div class="dominant-name" id="dominantName"></div>
+      <div class="dominant-desc" id="dominantDesc"></div>
+      <div class="result-block">
+        <div class="result-block-title">What this may be costing you</div>
+        <ul id="costingList"></ul>
+      </div>
+      <div class="result-block">
+        <div class="result-block-title">Why so many people stay here</div>
+        <ul id="stayingList"></ul>
+      </div>
+      <div class="result-block">
+        <div class="result-block-title">What this may be showing you</div>
+        <div class="insights-grid" id="showingList"></div>
+      </div>
+    </div>
+
+    <div class="results-cta">
+      <h3>Ready to find your way back?</h3>
+      <p>The Living Room is a group coaching community where we do this work together — with honesty, warmth, and a structure that actually holds.</p>
+      <button class="btn-primary" onclick="window.open(CONFIG.joinUrl,'_blank')">Learn about The Living Room</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CONFIG = {
+  mailchimpUrl: 'https://motivate-coaching.us18.list-manage.com/subscribe/post?u=575cbfd47d142d3fee69ff0b1&id=75e72f8d2a',
+  joinUrl: 'https://www.motivate-coaching.com/thelivingroom',
+};
+
+// ── QUESTIONS ──────────────────────────────────────────────────────────────
+// state: 0=Drift, 1=Noise, 2=Carry, 3=Replay, 4=Whisper
+// type: 'mc' | 'scale' | 'yn' | 'open'
+// For mc: options[0] = highest alignment (score 100), options[3] = lowest (score 0)
+// For scale: 1=Not like me (score 0 aligned), 5=Extremely like me (score 100)
+// For yn: yes=100, no=0
+// open: no scoring (optional)
+const QUESTIONS = [
+  {
+    id: 1, state: 0, type: 'mc',
+    text: 'Looking back at the past 6 months, which feels most true?',
+    options: [
+      "I've been moving, but not towards anything that matters.",
+      "I'm not sure the direction I'm heading is one I consciously chose.",
+      "I'm mostly on track, but not fully connected to it.",
+      "I feel clear about where I'm heading."
+    ]
+  },
+  {
+    id: 2, state: 1, type: 'scale',
+    text: 'Does your mind feel busy more often than it feels clear?'
+  },
+  {
+    id: 3, state: 2, type: 'mc',
+    text: 'When someone asks for help, what is your default response?',
+    options: [
+      "Yes, even when I'm already stretched.",
+      "Usually yes.",
+      "It depends on who is asking and what they need.",
+      "I'd first consider if I have capacity."
+    ]
+  },
+  {
+    id: 4, state: 3, type: 'mc',
+    text: 'After making an important decision...',
+    options: [
+      "I keep re-thinking the decision.",
+      "I look for signs that I made the right call.",
+      "I feel relieved that it's decided.",
+      "I move on and focus on what's next."
+    ]
+  },
+  {
+    id: 5, state: 4, type: 'scale',
+    text: 'Deep down, I already know what feels right, but I struggle to act on it.'
+  },
+  {
+    id: 6, state: 0, type: 'scale',
+    text: "I know what I want from life, but it often takes a back seat to the life I'm managing."
+  },
+  {
+    id: 7, state: 1, type: 'mc',
+    text: 'You wake up at 3am. What is your mind most likely doing?',
+    options: [
+      "Running through everything I need to do in my head.",
+      "Worrying about something I can't quite pin down.",
+      "Drifting off eventually.",
+      "Going back to sleep easily."
+    ]
+  },
+  {
+    id: 8, state: 2, type: 'scale',
+    text: 'My own needs often end up at the bottom of the list.'
+  },
+  {
+    id: 9, state: 3, type: 'scale',
+    text: 'When someone close to me is struggling, I often wonder what I could have done differently.'
+  },
+  {
+    id: 10, state: 4, type: 'yn',
+    text: 'Do you ever find yourself waiting for some sort of permission to act on what you instinctively already know?'
+  },
+  {
+    id: 11, state: 0, type: 'scale',
+    text: "I often feel like I'm moving through life on autopilot."
+  },
+  {
+    id: 12, state: 1, type: 'mc',
+    text: 'It is Sunday afternoon, and you have no specific plans.',
+    options: [
+      "I keep busy by quickly filling the time with something to do.",
+      "I think about everything I feel I 'should' be doing.",
+      "I relax, but feel a low-level guilt.",
+      "I genuinely switch off and enjoy what I choose to do."
+    ]
+  },
+  {
+    id: 13, state: 3, type: 'yn',
+    text: 'Is there something that happened recently that your mind keeps returning to?'
+  },
+  {
+    id: 14, state: 2, type: 'mc',
+    text: 'Which of these feels most true?',
+    options: [
+      "Other people's needs often come before my own.",
+      "I struggle to switch off from responsibilities.",
+      "I often feel responsible for how things turn out.",
+      "I regularly make time for myself."
+    ]
+  },
+  {
+    id: 15, state: 4, type: 'mc',
+    text: 'When facing an important decision, where do you usually look for the answer?',
+    options: [
+      "I look for advice, reassurance or confirmation from others.",
+      "I research and gather information before deciding.",
+      "I keep searching until I feel completely certain.",
+      "I trust my instincts and decide."
+    ]
+  },
+  {
+    id: 16, state: -1, type: 'open',
+    text: 'What currently demands the most from you, whilst giving the least back?',
+    optional: true
+  },
+  {
+    id: 17, state: -1, type: 'open',
+    text: 'What do you believe would need to change for life to feel more like yours again?',
+    optional: true
+  }
+];
+
+// ── STATE CONTENT ──────────────────────────────────────────────────────────
+const STATES = [
+  {
+    name: 'The Drift',
+    color: '#7ba7c4',
+    desc: "You may be moving through each day with a sense of going through the motions. Life isn't necessarily bad, but it doesn't quite feel like yours. The direction you're heading may feel like something that just happened, rather than something you consciously chose.",
+    costing: [
+      "A growing disconnect between the life you're living and the one you actually want.",
+      "The energy spent managing a path that doesn't fully feel like yours.",
+      "The gradual erosion of a sense of purpose and intention."
+    ],
+    staying: [
+      "Moving feels productive, even when the direction isn't clear.",
+      "Stopping to question the direction can feel unsettling or risky.",
+      "Many people stay in The Drift because the alternative — choosing — feels daunting."
+    ],
+    showing: [
+      "The direction that matters to you is still there — it may just need space to emerge.",
+      "Being lost isn't the same as being wrong — sometimes it's the beginning of finding your way.",
+      "The life you actually want may be closer than it feels."
+    ]
+  },
+  {
+    name: 'The Noise',
+    color: '#c47b7b',
+    desc: "Your mind may rarely get a moment of peace. Even when there is nothing urgent demanding your attention, your thoughts can remain busy, making it difficult to access the clarity, calm, and mental space you need.",
+    costing: [
+      "Being mentally pulled back into the past instead of fully engaging with the present.",
+      "Spending energy on things that can no longer be changed.",
+      "Finding it harder to move forward with confidence and trust yourself."
+    ],
+    staying: [
+      "A busy mind can feel productive, even when it isn't helping.",
+      "Constant thinking can create the illusion of control and certainty.",
+      "Many people become so used to mental noise that they stop noticing it."
+    ],
+    showing: [
+      "Your mind may be working harder than it needs to.",
+      "Clarity often comes from creating space, not doing more thinking.",
+      "The peace you're looking for may not be found in another thought."
+    ]
+  },
+  {
+    name: 'The Carry',
+    color: '#8bc47b',
+    desc: "You may be the person others rely on — the one who shows up, steps in, and keeps things together. You're good at it, and that's part of the problem. So much of your energy goes outward that there's often very little left for what you actually need.",
+    costing: [
+      "Consistently depleting yourself in service of everyone else's needs.",
+      "Struggling to recognise your own needs, let alone meet them.",
+      "A quiet resentment or exhaustion that builds slowly over time."
+    ],
+    staying: [
+      "Caring for others can feel like love, purpose and identity all at once.",
+      "Saying no can feel like letting people down — so yes becomes the default.",
+      "Many people carry so much because they've forgotten what it feels like not to."
+    ],
+    showing: [
+      "What you give to others so readily may be what you most need for yourself.",
+      "Capacity isn't unlimited — and tending to it isn't selfish.",
+      "The people around you may need you to model boundaries, not just carry them."
+    ]
+  },
+  {
+    name: 'The Replay',
+    color: '#c4a87b',
+    desc: "Your mind may return, again and again, to moments that have already passed — conversations, decisions, things said or left unsaid. Rather than releasing what can't be changed, you may find yourself circling back, searching for something: clarity, resolution, or a version of events that feels more settled.",
+    costing: [
+      "Being mentally pulled back into the past instead of fully engaging with the present.",
+      "Spending energy on things that can no longer be changed.",
+      "Finding it harder to move forward with confidence and trust yourself."
+    ],
+    staying: [
+      "Replaying can feel like learning or processing — even when it's neither.",
+      "The mind looks for resolution in moments that may never fully resolve.",
+      "Many people replay because they believe the right answer is still in there somewhere."
+    ],
+    showing: [
+      "What your mind keeps returning to may be asking something of you — not answering.",
+      "Letting go doesn't mean the moment didn't matter — it means you're ready to move.",
+      "Peace may be less about understanding what happened and more about choosing what comes next."
+    ]
+  },
+  {
+    name: 'The Whisper',
+    color: '#a87bc4',
+    desc: "There may be a quiet voice inside you — an instinct, a knowing, a sense of what feels right — that keeps getting pushed to the bottom of the list. It's not that you don't hear it. It's that something else always seems more urgent, more practical, or safer to follow.",
+    costing: [
+      "A growing distance from your own instincts and inner knowing.",
+      "The quiet accumulation of choices that don't quite feel like yours.",
+      "An uneasy sense that the life you're building doesn't fully reflect who you are."
+    ],
+    staying: [
+      "Acting on instinct can feel risky without external validation or certainty.",
+      "The noise of everyday life can drown out even the clearest inner signal.",
+      "Many people learn, over time, to distrust the very instincts that know them best."
+    ],
+    showing: [
+      "What you already know is worth listening to — even before you're sure.",
+      "The permission you're waiting for may never come from anywhere but yourself.",
+      "Your instincts are not the problem — the distance you've built from them is."
+    ]
+  }
+];
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let currentQ = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+let userName = '';
+let userEmail = '';
+
+// ── INTRO ──────────────────────────────────────────────────────────────────
+function startQuiz(e) {
+  e.preventDefault();
+  userName = document.getElementById('nameInput').value.trim();
+  userEmail = document.getElementById('emailInput').value.trim();
+  subscribeMailchimp(userName, userEmail);
+  showScreen('screenQuiz');
+  currentQ = 0;
+  renderQuestion();
+}
+
+function subscribeMailchimp(name, email) {
+  try {
+    const parts = name.split(' ');
+    const fname = parts[0] || '';
+    const lname = parts.slice(1).join(' ') || '';
+    const url = CONFIG.mailchimpUrl.replace('/post?', '/post-json?') +
+      `&EMAIL=${encodeURIComponent(email)}&FNAME=${encodeURIComponent(fname)}&LNAME=${encodeURIComponent(lname)}&c=?`;
+    const img = new Image();
+    img.src = url;
+  } catch(e) {}
+}
+
+// ── NAVIGATION ──────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goBack() {
+  if (currentQ === 0) { showScreen('screenIntro'); return; }
+  currentQ--;
+  renderQuestion();
+}
+
+function goNext() {
+  if (currentQ < QUESTIONS.length - 1) {
+    currentQ++;
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+// ── RENDER QUESTION ──────────────────────────────────────────────────────────
+function renderQuestion() {
+  const q = QUESTIONS[currentQ];
+  const total = QUESTIONS.length;
+  const pct = Math.round((currentQ / total) * 100);
+
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `Question ${currentQ + 1} of ${total}`;
+  document.getElementById('qNumber').textContent = `Question ${currentQ + 1}`;
+  document.getElementById('qText').textContent = q.text;
+
+  const area = document.getElementById('qAnswerArea');
+  area.innerHTML = '';
+
+  const btnNext = document.getElementById('btnNext');
+  const btnBack = document.getElementById('btnBack');
+  btnBack.style.display = currentQ === 0 ? 'none' : '';
+  btnNext.textContent = currentQ === total - 1 ? 'See my results' : 'Next';
+  btnNext.disabled = true;
+
+  if (q.type === 'mc') {
+    const list = document.createElement('div');
+    list.className = 'options-list';
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn' + (answers[currentQ] === i ? ' selected' : '');
+      btn.innerHTML = `<span class="option-dot"></span><span>${opt}</span>`;
+      btn.onclick = () => {
+        answers[currentQ] = i;
+        list.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        btnNext.disabled = false;
+      };
+      list.appendChild(btn);
+    });
+    area.appendChild(list);
+    if (answers[currentQ] !== null) btnNext.disabled = false;
+
+  } else if (q.type === 'scale') {
+    const wrap = document.createElement('div');
+    wrap.className = 'scale-wrap';
+    const track = document.createElement('div');
+    track.className = 'scale-track';
+    for (let v = 1; v <= 5; v++) {
+      const btn = document.createElement('button');
+      btn.className = 'scale-btn' + (answers[currentQ] === v ? ' selected' : '');
+      btn.textContent = v;
+      btn.onclick = () => {
+        answers[currentQ] = v;
+        track.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        btnNext.disabled = false;
+      };
+      track.appendChild(btn);
+    }
+    const labels = document.createElement('div');
+    labels.className = 'scale-labels';
+    labels.innerHTML = '<span>Not like me</span><span>Extremely like me</span>';
+    wrap.appendChild(track);
+    wrap.appendChild(labels);
+    area.appendChild(wrap);
+    if (answers[currentQ] !== null) btnNext.disabled = false;
+
+  } else if (q.type === 'yn') {
+    const wrap = document.createElement('div');
+    wrap.className = 'yn-wrap';
+    ['Yes', 'No'].forEach((label, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'yn-btn' + (answers[currentQ] === i ? ' selected' : '');
+      btn.textContent = label;
+      btn.onclick = () => {
+        answers[currentQ] = i;
+        wrap.querySelectorAll('.yn-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        btnNext.disabled = false;
+      };
+      wrap.appendChild(btn);
+    });
+    area.appendChild(wrap);
+    if (answers[currentQ] !== null) btnNext.disabled = false;
+
+  } else if (q.type === 'open') {
+    const wrap = document.createElement('div');
+    wrap.className = 'open-wrap';
+    const ta = document.createElement('textarea');
+    ta.className = 'open-textarea';
+    ta.placeholder = 'Type your thoughts here (optional)';
+    ta.value = answers[currentQ] || '';
+    ta.oninput = () => { answers[currentQ] = ta.value; };
+    const skip = document.createElement('div');
+    skip.className = 'open-skip';
+    skip.textContent = 'Skip this question →';
+    skip.onclick = () => { answers[currentQ] = ''; goNext(); };
+    wrap.appendChild(ta);
+    wrap.appendChild(skip);
+    area.appendChild(wrap);
+    btnNext.disabled = false; // always enabled for open
+  }
+}
+
+// ── SCORING ──────────────────────────────────────────────────────────────────
+function calcScores() {
+  // State scores 0-100
+  const stateTotals = [0, 0, 0, 0, 0];
+  const stateCounts = [0, 0, 0, 0, 0];
+
+  QUESTIONS.forEach((q, idx) => {
+    if (q.state < 0 || answers[idx] === null) return;
+    let score = 0;
+    if (q.type === 'mc') {
+      // 0→100, 1→67, 2→33, 3→0
+      score = [100, 67, 33, 0][answers[idx]] ?? 0;
+    } else if (q.type === 'scale') {
+      // 1→0 ... 5→100
+      score = ((answers[idx] - 1) / 4) * 100;
+    } else if (q.type === 'yn') {
+      // Yes (0) → 100, No (1) → 0
+      score = answers[idx] === 0 ? 100 : 0;
+    }
+    stateTotals[q.state] += score;
+    stateCounts[q.state]++;
+  });
+
+  return stateTotals.map((t, i) => stateCounts[i] > 0 ? Math.round(t / stateCounts[i]) : 0);
+}
+
+// ── RESULTS ──────────────────────────────────────────────────────────────────
+function showResults() {
+  const scores = calcScores();
+  const dominantIdx = scores.indexOf(Math.max(...scores));
+  const state = STATES[dominantIdx];
+
+  // Title
+  document.getElementById('resultsName').textContent = `${userName ? userName + "'s " : "Your "}5 States Profile`;
+
+  // Radar
+  drawRadar(scores);
+
+  // Bars
+  const barsEl = document.getElementById('stateBars');
+  barsEl.innerHTML = '';
+  STATES.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.className = 'state-bar-row';
+    row.innerHTML = `
+      <div class="state-bar-name">${s.name}</div>
+      <div class="state-bar-track"><div class="state-bar-fill" style="width:${scores[i]}%;background:${s.color}"></div></div>
+      <div class="state-bar-pct">${scores[i]}%</div>
+    `;
+    barsEl.appendChild(row);
+  });
+
+  // Dominant state content
+  document.getElementById('dominantName').textContent = state.name;
+  document.getElementById('dominantDesc').textContent = state.desc;
+
+  const costingEl = document.getElementById('costingList');
+  costingEl.innerHTML = state.costing.map(c => `<li>${c}</li>`).join('');
+
+  const stayingEl = document.getElementById('stayingList');
+  stayingEl.innerHTML = state.staying.map(s => `<li>${s}</li>`).join('');
+
+  const showingEl = document.getElementById('showingList');
+  showingEl.innerHTML = state.showing.map(s => `<div class="insight-item">${s}</div>`).join('');
+
+  showScreen('screenResults');
+}
+
+// ── RADAR CHART ──────────────────────────────────────────────────────────────
+function drawRadar(scores) {
+  const svg = document.getElementById('radarSvg');
+  svg.innerHTML = '';
+  const cx = 200, cy = 195, r = 140;
+  // 5 axes: Drift(top), Noise(right-top), Carry(right-bottom), Replay(left-bottom), Whisper(left-top)
+  const angles = [-90, -90+72, -90+144, -90+216, -90+288].map(a => a * Math.PI / 180);
+
+  function pt(angle, pct) {
+    const radius = r * (pct / 100);
+    return [cx + radius * Math.cos(angle), cy + radius * Math.sin(angle)];
+  }
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const def = document.createElementNS(ns, 'defs');
+  const style = document.createElementNS(ns, 'style');
+  style.textContent = `.state-label{font-family:'Jost',sans-serif;font-size:11px;fill:var(--text-dim,#888)}`;
+  def.appendChild(style);
+  svg.appendChild(def);
+
+  // Grid rings
+  [20, 40, 60, 80, 100].forEach(pct => {
+    const pts = angles.map(a => pt(a, pct)).map(p => p.join(',')).join(' ');
+    const poly = document.createElementNS(ns, 'polygon');
+    poly.setAttribute('points', pts);
+    poly.setAttribute('fill', 'none');
+    poly.setAttribute('stroke', 'var(--border,rgba(255,255,255,0.08))');
+    poly.setAttribute('stroke-width', '1');
+    svg.appendChild(poly);
+  });
+
+  // Axis lines
+  angles.forEach(a => {
+    const [x, y] = pt(a, 100);
+    const line = document.createElementNS(ns, 'line');
+    line.setAttribute('x1', cx); line.setAttribute('y1', cy);
+    line.setAttribute('x2', x); line.setAttribute('y2', y);
+    line.setAttribute('stroke', 'var(--border,rgba(255,255,255,0.08))');
+    line.setAttribute('stroke-width', '1');
+    svg.appendChild(line);
+  });
+
+  // Data polygon
+  const dataPoints = angles.map((a, i) => pt(a, scores[i]));
+  const dataPoly = document.createElementNS(ns, 'polygon');
+  dataPoly.setAttribute('points', dataPoints.map(p => p.join(',')).join(' '));
+  dataPoly.setAttribute('fill', 'rgba(200,169,110,0.15)');
+  dataPoly.setAttribute('stroke', 'var(--gold,#c8a96e)');
+  dataPoly.setAttribute('stroke-width', '1.5');
+  svg.appendChild(dataPoly);
+
+  // Dots
+  dataPoints.forEach(([x, y]) => {
+    const circle = document.createElementNS(ns, 'circle');
+    circle.setAttribute('cx', x); circle.setAttribute('cy', y); circle.setAttribute('r', '4');
+    circle.setAttribute('fill', 'var(--gold,#c8a96e)');
+    circle.setAttribute('stroke', 'var(--bg,#0e0e0e)');
+    circle.setAttribute('stroke-width', '2');
+    svg.appendChild(circle);
+  });
+
+  // Labels
+  const labelOffsets = [[0,-18],[20,0],[14,12],[-14,12],[-22,0]];
+  const labelAnchors = ['middle','start','start','end','end'];
+  STATES.forEach((s, i) => {
+    const [lx, ly] = pt(angles[i], 118);
+    const [ox, oy] = labelOffsets[i];
+    const text = document.createElementNS(ns, 'text');
+    text.setAttribute('x', lx + ox);
+    text.setAttribute('y', ly + oy);
+    text.setAttribute('text-anchor', labelAnchors[i]);
+    text.setAttribute('class', 'state-label');
+    text.textContent = s.name;
+    svg.appendChild(text);
+  });
+}
+</script>
