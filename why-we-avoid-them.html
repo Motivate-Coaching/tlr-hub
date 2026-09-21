@@ -180,7 +180,7 @@ input[type=text]::placeholder{color:var(--text-muted);font-size:0.83rem}
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <a class="back" href="index.html" onclick="history.length>1?(event.preventDefault(),history.back()):true">← Back</a>
+  <a class="back" href="index.html" onclick="history.length>1?(event.preventDefault(),location.href='index.html'):true">← Back</a>
   <span class="logo">The Living Room</span>
   <div style="display:flex;align-items:center;gap:0.85rem">
     <div id="saved-badge"><span class="dot"></span> Saved</div>
@@ -444,6 +444,7 @@ input[type=text]::placeholder{color:var(--text-muted);font-size:0.83rem}
 </div>
 
 <script src="auth.js"></script>
+<script src="history.js"></script>
 <script>
 const STORAGE_KEY = 'tlr-why-we-avoid-them';
 let saveTimer;
@@ -612,6 +613,7 @@ try{
 // Then try Supabase for cross-device data (may override localStorage if newer)
 requireAuth().then(user => {
   if(!user) return;
+  TLRHistory.init(STORAGE_KEY, collectData, applyData);
   showUserBadge && showUserBadge('.logo');
   loadProgress().then(rows => {
     if(!rows) return;

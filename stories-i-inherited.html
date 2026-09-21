@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
+<script src="history.js"></script>
 <style>
 :root{
   --navy:#1B2B4B;
@@ -128,7 +129,7 @@ body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark)
   <span class="logo">The Living Room</span>
   <div style="display:flex;align-items:center;gap:1rem">
     <div id="saved-badge"><span class="dot"></span> Saved</div>
-    <span class="theme-pill" onclick="history.back()">← Back</span>
+    <span class="theme-pill" onclick="location.href='index.html'">← Back</span>
   </div>
 </div>
 
@@ -367,6 +368,7 @@ async function resetComplete(){
 
 requireAuth().then(user => {
   if(!user) return;
+  TLRHistory.init(STORAGE_KEY, collectData, populateData);
   loadProgress().then(rows => {
     const row = rows && rows.find(r => r.tool_key === STORAGE_KEY);
     if(row && row.data){

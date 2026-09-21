@@ -168,6 +168,7 @@ textarea::placeholder{color:var(--text-muted);font-size:0.84rem}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
+<script src="history.js"></script>
 </head>
 <body>
 
@@ -373,7 +374,7 @@ textarea::placeholder{color:var(--text-muted);font-size:0.84rem}
   <div class="completion-actions">
     <button class="ca-btn" onclick="window.print()">🖨 Print blank worksheet</button>
     <button class="ca-btn" onclick="startAgain()">↩ Start again</button>
-    <button class="ca-btn" onclick="history.back()">← Back to library</button>
+    <button class="ca-btn" onclick="location.href='index.html'">← Back to library</button>
   </div>
 </div>
 </div>
@@ -514,6 +515,7 @@ try{
 
 requireAuth().then(user=>{
   if(!user) return;
+  TLRHistory.init(STORAGE_KEY, collectData, applyData);
   showUserBadge&&showUserBadge('.logo');
   loadProgress().then(rows=>{
     if(!rows) return;

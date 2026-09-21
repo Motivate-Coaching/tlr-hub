@@ -154,6 +154,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
+<script src="history.js"></script>
 </head>
 <body>
 
@@ -348,7 +349,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
       Start again
     </button>
-    <button class="ca-btn ca-primary" onclick="history.back()">← Back to library</button>
+    <button class="ca-btn ca-primary" onclick="location.href='index.html'">← Back to library</button>
   </div>
 </div>
 </div>
@@ -488,6 +489,7 @@ try{
 
 requireAuth().then(user=>{
   if(!user) return;
+  TLRHistory.init(STORAGE_KEY, collectData, applyData);
   showUserBadge&&showUserBadge('.logo');
   loadProgress().then(rows=>{
     if(!rows) return;

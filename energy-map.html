@@ -199,11 +199,12 @@ body{font-family:var(--font-body);background:var(--navy);color:var(--text-dark);
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
+<script src="history.js"></script>
 </head>
 <body>
 
 <div class="topbar">
-  <a class="back" onclick="history.back()">← Resource Library</a>
+  <a class="back" onclick="location.href='index.html'">← Resource Library</a>
   <span class="logo">TLR</span>
   <a class="theme-pill" href="index.html#library">Energy &amp; Drive</a>
   <div id="saved-badge" style="display:none;align-items:center;gap:0.4rem;font-size:0.72rem;color:rgba(255,255,255,0.5)"><span style="width:6px;height:6px;background:#2A9D6F;border-radius:50%;display:inline-block"></span> Saved</div>Progress saved</span>
@@ -476,7 +477,7 @@ body{font-family:var(--font-body);background:var(--navy);color:var(--text-dark);
   <div class="comp-actions">
     <button class="ca-btn" onclick="window.print()">🖨 Print blank worksheet</button>
     <button class="ca-btn" onclick="startAgain()">↩ Start again</button>
-    <button class="ca-btn" onclick="history.back()">← Back to library</button>
+    <button class="ca-btn" onclick="location.href='index.html'">← Back to library</button>
   </div>
 </div>
 </div>
@@ -619,6 +620,7 @@ try{
 
 requireAuth().then(user=>{
   if(!user) return;
+  TLRHistory.init(STORAGE_KEY, collectData, applyData);
   showUserBadge&&showUserBadge('.logo');
   loadProgress().then(rows=>{
     if(!rows) return;
