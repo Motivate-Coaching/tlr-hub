@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Identity I Choose — The Living Room</title>
+<title>Who Am I Becoming? — The Living Room</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -23,9 +23,10 @@
   --font-display:'Playfair Display',serif;
   --font-body:'Inter',sans-serif;
   --s1-color:#2C5F8A;
-  --s2-color:#5B4FCE;
+  --s2-color:#B5583C;
   --s3-color:#3A6B4A;
-  --s4-color:#B5583C;
+  --s4-color:#5B4FCE;
+  --s5-color:#7A6B4A;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark);min-height:100vh}
@@ -62,46 +63,50 @@ body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark)
 .step-num.c2{background:var(--s2-color)}
 .step-num.c3{background:var(--s3-color)}
 .step-num.c4{background:var(--s4-color)}
+.step-num.c5{background:var(--s5-color)}
 .step-q{font-size:1rem;font-weight:700;letter-spacing:0.01em;color:var(--text-dark);margin-bottom:0.2rem;text-transform:uppercase}
 .step-sub{font-size:0.84rem;color:var(--text-muted);line-height:1.55}
+.step-choose{font-size:0.75rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;display:block}
 
-/* ── Section 1: Future Self Snapshot ── */
-.snapshot-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem}
-.snap-card{border:1px solid var(--border);border-radius:10px;padding:1rem}
-.snap-icon{font-size:1.2rem;display:block;margin-bottom:0.3rem}
-.snap-label{font-size:0.67rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.5rem}
-.snap-ta{width:100%;border:none;background:transparent;font-family:var(--font-body);font-size:0.85rem;color:var(--text-dark);line-height:1.6;padding:0;outline:none;resize:none;min-height:80px}
-.snap-ta::placeholder{color:#C8C4BB;font-size:0.82rem}
-.snap-note{font-size:0.72rem;color:var(--text-muted);font-style:italic;margin-bottom:1rem;text-align:right}
+/* ── Sections 1 & 2: Want More / Want Less ── */
+.slots-row{display:flex;gap:0.75rem}
+.slot-card{flex:1;border:1px solid var(--border);border-radius:10px;padding:1rem;display:flex;align-items:flex-start;gap:0.75rem}
+.slot-num{width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;font-size:0.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.slot-input{flex:1;border:none;background:transparent;font-family:var(--font-body);font-size:0.9rem;color:var(--text-dark);outline:none;padding:0.25rem 0;border-bottom:1.5px solid var(--border);width:100%}
+.slot-input::placeholder{color:#C8C4BB}
+.slot-input:focus{border-bottom-color:var(--gold)}
 
-/* ── Section 2: Identity Shifts ── */
-.shifts-flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:0.5rem;align-items:start;margin-top:0.5rem}
-.shift-card{border:1px solid var(--border);border-radius:12px;padding:1.1rem;background:var(--cream)}
-.shift-badge{display:flex;align-items:center;gap:0.4rem;margin-bottom:0.75rem}
-.shift-badge-icon{font-size:1rem}
-.shift-badge-label{font-size:0.67rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase}
-.shift-ta{width:100%;border:none;background:transparent;font-family:var(--font-body);font-size:0.85rem;color:var(--text-dark);line-height:1.6;padding:0;outline:none;resize:none;min-height:80px}
-.shift-ta::placeholder{color:#C8C4BB;font-size:0.82rem}
-.shift-arrow{font-size:1.4rem;color:var(--gold);align-self:center;text-align:center;flex-shrink:0}
-.shift-badge-label.red{color:#B5583C}
-.shift-badge-label.blue{color:#5B4FCE}
-.shift-badge-label.green{color:#3A6B4A}
+/* ── Section 3: How I Want to Show Up ── */
+.show-up-grid{display:flex;flex-direction:column;gap:0.85rem}
+.show-up-row{display:flex;align-items:flex-start;gap:1rem;padding:0.85rem 1rem;border:1px solid var(--border);border-radius:10px;background:var(--cream)}
+.show-up-label-wrap{min-width:130px;flex-shrink:0}
+.show-up-icon{font-size:1.1rem;display:block;margin-bottom:0.2rem}
+.show-up-label{font-size:0.72rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-dark);display:block}
+.show-up-sub{font-size:0.68rem;color:var(--text-muted);line-height:1.4}
+.show-up-ta{flex:1;border:none;border-bottom:1.5px solid var(--border);background:transparent;font-family:var(--font-body);font-size:0.88rem;color:var(--text-dark);outline:none;resize:none;min-height:48px;line-height:1.6;padding:0.2rem 0}
+.show-up-ta::placeholder{color:#C8C4BB;font-size:0.84rem}
+.show-up-ta:focus{border-bottom-color:var(--gold)}
 
-/* ── Section 3: Proof Points ── */
-.proof-note{font-size:0.85rem;color:var(--text-mid);line-height:1.6;margin-bottom:1.1rem}
-.proof-items{display:flex;flex-direction:column;gap:0.6rem}
-.proof-item{display:flex;align-items:flex-start;gap:0.75rem;border-bottom:1.5px solid var(--border);padding-bottom:0.35rem}
-.proof-num{font-size:0.75rem;font-weight:700;color:var(--s3-color);min-width:20px;margin-top:0.55rem;flex-shrink:0}
-.proof-input{flex:1;border:none;background:transparent;font-family:var(--font-body);font-size:0.9rem;color:var(--text-dark);padding:0.45rem 0;outline:none}
-.proof-input::placeholder{color:#C8C4BB}
+/* ── Section 4: A Small Step ── */
+.step-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem}
+.step-card{border:1px solid var(--border);border-radius:10px;padding:1rem}
+.step-card-label{font-size:0.67rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.35rem}
+.step-card-sub{font-size:0.72rem;color:var(--text-muted);margin-bottom:0.65rem}
+.step-card-ta{width:100%;border:none;background:transparent;font-family:var(--font-body);font-size:0.88rem;color:var(--text-dark);outline:none;resize:none;min-height:70px;line-height:1.6;padding:0;border-bottom:1.5px solid var(--border)}
+.step-card-ta::placeholder{color:#C8C4BB;font-size:0.84rem}
+.step-card-ta:focus{border-bottom-color:var(--gold)}
 
-/* ── Section 4: Next 7 Days ── */
-.days-note{font-size:0.82rem;color:var(--text-mid);margin-bottom:1rem;font-style:italic}
-.days-grid{display:flex;flex-direction:column;gap:0.5rem}
-.day-row{display:flex;align-items:center;gap:0.85rem;border-bottom:1.5px solid var(--border);padding-bottom:0.3rem}
-.day-label{font-size:0.72rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gold);min-width:40px;flex-shrink:0}
-.day-input{flex:1;border:none;background:transparent;font-family:var(--font-body);font-size:0.88rem;color:var(--text-dark);padding:0.45rem 0;outline:none}
-.day-input::placeholder{color:#C8C4BB}
+/* ── Section 5: I'll Know It's Working ── */
+.working-list{display:flex;flex-direction:column;gap:0.75rem}
+.working-row{display:flex;align-items:flex-start;gap:0.85rem;border-bottom:1.5px solid var(--border);padding-bottom:0.5rem}
+.working-arrow{color:var(--gold);font-size:1rem;margin-top:0.5rem;flex-shrink:0}
+.working-input{flex:1;border:none;background:transparent;font-family:var(--font-body);font-size:0.9rem;color:var(--text-dark);padding:0.45rem 0;outline:none}
+.working-input::placeholder{color:#C8C4BB}
+
+/* ── Gentle Reminder ── */
+.reminder-block{border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;margin:1.5rem 0;background:var(--white)}
+.reminder-eyebrow{font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:0.65rem;display:flex;align-items:center;gap:0.4rem}
+.reminder-text{font-size:0.88rem;color:var(--text-mid);line-height:1.7}
 
 /* ── Reflection ── */
 .reflection-block{background:var(--navy);color:#fff;border-radius:14px;padding:1.5rem 1.75rem;margin:2rem 0}
@@ -115,8 +120,6 @@ body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark)
 .sign-card{border:2px solid var(--gold);border-radius:14px;padding:1.5rem;text-align:center;margin-bottom:2rem}
 .sign-eyebrow{font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem}
 .sign-text{font-family:var(--font-display);font-size:1.1rem;line-height:1.6;color:var(--text-dark);margin-bottom:1rem}
-.sign-strip{display:flex;justify-content:center;gap:2rem;flex-wrap:wrap}
-.sign-item{font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted)}
 
 .principles{display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem 1.5rem;margin:1.5rem 0;padding:1rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
 .principles span{font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)}
@@ -133,9 +136,10 @@ body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark)
 @media(max-width:600px){
   .tool-title{font-size:2.1rem}
   .page{padding:1.75rem 1rem 3rem}
-  .snapshot-grid{grid-template-columns:1fr 1fr}
-  .shifts-flow{grid-template-columns:1fr;gap:0.75rem}
-  .shift-arrow{display:none}
+  .slots-row{flex-direction:column}
+  .step-grid{grid-template-columns:1fr}
+  .show-up-row{flex-direction:column;gap:0.5rem}
+  .show-up-label-wrap{min-width:unset}
 }
 </style>
 </head>
@@ -151,14 +155,14 @@ body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark)
 
 <div class="page" id="mainView">
   <div class="tool-eyebrow">Identity Is Not Fixed · Week 4</div>
-  <h1 class="tool-title">The Identity I Choose</h1>
-  <div class="tool-subtitle">I get to decide who I am becoming.</div>
+  <h1 class="tool-title">Who Am I Becoming?</h1>
+  <div class="tool-subtitle">Choosing Intentionally, For Now.</div>
   <div class="tool-divider"></div>
-  <p class="tool-intro">We've explored who I've learnt to be, the stories I inherited, and who I am now. This week is about intention. I don't have to wait to become someone else. I can choose, design, and practise the identity I want to live.</p>
+  <p class="tool-intro">Identity is fluid. I am not becoming someone new. I am allowing space for who I am to keep evolving. I can choose how I want to show up, right now, and adjust as life and I continue to change. Small choices. Real actions. Ongoing becoming.</p>
 
   <div class="tool-instruction">
     <span class="inst-icon">✏️</span>
-    <span>This is the week everything you've explored comes together. Take your time. Write freely. Be specific — the more specific, the more real it becomes. Your answers auto-save.</span>
+    <span>Work through each section in order. This is not about becoming a different person — it's about choosing more intentionally. Your answers auto-save as you type.</span>
   </div>
 
   <div class="tool-progress">
@@ -167,158 +171,166 @@ body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark)
       <span class="prog-pct" id="prog-pct">0%</span>
     </div>
     <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
-    <div class="prog-hint" id="prog-hint">Start with your Future Self Snapshot</div>
+    <div class="prog-hint" id="prog-hint">Start with what you want more of</div>
   </div>
 
   <div id="completed-banner" style="display:none">
     ✅ <span>You've completed this tool. Your responses are saved. <button onclick="resetComplete()" style="background:none;border:none;color:#2A9D6F;cursor:pointer;font-size:0.88rem;text-decoration:underline;padding:0;margin-left:0.25rem">Mark as not complete</button></span>
   </div>
 
-  <!-- ── SECTION 1: FUTURE SELF ── -->
+  <!-- ── SECTION 1: WHAT I WANT MORE OF ── -->
   <div class="step-block">
     <div class="step-head">
       <div class="step-num c1">1</div>
       <div class="step-text">
-        <div class="step-q">My Future Self Snapshot</div>
-        <div class="step-sub">Imagine it's 12 months from now and you've been living with intention. Who have you become? Write freely. Be specific.</div>
+        <div class="step-q">What I Want More Of</div>
+        <div class="step-sub">Drawing from who I am now and what matters most, what qualities, ways of being or themes would I like to invite more of into my life?</div>
       </div>
     </div>
-    <div class="snap-note">Describe that person in as much detail as you can →</div>
-    <div class="snapshot-grid">
-      <div class="snap-card">
-        <span class="snap-icon">🧠</span>
-        <span class="snap-label">How do I think about myself?</span>
-        <textarea class="snap-ta" id="snap-think" placeholder="My relationship with myself, my self-talk, my beliefs…" oninput="autoSize(this);autoSave()" rows="4"></textarea>
-      </div>
-      <div class="snap-card">
-        <span class="snap-icon">❤️</span>
-        <span class="snap-label">How do I relate to others?</span>
-        <textarea class="snap-ta" id="snap-relate" placeholder="My relationships, how I show up for people, what I give…" oninput="autoSize(this);autoSave()" rows="4"></textarea>
-      </div>
-      <div class="snap-card">
-        <span class="snap-icon">🌟</span>
-        <span class="snap-label">How do I show up each day?</span>
-        <textarea class="snap-ta" id="snap-showup" placeholder="My energy, habits, presence, consistency…" oninput="autoSize(this);autoSave()" rows="4"></textarea>
-      </div>
-      <div class="snap-card">
-        <span class="snap-icon">🎯</span>
-        <span class="snap-label">What matters most to me?</span>
-        <textarea class="snap-ta" id="snap-matters" placeholder="What I'm focused on, what I've let go of…" oninput="autoSize(this);autoSave()" rows="4"></textarea>
-      </div>
-      <div class="snap-card">
-        <span class="snap-icon">🌱</span>
-        <span class="snap-label">What habits support me?</span>
-        <textarea class="snap-ta" id="snap-habits" placeholder="The daily practices that ground me…" oninput="autoSize(this);autoSave()" rows="4"></textarea>
-      </div>
-      <div class="snap-card">
-        <span class="snap-icon">☀️</span>
-        <span class="snap-label">How do I want my life to feel?</span>
-        <textarea class="snap-ta" id="snap-feel" placeholder="The quality, tone and texture of my daily life…" oninput="autoSize(this);autoSave()" rows="4"></textarea>
-      </div>
+    <span class="step-choose">Choose 2–3</span>
+    <div class="slots-row">
+      <div class="slot-card"><div class="slot-num">1</div><input class="slot-input" id="more-1" placeholder="e.g. presence, creativity, boldness…" oninput="autoSave()"></div>
+      <div class="slot-card"><div class="slot-num">2</div><input class="slot-input" id="more-2" placeholder="" oninput="autoSave()"></div>
+      <div class="slot-card"><div class="slot-num">3</div><input class="slot-input" id="more-3" placeholder="" oninput="autoSave()"></div>
     </div>
   </div>
 
-  <!-- ── SECTION 2: IDENTITY SHIFTS ── -->
+  <!-- ── SECTION 2: WHAT I WANT LESS OF ── -->
   <div class="step-block">
     <div class="step-head">
       <div class="step-num c2">2</div>
       <div class="step-text">
-        <div class="step-q">The Identity Shifts</div>
-        <div class="step-sub">What do you want to stop believing about yourself? What do you want to start believing? What do you want to become known for?</div>
+        <div class="step-q">What I Want Less Of</div>
+        <div class="step-sub">What habits, patterns or ways of showing up no longer serve me — or who I want to become?</div>
       </div>
     </div>
-    <div class="shifts-flow">
-      <div class="shift-card" style="border-color:#B5583C">
-        <div class="shift-badge">
-          <span class="shift-badge-icon">✕</span>
-          <span class="shift-badge-label red">I'm letting go of…</span>
-        </div>
-        <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:0.6rem;font-style:italic">Old stories / limiting beliefs</div>
-        <textarea class="shift-ta" id="shift-letting" placeholder="I'm letting go of believing that I… / The story that… / The identity of being someone who…" oninput="autoSize(this);autoSave()" rows="5"></textarea>
-      </div>
-      <div class="shift-arrow">→</div>
-      <div class="shift-card" style="border-color:#5B4FCE">
-        <div class="shift-badge">
-          <span class="shift-badge-icon">✓</span>
-          <span class="shift-badge-label blue">I choose to believe…</span>
-        </div>
-        <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:0.6rem;font-style:italic">New stories / empowering beliefs</div>
-        <textarea class="shift-ta" id="shift-choosing" placeholder="I choose to believe that I am… / I am someone who… / A true thing about me is…" oninput="autoSize(this);autoSave()" rows="5"></textarea>
-      </div>
-      <div class="shift-arrow">→</div>
-      <div class="shift-card" style="border-color:#3A6B4A">
-        <div class="shift-badge">
-          <span class="shift-badge-icon">❤️</span>
-          <span class="shift-badge-label green">I am becoming…</span>
-        </div>
-        <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:0.6rem;font-style:italic">The identity I choose</div>
-        <textarea class="shift-ta" id="shift-becoming" placeholder="I am becoming the kind of person who… / People will experience me as… / My identity is…" oninput="autoSize(this);autoSave()" rows="5"></textarea>
-      </div>
+    <span class="step-choose">Choose 1–3</span>
+    <div class="slots-row">
+      <div class="slot-card"><div class="slot-num">1</div><input class="slot-input" id="less-1" placeholder="e.g. overcommitting, self-doubt, people-pleasing…" oninput="autoSave()"></div>
+      <div class="slot-card"><div class="slot-num">2</div><input class="slot-input" id="less-2" placeholder="" oninput="autoSave()"></div>
+      <div class="slot-card"><div class="slot-num">3</div><input class="slot-input" id="less-3" placeholder="" oninput="autoSave()"></div>
     </div>
   </div>
 
-  <!-- ── SECTION 3: PROOF POINTS ── -->
+  <!-- ── SECTION 3: HOW I WANT TO SHOW UP ── -->
   <div class="step-block">
     <div class="step-head">
       <div class="step-num c3">3</div>
       <div class="step-text">
-        <div class="step-q">Proof Points</div>
-        <div class="step-sub">What evidence will show you that you're living this new identity? What will you see, feel, or hear that tells you you're on the right track?</div>
+        <div class="step-q">How I Want to Show Up</div>
+        <div class="step-sub">If I were living these qualities more, how would I show up in these areas of my life? Write 1–2 specific examples for each.</div>
       </div>
     </div>
-    <div class="proof-note">These are not goals — they're signs. Things you'd notice if you were genuinely becoming this person. They should feel specific and real.</div>
-    <div class="proof-items">
-      <div class="proof-item"><span class="proof-num">1</span><input class="proof-input" id="proof-1" placeholder="I will notice that…" oninput="autoSave()"></div>
-      <div class="proof-item"><span class="proof-num">2</span><input class="proof-input" id="proof-2" placeholder="I will notice that…" oninput="autoSave()"></div>
-      <div class="proof-item"><span class="proof-num">3</span><input class="proof-input" id="proof-3" placeholder="Others will start to…" oninput="autoSave()"></div>
-      <div class="proof-item"><span class="proof-num">4</span><input class="proof-input" id="proof-4" placeholder="I will feel…" oninput="autoSave()"></div>
-      <div class="proof-item"><span class="proof-num">5</span><input class="proof-input" id="proof-5" placeholder="I will have stopped…" oninput="autoSave()"></div>
+    <div class="show-up-grid">
+      <div class="show-up-row">
+        <div class="show-up-label-wrap">
+          <span class="show-up-icon">🧠</span>
+          <span class="show-up-label">With Myself</span>
+          <span class="show-up-sub">My mindset and self-talk</span>
+        </div>
+        <textarea class="show-up-ta" id="show-myself" placeholder="I would…" oninput="autoSize(this);autoSave()" rows="2"></textarea>
+      </div>
+      <div class="show-up-row">
+        <div class="show-up-label-wrap">
+          <span class="show-up-icon">❤️</span>
+          <span class="show-up-label">With Others</span>
+          <span class="show-up-sub">Relationships and connection</span>
+        </div>
+        <textarea class="show-up-ta" id="show-others" placeholder="I would…" oninput="autoSize(this);autoSave()" rows="2"></textarea>
+      </div>
+      <div class="show-up-row">
+        <div class="show-up-label-wrap">
+          <span class="show-up-icon">💼</span>
+          <span class="show-up-label">In My Work</span>
+          <span class="show-up-sub">Contributions and purpose</span>
+        </div>
+        <textarea class="show-up-ta" id="show-work" placeholder="I would…" oninput="autoSize(this);autoSave()" rows="2"></textarea>
+      </div>
+      <div class="show-up-row">
+        <div class="show-up-label-wrap">
+          <span class="show-up-icon">🌱</span>
+          <span class="show-up-label">In My Wellbeing</span>
+          <span class="show-up-sub">Energy, health and balance</span>
+        </div>
+        <textarea class="show-up-ta" id="show-wellbeing" placeholder="I would…" oninput="autoSize(this);autoSave()" rows="2"></textarea>
+      </div>
+      <div class="show-up-row">
+        <div class="show-up-label-wrap">
+          <span class="show-up-icon">☀️</span>
+          <span class="show-up-label">In My Leisure</span>
+          <span class="show-up-sub">Rest, play and enjoyment</span>
+        </div>
+        <textarea class="show-up-ta" id="show-leisure" placeholder="I would…" oninput="autoSize(this);autoSave()" rows="2"></textarea>
+      </div>
     </div>
   </div>
 
-  <!-- ── SECTION 4: NEXT 7 DAYS ── -->
+  <!-- ── SECTION 4: A SMALL STEP FOR NOW ── -->
   <div class="step-block">
     <div class="step-head">
       <div class="step-num c4">4</div>
       <div class="step-text">
-        <div class="step-q">My Next 7 Days</div>
-        <div class="step-sub">One small action each day that moves you closer to who you choose to be. Small steps. Big direction.</div>
+        <div class="step-q">A Small Step, For Now</div>
+        <div class="step-sub">Identity shifts through lived experience, not big declarations. What is one small, doable experiment I can try this week that reflects who I want to become?</div>
       </div>
     </div>
-    <div class="days-note">These don't have to be dramatic. The most powerful identity shifts happen in small, consistent choices. What would the person you're becoming do today?</div>
-    <div class="days-grid">
-      <div class="day-row"><span class="day-label">Day 1</span><input class="day-input" id="day-1" placeholder="" oninput="autoSave()"></div>
-      <div class="day-row"><span class="day-label">Day 2</span><input class="day-input" id="day-2" placeholder="" oninput="autoSave()"></div>
-      <div class="day-row"><span class="day-label">Day 3</span><input class="day-input" id="day-3" placeholder="" oninput="autoSave()"></div>
-      <div class="day-row"><span class="day-label">Day 4</span><input class="day-input" id="day-4" placeholder="" oninput="autoSave()"></div>
-      <div class="day-row"><span class="day-label">Day 5</span><input class="day-input" id="day-5" placeholder="" oninput="autoSave()"></div>
-      <div class="day-row"><span class="day-label">Day 6</span><input class="day-input" id="day-6" placeholder="" oninput="autoSave()"></div>
-      <div class="day-row"><span class="day-label">Day 7</span><input class="day-input" id="day-7" placeholder="" oninput="autoSave()"></div>
+    <div class="step-grid">
+      <div class="step-card">
+        <span class="step-card-label">The Experiment</span>
+        <div class="step-card-sub">What will I do?</div>
+        <textarea class="step-card-ta" id="step-experiment" placeholder="This week I will try…" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+      </div>
+      <div class="step-card">
+        <span class="step-card-label">When</span>
+        <div class="step-card-sub">When will I do it?</div>
+        <textarea class="step-card-ta" id="step-when" placeholder="Specifically…" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+      </div>
+      <div class="step-card">
+        <span class="step-card-label">Success Looks Like</span>
+        <div class="step-card-sub">What will I notice?</div>
+        <textarea class="step-card-ta" id="step-success" placeholder="I'll know it worked if…" oninput="autoSize(this);autoSave()" rows="3"></textarea>
+      </div>
     </div>
+  </div>
+
+  <!-- ── SECTION 5: I'LL KNOW IT'S WORKING ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num c5">5</div>
+      <div class="step-text">
+        <div class="step-q">I'll Know It's Working Because…</div>
+        <div class="step-sub">What signs will tell me I'm moving in the right direction? What will I feel, think, see or hear?</div>
+      </div>
+    </div>
+    <div class="working-list">
+      <div class="working-row"><span class="working-arrow">→</span><input class="working-input" id="working-1" placeholder="I will notice…" oninput="autoSave()"></div>
+      <div class="working-row"><span class="working-arrow">→</span><input class="working-input" id="working-2" placeholder="Others will…" oninput="autoSave()"></div>
+      <div class="working-row"><span class="working-arrow">→</span><input class="working-input" id="working-3" placeholder="I will feel…" oninput="autoSave()"></div>
+    </div>
+  </div>
+
+  <!-- ── GENTLE REMINDER ── -->
+  <div class="reminder-block">
+    <div class="reminder-eyebrow">⭐ A Gentle Reminder</div>
+    <div class="reminder-text">This is not a permanent decision. It is a choice for now. I can learn, adapt and choose again. I have freedom — and with it, the responsibility to keep choosing in a way that serves me and others.</div>
   </div>
 
   <!-- ── REFLECTION ── -->
   <div class="reflection-block">
     <div class="ref-eyebrow">A Moment of Reflection</div>
-    <div class="ref-q">What will I thank myself for in 12 months' time because I started choosing who I am today?</div>
+    <div class="ref-q">If I look back in 12 months, what would I be grateful I gave myself permission to explore?</div>
     <textarea class="ref-ta" id="reflection" placeholder="Write freely…" oninput="autoSize(this);autoSave()" rows="3"></textarea>
   </div>
 
   <!-- ── SIGN ── -->
   <div class="sign-card">
-    <div class="sign-eyebrow">Your Declaration</div>
+    <div class="sign-eyebrow">Not Fixed. Not Finished. Just Becoming.</div>
     <div class="sign-text">"I get to choose who I am.<br>I get to design the life I want."</div>
-    <div class="sign-strip">
-      <span class="sign-item">👁 Aware Today</span>
-      <span class="sign-item">🎯 Intentional Choices</span>
-      <span class="sign-item">🔄 Consistent Actions</span>
-      <span class="sign-item">✨ Who I Choose to Be</span>
-    </div>
   </div>
 
   <div class="principles">
     <span>👁 Aware — See clearly. Without judgement.</span>
-    <span>🧭 Explore — Question everything.</span>
+    <span>🧭 Explore — Question everything. Discover what's true for you.</span>
     <span>✨ Choose — Release what doesn't fit. Create what does.</span>
   </div>
 
@@ -330,32 +342,28 @@ body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark)
 </div>
 
 <script>
-const STORAGE_KEY = 'tlr-identity-i-choose';
+const STORAGE_KEY = 'tlr-who-am-i-becoming';
 function autoSize(el){ el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
 
 function collectData(){
   return {
-    snap_think: document.getElementById('snap-think').value,
-    snap_relate: document.getElementById('snap-relate').value,
-    snap_showup: document.getElementById('snap-showup').value,
-    snap_matters: document.getElementById('snap-matters').value,
-    snap_habits: document.getElementById('snap-habits').value,
-    snap_feel: document.getElementById('snap-feel').value,
-    shift_letting: document.getElementById('shift-letting').value,
-    shift_choosing: document.getElementById('shift-choosing').value,
-    shift_becoming: document.getElementById('shift-becoming').value,
-    proof_1: document.getElementById('proof-1').value,
-    proof_2: document.getElementById('proof-2').value,
-    proof_3: document.getElementById('proof-3').value,
-    proof_4: document.getElementById('proof-4').value,
-    proof_5: document.getElementById('proof-5').value,
-    day_1: document.getElementById('day-1').value,
-    day_2: document.getElementById('day-2').value,
-    day_3: document.getElementById('day-3').value,
-    day_4: document.getElementById('day-4').value,
-    day_5: document.getElementById('day-5').value,
-    day_6: document.getElementById('day-6').value,
-    day_7: document.getElementById('day-7').value,
+    more_1: document.getElementById('more-1').value,
+    more_2: document.getElementById('more-2').value,
+    more_3: document.getElementById('more-3').value,
+    less_1: document.getElementById('less-1').value,
+    less_2: document.getElementById('less-2').value,
+    less_3: document.getElementById('less-3').value,
+    show_myself: document.getElementById('show-myself').value,
+    show_others: document.getElementById('show-others').value,
+    show_work: document.getElementById('show-work').value,
+    show_wellbeing: document.getElementById('show-wellbeing').value,
+    show_leisure: document.getElementById('show-leisure').value,
+    step_experiment: document.getElementById('step-experiment').value,
+    step_when: document.getElementById('step-when').value,
+    step_success: document.getElementById('step-success').value,
+    working_1: document.getElementById('working-1').value,
+    working_2: document.getElementById('working-2').value,
+    working_3: document.getElementById('working-3').value,
     reflection: document.getElementById('reflection').value
   };
 }
@@ -370,28 +378,29 @@ function populateData(d){
 }
 
 function updateProgress(){
-  const snapIds = ['snap-think','snap-relate','snap-showup','snap-matters','snap-habits','snap-feel'];
-  const snapFilled = snapIds.filter(id => document.getElementById(id)?.value.trim().length > 10).length;
-  const snapScore = snapFilled / 6;
-
-  const shiftFilled = ['shift-letting','shift-choosing','shift-becoming'].filter(id => document.getElementById(id)?.value.trim().length > 15).length;
-  const shiftScore = shiftFilled / 3;
-
-  const proofFilled = [1,2,3,4,5].filter(n => document.getElementById(`proof-${n}`)?.value.trim().length > 5).length;
-  const proofScore = proofFilled / 5;
-
-  const daysFilled = [1,2,3,4,5,6,7].filter(n => document.getElementById(`day-${n}`)?.value.trim().length > 3).length;
-  const daysScore = daysFilled / 7;
-
+  const moreFilled = ['more-1','more-2','more-3'].filter(id => document.getElementById(id)?.value.trim().length > 2).length;
+  const lessFilled = ['less-1','less-2','less-3'].filter(id => document.getElementById(id)?.value.trim().length > 2).length;
+  const showFilled = ['show-myself','show-others','show-work','show-wellbeing','show-leisure'].filter(id => document.getElementById(id)?.value.trim().length > 10).length;
+  const stepFilled = ['step-experiment','step-when','step-success'].filter(id => document.getElementById(id)?.value.trim().length > 5).length;
+  const workFilled = ['working-1','working-2','working-3'].filter(id => document.getElementById(id)?.value.trim().length > 5).length;
   const refScore = document.getElementById('reflection')?.value.trim().length > 20 ? 1 : 0;
 
-  const pct = Math.round((snapScore*0.3 + shiftScore*0.25 + proofScore*0.2 + daysScore*0.15 + refScore*0.1)*100);
-  document.getElementById('prog-fill').style.width = pct+'%';
-  document.getElementById('prog-pct').textContent = pct+'%';
+  const pct = Math.round((
+    (moreFilled/2)*0.15 +
+    (lessFilled/1)*0.10 +
+    (showFilled/5)*0.30 +
+    (stepFilled/3)*0.20 +
+    (workFilled/3)*0.15 +
+    refScore*0.10
+  )*100);
+
+  const safePct = Math.min(pct, 100);
+  document.getElementById('prog-fill').style.width = safePct+'%';
+  document.getElementById('prog-pct').textContent = safePct+'%';
   const hint = document.getElementById('prog-hint');
-  if(pct>=80){ hint.textContent='Powerful work — ready to mark complete.'; hint.className='prog-hint done'; }
-  else if(pct>=40){ hint.textContent='Keep going — you\'re building something real.'; hint.className='prog-hint'; }
-  else { hint.textContent='Start with your Future Self Snapshot.'; hint.className='prog-hint'; }
+  if(safePct>=80){ hint.textContent='Excellent — ready to mark complete.'; hint.className='prog-hint done'; }
+  else if(safePct>=40){ hint.textContent='Good progress — keep going.'; hint.className='prog-hint'; }
+  else { hint.textContent='Start with what you want more of.'; hint.className='prog-hint'; }
 }
 
 let saveTimer;

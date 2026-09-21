@@ -145,6 +145,14 @@ body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark)
 .gap-ta:focus{border-bottom-color:var(--s5-color)}
 .gap-ta::placeholder{color:#C8C4BB}
 
+/* ── Core values slots ── */
+.cv-slots{display:flex;gap:0.65rem;margin-top:0.5rem;flex-wrap:wrap}
+.cv-slot{flex:1;min-width:90px;border:1px solid var(--border);border-radius:10px;padding:0.85rem 0.75rem;display:flex;flex-direction:column;align-items:center;gap:0.5rem;background:var(--cream)}
+.cv-slot-num{width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;font-size:0.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cv-slot-input{width:100%;border:none;border-bottom:1.5px solid var(--border);background:transparent;font-family:var(--font-body);font-size:0.88rem;color:var(--text-dark);outline:none;padding:0.25rem 0;text-align:center}
+.cv-slot-input::placeholder{color:#C8C4BB;font-size:0.8rem}
+.cv-slot-input:focus{border-bottom-color:var(--gold)}
+
 /* ── Reflection block ── */
 .reflection-block{background:var(--navy);color:#fff;border-radius:14px;padding:1.5rem 1.75rem;margin:2rem 0}
 .ref-eyebrow{font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem}
@@ -208,6 +216,24 @@ body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark)
 
   <div id="completed-banner" style="display:none">
     ✅ <span>You've completed this tool. Your responses are saved. <button onclick="resetComplete()" style="background:none;border:none;color:#2A9D6F;cursor:pointer;font-size:0.88rem;text-decoration:underline;padding:0;margin-left:0.25rem">Mark as not complete</button></span>
+  </div>
+
+  <!-- ── MY CORE VALUES ── -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num c1">★</div>
+      <div class="step-text">
+        <div class="step-q">My Core Values</div>
+        <div class="step-sub">What genuinely matters to me, right now? Write your top 5. Use the evidence from the questions below to help — or start here if you already have a sense.</div>
+      </div>
+    </div>
+    <div class="cv-slots">
+      <div class="cv-slot"><div class="cv-slot-num">1</div><input class="cv-slot-input" id="cv-1" placeholder="Value…" oninput="autoSave()"></div>
+      <div class="cv-slot"><div class="cv-slot-num">2</div><input class="cv-slot-input" id="cv-2" placeholder="Value…" oninput="autoSave()"></div>
+      <div class="cv-slot"><div class="cv-slot-num">3</div><input class="cv-slot-input" id="cv-3" placeholder="Value…" oninput="autoSave()"></div>
+      <div class="cv-slot"><div class="cv-slot-num">4</div><input class="cv-slot-input" id="cv-4" placeholder="Value…" oninput="autoSave()"></div>
+      <div class="cv-slot"><div class="cv-slot-num">5</div><input class="cv-slot-input" id="cv-5" placeholder="Value…" oninput="autoSave()"></div>
+    </div>
   </div>
 
   <!-- ── PHASE 1: EVIDENCE ── -->
@@ -590,6 +616,11 @@ function collectData(){
     });
   });
   return {
+    cv_1: document.getElementById('cv-1').value,
+    cv_2: document.getElementById('cv-2').value,
+    cv_3: document.getElementById('cv-3').value,
+    cv_4: document.getElementById('cv-4').value,
+    cv_5: document.getElementById('cv-5').value,
     ev_decision: document.getElementById('ev-decision').value,
     ev_sacrifice: document.getElementById('ev-sacrifice').value,
     ev_anger: document.getElementById('ev-anger').value,
@@ -610,9 +641,11 @@ function collectData(){
 
 function populateData(d){
   if(!d) return;
-  const fields = ['ev-decision','ev-sacrifice','ev-anger','ev-pride','pattern-reflection',
+  const fields = ['cv-1','cv-2','cv-3','cv-4','cv-5',
+    'ev-decision','ev-sacrifice','ev-anger','ev-pride','pattern-reflection',
     'become-think','become-relate','become-showup','become-care','become-live','gap-gap','gap-step','reflection'];
-  const keys = ['ev_decision','ev_sacrifice','ev_anger','ev_pride','pattern_reflection',
+  const keys = ['cv_1','cv_2','cv_3','cv_4','cv_5',
+    'ev_decision','ev_sacrifice','ev_anger','ev_pride','pattern_reflection',
     'become_think','become_relate','become_showup','become_care','become_live','gap_gap','gap_step','reflection'];
   fields.forEach((id,i) => {
     const el = document.getElementById(id);
