@@ -8,10 +8,23 @@
 (function () {
   'use strict';
 
-  // Shares the _supabase client already initialised by auth.js
-  // (both scripts run in the same page scope, so _supabase is accessible here)
+  const SUPA_URL = 'https://tsusrzkpzevpiuvsppls.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzdXNyemtwemV2cGl1dnNwcGxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3NDAzMzUsImV4cCI6MjEwMTMxNjMzNX0.UQD9BaOjYWNOEVeV3QCF2sdlNc9SYJ2PrcZgpCtlQ8s';
+
+  // Create our own Supabase client — avoids any cross-script scoping issues.
+  // Supabase JS v2 uses a shared localStorage session key, so this client
+  // automatically picks up the session that auth.js already established.
+  let _sb = null;
+  function _getSb() {
+    if (_sb) return _sb;
+    if (window.supabase && window.supabase.createClient) {
+      _sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+    }
+    return _sb;
+  }
 
   let _toolKey, _collectFn, _applyFn;
+  let _lastSavedLabel = null; // tracks the label of the most recent saved snapshot this session
 
   // ── Public API ────────────────────────────────────────────────────────
   window.TLRHistory = {
@@ -30,14 +43,18 @@
 
   // ── Supabase helpers ──────────────────────────────────────────────────
   async function _getUserId() {
-    const { data: { session } } = await _supabase.auth.getSession();
+    const sb = _getSb();
+    if (!sb) throw new Error('Supabase not loaded');
+    const { data: { session } } = await sb.auth.getSession();
     return session ? session.user.id : null;
   }
 
   async function _saveSnapshot(label, data, completed) {
+    const sb = _getSb();
+    if (!sb) throw new Error('Supabase not loaded');
     const uid = await _getUserId();
-    if (!uid) return;
-    const { error } = await _supabase.from('tool_snapshots').insert({
+    if (!uid) throw new Error('Not signed in');
+    const { error } = await sb.from('tool_snapshots').insert({
       user_id:    uid,
       tool_key:   _toolKey,
       label:      label || null,
@@ -52,9 +69,11 @@
   }
 
   async function _loadSnapshots() {
+    const sb = _getSb();
+    if (!sb) return [];
     const uid = await _getUserId();
     if (!uid) return [];
-    const { data, error } = await _supabase
+    const { data, error } = await sb
       .from('tool_snapshots')
       .select('*')
       .eq('user_id', uid)
@@ -216,10 +235,25 @@
 
   // ── Name dialog flow ──────────────────────────────────────────────────
   function _showNameDialog() {
-    const inp = document.getElementById('tlr-snap-label');
-    if (inp) inp.value = '';
+    // If this session already has a saved version, warn rather than re-prompting blindly
+    if (_lastSavedLabel !== null) {
+      const lbl = _lastSavedLabel ? '“' + _lastSavedLabel + '”' : 'an unnamed version';
+      // Show a lighter confirmation: already saved, do they want to save a new snapshot?
+      const inp = document.getElementById('tlr-snap-label');
+      if (inp) inp.value = '';
+      const sub = document.querySelector('#tlr-name-overlay .tlr-dialog-sub');
+      if (sub) sub.textContent = 'Already saved as ' + lbl + ' this session. Give the new version a different name, or leave blank to save another copy.';
+    } else {
+      const sub = document.querySelector('#tlr-name-overlay .tlr-dialog-sub');
+      if (sub) sub.textContent = 'Give it a name so you can find it later — something like “September 2026”, “After the redundancy”, or “Starting fresh”.';
+      const inp = document.getElementById('tlr-snap-label');
+      if (inp) inp.value = '';
+    }
     _open('tlr-name-overlay');
-    setTimeout(() => { if (inp) inp.focus(); }, 280);
+    setTimeout(() => {
+      const inp = document.getElementById('tlr-snap-label');
+      if (inp) inp.focus();
+    }, 280);
   }
 
   window._tlrDoSave = async function () {
@@ -231,6 +265,7 @@
     try {
       // Save named snapshot to history
       await _saveSnapshot(label, data, completed);
+      _lastSavedLabel = label;
       // Also explicitly flush to main progress slot
       if (typeof saveProgress === 'function') {
         try { await saveProgress(_toolKey, completed, data); } catch (e) {}
@@ -240,7 +275,8 @@
       if (badge) { badge.style.display = 'flex'; setTimeout(() => { badge.style.display = 'none'; }, 2000); }
       _showToast(label ? '“' + label + '” saved to history' : 'Version saved to history');
     } catch (e) {
-      _showToast('Could not save — check your connection and try again');
+      console.error('[TLRHistory] _tlrDoSave error:', e);
+      _showToast('Could not save: ' + (e.message || 'unknown error'));
     }
   };
 
@@ -306,6 +342,7 @@
 
   window._tlrDoClear = function () {
     _tlrClose('tlr-clear-overlay');
+    _lastSavedLabel = null;
     // Clear all visible inputs and textareas
     document.querySelectorAll('input:not([type=hidden]):not([type=radio]):not([type=checkbox]), textarea').forEach(el => {
       el.value = '';
