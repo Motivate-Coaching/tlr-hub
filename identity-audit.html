@@ -232,9 +232,9 @@ body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark)
   <p style="text-align:center;font-family:var(--font-display);font-size:1rem;font-style:italic;color:var(--text-muted);margin-bottom:2rem;">Your identity is a choice. Your life is yours to shape.</p>
 
   <div class="complete-wrap">
-    <button class="save-btn" onclick="doSave()">💾 Save my answers</button>
+    <button class="save-btn" onclick="TLRHistory.promptSave()">💾 Save my answers</button>
     <a class="library-btn" href="index.html">← Back to hub</a>
-    <button class="complete-btn" id="complete-btn" onclick="markComplete()">Mark as Complete ✓</button>
+    <button class="complete-btn" id="complete-btn" onclick="markComplete()" style="display:none">Mark as Complete ✓</button>
   </div>
 </div>
 
@@ -398,6 +398,8 @@ function updateProgress(){
     hint.textContent = 'Start by completing the sentences below.';
     hint.className = 'prog-hint';
   }
+  const completeBtn = document.getElementById('complete-btn');
+  if(completeBtn) completeBtn.style.display = pct >= 80 ? '' : 'none';
 }
 
 function scrollToFirstEmpty(){

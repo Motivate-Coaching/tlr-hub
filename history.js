@@ -45,7 +45,10 @@
       completed:  !!completed,
       created_at: new Date().toISOString()
     });
-    if (error) console.error('[TLRHistory] save error:', error.message);
+    if (error) {
+      console.error('[TLRHistory] save error:', error.message);
+      throw new Error(error.message);
+    }
   }
 
   async function _loadSnapshots() {
@@ -157,18 +160,12 @@
     histBtn.innerHTML = _clockIcon() + ' My history';
     histBtn.onclick = () => TLRHistory.showHistory();
 
-    const snapBtn = document.createElement('button');
-    snapBtn.className = 'tlr-history-btn';
-    snapBtn.innerHTML = _saveIcon() + ' Save this version';
-    snapBtn.onclick = () => TLRHistory.promptSave();
-
     const clearBtn = document.createElement('button');
     clearBtn.className = 'tlr-clear-btn';
     clearBtn.textContent = 'Clear all fields';
     clearBtn.onclick = () => TLRHistory.clearAll();
 
     row.appendChild(histBtn);
-    row.appendChild(snapBtn);
     row.appendChild(clearBtn);
     wrap.appendChild(row);
   }
@@ -232,10 +229,18 @@
     const completed = !!(data && data._completed);
     _showToast('Saving…');
     try {
+      // Save named snapshot to history
       await _saveSnapshot(label, data, completed);
-      _showToast(label ? '“' + label + '” saved' : 'Version saved');
+      // Also explicitly flush to main progress slot
+      if (typeof saveProgress === 'function') {
+        try { await saveProgress(_toolKey, completed, data); } catch (e) {}
+      }
+      // Update the topbar saved badge if it exists
+      const badge = document.getElementById('saved-badge');
+      if (badge) { badge.style.display = 'flex'; setTimeout(() => { badge.style.display = 'none'; }, 2000); }
+      _showToast(label ? '“' + label + '” saved to history' : 'Version saved to history');
     } catch (e) {
-      _showToast('Could not save — check your connection');
+      _showToast('Could not save — check your connection and try again');
     }
   };
 
@@ -256,7 +261,7 @@
     if (!content) return;
     if (!snaps || snaps.length === 0) {
       content.innerHTML = `<div class="tlr-drawer-title">My history</div>
-<div class="tlr-snap-empty"><div class="tlr-snap-empty-icon">📂</div>No saved versions yet.<br>Use <strong>Save this version</strong> to capture a snapshot of your work at any point.</div>`;
+<div class="tlr-snap-empty"><div class="tlr-snap-empty-icon">📂</div>No saved versions yet.<br>Use <strong>Save my answers</strong> to capture a named snapshot of your work at any point.</div>`;
       return;
     }
     const cards = snaps.map(s => {
