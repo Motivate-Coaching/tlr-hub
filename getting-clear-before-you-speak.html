@@ -156,7 +156,7 @@ textarea::placeholder{color:var(--text-muted);font-size:0.88rem}
 <body>
 
 <div class="topbar">
-  <a class="back" href="index.html" onclick="history.length>1?(event.preventDefault(),location.href='index.html'):true">← Back</a>
+  <a class="back" href="#" onclick="event.preventDefault();history.back()">← Back</a>
   <span class="logo">The Living Room</span>
   <div style="display:flex;align-items:center;gap:0.85rem">
     <div id="saved-badge"><span class="dot"></span> Saved</div>
@@ -361,7 +361,7 @@ textarea::placeholder{color:var(--text-muted);font-size:0.88rem}
     <div class="closing-quote">"You don't need the perfect words. You just need enough clarity to begin."</div>
     <div class="completion-actions">
       <button class="ca-btn" onclick="document.getElementById('mainView').style.display='';document.getElementById('completionView').style.display='none'">← Review your answers</button>
-      <button class="ca-btn" onclick="window.location.href='index.html'">Back to library</button>
+      <button class="ca-btn" onclick="event.preventDefault();history.back()">Back to library</button>
       <button class="ca-btn" onclick="window.location.href='having-the-conversation.html'">Next: Having the Conversation →</button>
     </div>
   </div>
