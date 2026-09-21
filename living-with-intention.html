@@ -160,7 +160,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
 
 <!-- Topbar -->
 <div class="topbar">
-  <a href="index.html" class="back">← Resource Library</a>
+  <a href="#" class="back" onclick="event.preventDefault();history.back()">← Resource Library</a>
   <span class="logo">TLR</span>
   <a class="theme-pill" href="index.html#library">Autopilot &amp; Drift</a>
   <div id="saved-badge" style="display:none;align-items:center;gap:0.4rem;font-size:0.72rem;color:rgba(255,255,255,0.5)"><span style="width:6px;height:6px;background:#2A9D6F;border-radius:50%;display:inline-block"></span> Saved</div>Progress saved</span>
@@ -317,7 +317,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
   <div class="completion-actions">
     <button class="ca-btn" onclick="window.print()">🖨 Print blank worksheet</button>
     <button class="ca-btn" onclick="startAgain()">↩ Start again</button>
-    <button class="ca-btn" onclick="location.href='index.html'">← Back to library</button>
+    <button class="ca-btn" onclick="event.preventDefault();history.back()">← Back to library</button>
   </div>
 </div>
 </div>

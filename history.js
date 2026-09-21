@@ -8,20 +8,8 @@
 (function () {
   'use strict';
 
-  const SUPA_URL = 'https://tsusrzkpzevpiuvsppls.supabase.co';
-  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzdXNyemtwemV2cGl1dnNwcGxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3NDAzMzUsImV4cCI6MjEwMTMxNjMzNX0.UQD9BaOjYWNOEVeV3QCF2sdlNc9SYJ2PrcZgpCtlQ8s';
-
-  // Create our own Supabase client — avoids any cross-script scoping issues.
-  // Supabase JS v2 uses a shared localStorage session key, so this client
-  // automatically picks up the session that auth.js already established.
-  let _sb = null;
-  function _getSb() {
-    if (_sb) return _sb;
-    if (window.supabase && window.supabase.createClient) {
-      _sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-    }
-    return _sb;
-  }
+  // Uses saveSnapshot() and loadSnapshots() defined in auth.js,
+  // which share the same authenticated _supabase client.
 
   let _toolKey, _collectFn, _applyFn;
   let _lastSavedLabel = null; // tracks the label of the most recent saved snapshot this session
@@ -41,47 +29,15 @@
     clearAll()    { _confirmAndClear(); }
   };
 
-  // ── Supabase helpers ──────────────────────────────────────────────────
-  async function _getUserId() {
-    const sb = _getSb();
-    if (!sb) throw new Error('Supabase not loaded');
-    const { data: { session } } = await sb.auth.getSession();
-    return session ? session.user.id : null;
+  // ── Supabase helpers (delegate to auth.js globals) ────────────────────
+  async function _doSaveSnapshot(label, data, completed) {
+    // saveSnapshot() is defined in auth.js and uses the authenticated _supabase client
+    await saveSnapshot(_toolKey, label, data, completed);
   }
 
-  async function _saveSnapshot(label, data, completed) {
-    const sb = _getSb();
-    if (!sb) throw new Error('Supabase not loaded');
-    const uid = await _getUserId();
-    if (!uid) throw new Error('Not signed in');
-    const { error } = await sb.from('tool_snapshots').insert({
-      user_id:    uid,
-      tool_key:   _toolKey,
-      label:      label || null,
-      data:       data,
-      completed:  !!completed,
-      created_at: new Date().toISOString()
-    });
-    if (error) {
-      console.error('[TLRHistory] save error:', error.message);
-      throw new Error(error.message);
-    }
-  }
-
-  async function _loadSnapshots() {
-    const sb = _getSb();
-    if (!sb) return [];
-    const uid = await _getUserId();
-    if (!uid) return [];
-    const { data, error } = await sb
-      .from('tool_snapshots')
-      .select('*')
-      .eq('user_id', uid)
-      .eq('tool_key', _toolKey)
-      .order('created_at', { ascending: false })
-      .limit(100);
-    if (error) { console.error('[TLRHistory] load error:', error.message); return []; }
-    return data || [];
+  async function _doLoadSnapshots() {
+    // loadSnapshots() is defined in auth.js
+    return loadSnapshots(_toolKey);
   }
 
   // ── Styles ────────────────────────────────────────────────────────────
@@ -264,7 +220,7 @@
     _showToast('Saving…');
     try {
       // Save named snapshot to history
-      await _saveSnapshot(label, data, completed);
+      await _doSaveSnapshot(label, data, completed);
       _lastSavedLabel = label;
       // Also explicitly flush to main progress slot
       if (typeof saveProgress === 'function') {
@@ -286,7 +242,7 @@
     if (!content) return;
     content.innerHTML = '<div class="tlr-drawer-title">My history</div><div class="tlr-drawer-sub">Loading…</div>';
     _open('tlr-hist-overlay');
-    const snaps = await _loadSnapshots();
+    const snaps = await _doLoadSnapshots();
     window._tlrSnaps = {};
     snaps.forEach(s => { window._tlrSnaps[s.id] = s; });
     _renderList(snaps);

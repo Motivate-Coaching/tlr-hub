@@ -114,6 +114,36 @@ async function signOut() {
   window.location.replace('login.html');
 }
 
+// saveSnapshot — write a named version to tool_snapshots (called by history.js)
+async function saveSnapshot(toolKey, label, data, completed) {
+  const user = await getUser();
+  if (!user) throw new Error('Not signed in');
+  const { error } = await _supabase.from('tool_snapshots').insert({
+    user_id:    user.id,
+    tool_key:   toolKey,
+    label:      label || null,
+    data:       data || {},
+    completed:  !!completed,
+    created_at: new Date().toISOString()
+  });
+  if (error) throw new Error(error.message);
+}
+
+// loadSnapshots — fetch all saved versions for a tool (called by history.js)
+async function loadSnapshots(toolKey) {
+  const user = await getUser();
+  if (!user) return [];
+  const { data, error } = await _supabase
+    .from('tool_snapshots')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('tool_key', toolKey)
+    .order('created_at', { ascending: false })
+    .limit(100);
+  if (error) { console.error('[snapshots] load error:', error.message); return []; }
+  return data || [];
+}
+
 // saveProgress — upsert a tool result to Supabase + keep localStorage in sync
 async function saveProgress(toolId, completed, data = {}) {
   const user = await getUser();

@@ -137,7 +137,7 @@ body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark)
   <span class="logo">The Living Room</span>
   <div style="display:flex;align-items:center;gap:1rem">
     <div id="saved-badge"><span class="dot"></span> Saved</div>
-    <span class="theme-pill" onclick="location.href='index.html'">← Back</span>
+    <span class="theme-pill" onclick="event.preventDefault();history.back()">← Back</span>
   </div>
 </div>
 
@@ -232,7 +232,7 @@ body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark)
   <p style="text-align:center;font-family:var(--font-display);font-size:1rem;font-style:italic;color:var(--text-muted);margin-bottom:2rem;">Your identity is a choice. Your life is yours to shape.</p>
 
   <div class="complete-wrap">
-    <button class="save-btn" onclick="TLRHistory.promptSave()">💾 Save my answers</button>
+    <button class="save-btn" onclick="TLRHistory.promptSave()">💾 Save my progress</button>
     <a class="library-btn" href="#" onclick="event.preventDefault();history.back()">← Back to hub</a>
     <button class="complete-btn" id="complete-btn" onclick="markComplete()" style="display:none">Mark as Complete ✓</button>
   </div>
