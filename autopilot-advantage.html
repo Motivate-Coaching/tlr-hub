@@ -268,7 +268,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
   </div>
 
     <div class="complete-wrap">
-    <a class="library-btn" href="index.html#library">← Resource library</a>
+    <a class="library-btn" href="#" onclick="event.preventDefault();history.back()">← Resource library</a>
     <button class="save-btn" onclick="saveNow()">Save progress</button>
     <button class="complete-btn" id="mark-complete-btn" onclick="complete()" style="display:none">Mark as complete ✓</button>
   </div>
