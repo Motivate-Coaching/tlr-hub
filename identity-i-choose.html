@@ -336,7 +336,7 @@ body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark)
   </div>
 
   <div class="complete-wrap">
-    <button class="save-btn" onclick="doSave()">💾 Save my progress</button>
+    <button class="save-btn" onclick="TLRHistory.promptSave()">💾 Save my progress</button>
     <a class="library-btn" href="#" onclick="event.preventDefault();history.back()">← Back to hub</a>
     <button class="complete-btn" id="complete-btn" onclick="markComplete()">Mark as Complete ✓</button>
   </div>
