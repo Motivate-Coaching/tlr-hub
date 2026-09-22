@@ -25,7 +25,7 @@
       _injectModals();
     },
     promptSave()  { _showNameDialog(); },
-    showHistory() { _loadAndShowHistory(); },
+    showHistory() { _guardedShowHistory(); },
     clearAll()    { _confirmAndClear(); }
   };
 
@@ -209,6 +209,16 @@
       <button class="tlr-confirm-ok" onclick="_tlrDoClear()">Yes, clear it</button>
     </div>
   </div>
+</div>
+<div class="tlr-overlay center" id="tlr-save-first-overlay" onclick="if(event.target===this)_tlrClose('tlr-save-first-overlay')">
+  <div class="tlr-confirm-dialog">
+    <div class="tlr-confirm-title">💾 Save your work first?</div>
+    <div class="tlr-confirm-msg">You have unsaved progress on this worksheet. If you restore a previous version without saving, what you're working on now will be lost.<br><br>Would you like to save it first so you can come back to it?</div>
+    <div class="tlr-confirm-btns" style="flex-direction:column;gap:0.5rem">
+      <button class="tlr-dialog-save" style="width:100%;padding:0.7rem" onclick="_tlrSaveFirstThenHistory()">Save my progress, then open history</button>
+      <button class="tlr-confirm-cancel" style="width:100%;text-align:center" onclick="_tlrSkipSaveOpenHistory()">Open history without saving</button>
+    </div>
+  </div>
 </div>`;
     document.body.appendChild(el);
 
@@ -317,12 +327,54 @@
       // Update the topbar saved badge if it exists
       const badge = document.getElementById('saved-badge');
       if (badge) { badge.style.display = 'flex'; setTimeout(() => { badge.style.display = 'none'; }, 2000); }
-      _showToast(label ? '“' + label + '” saved to history' : 'Version saved to history');
+      _showToast(label ? '”' + label + '” saved to history' : 'Version saved to history');
+      // If the user clicked “save first, then open history”, now open it
+      if (_pendingHistoryAfterSave) {
+        _pendingHistoryAfterSave = false;
+        setTimeout(_loadAndShowHistory, 400);
+      }
     } catch (e) {
+      _pendingHistoryAfterSave = false;
       console.error('[TLRHistory] _tlrDoSave error:', e);
       _showToast('Could not save: ' + (e.message || 'unknown error'));
     }
   };
+
+  // ── History: check for unsaved work before opening ───────────────────
+  function _hasUnsavedContent() {
+    // Returns true if the page has any filled-in fields and nothing has been
+    // explicitly saved to history this session
+    if (_lastSavedLabel !== null) return false; // already saved a named version this session
+    const inputs = document.querySelectorAll(
+      'input:not([type=hidden]):not([type=checkbox]):not([type=radio]), textarea, [contenteditable]'
+    );
+    for (const el of inputs) {
+      if ((el.value || el.textContent || '').trim()) return true;
+    }
+    return false;
+  }
+
+  function _guardedShowHistory() {
+    if (_hasUnsavedContent()) {
+      _open('tlr-save-first-overlay');
+    } else {
+      _loadAndShowHistory();
+    }
+  }
+
+  window._tlrSaveFirstThenHistory = function () {
+    _tlrClose('tlr-save-first-overlay');
+    // Open the name dialog; after saving, automatically open history
+    _pendingHistoryAfterSave = true;
+    _showNameDialog();
+  };
+
+  window._tlrSkipSaveOpenHistory = function () {
+    _tlrClose('tlr-save-first-overlay');
+    _loadAndShowHistory();
+  };
+
+  let _pendingHistoryAfterSave = false;
 
   // ── History drawer ────────────────────────────────────────────────────
   async function _loadAndShowHistory() {
