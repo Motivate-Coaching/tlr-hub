@@ -21,7 +21,7 @@ Plain HTML, CSS and vanilla JS on GitHub Pages. No framework, no build step, no 
 ## How to work in this repo
 
 1. Work on a branch and open a pull request. Merging to main makes changes live for members, so before merging anything that changes pages members use, tell Stuart what will change and get his OK.
-2. Database changes go in supabase/migrations/ as a new timestamped .sql file (YYYYMMDDHHMMSS_short_name.sql). Never edit an existing migration. Cloud sessions cannot reach Supabase, so tell Stuart the migration still needs applying (he does this with Claude in a normal chat).
+2. Database changes go in supabase/migrations/ as a new timestamped .sql file (YYYYMMDDHHMMSS_short_name.sql). Never edit an existing migration. Cloud sessions can reach Supabase through the Supabase connector, but the database is live, so show Stuart the change in plain language and get his OK before applying any migration.
 3. Never commit secrets. The Supabase anon key in auth.js is public by design and fine. Any other key (service role, Resend, Mailchimp, Stripe) must never appear in any file.
 4. When auth.js or history.js change, bump the ?v= query string on every page that loads them. Current: auth.js?v=20260922, history.js?v=20260922b.
 5. Back buttons always use onclick="history.back()". Never hardcode index.html.
