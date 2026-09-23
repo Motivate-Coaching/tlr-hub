@@ -1316,7 +1316,7 @@ async function submitAndReveal(){
 
   // Save to Supabase
   try{
-    await _sb.from('values_responses').upsert({
+    const { error } = await _sb.from('values_responses').insert({
       first_name: state.first_name||'',
       email: state.email,
       ev_decision: state.ev_decision||'',
@@ -1341,7 +1341,8 @@ async function submitAndReveal(){
       utm_source: UTM.utm_source,
       utm_medium: UTM.utm_medium,
       utm_campaign: UTM.utm_campaign
-    }, { onConflict: 'email' });
+    });
+    if(error) console.error('Supabase save error:', error);
   }catch(e){ console.error('Supabase save error:', e); }
 
   // Add to Mailchimp (via proxy)
@@ -1462,14 +1463,14 @@ function buildResultsScreen(){
 /* ═══ SAVE PARTIAL (for drop-off analytics) ═══ */
 async function savePartialToSupabase(){
   try{
-    await _sb.from('values_responses').upsert({
+    await _sb.from('values_responses').insert({
       first_name: state.first_name||'',
       email: 'partial_'+Date.now()+'@tlr',
       step_reached: 1,
       utm_source: UTM.utm_source,
       utm_medium: UTM.utm_medium,
       utm_campaign: UTM.utm_campaign
-    }, { onConflict: 'email' });
+    });
   }catch(e){}
 }
 
