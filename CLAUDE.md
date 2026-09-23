@@ -53,16 +53,14 @@ Other pages: index.html (resource library), dashboard.html, login.html, reset-pa
 - member_progress: one auto-save row per user per tool, unique on (user_id, tool_id). RLS: own rows only.
 - tool_snapshots: named version history. RLS: own rows only, authenticated role.
 - activity_log: page views and events. RLS: own rows, plus Stuart's email can read all.
-- values_responses: public Values Discovery submissions.
+- values_responses: public Values Discovery submissions. Anyone can insert; nobody can update; only Stuart's email can read. Email is not unique, so retakes add a new row.
 Tables created with raw SQL need explicit GRANTs.
 
 ## Known issues and open work
 
-1. Values Discovery saves nothing (high priority). values_responses has RLS policies but no INSERT, UPDATE or SELECT grants for anon or authenticated, so saves fail silently. The existing policies are too open to simply grant against. Needs a proper fix: public submit only, admin-only read, no overwriting other people's rows.
-2. Housekeeping: anon has an unneeded SELECT grant on tool_snapshots.
-3. Design and tone pass on M1, M2, M3, M4 and M6 (21 tools) to match the redesigned M5 and M7, plus checking each tool follows the standard pattern.
-4. Research what members value on Skool, Circle and similar platforms.
-5. Long term: white-label platform for other coaches (workspace_id multi-tenancy with RLS, Stripe billing, coach admin view, course builder).
+1. Design and tone pass on M1, M2, M3, M4 and M6 (21 tools) to match the redesigned M5 and M7, plus checking each tool follows the standard pattern.
+2. Research what members value on Skool, Circle and similar platforms.
+3. Long term: white-label platform for other coaches (workspace_id multi-tenancy with RLS, Stripe billing, coach admin view, course builder).
 
 ## Design system
 
