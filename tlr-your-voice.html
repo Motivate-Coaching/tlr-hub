@@ -38,6 +38,19 @@ main{flex:1;display:flex;justify-content:center;padding:3rem 1.25rem 4rem}
 @keyframes arrive{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.screen.active{animation:none}.track span{transition:none}}
 
+.intro h1{font-family:var(--font-display);font-weight:400;font-size:clamp(2.2rem,6vw,3rem);line-height:1.15;margin-bottom:0.75rem}
+.intro-lede{font-size:1.1rem;line-height:1.6;color:var(--text-mid);max-width:32em;margin-bottom:2rem}
+.note{background:var(--white);border-left:3px solid var(--gold);border-radius:0 6px 6px 0;padding:1.4rem 1.5rem;margin:0 0 2rem}
+.note p{font-family:var(--font-display);font-size:1.12rem;line-height:1.7;margin-bottom:0.8rem}
+.note p:last-child{margin-bottom:0}
+.note figcaption{font-family:var(--font-display);font-style:italic;color:var(--text-mid);margin-top:0.9rem}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2.25rem}
+.facts div{border-top:1px solid var(--border);padding-top:0.75rem}
+.facts dt{font-family:var(--font-display);font-size:1.5rem;color:var(--text-dark);margin-bottom:0.2rem}
+.facts dd{font-size:0.88rem;line-height:1.5;color:var(--text-mid)}
+.btn-start{font-size:1rem;padding:0.95rem 1.8rem}
+.intro-foot{font-size:0.85rem;color:var(--text-muted);margin-top:1rem}
+@media (max-width:520px){.facts{grid-template-columns:1fr;gap:0.75rem}.facts div{display:flex;gap:0.75rem;align-items:baseline}.facts dt{font-size:1.2rem;min-width:4.2rem}.btn-start{width:100%}}
 .letter p{font-family:var(--font-display);font-size:1.2rem;line-height:1.75;color:var(--text-dark);margin-bottom:1.1rem}
 .letter .sign{font-style:italic;margin-top:1.5rem}
 .letter .small{font-family:var(--font-body);font-size:0.9rem;color:var(--text-mid);line-height:1.6}
@@ -87,12 +100,26 @@ legend{font-family:var(--font-display);font-size:clamp(1.6rem,4.5vw,2.25rem);lin
 <main>
 
   <!-- Intro -->
-  <section class="screen letter" id="s-intro" aria-labelledby="intro-first">
-    <p id="intro-first">I'm rebuilding how The Living Room introduces itself to the world, and the people best placed to describe it are the ones who've actually been in the room. That's you.</p>
-    <p>There are no right answers here, and nothing needs to sound polished. The rougher and more honest, the more useful it is.</p>
-    <p class="small">Five questions, about ten minutes. Your answers save as you go, so you can stop and come back.</p>
-    <p class="sign">Stu</p>
-    <div class="nav"><span></span><button class="btn btn-main" onclick="go(1)">Start</button></div>
+  <section class="screen intro" id="s-intro" aria-labelledby="intro-title">
+    <h1 id="intro-title">In your own words</h1>
+    <p class="intro-lede">Five questions about your time in The Living Room, to help describe it to the people who need it most.</p>
+
+    <figure class="note">
+      <blockquote>
+        <p>The people best placed to describe The Living Room are the ones who've actually been in the room. That's you.</p>
+        <p>There are no right answers, and nothing needs to sound polished. The rougher and more honest, the more useful it is.</p>
+      </blockquote>
+      <figcaption>Stu</figcaption>
+    </figure>
+
+    <dl class="facts">
+      <div><dt>5</dt><dd>questions, each on its own page</dd></div>
+      <div><dt>10 min</dt><dd>or so, at your own pace</dd></div>
+      <div><dt>Saves</dt><dd>as you type, so you can come back</dd></div>
+    </dl>
+
+    <button class="btn btn-main btn-start" id="start-btn" onclick="go(1)">Start the questions</button>
+    <p class="intro-foot">At the end, you choose how your words can be used, including keeping them private.</p>
   </section>
 
   <!-- Questions are built from QUESTIONS below -->
@@ -237,6 +264,8 @@ requireAuth().then(user => {
     let d = row && row.data ? row.data : null;
     if (!d){ try { d = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch(e){} }
     populateData(d);
+    const started = d && d.answers && Object.values(d.answers).some(Boolean);
+    if (started) document.getElementById('start-btn').textContent = 'Pick up where you left off';
     go(row && row.completed ? screens.length - 1 : 0);
   }).catch(() => go(0));
 });
