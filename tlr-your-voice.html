@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>In Your Words · The Living Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js?v=20260922"></script>
+<style>
+:root{
+  --navy:#0F1215; --navy-mid:#1C2B3A;
+  --gold:#E8A800; --gold-light:#F5C842;
+  --cream:#F9F7F2; --cream-dark:#EFE9DF; --white:#FFFFFF;
+  --text-dark:#111820; --text-mid:#445566; --text-muted:#8899AA;
+  --border:#E2D9CE; --accent:#1A6B72;
+  --font-display:'Playfair Display',Georgia,serif;
+  --font-body:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark);display:flex;flex-direction:column;min-height:100vh}
+
+.topbar{background:var(--navy);border-bottom:3px solid var(--gold);padding:0.75rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;position:sticky;top:0;z-index:10}
+.back{background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.8);font:500 0.8rem var(--font-body);padding:0.35rem 0.8rem;border-radius:3px;cursor:pointer}
+.back:hover{border-color:var(--gold);color:#fff}
+.brand{color:#fff;font-family:var(--font-display);font-size:1.05rem}
+#saved{font-size:0.75rem;color:rgba(255,255,255,0.55);opacity:0;transition:opacity .3s}
+#saved.show{opacity:1}
+
+.track{height:3px;background:var(--cream-dark)}
+.track span{display:block;height:100%;width:0;background:var(--gold);transition:width .5s ease}
+
+main{flex:1;display:flex;justify-content:center;padding:3rem 1.25rem 4rem}
+.screen{width:100%;max-width:640px;display:none}
+.screen.active{display:block;animation:arrive .45s ease}
+@keyframes arrive{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.screen.active{animation:none}.track span{transition:none}}
+
+.letter p{font-family:var(--font-display);font-size:1.2rem;line-height:1.75;color:var(--text-dark);margin-bottom:1.1rem}
+.letter .sign{font-style:italic;margin-top:1.5rem}
+.letter .small{font-family:var(--font-body);font-size:0.9rem;color:var(--text-mid);line-height:1.6}
+
+.count{font-size:0.85rem;color:var(--text-muted);margin-bottom:1.25rem}
+.q{display:block;font-family:var(--font-display);font-size:clamp(1.6rem,4.5vw,2.25rem);line-height:1.3;font-weight:400;margin-bottom:0.75rem}
+.hint{font-size:0.95rem;color:var(--text-mid);line-height:1.6;margin-bottom:1.75rem;max-width:34em}
+textarea{width:100%;min-height:11rem;border:1px solid var(--border);border-radius:6px;background:var(--white);padding:1rem 1.1rem;font:1rem/1.65 var(--font-body);color:var(--text-dark);resize:vertical}
+textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(232,168,0,0.18)}
+
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.75rem;gap:1rem}
+.btn{font:600 0.95rem var(--font-body);border-radius:4px;padding:0.8rem 1.4rem;cursor:pointer;border:1px solid transparent}
+.btn-main{background:var(--navy);color:#fff}
+.btn-main:hover{background:var(--navy-mid)}
+.btn-main:disabled{opacity:0.4;cursor:not-allowed}
+.btn-quiet{background:none;color:var(--text-mid);border-color:var(--border)}
+.btn-quiet:hover{border-color:var(--text-mid)}
+.skip{margin-right:1rem;background:none;border:none;color:var(--text-muted);font:0.85rem var(--font-body);text-decoration:underline;cursor:pointer}
+button:focus-visible,textarea:focus-visible,input:focus-visible+label{outline:2px solid var(--gold);outline-offset:2px}
+
+fieldset{border:none;margin:1.5rem 0 0.5rem}
+legend{font-family:var(--font-display);font-size:clamp(1.6rem,4.5vw,2.25rem);line-height:1.3;margin-bottom:1.25rem}
+.choice{position:relative;margin-bottom:0.6rem}
+.choice input{position:absolute;opacity:0}
+.choice label{display:block;background:var(--white);border:1px solid var(--border);border-radius:6px;padding:0.9rem 1rem 0.9rem 2.75rem;cursor:pointer;font-size:0.95rem;line-height:1.5}
+.choice label::before{content:"";position:absolute;left:1rem;top:1.1rem;width:14px;height:14px;border-radius:50%;border:2px solid var(--text-muted)}
+.choice input:checked+label{border-color:var(--gold);background:#FFFBF0}
+.choice input:checked+label::before{border-color:var(--gold);background:var(--gold);box-shadow:inset 0 0 0 2px #fff}
+.choice small{display:block;color:var(--text-muted);font-size:0.82rem;margin-top:0.15rem}
+
+.error{color:#A33;font-size:0.9rem;margin-top:1rem;min-height:1.2em}
+.done h1{font-family:var(--font-display);font-weight:400;font-size:clamp(1.8rem,5vw,2.5rem);margin-bottom:1rem}
+.done p{font-size:1rem;line-height:1.7;color:var(--text-mid);margin-bottom:1rem}
+
+@media (max-width:520px){main{padding-top:2rem}.letter p{font-size:1.08rem}.nav{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="back" onclick="history.back()">Back</button>
+  <span class="brand">The Living Room</span>
+  <span id="saved" aria-live="polite">Saved</span>
+</div>
+<div class="track" aria-hidden="true"><span id="bar"></span></div>
+
+<main>
+
+  <!-- Intro -->
+  <section class="screen letter" id="s-intro" aria-labelledby="intro-first">
+    <p id="intro-first">I'm rebuilding how The Living Room introduces itself to the world, and the people best placed to describe it are the ones who've actually been in the room. That's you.</p>
+    <p>There are no right answers here, and nothing needs to sound polished. The rougher and more honest, the more useful it is.</p>
+    <p class="small">Five questions, about ten minutes. Your answers save as you go, so you can stop and come back.</p>
+    <p class="sign">Stu</p>
+    <div class="nav"><span></span><button class="btn btn-main" onclick="go(1)">Start</button></div>
+  </section>
+
+  <!-- Questions are built from QUESTIONS below -->
+  <div id="q-screens"></div>
+
+  <!-- Consent + send -->
+  <section class="screen" id="s-consent">
+    <p class="count">Nearly done</p>
+    <fieldset>
+      <legend>How can I use your words?</legend>
+      <div class="choice"><input type="radio" name="consent" id="c-anon" value="anonymous"><label for="c-anon">You can quote me anonymously<small>Your words, no name attached.</small></label></div>
+      <div class="choice"><input type="radio" name="consent" id="c-first" value="first_name"><label for="c-first">You can quote me with my first name<small>Real names make testimonials far more trusted.</small></label></div>
+      <div class="choice"><input type="radio" name="consent" id="c-private" value="private"><label for="c-private">Keep my answers private<small>Only Stu reads them. Nothing is quoted.</small></label></div>
+    </fieldset>
+    <p class="error" id="err" role="alert"></p>
+    <div class="nav">
+      <button class="btn btn-quiet" onclick="go(QUESTIONS.length)">Back</button>
+      <button class="btn btn-main" id="send" onclick="send()">Send my answers</button>
+    </div>
+  </section>
+
+  <!-- Thank you -->
+  <section class="screen done" id="s-done">
+    <h1>Thank you. Genuinely.</h1>
+    <p>Your answers are with me. They'll shape how we describe The Living Room to the people who need it most, in words that sound like real life rather than marketing.</p>
+    <p>If something else comes to mind later, you can come back and add to it.</p>
+    <div class="nav">
+      <button class="btn btn-quiet" onclick="go(1)">Review my answers</button>
+      <button class="btn btn-main" onclick="history.back()">Back to the Hub</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+const STORAGE_KEY = 'tlr-your-voice';
+const PAGE = 'tlr-your-voice';
+
+const QUESTIONS = [
+  { id:'before',  q:'Before you joined, what was going on for you?',
+    hint:"Describe it the way you'd explain it to a friend over a coffee." },
+  { id:'tried',   q:'What had you already tried, and why didn\u2019t it stick?',
+    hint:'Books, apps, courses, therapy, a new routine every January. Anything counts.' },
+  { id:'nearly',  q:'What nearly stopped you from joining?',
+    hint:"And if you've since left, what made you decide to go? Honesty helps most here." },
+  { id:'different', q:'What\u2019s different now, if anything?',
+    hint:'A specific moment is worth more than a general feeling.' },
+  { id:'friend',  q:'If a friend was where you were, how would you describe The Living Room to them?',
+    hint:'A sentence or two, in your own words.' }
+];
+
+// Build question screens
+const wrap = document.getElementById('q-screens');
+QUESTIONS.forEach((item, i) => {
+  const n = i + 1;
+  const s = document.createElement('section');
+  s.className = 'screen';
+  s.id = 's-' + n;
+  s.innerHTML = `
+    <p class="count">Question ${n} of ${QUESTIONS.length}</p>
+    <label class="q" for="a-${item.id}">${item.q}</label>
+    <p class="hint">${item.hint}</p>
+    <textarea id="a-${item.id}" rows="7"></textarea>
+    <div class="nav">
+      <button class="btn btn-quiet" onclick="go(${n - 1})">Back</button>
+      <span>
+        <button class="skip" onclick="go(${n + 1})">Skip this one</button>
+        <button class="btn btn-main" onclick="go(${n + 1})">${n === QUESTIONS.length ? 'Continue' : 'Next'}</button>
+      </span>
+    </div>`;
+  wrap.appendChild(s);
+});
+
+// Screen order: 0 intro, 1..N questions, N+1 consent, N+2 done
+const screens = ['s-intro', ...QUESTIONS.map((_, i) => 's-' + (i + 1)), 's-consent', 's-done'];
+let current = 0;
+
+function go(i){
+  i = Math.max(0, Math.min(i, screens.length - 1));
+  document.getElementById(screens[current]).classList.remove('active');
+  current = i;
+  const el = document.getElementById(screens[current]);
+  el.classList.add('active');
+  const pct = Math.round((Math.min(current, QUESTIONS.length + 1) / (QUESTIONS.length + 1)) * 100);
+  document.getElementById('bar').style.width = pct + '%';
+  window.scrollTo({top:0});
+  const ta = el.querySelector('textarea');
+  if (ta) ta.focus({preventScroll:true});
+}
+
+function collectData(){
+  const answers = {};
+  QUESTIONS.forEach(item => { answers[item.id] = document.getElementById('a-' + item.id).value.trim(); });
+  const c = document.querySelector('input[name="consent"]:checked');
+  return { answers, consent: c ? c.value : null, lastSaved: new Date().toISOString() };
+}
+
+function populateData(d){
+  if (!d) return;
+  const a = d.answers || {};
+  QUESTIONS.forEach(item => { if (a[item.id]) document.getElementById('a-' + item.id).value = a[item.id]; });
+  if (d.consent) { const r = document.querySelector(`input[name="consent"][value="${d.consent}"]`); if (r) r.checked = true; }
+}
+
+let timer;
+function autoSave(){
+  clearTimeout(timer);
+  timer = setTimeout(async () => {
+    const data = collectData();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    await saveProgress(STORAGE_KEY, false, data);
+    const s = document.getElementById('saved');
+    s.classList.add('show'); setTimeout(() => s.classList.remove('show'), 1500);
+  }, 1000);
+}
+document.addEventListener('input', autoSave);
+document.addEventListener('change', autoSave);
+
+async function send(){
+  const err = document.getElementById('err');
+  const data = collectData();
+  const answered = Object.values(data.answers).filter(Boolean).length;
+  if (!answered){ err.textContent = 'Add an answer to at least one question before sending.'; return; }
+  if (!data.consent){ err.textContent = 'Choose how I can use your words, then send.'; return; }
+  err.textContent = '';
+  const btn = document.getElementById('send');
+  btn.disabled = true; btn.textContent = 'Sending...';
+  data._completed = true;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  await saveProgress(STORAGE_KEY, true, data);
+  // Members can only read their own progress rows, so the answers are also logged
+  // to activity_log, which Stu can read in full.
+  await logActivity('voice_survey_submitted', PAGE, { answers: data.answers, consent: data.consent, answered });
+  btn.disabled = false; btn.textContent = 'Send my answers';
+  go(screens.length - 1);
+}
+
+requireAuth().then(user => {
+  if (!user) return;
+  loadProgress().then(rows => {
+    const row = rows && rows.find(r => r.tool_id === STORAGE_KEY);
+    let d = row && row.data ? row.data : null;
+    if (!d){ try { d = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch(e){} }
+    populateData(d);
+    go(row && row.completed ? screens.length - 1 : 0);
+  }).catch(() => go(0));
+});
+</script>
+</body>
+</html>

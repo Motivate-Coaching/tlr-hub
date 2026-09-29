@@ -1271,6 +1271,38 @@ requireAuth().then(u => {
     </div>
   </div>
 
+  <!-- ── MEMBER SURVEY INVITE (home view, hides once sent) ── -->
+  <div class="voice-invite" id="voice-invite" hidden>
+    <div class="voice-invite-inner">
+      <div>
+        <div class="voice-invite-title">Five questions, in your own words</div>
+        <p class="voice-invite-sub">Help shape how The Living Room describes itself. About ten minutes, and it saves as you go.</p>
+      </div>
+      <a class="voice-invite-btn" href="tlr-your-voice.html">Share your story</a>
+    </div>
+  </div>
+  <style>
+  .voice-invite{background:var(--cream,#F9F7F2);border-bottom:1px solid var(--border,#E2D9CE);padding:1.5rem 2rem}
+  .voice-invite-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
+  .voice-invite-title{font-family:'Playfair Display',Georgia,serif;font-size:1.35rem;color:var(--text-dark,#111820);margin-bottom:0.3rem}
+  .voice-invite-sub{font-size:0.9rem;color:var(--text-mid,#445566);line-height:1.55;max-width:38em}
+  .voice-invite-btn{background:var(--navy,#0F1215);color:#fff;padding:0.75rem 1.3rem;border-radius:4px;font-weight:600;font-size:0.9rem;text-decoration:none;white-space:nowrap}
+  .voice-invite-btn:hover{background:var(--navy-mid,#1C2B3A)}
+  .voice-invite-btn:focus-visible{outline:2px solid var(--gold,#E8A800);outline-offset:2px}
+  </style>
+  <script>
+  (function(){
+    function check(){
+      var done = [];
+      try { done = JSON.parse(localStorage.getItem('tlr_completed') || '[]'); } catch(e){}
+      var el = document.getElementById('voice-invite');
+      if (el) el.hidden = done.indexOf('tlr-your-voice') !== -1;
+    }
+    check();
+    setTimeout(check, 2500); // re-check once Supabase progress has loaded
+  })();
+  </script>
+
   <!-- ── DAILY GAME PROMO (home view) ─────────────────── -->
   <div class="game-promo-banner">
     <div class="game-promo-inner">
