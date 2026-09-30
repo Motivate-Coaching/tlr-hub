@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Using Autopilot to Your Advantage | TLR</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
   --navy:#0F1215; --navy-mid:#1C2B3A;
   --cream:#F5F1EB; --cream-dark:#EDE8DF; --cream-deeper:#E5DFD5;
   --text-dark:#1A1A1A; --text-mid:#4A4A4A; --text-muted:#8A8880;
   --border:rgba(0,0,0,0.08); --white:#FFFFFF;
-  --font-body:'Poppins',sans-serif; --font-display:'Playfair Display',serif;
+  --font-body:'Inter',sans-serif; --font-display:'Playfair Display',serif;
   --accent:#5C6B3A; --accent-pale:#5C6B3A15; --accent-light:#8A9E5A;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -161,10 +161,9 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
 
 <!-- Topbar -->
 <div class="topbar">
-  <a href="#" class="back" onclick="event.preventDefault();history.back()">← Resource Library</a>
-  <span class="logo">TLR</span>
-  <a class="theme-pill" href="index.html#library">Autopilot &amp; Drift</a>
-  <div id="saved-badge" style="display:none;align-items:center;gap:0.4rem;font-size:0.72rem;color:rgba(255,255,255,0.5)"><span style="width:6px;height:6px;background:#2A9D6F;border-radius:50%;display:inline-block"></span> Saved</div>Progress saved</span>
+  <span class="logo">The Living Room</span>
+  <span class="theme-pill" onclick="event.preventDefault();history.back()">Autopilot &amp; Drift</span>
+  <div id="saved-badge" style="display:none;align-items:center;gap:0.4rem;font-size:0.72rem;color:rgba(255,255,255,0.5)"><span style="width:6px;height:6px;background:#2A9D6F;border-radius:50%;display:inline-block"></span> Saved</div>
 </div>
 
 <div id="mainView">
@@ -203,7 +202,11 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
   </div>
   <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:1.1rem;text-align:center;font-style:italic">Answer honestly — referring back to your list above.</p>
   <div class="q-stack">
-    <div class="tool-progress" onclick="progressBarClick()">
+      <div id="completed-banner" style="display:none">
+    ✅ <span>You've completed this tool. Your responses are saved. <button onclick="resetComplete()" style="background:none;border:none;color:#2A9D6F;cursor:pointer;font-size:0.88rem;text-decoration:underline;padding:0;margin-left:0.25rem">Mark as not complete</button></span>
+  </div>
+
+<div class="tool-progress" onclick="progressBarClick()">
     <div class="prog-header">
       <span class="prog-label">Your progress in this tool</span>
       <span class="prog-pct" id="prog-pct">0%</span>
@@ -270,61 +273,13 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
     <div class="complete-wrap">
     <a class="library-btn" href="#" onclick="event.preventDefault();history.back()">← Resource library</a>
     <button class="save-btn" onclick="TLRHistory.promptSave()">💾 Save my progress</button>
-    <button class="complete-btn" id="mark-complete-btn" onclick="complete()" style="display:none">Mark as complete ✓</button>
+    <button class="complete-btn" id="mark-complete-btn" onclick="markComplete()" style="display:none">Mark as complete ✓</button>
   </div>
 
 </div><!-- /page -->
 </div><!-- /toolView -->
 
 <!-- Completion view -->
-<div id="completionView">
-<div class="comp-inner">
-  <div class="completion-header">
-    <div class="completion-icon">✈️</div>
-    <h2>You are now in the pilot's seat.</h2>
-    <p class="completion-tagline">The autopilot you design is the life you live.</p>
-  </div>
-  <div class="summary-section">
-    <h3>Your current defaults</h3>
-    <div class="summary-card"><div class="card-label">The ones supporting me</div><div class="card-value" id="s_q1"></div></div>
-    <div class="summary-card"><div class="card-label">The ones that are simply familiar</div><div class="card-value" id="s_q2"></div></div>
-    <div class="summary-card"><div class="card-label">What I have unintentionally allowed to become default</div><div class="card-value" id="s_q3"></div></div>
-    <div class="summary-card"><div class="card-label">What I would choose to reinforce</div><div class="card-value" id="s_q4"></div></div>
-  </div>
-  <div class="summary-section">
-    <h3>Your intention</h3>
-    <div class="summary-card"><div class="card-label">I would benefit from making this second nature</div><div class="card-value" id="s_q5"></div></div>
-  </div>
-  <div class="momentum-section">
-    <h3>Keep your momentum</h3>
-    <div class="momentum-btns">
-      <button class="m-btn" onclick="emailToSelf()">📧 Email to myself</button>
-      <button class="m-btn" onclick="shareWhatsApp()">💬 WhatsApp</button>
-      <button class="m-btn" onclick="toggleCalPanel()">📅 Add to calendar</button>
-      <button class="m-btn" onclick="copyCommitment(this)">📋 Copy commitment</button>
-    </div>
-    <div class="cal-panel" id="calPanel">
-      <label>Date</label><input type="date" id="calDate">
-      <label>Time</label><input type="time" id="calTime" value="09:00">
-      <label>Repeat</label>
-      <select id="calRepeat">
-        <option value="none">No repeat</option>
-        <option value="daily">Daily</option>
-        <option value="weekly">Weekly</option>
-        <option value="monthly">Monthly</option>
-      </select>
-      <button class="dl-btn" onclick="downloadICS()">Download .ics file</button>
-    </div>
-  </div>
-  <div class="closing-quote">Small, repeated choices install the life you actually want. You have made your choice.</div>
-  <div class="completion-actions">
-    <button class="ca-btn" onclick="window.print()">🖨 Print blank worksheet</button>
-    <button class="ca-btn" onclick="startAgain()">↩ Start again</button>
-    <button class="ca-btn" onclick="event.preventDefault();history.back()">← Back to library</button>
-  </div>
-</div>
-</div>
-
 <script>
 const STORAGE_KEY = 'tlr-autopilot-advantage';
 let saveTimer;
@@ -409,36 +364,7 @@ function saveNow(){
 }
 
 // ── COMPLETE ─────────────────────────────────────────────────
-function complete(){doComplete();}
-
-function doComplete(){
-  const d = collectData();
-  ['q1','q2','q3','q4','q5'].forEach(k=>{
-    const el = document.getElementById('s_'+k);
-    if(el) el.textContent = d[k] || '—';
-  });
-  const data = collectData();
-  data._completed = true;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  void saveProgress(STORAGE_KEY, true, data);
-  document.getElementById('mainView').style.display = 'none';
-  document.getElementById('completionView').style.display = '';
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
 // ── COMPLETED BANNER ─────────────────────────────────────────
-function showCompletedBanner(){
-  if(document.getElementById('completed-banner')) return;
-  const banner=document.createElement('div');
-  banner.id='completed-banner';
-  banner.style.cssText='background:#F0FAF5;border:1px solid #2A9D6F;border-radius:10px;padding:0.85rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;font-size:0.88rem;color:var(--text-mid,#4A4A4A)';
-  banner.innerHTML='<span style="font-size:1.1rem">✓</span> You\'ve completed this tool. Your answers are saved below — feel free to revisit or add to them anytime.';
-  const page=document.querySelector('.page')||document.querySelector('.tool-page')||document.body;
-  const progBar=document.querySelector('.tool-progress');
-  if(progBar) page.insertBefore(banner,progBar);
-  else page.prepend(banner);
-}
-
 // ── INIT ─────────────────────────────────────────────────
 try{
   const d=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
@@ -446,9 +372,7 @@ try{
   updateProgress();
   if(d._completed){
     const allDone=Object.values(getSectionStatus()).every(Boolean);
-    if(allDone){
-      showCompletedBanner();
-    }else{
+    document.getElementById('completed-banner').style.display='flex';else{
       delete d._completed;
       localStorage.setItem(STORAGE_KEY,JSON.stringify(d));
       const done=JSON.parse(localStorage.getItem('tlr_completed')||'[]');
@@ -457,6 +381,37 @@ try{
     }
   }
 }catch(e){}
+
+
+async function markComplete(){
+  const data = collectData();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  if(!done.includes(STORAGE_KEY)) done.push(STORAGE_KEY);
+  localStorage.setItem('tlr_completed', JSON.stringify(done));
+  await saveProgress(STORAGE_KEY, true, data);
+  document.getElementById('completed-banner').style.display = 'flex';
+  const btn = document.getElementById('mark-complete-btn') || document.getElementById('complete-btn');
+  if(btn) btn.style.display = 'none';
+  const hint = document.getElementById('prog-hint');
+  if(hint){ hint.textContent = 'Completed ✓'; hint.className = 'prog-hint done'; }
+  const fill = document.getElementById('prog-fill');
+  if(fill) fill.style.width = '100%';
+  const pct = document.getElementById('prog-pct');
+  if(pct) pct.textContent = '100%';
+  if(typeof logActivity === 'function') logActivity('tool_complete', window.location.pathname, {tool: STORAGE_KEY});
+}
+
+async function resetComplete(){
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  const idx = done.indexOf(STORAGE_KEY);
+  if(idx > -1){ done.splice(idx,1); localStorage.setItem('tlr_completed', JSON.stringify(done)); }
+  const data = collectData();
+  await saveProgress(STORAGE_KEY, false, data);
+  document.getElementById('completed-banner').style.display = 'none';
+  const btn = document.getElementById('mark-complete-btn') || document.getElementById('complete-btn');
+  if(btn) btn.style.display = '';
+}
 
 requireAuth().then(user=>{
   if(!user) return;
@@ -470,9 +425,7 @@ requireAuth().then(user=>{
       updateProgress();
       if(row.completed){
         const allDone=Object.values(getSectionStatus()).every(Boolean);
-        if(allDone){
-          showCompletedBanner();
-        }else{
+        document.getElementById('completed-banner').style.display='flex';else{
           void saveProgress(STORAGE_KEY,false,row.data);
           const done=JSON.parse(localStorage.getItem('tlr_completed')||'[]');
           const idx=done.indexOf(STORAGE_KEY);

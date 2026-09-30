@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Why We Avoid Them | TLR</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
   --navy:#0F1215; --navy-mid:#1C2B3A;
   --cream:#F5F1EB; --cream-dark:#EDE8DF; --cream-deeper:#E5DFD5;
   --text-dark:#1A1A1A; --text-mid:#4A4A4A; --text-muted:#8A8880;
   --border:rgba(0,0,0,0.08); --white:#FFFFFF;
-  --font-body:'Poppins',sans-serif; --font-display:'Playfair Display',serif;
+  --font-body:'Inter',sans-serif; --font-display:'Playfair Display',serif;
   --accent:#C17B2E; --accent-pale:rgba(193,123,46,0.1); --accent-light:#D9964E;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -180,11 +180,10 @@ input[type=text]::placeholder{color:var(--text-muted);font-size:0.83rem}
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <a class="back" href="#" onclick="event.preventDefault();history.back()">← Back</a>
   <span class="logo">The Living Room</span>
   <div style="display:flex;align-items:center;gap:0.85rem">
     <div id="saved-badge"><span class="dot"></span> Saved</div>
-    <a class="theme-pill" href="index.html#library">Difficult Conversations</a>
+    <span class="theme-pill" onclick="event.preventDefault();history.back()">Difficult Conversations</span>
   </div>
 </div>
 
@@ -198,7 +197,11 @@ input[type=text]::placeholder{color:var(--text-muted);font-size:0.83rem}
   <div class="divider"></div>
 
   <!-- PROGRESS BAR -->
-  <div class="tool-progress" onclick="progressBarClick()">
+    <div id="completed-banner" style="display:none">
+    ✅ <span>You've completed this tool. Your responses are saved. <button onclick="resetComplete()" style="background:none;border:none;color:#2A9D6F;cursor:pointer;font-size:0.88rem;text-decoration:underline;padding:0;margin-left:0.25rem">Mark as not complete</button></span>
+  </div>
+
+<div class="tool-progress" onclick="progressBarClick()">
     <div class="prog-header">
       <span class="prog-label">Your progress in this tool</span>
       <span class="prog-pct" id="prog-pct">0%</span>
@@ -413,36 +416,13 @@ input[type=text]::placeholder{color:var(--text-muted);font-size:0.83rem}
   <div class="complete-wrap">
     <a class="library-btn" href="#" onclick="event.preventDefault();history.back()">← Resource library</a>
     <button class="save-btn" onclick="TLRHistory.promptSave()">💾 Save my progress</button>
-    <button class="complete-btn" id="mark-complete-btn" onclick="complete()" style="display:none">Mark as complete ✓</button>
+    <button class="complete-btn" id="mark-complete-btn" onclick="markComplete()" style="display:none">Mark as complete ✓</button>
   </div>
 
 </div>
 </div>
 
 <!-- COMPLETION VIEW -->
-<div id="completionView">
-  <div class="comp-inner">
-    <div class="completion-header">
-      <div class="completion-icon">💬</div>
-      <h2>Awareness achieved.</h2>
-      <div class="completion-tagline">You've taken the first step — noticing. That's braver than it sounds.</div>
-    </div>
-    <div class="summary-section">
-      <h3>Your reflections</h3>
-      <div class="summary-card"><div class="card-label">The conversation I've been avoiding</div><div class="card-value" id="sum-s1"></div></div>
-      <div class="summary-card" id="sum-stops-card" style="display:none"><div class="card-label">What gets in my way</div><div class="card-value" id="sum-stops"></div></div>
-      <div class="summary-card" id="sum-s3-card" style="display:none"><div class="card-label">When this has shown up before</div><div class="card-value" id="sum-s3"></div></div>
-      <div class="summary-card" id="sum-s4-card" style="display:none"><div class="card-label">What I'm protecting</div><div class="card-value" id="sum-s4"></div></div>
-    </div>
-    <div class="closing-quote">"Avoidance makes sense. Awareness creates choice. Choice creates change."</div>
-    <div class="completion-actions">
-      <button class="ca-btn" onclick="document.getElementById('mainView').style.display='';document.getElementById('completionView').style.display='none'">← Review your answers</button>
-      <button class="ca-btn" onclick="event.preventDefault();history.back()">Back to library</button>
-      <button class="ca-btn" onclick="window.location.href='getting-clear-before-you-speak.html'">Next: Getting Clear Before You Speak →</button>
-    </div>
-  </div>
-</div>
-
 <script src="auth.js?v=20260922"></script>
 <script src="history.js?v=20260930"></script>
 <script>
@@ -552,43 +532,8 @@ function saveNow(){
 
 // ── COMPLETE ──────────────────────────────────────────
 // Button only appears when all sections are filled, so no validation needed here
-function complete(){
-  doComplete();
-}
-
-function doComplete(){
-  const s1 = document.getElementById('s1').value.trim();
-  document.getElementById('sum-s1').textContent = s1 || '(not filled in)';
-
-  const stops = [...document.querySelectorAll('#stops-grid input:checked')].map(i=>i.closest('.check-item').querySelector('.check-label').textContent);
-  if(stops.length){ document.getElementById('sum-stops').textContent=stops.join('\n'); document.getElementById('sum-stops-card').style.display=''; }
-
-  const s3parts = ['s3a','s3b','s3c','s3d'].map(k=>document.getElementById(k).value.trim()).filter(Boolean);
-  if(s3parts.length){ document.getElementById('sum-s3').textContent=s3parts.join('\n'); document.getElementById('sum-s3-card').style.display=''; }
-
-  const s4parts = ['s4a','s4b','s4c'].map(k=>document.getElementById(k).value.trim()).filter(Boolean);
-  if(s4parts.length){ document.getElementById('sum-s4').textContent=s4parts.join('\n'); document.getElementById('sum-s4-card').style.display=''; }
-
-  const data = collectData();
-  data._completed = true;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  void saveProgress(STORAGE_KEY, true, data); // Supabase — mark as fully complete
-
-  document.getElementById('mainView').style.display='none';
-  document.getElementById('completionView').style.display='';
-  window.scrollTo({top:0,behavior:'smooth'});
-}
 
 // ── COMPLETED BANNER ─────────────────────────────────
-function showCompletedBanner(){
-  if(document.getElementById('completed-banner')) return;
-  const banner = document.createElement('div');
-  banner.id = 'completed-banner';
-  banner.style.cssText='background:var(--accent-pale);border:1px solid var(--accent);border-radius:10px;padding:0.85rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;font-size:0.88rem;color:var(--text-mid)';
-  banner.innerHTML='<span style="font-size:1.1rem">✓</span> You\'ve completed this tool. Your answers are saved below — feel free to revisit or add to them anytime.';
-  document.querySelector('.page').insertBefore(banner, document.querySelector('.tool-progress'));
-}
-
 // ── INIT ─────────────────────────────────────────────
 // Immediate localStorage check so the page feels instant
 try{
@@ -597,9 +542,7 @@ try{
   updateProgress();
   if(d._completed){
     const allDone = Object.values(getSectionStatus()).every(Boolean);
-    if(allDone){
-      showCompletedBanner();
-    } else {
+    document.getElementById('completed-banner').style.display='flex'; else {
       // Stale flag — tool was marked complete before all sections were filled; clear it
       delete d._completed;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
@@ -611,6 +554,37 @@ try{
 }catch(e){}
 
 // Then try Supabase for cross-device data (may override localStorage if newer)
+
+async function markComplete(){
+  const data = collectData();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  if(!done.includes(STORAGE_KEY)) done.push(STORAGE_KEY);
+  localStorage.setItem('tlr_completed', JSON.stringify(done));
+  await saveProgress(STORAGE_KEY, true, data);
+  document.getElementById('completed-banner').style.display = 'flex';
+  const btn = document.getElementById('mark-complete-btn') || document.getElementById('complete-btn');
+  if(btn) btn.style.display = 'none';
+  const hint = document.getElementById('prog-hint');
+  if(hint){ hint.textContent = 'Completed ✓'; hint.className = 'prog-hint done'; }
+  const fill = document.getElementById('prog-fill');
+  if(fill) fill.style.width = '100%';
+  const pct = document.getElementById('prog-pct');
+  if(pct) pct.textContent = '100%';
+  if(typeof logActivity === 'function') logActivity('tool_complete', window.location.pathname, {tool: STORAGE_KEY});
+}
+
+async function resetComplete(){
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  const idx = done.indexOf(STORAGE_KEY);
+  if(idx > -1){ done.splice(idx,1); localStorage.setItem('tlr_completed', JSON.stringify(done)); }
+  const data = collectData();
+  await saveProgress(STORAGE_KEY, false, data);
+  document.getElementById('completed-banner').style.display = 'none';
+  const btn = document.getElementById('mark-complete-btn') || document.getElementById('complete-btn');
+  if(btn) btn.style.display = '';
+}
+
 requireAuth().then(user => {
   if(!user) return;
   TLRHistory.init(STORAGE_KEY, collectData, applyData);
@@ -623,9 +597,7 @@ requireAuth().then(user => {
       updateProgress();
       if(row.completed){
         const allDone = Object.values(getSectionStatus()).every(Boolean);
-        if(allDone){
-          showCompletedBanner();
-        } else {
+        document.getElementById('completed-banner').style.display='flex'; else {
           // Supabase says completed but sections aren't all filled — correct server-side too
           void saveProgress(STORAGE_KEY, false, row.data);
           const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
