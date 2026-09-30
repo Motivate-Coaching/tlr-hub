@@ -13,6 +13,7 @@
 
   let _toolKey, _collectFn, _applyFn;
   let _lastSavedLabel = null; // tracks the label of the most recent saved snapshot this session
+  let _autoSaveTimer  = null; // debounce handle for input-driven autosave
 
   // ── Public API ────────────────────────────────────────────────────────
   window.TLRHistory = {
@@ -23,11 +24,68 @@
       _injectStyles();
       _injectButtons();
       _injectModals();
+      _wireAutosave();
+      _wirePrint();
     },
     promptSave()  { _showNameDialog(); },
     showHistory() { _guardedShowHistory(); },
     clearAll()    { _confirmAndClear(); }
   };
+
+  // ── Autosave: wire input events → localStorage + Supabase ───────────
+  // Runs on every keystroke (debounced). Works for ALL tools because
+  // _collectFn and _toolKey are captured in init().
+  function _wireAutosave() {
+    document.addEventListener('input', (e) => {
+      if (!e.target.matches('input:not([type=hidden]):not([type=checkbox]):not([type=radio]), textarea, [contenteditable]')) return;
+      clearTimeout(_autoSaveTimer);
+      _autoSaveTimer = setTimeout(async () => {
+        if (!_collectFn || !_toolKey) return;
+        try {
+          const data = _collectFn();
+          localStorage.setItem(_toolKey, JSON.stringify(data));
+          if (typeof saveProgress === 'function') {
+            await saveProgress(_toolKey, false, data);
+          }
+          // Flash the topbar saved badge if it exists
+          const badge = document.getElementById('saved-badge');
+          if (badge) { badge.style.display = 'flex'; setTimeout(() => { badge.style.display = 'none'; }, 2000); }
+          // Update the autosave note if it's showing the spinner
+          const note = document.getElementById('tlr-autosave-note');
+          if (note) { note.textContent = '✓ Progress saved'; setTimeout(() => { note.textContent = 'Auto-saving as you type — use Save my progress below to keep a named copy'; }, 3000); }
+          // Re-run progress bar if the tool defines it
+          if (typeof updateProgress === 'function') try { updateProgress(); } catch(e2) {}
+        } catch (err) {
+          console.error('[TLRHistory] autosave error:', err);
+        }
+      }, 1200);
+    });
+  }
+
+  // ── Print fix: replace textarea content with divs before printing ─────
+  // Browsers only print the visible portion of a scrollable textarea.
+  // This swaps each filled textarea for a plain div so all text prints.
+  function _wirePrint() {
+    window.addEventListener('beforeprint', () => {
+      document.querySelectorAll('textarea').forEach(ta => {
+        const val = ta.value;
+        const div = document.createElement('div');
+        div.className = 'tlr-print-ta';
+        // Copy computed style basics so it looks the same on paper
+        div.textContent = val;
+        ta.parentNode.insertBefore(div, ta.nextSibling);
+        ta.style.display = 'none';
+        ta.dataset.tlrPrintHidden = '1';
+      });
+    });
+    window.addEventListener('afterprint', () => {
+      document.querySelectorAll('textarea[data-tlr-print-hidden]').forEach(ta => {
+        ta.style.display = '';
+        delete ta.dataset.tlrPrintHidden;
+      });
+      document.querySelectorAll('.tlr-print-ta').forEach(d => d.remove());
+    });
+  }
 
   // ── Supabase helpers (delegate to auth.js globals) ────────────────────
   async function _doSaveSnapshot(label, data, completed) {
@@ -103,12 +161,21 @@
 .tlr-share-btn.wa:hover{background:rgba(18,140,126,0.05);border-color:#128C7E}
 .tlr-share-btn svg{flex-shrink:0;width:18px;height:18px}
 
+/* ── Autosave note ── */
+.tlr-autosave-note{font-size:0.75rem;color:var(--text-muted,#8A8880);text-align:center;margin-top:0.6rem;line-height:1.5}
+
 /* ── Print styles ── */
 @media print{
   .topbar,.complete-wrap,.tlr-history-row,.tlr-overlay,.tlr-share-overlay,
-  #completionView,.completion-actions,#completed-banner,.tool-progress{display:none!important}
+  #completionView,.completion-actions,#completed-banner,.tool-progress,
+  .tlr-autosave-note{display:none!important}
   body{background:#fff;font-size:12px}
   .page,.step-block{box-shadow:none!important;border:1px solid #ddd!important}
+  /* Show full textarea content — see _wirePrint() in history.js */
+  textarea[data-tlr-print-hidden]{display:none!important}
+  .tlr-print-ta{display:block!important;white-space:pre-wrap;font-family:inherit;font-size:inherit;
+    line-height:1.6;color:#1A1A1A;padding:0.5rem 0;border-bottom:1px solid #ccc;min-height:1.2em;
+    word-break:break-word}
 }
 
 /* ── Name dialog ── */
@@ -178,6 +245,13 @@
     row.appendChild(shareBtn);
     row.appendChild(clearBtn);
     wrap.appendChild(row);
+
+    // Autosave notice — sits just below the button row
+    const note = document.createElement('p');
+    note.id = 'tlr-autosave-note';
+    note.className = 'tlr-autosave-note';
+    note.textContent = 'Auto-saving as you type — use Save my progress above to keep a named copy';
+    wrap.appendChild(note);
   }
 
   // ── Modal HTML ────────────────────────────────────────────────────────
