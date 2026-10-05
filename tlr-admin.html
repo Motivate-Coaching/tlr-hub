@@ -325,10 +325,13 @@ sb.auth.getSession().then(({ data: { session } }) => {
 });
 
 // ── DATA ──
+const ADMIN_EMAIL = 'stuart.fairbairns@gmail.com';
+
 async function loadAll() {
   document.getElementById('last-updated').textContent = 'Loading…';
   const { data, error } = await sb.from('activity_log')
     .select('*')
+    .neq('user_email', ADMIN_EMAIL)
     .order('created_at', { ascending: false })
     .limit(500);
 
