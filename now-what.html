@@ -80,13 +80,13 @@
   /* Three columns */
   .three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
   @media(max-width:600px){.three-col{grid-template-columns:1fr}}
-  .col-card{border-radius:8px;overflow:hidden}
-  .col-card-head{padding:0.65rem 0.85rem;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;text-align:center}
+  .col-card{border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
+  .col-card-head{padding:0.65rem 0.85rem;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;text-align:center;min-height:4.5rem;display:flex;flex-direction:column;justify-content:center}
   .col-card-head .sub{font-size:0.7rem;font-weight:400;text-transform:none;letter-spacing:0;opacity:0.75;display:block;margin-top:0.15rem}
   .col-card--keep .col-card-head{background:#1A6B72;color:var(--white)}
   .col-card--question .col-card-head{background:var(--navy-mid);color:var(--white)}
   .col-card--missing .col-card-head{background:#5C3D2E;color:var(--white)}
-  .col-card textarea{border-radius:0;border:1px solid var(--border);border-top:none;min-height:110px;background:var(--white)}
+  .col-card textarea{border-radius:0;border:1px solid var(--border);border-top:none;min-height:110px;background:var(--white);flex:1}
 
   /* Tool instruction */
   .tool-instruction{display:flex;gap:0.75rem;background:var(--cream-dark);border-radius:8px;padding:1rem 1.1rem;margin-bottom:1.25rem;font-size:0.83rem;color:var(--text-mid);line-height:1.5}
