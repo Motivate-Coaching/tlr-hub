@@ -1355,12 +1355,12 @@ requireAuth().then(u => {
     <div class="theme-dash-inner">
       <div class="theme-dash-cols">
         <div class="theme-dash-img-col">
-          <img src="identity-is-not-fixed.jpg" alt="Identity Is Not Fixed" class="theme-dash-img" onerror="this.parentElement.style.display='none'">
+          <img src="good-life.jpg" alt="I Have A Good Life. Why Doesn't It Feel Like It?" class="theme-dash-img" onerror="this.parentElement.style.display='none'">
         </div>
         <div class="theme-dash-content">
           <div class="theme-dash-eyebrow">This Month's Theme</div>
           <div class="theme-dash-meta">
-            <div class="theme-dash-title">Identity Is Not Fixed</div>
+            <div class="theme-dash-title">I Have A Good Life. Why Doesn't It Feel Like It?</div>
             <a href="#" onclick="event.preventDefault();goToView('library')" class="theme-dash-link">Open theme →</a>
           </div>
           <div class="theme-dash-door">"Not who I was told to be. Not who I had to be. Who I choose to be."</div>
@@ -1516,7 +1516,8 @@ requireAuth().then(u => {
       </div>
       <div class="sidebar-body">
         <ul class="sidebar-nav">
-          <li class="active"><a href="#identity-is-not-fixed">Identity Is Not Fixed</a></li>
+          <li class="active"><a href="#good-life">I Have A Good Life…</a></li>
+          <li><a href="#identity-is-not-fixed">Identity Is Not Fixed</a></li>
           <li><a href="#difficult-conversations">Difficult Conversations</a></li>
           <li><a href="#building-momentum">Building Momentum</a></li>
           <li><a href="#energy-and-drive">Energy &amp; Drive</a></li>
@@ -1542,31 +1543,21 @@ requireAuth().then(u => {
         <div class="feature-header" id="current-feature-header">
           <div>
             <div class="feature-tag">Current theme</div>
-            <div class="feature-title">Identity Is Not Fixed</div>
-            <div class="feature-door">"Not who I was told to be. Not who I had to be. Who I choose to be."</div>
+            <div class="feature-title">I Have A Good Life. Why Doesn't It Feel Like It?</div>
+            <div class="feature-door">"A life that looks right from the outside doesn't always feel right from the inside."</div>
           </div>
           <div class="feature-header-right">
-            <div class="feature-week-badge">Week 3 of 4</div>
+            <div class="feature-week-badge">Week 1 of 4</div>
             <span class="feature-collapse-arrow">&#9660;</span>
           </div>
         </div>
         <div class="feature-body">
           <div class="theme-banner-wrap">
-            <img src="identity-is-not-fixed.jpg" alt="Identity Is Not Fixed" class="theme-banner-img" onerror="this.parentElement.style.display='none'">
+            <img src="good-life.jpg" alt="I Have A Good Life. Why Doesn't It Feel Like It?" class="theme-banner-img" onerror="this.parentElement.style.display='none'">
           </div>
-          <p class="feature-intro">We don't choose most of who we believe we are. We learn it — over time, from people, experiences, and the stories we repeat. This theme invites you to examine the identity you've inherited, understand what you actually value, and consciously choose who you want to become.</p>
+          <p class="feature-intro">We don't always know why a life that looks objectively good, successful or deliberately built doesn't automatically feel as satisfying as we expected. This theme helps you step back from what you've been told should make you happy, look at what the evidence actually shows creates a good life, and deliberately create more of what matters to you.</p>
           <div class="topics-heading">Topics and tools</div>
           <div class="topics-list" id="current-topics"></div>
-          <div class="workshop-block" style="margin-top:1.5rem;">
-            <div class="workshop-header">
-              <div class="workshop-eyebrow">Masterclass Recording</div>
-              <div class="workshop-title">Identity Is Not Fixed, with Stuart Fairbairns PCC</div>
-            </div>
-            <div class="yt-facade" onclick="this.innerHTML='<iframe src=\'https://www.youtube.com/embed/lm3OarYesHY?autoplay=1&rel=0\' allow=\'autoplay;accelerometer;clipboard-write;encrypted-media;gyroscope;picture-in-picture\' allowfullscreen style=\'position:absolute;top:0;left:0;width:100%;height:100%;border:0\'></iframe>';this.style.paddingBottom='56.25%';this.style.position='relative'">
-              <img src="https://img.youtube.com/vi/lm3OarYesHY/sddefault.jpg" onerror="this.src='https://img.youtube.com/vi/lm3OarYesHY/hqdefault.jpg'" alt="Identity Is Not Fixed Masterclass">
-              <div class="yt-play"><svg viewBox="0 0 24 24" fill="white" width="24" height="24"><polygon points="5,3 19,12 5,21"/></svg></div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -2056,13 +2047,24 @@ requireAuth().then(u => {
 <script>
 /* ── DATA ───────────────────────────────── */
 const currentTopics = [
-  { n: 1, topic: 'Who Have I Learnt to Be?', focus: 'Exploring the identity we inherited — the stories repeated about us, the roles we adopted, and the beliefs we\'ve never examined. Surfacing what\'s actually driving how we see ourselves.', tool: { name: 'Identity Audit', file: 'identity-audit.html', interactive: true } },
-  { n: 2, topic: 'The Stories I Inherited', focus: 'The messages we absorbed about work, money, relationships, and life — often before we were old enough to question them. Bringing them into the light and asking: is this actually mine?', tool: { name: 'The Stories I Inherited', file: 'stories-i-inherited.html', interactive: true } },
-  { n: 3, topic: 'Who Am I Now?', focus: 'Moving beyond what we were told to be, to what we actually value. An evidence-first exploration of the values that are genuinely driving our choices — lived versus aspirational.', tool: { name: 'Who Am I Now?', file: 'who-am-i-now.html', interactive: true } },
-  { n: 4, topic: 'Who Am I Becoming?', focus: 'Choosing intentionally, for now. What to invite more of, what to let go of, how to show up differently — and the one small step that starts it this week.', tool: { name: 'Who Am I Becoming?', file: 'identity-i-choose.html', interactive: true } }
+  { n: 1, topic: 'I Did What I Was Supposed To Do. Now What?', focus: 'Make sense of why a life that looks objectively good doesn\'t always feel the way we expected it to. Exploring old and new scripts about what a "good life" should look like — and how to see through them.', tool: { name: 'Now What?', file: 'now-what.html', interactive: true } },
+  { n: 2, topic: 'What Actually Makes Life Worth Living?', focus: 'Step away from what we\'re told should matter and look at what high-quality research actually shows contributes to people living well. The evidence provides the foundations; members explore what those look like in their own lives.', tool: { name: 'What Makes Life Worth Living?', file: 'what-makes-life-worth-living.html', interactive: true } },
+  { n: 3, topic: 'Has My Life Become More About Maintaining Than Living?', focus: 'Look at the balance between maintaining the life we\'ve built and actually engaging, exploring, connecting, growing, creating and enjoying it. Notice → question → test to surface assumptions shaping how life currently operates.', tool: { name: 'Maintaining vs. Living', file: 'maintaining-vs-living.html', interactive: true } },
+  { n: 4, topic: 'What Do I Want More Of Now?', focus: 'Bring the evidence and discoveries together. Identify which ingredients would genuinely improve the experience of life now, then translate those into small, realistic actions and experiments.', tool: { name: 'What Do I Want More Of?', file: 'what-do-i-want-more-of.html', interactive: true } }
 ];
 
 const pastThemes = [
+  {
+    id: 'identity-is-not-fixed', theme: 'Identity Is Not Fixed', door: '"Not who I was told to be. Not who I had to be. Who I choose to be."',
+    banner: 'identity-is-not-fixed.jpg',
+    intro: 'We don\'t choose most of who we believe we are. We learn it — over time, from people, experiences, and the stories we repeat. This theme invites you to examine the identity you\'ve inherited, understand what you actually value, and consciously choose who you want to become.',
+    topics: [
+      { n: 1, topic: 'Who Have I Learnt to Be?', focus: 'Exploring the identity we inherited — the stories repeated about us, the roles we adopted, and the beliefs we\'ve never examined. Surfacing what\'s actually driving how we see ourselves.', tool: { name: 'Identity Audit', file: 'identity-audit.html', interactive: true } },
+      { n: 2, topic: 'The Stories I Inherited', focus: 'The messages we absorbed about work, money, relationships, and life — often before we were old enough to question them. Bringing them into the light and asking: is this actually mine?', tool: { name: 'The Stories I Inherited', file: 'stories-i-inherited.html', interactive: true } },
+      { n: 3, topic: 'Who Am I Now?', focus: 'Moving beyond what we were told to be, to what we actually value. An evidence-first exploration of the values that are genuinely driving our choices — lived versus aspirational.', tool: { name: 'Who Am I Now?', file: 'who-am-i-now.html', interactive: true } },
+      { n: 4, topic: 'Who Am I Becoming?', focus: 'Choosing intentionally, for now. What to invite more of, what to let go of, how to show up differently — and the one small step that starts it this week.', tool: { name: 'Who Am I Becoming?', file: 'identity-i-choose.html', interactive: true } }
+    ], workshop: { title: 'Identity Is Not Fixed, with Stuart Fairbairns PCC', youtubeId: 'lm3OarYesHY' }
+  },
   {
     id: 'difficult-conversations', theme: 'Difficult Conversations', door: '"There\'s something I need to say. I just don\'t know how."',
     banner: 'difficult-conversations.jpg',
@@ -2365,7 +2367,7 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
 
 /* ── PROGRESS WIDGET ────────────────────── */
 const ALL_TOOLS = [
-  ...currentTopics.filter(t=>t.tool?.file).map(t=>({file:t.tool.file,name:t.tool.name,theme:'Identity Is Not Fixed'})),
+  ...currentTopics.filter(t=>t.tool?.file).map(t=>({file:t.tool.file,name:t.tool.name,theme:'I Have A Good Life. Why Doesn\'t It Feel Like It?'})),
   ...pastThemes.flatMap(pt=>pt.topics.filter(t=>t.tool?.file).map(t=>({file:t.tool.file,name:t.tool.name,theme:pt.theme.replace(/&amp;/g,'&')})))
 ];
 
@@ -2680,7 +2682,7 @@ async function confirmDeleteAccount() {
 }
 
 /* ── WELCOME BANNER ────────────────────────────── */
-const _CURRENT_THEME_NAME = 'Identity Is Not Fixed';
+const _CURRENT_THEME_NAME = 'I Have A Good Life. Why Doesn\'t It Feel Like It?';
 
 function renderWelcomeBanner(user) {
   const banner = document.getElementById('welcome-banner');

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I Did What I Was Supposed To Do. Now What? | The Living Room</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js?v=20260930"></script>
+<script src="history.js?v=20260930"></script>
+<style>
+  :root{
+    --navy:#0F1215;--navy-mid:#1C2B3A;--gold:#E8A800;--gold-light:#F5C842;
+    --cream:#F9F7F2;--cream-dark:#EFE9DF;--white:#FFFFFF;
+    --text-dark:#111820;--text-mid:#445566;--text-muted:#8899AA;
+    --border:#E2D9CE;--accent:#1A6B72;
+    --font-body:'Inter',sans-serif;--font-display:'Playfair Display',serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);font-size:15px;line-height:1.6}
+
+  /* Topbar */
+  .topbar{background:var(--navy);padding:0.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .topbar-left{display:flex;align-items:center;gap:1rem}
+  .back-btn{background:none;border:none;color:rgba(255,255,255,0.55);cursor:pointer;font-size:0.8rem;font-family:var(--font-body);display:flex;align-items:center;gap:0.4rem;padding:0.3rem 0;transition:color 0.2s}
+  .back-btn:hover{color:var(--white)}
+  .logo{font-family:var(--font-display);color:var(--white);font-size:1rem;font-weight:700;letter-spacing:0.01em}
+  .saved-badge{display:none;align-items:center;gap:0.4rem;background:rgba(232,168,0,0.15);border:1px solid rgba(232,168,0,0.3);border-radius:20px;padding:0.25rem 0.75rem;font-size:0.72rem;color:var(--gold);font-weight:500}
+  #user-badge{font-size:0.75rem;color:rgba(255,255,255,0.5);white-space:nowrap}
+
+  /* Hero */
+  .tool-hero{background:var(--navy);padding:2.5rem 1.5rem 2rem;text-align:center}
+  .theme-pill{display:inline-flex;align-items:center;gap:0.4rem;background:rgba(232,168,0,0.12);border:1px solid rgba(232,168,0,0.25);border-radius:20px;padding:0.3rem 0.9rem;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);font-weight:600;cursor:pointer;margin-bottom:1rem}
+  .tool-hero h1{font-family:var(--font-display);font-size:clamp(1.5rem,4vw,2.2rem);color:var(--white);font-weight:700;line-height:1.2;margin-bottom:0.75rem}
+  .tool-hero p{color:rgba(255,255,255,0.65);font-size:0.9rem;max-width:560px;margin:0 auto}
+  .topic-label{font-size:0.72rem;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem}
+
+  /* Progress */
+  .prog-wrap{background:var(--navy-mid);padding:0.9rem 1.5rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid rgba(255,255,255,0.06)}
+  .prog-bar{flex:1;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden}
+  .prog-fill{height:100%;background:var(--gold);border-radius:3px;width:0%;transition:width 0.5s}
+  .prog-pct{font-size:0.75rem;color:var(--gold);font-weight:600;min-width:2.5rem;text-align:right}
+  .prog-hint{font-size:0.72rem;color:rgba(255,255,255,0.35);min-width:8rem}
+  .prog-hint.done{color:var(--gold)}
+
+  /* Main */
+  .tool-body{max-width:760px;margin:0 auto;padding:2rem 1.5rem 4rem}
+
+  /* Section blocks */
+  .section-block{background:var(--white);border-radius:12px;padding:1.75rem;margin-bottom:1.5rem;border:1px solid var(--border)}
+  .section-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--navy);color:var(--white);font-size:0.75rem;font-weight:700;margin-bottom:0.75rem}
+  .section-block h2{font-family:var(--font-display);font-size:1.15rem;color:var(--text-dark);margin-bottom:0.35rem}
+  .section-block p{font-size:0.85rem;color:var(--text-mid);margin-bottom:1.25rem}
+
+  /* Tables */
+  .area-table{width:100%;border-collapse:collapse;font-size:0.85rem}
+  .area-table th{background:var(--cream-dark);color:var(--text-mid);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;padding:0.6rem 0.75rem;text-align:left;font-weight:600;border:1px solid var(--border)}
+  .area-table td{border:1px solid var(--border);padding:0.4rem 0.5rem;vertical-align:middle}
+  .area-table td:first-child{color:var(--text-mid);font-size:0.82rem;white-space:nowrap;padding:0.5rem 0.75rem;background:var(--cream)}
+  .area-table input[type=text]{width:100%;border:none;background:transparent;font-family:var(--font-body);font-size:0.85rem;color:var(--text-dark);padding:0.35rem 0.5rem;outline:none}
+  .area-table input[type=text]:focus{background:rgba(232,168,0,0.04)}
+  .area-table tr:hover td{background:rgba(249,247,242,0.6)}
+  .area-table tr:hover td:first-child{background:var(--cream-dark)}
+
+  /* Checkboxes */
+  .checkbox-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.5rem}
+  .cb-item{display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.6rem;border-radius:6px;cursor:pointer;transition:background 0.15s}
+  .cb-item:hover{background:var(--cream)}
+  .cb-item input[type=checkbox]{width:15px;height:15px;accent-color:var(--navy);cursor:pointer;flex-shrink:0}
+  .cb-item label{font-size:0.83rem;color:var(--text-dark);cursor:pointer;line-height:1.3}
+  .cb-other{display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.6rem}
+  .cb-other input[type=text]{border:none;border-bottom:1px solid var(--border);background:transparent;font-family:var(--font-body);font-size:0.83rem;color:var(--text-dark);padding:0.2rem 0.3rem;outline:none;flex:1}
+  .cb-other input[type=text]:focus{border-bottom-color:var(--gold)}
+  .cb-other label{font-size:0.83rem;color:var(--text-muted);white-space:nowrap}
+
+  /* Textarea */
+  textarea{width:100%;min-height:130px;border:1px solid var(--border);border-radius:8px;padding:0.85rem;font-family:var(--font-body);font-size:0.88rem;color:var(--text-dark);resize:vertical;background:var(--cream);line-height:1.6;outline:none;transition:border-color 0.2s}
+  textarea:focus{border-color:var(--gold)}
+
+  /* Three columns */
+  .three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+  @media(max-width:600px){.three-col{grid-template-columns:1fr}}
+  .col-card{border-radius:8px;overflow:hidden}
+  .col-card-head{padding:0.65rem 0.85rem;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;text-align:center}
+  .col-card-head .sub{font-size:0.7rem;font-weight:400;text-transform:none;letter-spacing:0;opacity:0.75;display:block;margin-top:0.15rem}
+  .col-card--keep .col-card-head{background:#1A6B72;color:var(--white)}
+  .col-card--question .col-card-head{background:var(--navy-mid);color:var(--white)}
+  .col-card--missing .col-card-head{background:#5C3D2E;color:var(--white)}
+  .col-card textarea{border-radius:0;border:1px solid var(--border);border-top:none;min-height:110px;background:var(--white)}
+
+  /* Tool instruction */
+  .tool-instruction{display:flex;gap:0.75rem;background:var(--cream-dark);border-radius:8px;padding:1rem 1.1rem;margin-bottom:1.25rem;font-size:0.83rem;color:var(--text-mid);line-height:1.5}
+  .tool-instruction::before{content:'✏️';font-size:1rem;flex-shrink:0;margin-top:0.05rem}
+
+  /* Completed banner */
+  #completed-banner{display:none;align-items:center;gap:1rem;background:linear-gradient(135deg,#1A6B72,#0F4F54);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+  .cb-icon{font-size:1.5rem}
+  .cb-text{flex:1;min-width:180px}
+  .cb-text strong{display:block;color:var(--white);font-size:0.95rem;margin-bottom:0.2rem}
+  .cb-text span{color:rgba(255,255,255,0.65);font-size:0.8rem}
+  .cb-reset{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:var(--white);border-radius:6px;padding:0.4rem 0.9rem;font-size:0.78rem;cursor:pointer;font-family:var(--font-body);white-space:nowrap}
+
+  /* Complete wrap */
+  .complete-wrap{margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border);text-align:center}
+  .complete-btn{background:var(--navy);color:var(--white);border:none;border-radius:8px;padding:0.75rem 2rem;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background 0.2s}
+  .complete-btn:hover{background:var(--navy-mid)}
+  .complete-btn:disabled{opacity:0.4;cursor:not-allowed}
+
+  @media print{
+    .topbar,.complete-wrap,#completed-banner{display:none!important}
+    body{background:#fff;font-size:12px}
+    .section-block{border:1px solid #ccc;break-inside:avoid;page-break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="back-btn" onclick="history.back()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Resource Library
+    </button>
+    <span class="logo">The Living Room</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <div class="saved-badge" id="saved-badge">
+      <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M4 6l1.5 1.5L8 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Progress saved
+    </div>
+    <span id="user-badge"></span>
+  </div>
+</div>
+
+<div class="prog-wrap">
+  <span class="prog-hint" id="prog-hint">0 of 5 sections done</span>
+  <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+  <span class="prog-pct" id="prog-pct">0%</span>
+</div>
+
+<div class="tool-hero">
+  <div class="topic-label">Topic 1 of 4</div>
+  <span class="theme-pill" onclick="history.back()">I Have A Good Life. Why Doesn't It Feel Like It?</span>
+  <h1>I Did What I Was Supposed To Do. Now What?</h1>
+  <p>Make sense of why a life that looks objectively good doesn't always feel the way we expected it to.</p>
+</div>
+
+<div class="tool-body">
+
+  <div id="completed-banner">
+    <span class="cb-icon">✓</span>
+    <div class="cb-text">
+      <strong>You've completed this tool.</strong>
+      <span>It's saved. Come back whenever you need it.</span>
+    </div>
+    <button class="cb-reset" onclick="resetComplete()">Mark as not done</button>
+  </div>
+
+  <div class="tool-instruction">This tool helps you get out of your head and onto paper. There are no right answers — only honest ones. Work through each section in order, and let what you write surprise you.</div>
+
+  <!-- Section 1 -->
+  <div class="section-block">
+    <div class="section-num">1</div>
+    <h2>The life I expected this to create</h2>
+    <p>Think about the things you've pursued, built or achieved. What did you expect these to give you? Jot down a few key areas and what you hoped they would bring.</p>
+    <table class="area-table">
+      <thead><tr><th>AREA</th><th>WHAT I EXPECTED THIS TO GIVE ME</th></tr></thead>
+      <tbody>
+        <tr><td>Career / work</td><td><input type="text" id="exp-career" placeholder=""></td></tr>
+        <tr><td>Relationships</td><td><input type="text" id="exp-relationships" placeholder=""></td></tr>
+        <tr><td>Family / children</td><td><input type="text" id="exp-family" placeholder=""></td></tr>
+        <tr><td>Home / living environment</td><td><input type="text" id="exp-home" placeholder=""></td></tr>
+        <tr><td>Money / financial security</td><td><input type="text" id="exp-money" placeholder=""></td></tr>
+        <tr><td>Health / fitness</td><td><input type="text" id="exp-health" placeholder=""></td></tr>
+        <tr><td>Lifestyle / freedom</td><td><input type="text" id="exp-lifestyle" placeholder=""></td></tr>
+        <tr><td>Personal growth / achievement</td><td><input type="text" id="exp-growth" placeholder=""></td></tr>
+        <tr><td>Other</td><td><input type="text" id="exp-other" placeholder=""></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="section-block">
+    <div class="section-num">2</div>
+    <h2>The life I'm actually experiencing</h2>
+    <p>What does this genuinely give you now? For each area, consider what it brings today. It might be a mix of positives and challenges.</p>
+    <table class="area-table">
+      <thead><tr><th>AREA</th><th>WHAT IT GIVES ME NOW</th></tr></thead>
+      <tbody>
+        <tr><td>Career / work</td><td><input type="text" id="now-career" placeholder=""></td></tr>
+        <tr><td>Relationships</td><td><input type="text" id="now-relationships" placeholder=""></td></tr>
+        <tr><td>Family / children</td><td><input type="text" id="now-family" placeholder=""></td></tr>
+        <tr><td>Home / living environment</td><td><input type="text" id="now-home" placeholder=""></td></tr>
+        <tr><td>Money / financial security</td><td><input type="text" id="now-money" placeholder=""></td></tr>
+        <tr><td>Health / fitness</td><td><input type="text" id="now-health" placeholder=""></td></tr>
+        <tr><td>Lifestyle / freedom</td><td><input type="text" id="now-lifestyle" placeholder=""></td></tr>
+        <tr><td>Personal growth / achievement</td><td><input type="text" id="now-growth" placeholder=""></td></tr>
+        <tr><td>Other</td><td><input type="text" id="now-other" placeholder=""></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="section-block">
+    <div class="section-num">3</div>
+    <h2>What else is competing for my attention now?</h2>
+    <p>There are more influences on our lives today than ever before. Which of these, or others, have started shaping what you think a "good life" should look like?</p>
+    <div class="checkbox-grid">
+      <label class="cb-item"><input type="checkbox" id="cb-money"><label for="cb-money">Money and financial security</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-productivity"><label for="cb-productivity">Productivity and achievement</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-appearance"><label for="cb-appearance">Appearance and image</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-experiences"><label for="cb-experiences">Experiences and travel</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-health"><label for="cb-health">Health and fitness</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-relationships"><label for="cb-relationships">Relationships and family</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-parenting"><label for="cb-parenting">Parenting</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-entrepreneurship"><label for="cb-entrepreneurship">Entrepreneurship / building something</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-socialmedia"><label for="cb-socialmedia">Social media and comparison</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-tech"><label for="cb-tech">Technology and AI</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-politics"><label for="cb-politics">Politics and the state of the world</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-status"><label for="cb-status">Status and recognition</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-security"><label for="cb-security">Security and stability</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-consumption"><label for="cb-consumption">More consumption / lifestyle</label></label>
+    </div>
+    <div style="margin-top:0.75rem;display:flex;flex-direction:column;gap:0.4rem">
+      <div class="cb-other"><label>Other:</label><input type="text" id="cb-other1"></div>
+      <div class="cb-other"><label>Other:</label><input type="text" id="cb-other2"></div>
+    </div>
+  </div>
+
+  <!-- Section 4 -->
+  <div class="section-block">
+    <div class="section-num">4</div>
+    <h2>Step back and look at it</h2>
+    <p>If I stopped trying to decide whether my life should feel good, what would I say about how it actually feels to live it?</p>
+    <textarea id="step-back" placeholder="Write freely here..."></textarea>
+  </div>
+
+  <!-- Section 5 -->
+  <div class="section-block">
+    <div class="section-num">5</div>
+    <h2>What now?</h2>
+    <p>Use what you've written to sort the key parts of your life into three columns.</p>
+    <div class="three-col">
+      <div class="col-card col-card--keep">
+        <div class="col-card-head">KEEP<span class="sub">This genuinely adds to my life.</span></div>
+        <textarea id="col-keep" placeholder="What belongs here?"></textarea>
+      </div>
+      <div class="col-card col-card--question">
+        <div class="col-card-head">QUESTION<span class="sub">I'm no longer sure why this matters so much.</span></div>
+        <textarea id="col-question" placeholder="What belongs here?"></textarea>
+      </div>
+      <div class="col-card col-card--missing">
+        <div class="col-card-head">MISSING?<span class="sub">Something important isn't getting enough space.</span></div>
+        <textarea id="col-missing" placeholder="What belongs here?"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="complete-wrap">
+    <button class="complete-btn" id="mark-complete-btn" onclick="markComplete()" style="display:none">Mark as complete ✓</button>
+    <p id="tlr-autosave-note" class="tlr-autosave-note" style="font-size:0.78rem;color:var(--text-muted);margin-top:0.75rem"></p>
+  </div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'tlr-now-what';
+
+function collectData(){
+  const checkboxIds = ['cb-money','cb-productivity','cb-appearance','cb-experiences','cb-health','cb-relationships','cb-parenting','cb-entrepreneurship','cb-socialmedia','cb-tech','cb-politics','cb-status','cb-security','cb-consumption'];
+  return {
+    exp: {
+      career: v('exp-career'), relationships: v('exp-relationships'), family: v('exp-family'),
+      home: v('exp-home'), money: v('exp-money'), health: v('exp-health'),
+      lifestyle: v('exp-lifestyle'), growth: v('exp-growth'), other: v('exp-other')
+    },
+    now: {
+      career: v('now-career'), relationships: v('now-relationships'), family: v('now-family'),
+      home: v('now-home'), money: v('now-money'), health: v('now-health'),
+      lifestyle: v('now-lifestyle'), growth: v('now-growth'), other: v('now-other')
+    },
+    checkboxes: checkboxIds.reduce((a,id)=>({...a,[id]:document.getElementById(id)?.checked||false}),{}),
+    otherText: { other1: v('cb-other1'), other2: v('cb-other2') },
+    stepBack: v('step-back'),
+    colKeep: v('col-keep'),
+    colQuestion: v('col-question'),
+    colMissing: v('col-missing')
+  };
+}
+
+function v(id){ const el = document.getElementById(id); return el ? (el.value||'') : ''; }
+
+function populateData(d){
+  if(!d) return;
+  const expMap = d.exp||{};
+  const nowMap = d.now||{};
+  Object.entries(expMap).forEach(([k,val])=>{ const el=document.getElementById('exp-'+k); if(el) el.value=val||''; });
+  Object.entries(nowMap).forEach(([k,val])=>{ const el=document.getElementById('now-'+k); if(el) el.value=val||''; });
+  if(d.checkboxes) Object.entries(d.checkboxes).forEach(([id,chk])=>{ const el=document.getElementById(id); if(el) el.checked=chk; });
+  if(d.otherText){ sv('cb-other1',d.otherText.other1); sv('cb-other2',d.otherText.other2); }
+  sv('step-back',d.stepBack);
+  sv('col-keep',d.colKeep);
+  sv('col-question',d.colQuestion);
+  sv('col-missing',d.colMissing);
+}
+
+function sv(id,val){ const el=document.getElementById(id); if(el && val) el.value=val; }
+
+function updateProgress(){
+  const exp = Object.values(collectData().exp).filter(Boolean).length;
+  const now = Object.values(collectData().now).filter(Boolean).length;
+  const s1 = exp > 0 ? 1 : 0;
+  const s2 = now > 0 ? 1 : 0;
+  const s3 = (Object.values(collectData().checkboxes).some(Boolean) || collectData().otherText.other1 || collectData().otherText.other2) ? 1 : 0;
+  const s4 = collectData().stepBack.trim().length > 10 ? 1 : 0;
+  const s5 = (collectData().colKeep || collectData().colQuestion || collectData().colMissing) ? 1 : 0;
+  const done = s1+s2+s3+s4+s5;
+  const pct = Math.round((done/5)*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'%';
+  document.getElementById('prog-hint').textContent = `${done} of 5 sections done`;
+  const btn = document.getElementById('mark-complete-btn');
+  if(btn) btn.style.display = done >= 3 ? '' : 'none';
+}
+
+async function markComplete(){
+  const data = collectData();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  if(!done.includes(STORAGE_KEY)) done.push(STORAGE_KEY);
+  localStorage.setItem('tlr_completed', JSON.stringify(done));
+  await saveProgress(STORAGE_KEY, true, data);
+  document.getElementById('completed-banner').style.display = 'flex';
+  const btn = document.getElementById('mark-complete-btn');
+  if(btn) btn.style.display = 'none';
+  const hint = document.getElementById('prog-hint');
+  if(hint){ hint.textContent = 'Completed ✓'; hint.className = 'prog-hint done'; }
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('prog-pct').textContent = '100%';
+  if(typeof logActivity === 'function') logActivity('tool_complete', window.location.pathname, {tool: STORAGE_KEY});
+}
+
+async function resetComplete(){
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  const idx = done.indexOf(STORAGE_KEY);
+  if(idx > -1){ done.splice(idx,1); localStorage.setItem('tlr_completed', JSON.stringify(done)); }
+  const data = collectData();
+  await saveProgress(STORAGE_KEY, false, data);
+  document.getElementById('completed-banner').style.display = 'none';
+  const btn = document.getElementById('mark-complete-btn');
+  if(btn) btn.style.display = '';
+}
+
+requireAuth().then(async () => {
+  showUserBadge('#user-badge');
+  TLRHistory.init(STORAGE_KEY, collectData, populateData);
+  const remote = await loadProgress();
+  const local = localStorage.getItem(STORAGE_KEY);
+  if(!remote && local){ try{ populateData(JSON.parse(local)); }catch(e){} }
+  updateProgress();
+  document.addEventListener('input', updateProgress);
+
+  const saved = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  if(saved.includes(STORAGE_KEY)){
+    document.getElementById('completed-banner').style.display='flex';
+    const btn=document.getElementById('mark-complete-btn');
+    if(btn) btn.style.display='none';
+  }
+}).catch(()=>{ window.location.href='login.html'; });
+</script>
+</body>
+</html>

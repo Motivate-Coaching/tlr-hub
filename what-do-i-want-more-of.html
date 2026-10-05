@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What Do I Want More Of Now? | The Living Room</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js?v=20260930"></script>
+<script src="history.js?v=20260930"></script>
+<style>
+  :root{--navy:#0F1215;--navy-mid:#1C2B3A;--gold:#E8A800;--gold-light:#F5C842;--cream:#F9F7F2;--cream-dark:#EFE9DF;--white:#FFFFFF;--text-dark:#111820;--text-mid:#445566;--text-muted:#8899AA;--border:#E2D9CE;--accent:#1A6B72;--font-body:'Inter',sans-serif;--font-display:'Playfair Display',serif;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);font-size:15px;line-height:1.6}
+  .topbar{background:var(--navy);padding:0.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .topbar-left{display:flex;align-items:center;gap:1rem}
+  .back-btn{background:none;border:none;color:rgba(255,255,255,0.55);cursor:pointer;font-size:0.8rem;font-family:var(--font-body);display:flex;align-items:center;gap:0.4rem;padding:0.3rem 0;transition:color 0.2s}
+  .back-btn:hover{color:var(--white)}
+  .logo{font-family:var(--font-display);color:var(--white);font-size:1rem;font-weight:700}
+  .saved-badge{display:none;align-items:center;gap:0.4rem;background:rgba(232,168,0,0.15);border:1px solid rgba(232,168,0,0.3);border-radius:20px;padding:0.25rem 0.75rem;font-size:0.72rem;color:var(--gold);font-weight:500}
+  #user-badge{font-size:0.75rem;color:rgba(255,255,255,0.5)}
+  .prog-wrap{background:var(--navy-mid);padding:0.9rem 1.5rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid rgba(255,255,255,0.06)}
+  .prog-bar{flex:1;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden}
+  .prog-fill{height:100%;background:var(--gold);border-radius:3px;width:0%;transition:width 0.5s}
+  .prog-pct{font-size:0.75rem;color:var(--gold);font-weight:600;min-width:2.5rem;text-align:right}
+  .prog-hint{font-size:0.72rem;color:rgba(255,255,255,0.35);min-width:8rem}
+  .prog-hint.done{color:var(--gold)}
+  .tool-hero{background:var(--navy);padding:2.5rem 1.5rem 2rem;text-align:center}
+  .theme-pill{display:inline-flex;align-items:center;gap:0.4rem;background:rgba(232,168,0,0.12);border:1px solid rgba(232,168,0,0.25);border-radius:20px;padding:0.3rem 0.9rem;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);font-weight:600;cursor:pointer;margin-bottom:1rem}
+  .tool-hero h1{font-family:var(--font-display);font-size:clamp(1.5rem,4vw,2.2rem);color:var(--white);font-weight:700;line-height:1.2;margin-bottom:0.75rem}
+  .tool-hero p{color:rgba(255,255,255,0.65);font-size:0.9rem;max-width:560px;margin:0 auto}
+  .topic-label{font-size:0.72rem;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem}
+  .tool-body{max-width:760px;margin:0 auto;padding:2rem 1.5rem 4rem}
+  .section-block{background:var(--white);border-radius:12px;padding:1.75rem;margin-bottom:1.5rem;border:1px solid var(--border)}
+  .section-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--navy);color:var(--white);font-size:0.75rem;font-weight:700;margin-bottom:0.75rem}
+  .section-block h2{font-family:var(--font-display);font-size:1.15rem;color:var(--text-dark);margin-bottom:0.35rem}
+  .section-block p{font-size:0.85rem;color:var(--text-mid);margin-bottom:1.25rem}
+  textarea{width:100%;min-height:120px;border:1px solid var(--border);border-radius:8px;padding:0.85rem;font-family:var(--font-body);font-size:0.88rem;color:var(--text-dark);resize:vertical;background:var(--cream);line-height:1.6;outline:none;transition:border-color 0.2s}
+  textarea:focus{border-color:var(--gold)}
+  .action-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.85rem;margin-bottom:1rem}
+  .action-card{border:1px solid var(--border);border-radius:8px;padding:1rem}
+  .action-card h4{font-size:0.82rem;font-weight:600;color:var(--navy);margin-bottom:0.2rem}
+  .action-card .desc{font-size:0.77rem;color:var(--text-muted);margin-bottom:0.6rem;font-style:italic}
+  .action-card textarea{min-height:75px;font-size:0.82rem}
+  .experiment-block{background:var(--navy);border-radius:10px;padding:1.5rem;margin-bottom:1.25rem}
+  .experiment-block p{color:rgba(255,255,255,0.65);font-size:0.85rem;margin-bottom:1rem}
+  .experiment-block textarea{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:var(--white);min-height:100px}
+  .experiment-block textarea::placeholder{color:rgba(255,255,255,0.3)}
+  .experiment-block textarea:focus{border-color:var(--gold)}
+  .experiment-block h3{font-family:var(--font-display);font-size:1rem;color:var(--white);margin-bottom:0.5rem}
+  .tool-instruction{display:flex;gap:0.75rem;background:var(--cream-dark);border-radius:8px;padding:1rem 1.1rem;margin-bottom:1.25rem;font-size:0.83rem;color:var(--text-mid);line-height:1.5}
+  .tool-instruction::before{content:'✏️';font-size:1rem;flex-shrink:0;margin-top:0.05rem}
+  #completed-banner{display:none;align-items:center;gap:1rem;background:linear-gradient(135deg,#1A6B72,#0F4F54);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+  .cb-icon{font-size:1.5rem}
+  .cb-text{flex:1;min-width:180px}
+  .cb-text strong{display:block;color:var(--white);font-size:0.95rem;margin-bottom:0.2rem}
+  .cb-text span{color:rgba(255,255,255,0.65);font-size:0.8rem}
+  .cb-reset{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:var(--white);border-radius:6px;padding:0.4rem 0.9rem;font-size:0.78rem;cursor:pointer;font-family:var(--font-body)}
+  .complete-wrap{margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border);text-align:center}
+  .complete-btn{background:var(--navy);color:var(--white);border:none;border-radius:8px;padding:0.75rem 2rem;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background 0.2s}
+  .complete-btn:hover{background:var(--navy-mid)}
+  @media print{.topbar,.complete-wrap,#completed-banner{display:none!important}body{background:#fff}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="back-btn" onclick="history.back()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Resource Library
+    </button>
+    <span class="logo">The Living Room</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <div class="saved-badge" id="saved-badge"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M4 6l1.5 1.5L8 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Progress saved</div>
+    <span id="user-badge"></span>
+  </div>
+</div>
+
+<div class="prog-wrap">
+  <span class="prog-hint" id="prog-hint">0 of 4 sections done</span>
+  <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+  <span class="prog-pct" id="prog-pct">0%</span>
+</div>
+
+<div class="tool-hero">
+  <div class="topic-label">Topic 4 of 4</div>
+  <span class="theme-pill" onclick="history.back()">I Have A Good Life. Why Doesn't It Feel Like It?</span>
+  <h1>What Do I Want More Of Now?</h1>
+  <p>Bring the evidence together. Identify what would genuinely improve the experience of your life, then translate that into small, realistic actions.</p>
+</div>
+
+<div class="tool-body">
+
+  <div id="completed-banner">
+    <span class="cb-icon">✓</span>
+    <div class="cb-text">
+      <strong>You've completed this tool.</strong>
+      <span>It's saved. Come back whenever you need it.</span>
+    </div>
+    <button class="cb-reset" onclick="resetComplete()">Mark as not done</button>
+  </div>
+
+  <div class="tool-instruction">This is the place where the whole month comes together. You've understood the dissatisfaction, discovered what actually contributes to living well, and examined how you're currently experiencing your life. Now — deliberately create more of what matters.</div>
+
+  <!-- Section 1: What this month revealed -->
+  <div class="section-block">
+    <div class="section-num">1</div>
+    <h2>What this month revealed</h2>
+    <p>Looking back across the three previous tools — what has surprised you, challenged you, or become clearer? What do you know now that you didn't, or couldn't articulate, four weeks ago?</p>
+    <textarea id="revealed" placeholder="What have you discovered or understood differently this month?"></textarea>
+  </div>
+
+  <!-- Section 2: The ingredients I want more of -->
+  <div class="section-block">
+    <div class="section-num">2</div>
+    <h2>The ingredients I want more of</h2>
+    <p>From the eight ingredients of a life well lived — relationships, health, meaning, agency, growth, security, contribution, enjoyment — which two or three would make the biggest difference to how your life feels? And what would "more" actually look like for each one?</p>
+    <div class="action-grid">
+      <div class="action-card">
+        <h4>Ingredient 1</h4>
+        <div class="desc">Which one, and what would more look like?</div>
+        <textarea id="ingredient1" placeholder="e.g. More enjoyment — specifically: one thing a week that I do purely because I want to"></textarea>
+      </div>
+      <div class="action-card">
+        <h4>Ingredient 2</h4>
+        <div class="desc">Which one, and what would more look like?</div>
+        <textarea id="ingredient2" placeholder="e.g. More connection — specifically: less scheduling, more just being present"></textarea>
+      </div>
+      <div class="action-card">
+        <h4>Ingredient 3 (optional)</h4>
+        <div class="desc">Which one, and what would more look like?</div>
+        <textarea id="ingredient3" placeholder="e.g. More agency — specifically: making one decision this month that's purely mine"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Small actions and experiments -->
+  <div class="section-block">
+    <div class="section-num">3</div>
+    <h2>Small actions and experiments</h2>
+    <p>Strengthening what's already good, introducing what's missing, and creating more of what actually matters. What are the simplest, most realistic things you could do in the next four weeks?</p>
+    <div class="action-grid">
+      <div class="action-card">
+        <h4>Strengthen something good</h4>
+        <div class="desc">Something that's already working — how do you do more of it?</div>
+        <textarea id="action-strengthen" placeholder="What's already good that deserves more space?"></textarea>
+      </div>
+      <div class="action-card">
+        <h4>Introduce something missing</h4>
+        <div class="desc">One small thing you could add or restart.</div>
+        <textarea id="action-introduce" placeholder="What's been absent that you want to bring back in?"></textarea>
+      </div>
+      <div class="action-card">
+        <h4>Question something</h4>
+        <div class="desc">One assumption or habit to examine and possibly change.</div>
+        <textarea id="action-question" placeholder="What do you want to look at differently?"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: One commitment -->
+  <div class="section-block" style="padding:0;overflow:hidden">
+    <div class="experiment-block" style="margin:0;border-radius:12px">
+      <div class="section-num" style="background:var(--gold);color:var(--navy)">4</div>
+      <h3>One commitment for this month</h3>
+      <p>Not a complete overhaul. Not a new identity. Just one clear, specific thing you will do differently — and why it matters to you.</p>
+      <textarea id="commitment" placeholder="I commit to... because..."></textarea>
+    </div>
+  </div>
+
+  <div class="complete-wrap">
+    <button class="complete-btn" id="mark-complete-btn" onclick="markComplete()" style="display:none">Mark as complete ✓</button>
+    <p id="tlr-autosave-note" class="tlr-autosave-note" style="font-size:0.78rem;color:var(--text-muted);margin-top:0.75rem"></p>
+  </div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'tlr-what-do-i-want-more-of';
+
+function collectData(){
+  return {
+    revealed: v('revealed'),
+    ingredient1: v('ingredient1'), ingredient2: v('ingredient2'), ingredient3: v('ingredient3'),
+    actionStrengthen: v('action-strengthen'), actionIntroduce: v('action-introduce'), actionQuestion: v('action-question'),
+    commitment: v('commitment')
+  };
+}
+function v(id){const el=document.getElementById(id);return el?(el.value||''):''}
+function populateData(d){
+  if(!d) return;
+  const map={revealed:'revealed',ingredient1:'ingredient1',ingredient2:'ingredient2',ingredient3:'ingredient3',actionStrengthen:'action-strengthen',actionIntroduce:'action-introduce',actionQuestion:'action-question',commitment:'commitment'};
+  Object.entries(map).forEach(([k,id])=>{if(d[k]){const el=document.getElementById(id);if(el)el.value=d[k];}});
+}
+function updateProgress(){
+  const d=collectData();
+  const s1=d.revealed?.trim().length>10?1:0;
+  const s2=(d.ingredient1||d.ingredient2)?1:0;
+  const s3=(d.actionStrengthen||d.actionIntroduce||d.actionQuestion)?1:0;
+  const s4=d.commitment?.trim().length>10?1:0;
+  const done=s1+s2+s3+s4;
+  const pct=Math.round((done/4)*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-hint').textContent=`${done} of 4 sections done`;
+  const btn=document.getElementById('mark-complete-btn');
+  if(btn) btn.style.display=done>=2?'':'none';
+}
+async function markComplete(){
+  const data=collectData();
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+  const done=JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  if(!done.includes(STORAGE_KEY))done.push(STORAGE_KEY);
+  localStorage.setItem('tlr_completed',JSON.stringify(done));
+  await saveProgress(STORAGE_KEY,true,data);
+  document.getElementById('completed-banner').style.display='flex';
+  const btn=document.getElementById('mark-complete-btn');if(btn)btn.style.display='none';
+  const hint=document.getElementById('prog-hint');if(hint){hint.textContent='Completed ✓';hint.className='prog-hint done';}
+  document.getElementById('prog-fill').style.width='100%';document.getElementById('prog-pct').textContent='100%';
+  if(typeof logActivity==='function')logActivity('tool_complete',window.location.pathname,{tool:STORAGE_KEY});
+}
+async function resetComplete(){
+  const done=JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  const idx=done.indexOf(STORAGE_KEY);if(idx>-1){done.splice(idx,1);localStorage.setItem('tlr_completed',JSON.stringify(done));}
+  await saveProgress(STORAGE_KEY,false,collectData());
+  document.getElementById('completed-banner').style.display='none';
+  const btn=document.getElementById('mark-complete-btn');if(btn)btn.style.display='';
+}
+requireAuth().then(async()=>{
+  showUserBadge('#user-badge');
+  TLRHistory.init(STORAGE_KEY,collectData,populateData);
+  const remote=await loadProgress();
+  const local=localStorage.getItem(STORAGE_KEY);
+  if(!remote&&local){try{populateData(JSON.parse(local));}catch(e){}}
+  updateProgress();
+  document.addEventListener('input',updateProgress);
+  const saved=JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  if(saved.includes(STORAGE_KEY)){document.getElementById('completed-banner').style.display='flex';const btn=document.getElementById('mark-complete-btn');if(btn)btn.style.display='none';}
+}).catch(()=>{window.location.href='login.html';});
+</script>
+</body>
+</html>
