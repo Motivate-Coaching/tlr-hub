@@ -2244,17 +2244,32 @@ document.querySelectorAll('.tab-btn[data-view]').forEach(btn => {
   btn.addEventListener('click', () => goToView(btn.dataset.view));
 });
 
-// Navigate directly to a view via URL hash (e.g. index.html#library)
-if (window.location.hash) {
-  const hashView = window.location.hash.replace('#', '');
-  if (views[hashView]) goToView(hashView);
-}
-
-// URL hash-based tab navigation (for links from other pages)
+// Navigate directly to a view via URL hash
+// Handles both tab names (e.g. #library) and section IDs within a view (e.g. #good-life)
 (function handleHash() {
+  if (!window.location.hash) return;
   const hash = window.location.hash.replace('#', '');
-  if (hash && views[hash]) {
+  if (views[hash]) {
     goToView(hash);
+  } else {
+    // Hash is a section ID inside a view — find it and switch to that view first
+    const target = document.getElementById(hash);
+    if (target) {
+      const libView = document.getElementById('view-library');
+      if (libView && libView.contains(target)) {
+        goToView('library');
+      }
+      setTimeout(() => {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Auto-expand theme cards
+        if (target.classList.contains('theme-card') && !target.classList.contains('is-open')) {
+          target.classList.add('is-open');
+          const trig = target.querySelector('.theme-trigger');
+          if (trig) trig.setAttribute('aria-expanded', 'true');
+        }
+        setActive(hash);
+      }, 80);
+    }
   }
 })();
 
@@ -2329,12 +2344,12 @@ if (window.location.hash) {
 })();
 
 /* ── CURRENT THEME COLLAPSE ─────────────── */
-const currentFeature = document.getElementById('identity-is-not-fixed');
+const currentFeature = document.getElementById('good-life');
 const currentHeader = document.getElementById('current-feature-header');
-currentHeader.addEventListener('click', () => { currentFeature.classList.toggle('collapsed'); setActive('identity-is-not-fixed'); });
+currentHeader.addEventListener('click', () => { currentFeature.classList.toggle('collapsed'); setActive('good-life'); });
 
 /* ── SMOOTH SCROLL + DOT UPDATE ON CLICK ── */
-const themeIds = ['identity-is-not-fixed', 'difficult-conversations', 'building-momentum', 'energy-and-drive', 'boundaries', 'autopilot', 'decision-fatigue'];
+const themeIds = ['good-life', 'identity-is-not-fixed', 'difficult-conversations', 'building-momentum', 'energy-and-drive', 'boundaries', 'autopilot', 'decision-fatigue'];
 let scrollLocked = false;
 
 document.querySelectorAll('a[href^="#"]').forEach(link => {
@@ -2349,7 +2364,7 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
         scrollLocked = true;
         setTimeout(() => { scrollLocked = false; }, 900);
         // Auto-expand the theme when clicked from sidebar
-        if (id === 'identity-is-not-fixed') {
+        if (id === 'good-life') {
           currentFeature.classList.remove('collapsed');
         } else {
           const card = document.getElementById(id);
