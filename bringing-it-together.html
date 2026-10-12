@@ -25,7 +25,7 @@
   .logo{font-family:var(--font-display);color:var(--white);font-size:1rem;font-weight:700}
   .saved-badge{display:none;align-items:center;gap:0.4rem;background:rgba(232,168,0,0.15);border:1px solid rgba(232,168,0,0.3);border-radius:20px;padding:0.25rem 0.75rem;font-size:0.72rem;color:var(--gold);font-weight:500}
   #user-badge{font-size:0.75rem;color:rgba(255,255,255,0.5);white-space:nowrap}
-  .tool-hero{background:var(--navy);padding:2.5rem 1.5rem 2rem;text-align:center}
+  .tool-hero{background:var(--navy);padding:0 0 2rem;text-align:center}
   .theme-pill{display:inline-flex;align-items:center;gap:0.4rem;background:rgba(232,168,0,0.12);border:1px solid rgba(232,168,0,0.25);border-radius:20px;padding:0.3rem 0.9rem;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);font-weight:600;cursor:pointer;margin-bottom:1rem}
   .tool-hero h1{font-family:var(--font-display);font-size:clamp(1.5rem,4vw,2.2rem);color:var(--white);font-weight:700;line-height:1.2;margin-bottom:0.75rem}
   .tool-hero p{color:rgba(255,255,255,0.65);font-size:0.9rem;max-width:560px;margin:0 auto}
@@ -107,6 +107,9 @@
     .matters-col + .matters-col{border-left:1px solid var(--border);border-top:none}
     .ns-label{min-width:140px}
   }
+  .tool-banner-img{width:100%;display:block;max-height:300px;object-fit:cover;object-position:left top;border-radius:0}
+  .tool-hero-inner{padding:2rem 1.5rem 0;text-align:center}
+  @media(max-width:600px){.tool-banner-img{max-height:180px}}
 </style>
 </head>
 <body>
@@ -123,10 +126,13 @@
 </div>
 
 <div class="tool-hero">
+  <img class="tool-banner-img" src="good-life.jpg" alt="" onerror="this.style.display='none'">
+  <div class="tool-hero-inner">
   <div class="topic-label">M8 · Week 4</div>
   <div class="theme-pill" onclick="history.back()">↩ I Have A Good Life. Why Doesn't It Feel Like It?</div>
   <h1>Bringing It Together</h1>
   <p>Clarity creates choice.</p>
+  </div>
 </div>
 
 <div class="prog-wrap">

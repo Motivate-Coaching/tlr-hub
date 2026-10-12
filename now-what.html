@@ -29,7 +29,7 @@
   #user-badge{font-size:0.75rem;color:rgba(255,255,255,0.5);white-space:nowrap}
 
   /* Hero */
-  .tool-hero{background:var(--navy);padding:2.5rem 1.5rem 2rem;text-align:center}
+  .tool-hero{background:var(--navy);padding:0 0 2rem;text-align:center}
   .theme-pill{display:inline-flex;align-items:center;gap:0.4rem;background:rgba(232,168,0,0.12);border:1px solid rgba(232,168,0,0.25);border-radius:20px;padding:0.3rem 0.9rem;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);font-weight:600;cursor:pointer;margin-bottom:1rem}
   .tool-hero h1{font-family:var(--font-display);font-size:clamp(1.5rem,4vw,2.2rem);color:var(--white);font-weight:700;line-height:1.2;margin-bottom:0.75rem}
   .tool-hero p{color:rgba(255,255,255,0.65);font-size:0.9rem;max-width:560px;margin:0 auto}
@@ -111,6 +111,9 @@
     body{background:#fff;font-size:12px}
     .section-block{border:1px solid #ccc;break-inside:avoid;page-break-inside:avoid}
   }
+  .tool-banner-img{width:100%;display:block;max-height:300px;object-fit:cover;object-position:left top;border-radius:0}
+  .tool-hero-inner{padding:2rem 1.5rem 0;text-align:center}
+  @media(max-width:600px){.tool-banner-img{max-height:180px}}
 </style>
 </head>
 <body>
@@ -139,10 +142,13 @@
 </div>
 
 <div class="tool-hero">
+  <img class="tool-banner-img" src="good-life.jpg" alt="" onerror="this.style.display='none'">
+  <div class="tool-hero-inner">
   <div class="topic-label">Topic 1 of 4</div>
   <span class="theme-pill" onclick="history.back()">I Have A Good Life. Why Doesn't It Feel Like It?</span>
   <h1>I Did What I Was Supposed To Do. Now What?</h1>
   <p>Make sense of why a life that looks objectively good doesn't always feel the way we expected it to.</p>
+  </div>
 </div>
 
 <div class="tool-body">

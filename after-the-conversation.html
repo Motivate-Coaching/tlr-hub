@@ -122,6 +122,9 @@ body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark)
   .complete-wrap{flex-direction:column;align-items:stretch}
   .save-btn,.library-btn,.complete-btn{text-align:center;justify-content:center}
 }
+  .tool-banner-img{width:100%;display:block;max-height:300px;object-fit:cover;object-position:left top;border-radius:0}
+  .tool-hero-inner{padding:2rem 1.5rem 0;text-align:center}
+  @media(max-width:600px){.tool-banner-img{max-height:180px}}
 </style>
 </head>
 <body>
@@ -134,6 +137,8 @@ body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark)
     <span class="theme-pill" onclick="event.preventDefault();history.back()" onclick="event.preventDefault();history.back()">Difficult Conversations</span>
   </div>
 </div>
+<img class="tool-banner-img" src="difficult-conversations.jpg" alt="" onerror="this.style.display='none'">
+
 
 <!-- MAIN VIEW -->
 <div id="mainView">

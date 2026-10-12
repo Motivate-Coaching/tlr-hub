@@ -135,6 +135,9 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
 .library-btn:hover{opacity:0.87;transform:translateY(-1px)}
 .complete-btn{background:var(--navy);color:#fff;border:none;padding:1rem 2.75rem;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s;letter-spacing:0.01em}
 .complete-btn:hover{opacity:0.87;transform:translateY(-1px)}
+  .tool-banner-img{width:100%;display:block;max-height:300px;object-fit:cover;object-position:left top;border-radius:0}
+  .tool-hero-inner{padding:2rem 1.5rem 0;text-align:center}
+  @media(max-width:600px){.tool-banner-img{max-height:180px}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js?v=20260922"></script>
@@ -146,6 +149,8 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark)
   <span class="theme-pill" onclick="event.preventDefault();history.back()">Boundaries &amp; Pressure</span>
   <div id="saved-badge" style="display:none;align-items:center;gap:0.4rem;font-size:0.72rem;color:rgba(255,255,255,0.5)"><span style="width:6px;height:6px;background:#2A9D6F;border-radius:50%;display:inline-block"></span> Saved</div>
 </div>
+<img class="tool-banner-img" src="boundaries.jpg" alt="" onerror="this.style.display='none'">
+
 
 <div id="mainView">
 <div class="page">

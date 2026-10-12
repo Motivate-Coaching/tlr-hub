@@ -142,6 +142,9 @@ body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark)
   .show-up-row{flex-direction:column;gap:0.5rem}
   .show-up-label-wrap{min-width:unset}
 }
+  .tool-banner-img{width:100%;display:block;max-height:300px;object-fit:cover;object-position:left top;border-radius:0}
+  .tool-hero-inner{padding:2rem 1.5rem 0;text-align:center}
+  @media(max-width:600px){.tool-banner-img{max-height:180px}}
 </style>
 </head>
 <body>
@@ -153,6 +156,8 @@ body{background:var(--cream);font-family:var(--font-body);color:var(--text-dark)
     <span class="theme-pill" onclick="event.preventDefault();history.back()">← Back</span>
   </div>
 </div>
+<img class="tool-banner-img" src="identity-is-not-fixed.jpg" alt="" onerror="this.style.display='none'">
+
 
 <div class="page" id="mainView">
   <div class="tool-eyebrow">Identity Is Not Fixed · Week 4</div>
