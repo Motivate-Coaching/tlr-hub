@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What Actually Makes A Good Life? | The Living Room</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js?v=20260922"></script>
+<script src="history.js?v=20260922b"></script>
+<style>
+  :root{
+    --navy:#0F1215;--navy-mid:#1C2B3A;--gold:#E8A800;--gold-light:#F5C842;
+    --cream:#F9F7F2;--cream-dark:#EFE9DF;--white:#FFFFFF;
+    --text-dark:#111820;--text-mid:#445566;--text-muted:#8899AA;
+    --border:#E2D9CE;--accent:#1A6B72;
+    --font-body:'Inter',sans-serif;--font-display:'Playfair Display',serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);font-size:15px;line-height:1.6}
+
+  /* Topbar */
+  .topbar{background:var(--navy);padding:0.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .topbar-left{display:flex;align-items:center;gap:1rem}
+  .back-btn{background:none;border:none;color:rgba(255,255,255,0.55);cursor:pointer;font-size:0.8rem;font-family:var(--font-body);display:flex;align-items:center;gap:0.4rem;padding:0.3rem 0;transition:color 0.2s}
+  .back-btn:hover{color:var(--white)}
+  .logo{font-family:var(--font-display);color:var(--white);font-size:1rem;font-weight:700;letter-spacing:0.01em}
+  .saved-badge{display:none;align-items:center;gap:0.4rem;background:rgba(232,168,0,0.15);border:1px solid rgba(232,168,0,0.3);border-radius:20px;padding:0.25rem 0.75rem;font-size:0.72rem;color:var(--gold);font-weight:500}
+  #user-badge{font-size:0.75rem;color:rgba(255,255,255,0.5);white-space:nowrap}
+
+  /* Hero */
+  .tool-hero{background:var(--navy);padding:2.5rem 1.5rem 2rem;text-align:center}
+  .theme-pill{display:inline-flex;align-items:center;gap:0.4rem;background:rgba(232,168,0,0.12);border:1px solid rgba(232,168,0,0.25);border-radius:20px;padding:0.3rem 0.9rem;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);font-weight:600;cursor:pointer;margin-bottom:1rem}
+  .tool-hero h1{font-family:var(--font-display);font-size:clamp(1.5rem,4vw,2.2rem);color:var(--white);font-weight:700;line-height:1.2;margin-bottom:0.75rem}
+  .tool-hero p{color:rgba(255,255,255,0.65);font-size:0.9rem;max-width:560px;margin:0 auto}
+  .topic-label{font-size:0.72rem;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem}
+
+  /* Progress */
+  .prog-wrap{background:var(--navy-mid);padding:0.9rem 1.5rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid rgba(255,255,255,0.06)}
+  .prog-bar{flex:1;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden}
+  .prog-fill{height:100%;background:var(--gold);border-radius:3px;width:0%;transition:width 0.5s}
+  .prog-pct{font-size:0.75rem;color:var(--gold);font-weight:600;min-width:2.5rem;text-align:right}
+  .prog-hint{font-size:0.72rem;color:rgba(255,255,255,0.35);min-width:8rem}
+  .prog-hint.done{color:var(--gold)}
+
+  /* Main */
+  .tool-body{max-width:760px;margin:0 auto;padding:2rem 1.5rem 4rem}
+
+  /* Section blocks */
+  .section-block{background:var(--white);border-radius:12px;padding:1.75rem;margin-bottom:1.5rem;border:1px solid var(--border)}
+  .section-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--navy);color:var(--white);font-size:0.75rem;font-weight:700;margin-bottom:0.75rem}
+  .section-block h2{font-family:var(--font-display);font-size:1.15rem;color:var(--text-dark);margin-bottom:0.35rem}
+  .section-block p{font-size:0.85rem;color:var(--text-mid);margin-bottom:1.25rem}
+
+  /* Evidence table */
+  .area-table{width:100%;border-collapse:collapse;font-size:0.85rem}
+  .area-table th{background:var(--cream-dark);color:var(--text-mid);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;padding:0.6rem 0.75rem;text-align:left;font-weight:600;border:1px solid var(--border)}
+  .area-table td{border:1px solid var(--border);padding:0.4rem 0.5rem;vertical-align:middle}
+  .area-table td.area-name{color:var(--text-mid);font-size:0.82rem;white-space:nowrap;padding:0.5rem 0.75rem;background:var(--cream);font-weight:500;width:160px}
+  .area-table td.research{font-size:0.82rem;color:var(--text-mid);padding:0.5rem 0.75rem;width:40%}
+  .area-table input[type=text]{width:100%;border:none;background:transparent;font-family:var(--font-body);font-size:0.85rem;color:var(--text-dark);padding:0.35rem 0.5rem;outline:none}
+  .area-table input[type=text]:focus{background:rgba(232,168,0,0.04)}
+  .area-table tr:hover td{background:rgba(249,247,242,0.5)}
+  .area-table tr:hover td.area-name{background:var(--cream-dark)}
+
+  /* Rating table */
+  .rate-table{width:100%;border-collapse:collapse;font-size:0.85rem}
+  .rate-table th{background:var(--cream-dark);color:var(--text-mid);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;padding:0.6rem 0.75rem;text-align:left;font-weight:600;border:1px solid var(--border)}
+  .rate-table td{border:1px solid var(--border);padding:0.4rem 0.5rem;vertical-align:middle}
+  .rate-table td.area-name{color:var(--text-mid);font-size:0.82rem;white-space:nowrap;padding:0.5rem 0.75rem;background:var(--cream);font-weight:500;width:160px}
+  .rate-table td.notes-cell{padding:0.35rem 0.5rem}
+  .rate-table input[type=text]{width:100%;border:none;background:transparent;font-family:var(--font-body);font-size:0.85rem;color:var(--text-dark);padding:0.35rem 0.5rem;outline:none}
+  .rate-table input[type=text]:focus{background:rgba(232,168,0,0.04)}
+  .rate-table tr:hover td{background:rgba(249,247,242,0.5)}
+  .rate-table tr:hover td.area-name{background:var(--cream-dark)}
+
+  /* Radio group */
+  .radio-group{display:flex;align-items:center;gap:0.3rem;justify-content:center;padding:0.4rem 0.5rem}
+  .radio-group label{display:flex;flex-direction:column;align-items:center;gap:0.2rem;cursor:pointer;font-size:0.72rem;color:var(--text-muted)}
+  .radio-group input[type=radio]{appearance:none;-webkit-appearance:none;width:18px;height:18px;border:2px solid var(--border);border-radius:50%;cursor:pointer;transition:all 0.15s;background:var(--white)}
+  .radio-group input[type=radio]:checked{background:var(--navy);border-color:var(--navy)}
+  .radio-group input[type=radio]:hover{border-color:var(--gold)}
+
+  /* Meaning table */
+  .meaning-table{width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:0.5rem}
+  .meaning-table th{background:var(--cream-dark);color:var(--text-mid);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;padding:0.6rem 0.75rem;text-align:left;font-weight:600;border:1px solid var(--border)}
+  .meaning-table td{border:1px solid var(--border);padding:0.4rem 0.5rem;vertical-align:top}
+  .meaning-table input[type=text],.meaning-table textarea{width:100%;border:none;background:transparent;font-family:var(--font-body);font-size:0.85rem;color:var(--text-dark);padding:0.35rem 0.5rem;outline:none;resize:none;min-height:52px}
+  .meaning-table input[type=text]:focus,.meaning-table textarea:focus{background:rgba(232,168,0,0.04)}
+
+  /* Checkbox grid */
+  .cb-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.4rem 1.5rem}
+  .cb-item{display:flex;align-items:flex-start;gap:0.6rem;padding:0.45rem 0.5rem;border-radius:6px;cursor:pointer;transition:background 0.15s}
+  .cb-item:hover{background:var(--cream)}
+  .cb-item input[type=checkbox]{width:15px;height:15px;accent-color:var(--navy);cursor:pointer;flex-shrink:0;margin-top:2px}
+  .cb-item label{font-size:0.83rem;color:var(--text-dark);cursor:pointer;line-height:1.4}
+  .cb-other{display:flex;align-items:center;gap:0.6rem;padding:0.45rem 0.5rem}
+  .cb-other label{font-size:0.83rem;color:var(--text-muted);white-space:nowrap}
+  .cb-other input[type=text]{border:none;border-bottom:1px solid var(--border);background:transparent;font-family:var(--font-body);font-size:0.83rem;color:var(--text-dark);padding:0.2rem 0.3rem;outline:none;flex:1}
+  .cb-other input[type=text]:focus{border-bottom-color:var(--gold)}
+
+  /* Priority list */
+  .priority-list{display:flex;flex-direction:column;gap:0.85rem;margin-top:0.5rem}
+  .priority-item{display:flex;align-items:flex-start;gap:0.85rem}
+  .priority-num{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--navy-mid);color:rgba(255,255,255,0.6);font-size:0.82rem;font-weight:700;flex-shrink:0;margin-top:2px}
+  .priority-item textarea{flex:1;min-height:80px;border:1px solid var(--border);border-radius:8px;padding:0.75rem;font-family:var(--font-body);font-size:0.88rem;color:var(--text-dark);resize:vertical;background:var(--cream);line-height:1.6;outline:none;transition:border-color 0.2s}
+  .priority-item textarea:focus{border-color:var(--gold)}
+
+  /* Complete */
+  .complete-wrap{text-align:center;padding:2rem 0 0.5rem}
+  .complete-btn{background:var(--navy);color:var(--white);border:none;padding:0.85rem 2.5rem;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background 0.2s}
+  .complete-btn:hover{background:var(--navy-mid)}
+
+  @media(max-width:600px){
+    .area-table td.research{display:none}
+    .area-table th.research-th{display:none}
+    .cb-grid{grid-template-columns:1fr}
+    .rate-table th.notes-th{display:none}
+    .rate-table td.notes-cell{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="back-btn" onclick="history.back()">← Back</button>
+    <span class="logo">The Living Room</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <span class="saved-badge" id="saved-badge">✓ Saved</span>
+    <span id="user-badge"></span>
+  </div>
+</div>
+
+<div class="tool-hero">
+  <div class="topic-label">M8 · Week 2</div>
+  <div class="theme-pill" onclick="history.back()">↩ I Have A Good Life. Why Doesn't It Feel Like It?</div>
+  <h1>What Actually Makes A Good Life?</h1>
+  <p>Step away from what we're told should matter and look at what the research actually shows.</p>
+</div>
+
+<div class="prog-wrap">
+  <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+  <span class="prog-pct" id="prog-pct">0%</span>
+  <span class="prog-hint" id="prog-hint">0 of 5 sections done</span>
+</div>
+
+<div id="completed-banner" style="display:none;background:rgba(26,107,114,0.08);border-top:2px solid var(--accent);padding:0.85rem 1.5rem;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap">
+  <span style="color:var(--accent);font-weight:600;font-size:0.9rem">✓ You've marked this tool as complete</span>
+  <button onclick="resetComplete()" style="background:none;border:1px solid var(--accent);color:var(--accent);padding:0.3rem 0.9rem;border-radius:6px;font-size:0.78rem;cursor:pointer;font-family:var(--font-body)">Edit my answers</button>
+</div>
+
+<div class="tool-body">
+
+  <!-- Section 1 -->
+  <div class="section-block">
+    <div class="section-num">1</div>
+    <h2>The evidence: what actually contributes?</h2>
+    <p>There's a lot of advice out there about what makes a good life. This week, we're looking at what the research consistently shows makes a real difference. Read through the key areas below and note down what lands for you and anything that surprises you.</p>
+    <table class="area-table">
+      <thead>
+        <tr>
+          <th>Area</th>
+          <th class="research-th">What the research says</th>
+          <th>My notes / reflections</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="area-name">Meaning and purpose</td>
+          <td class="research">Having a sense of purpose is strongly linked to wellbeing, resilience and life satisfaction.</td>
+          <td><input type="text" id="e1-meaning" placeholder="What lands for you?"></td>
+        </tr>
+        <tr>
+          <td class="area-name">Close relationships</td>
+          <td class="research">Deep, supportive relationships are one of the most consistent predictors of a good life.</td>
+          <td><input type="text" id="e1-relationships" placeholder="What lands for you?"></td>
+        </tr>
+        <tr>
+          <td class="area-name">Physical health</td>
+          <td class="research">Movement, good sleep and looking after physical health significantly impact mood, energy and longevity.</td>
+          <td><input type="text" id="e1-health" placeholder="What lands for you?"></td>
+        </tr>
+        <tr>
+          <td class="area-name">Autonomy and choice</td>
+          <td class="research">Feeling a sense of control and freedom in how we live and work is closely linked to wellbeing.</td>
+          <td><input type="text" id="e1-autonomy" placeholder="What lands for you?"></td>
+        </tr>
+        <tr>
+          <td class="area-name">Contribution</td>
+          <td class="research">Feeling that we make a positive difference to others increases happiness and life satisfaction.</td>
+          <td><input type="text" id="e1-contribution" placeholder="What lands for you?"></td>
+        </tr>
+        <tr>
+          <td class="area-name">Present-moment experience</td>
+          <td class="research">Being able to notice and enjoy everyday experiences is linked to greater wellbeing.</td>
+          <td><input type="text" id="e1-present" placeholder="What lands for you?"></td>
+        </tr>
+        <tr>
+          <td class="area-name">Growth and learning</td>
+          <td class="research">Continuing to learn and develop is associated with higher satisfaction and resilience.</td>
+          <td><input type="text" id="e1-growth" placeholder="What lands for you?"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="section-block">
+    <div class="section-num">2</div>
+    <h2>Where does this show up in my life now?</h2>
+    <p>Looking at the same areas, how present are these in your life right now? Give each area a score, then jot down a few notes.</p>
+    <table class="rate-table">
+      <thead>
+        <tr>
+          <th>Area</th>
+          <th style="text-align:center">How present is this in my life right now?<br><span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.68rem">1 = Not at all &nbsp;&nbsp; 5 = Very present</span></th>
+          <th class="notes-th">Notes – what's working? What's missing?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="area-name">Meaning and purpose</td>
+          <td>
+            <div class="radio-group">
+              <label><input type="radio" name="r-meaning" id="r-meaning-1" value="1"><span>1</span></label>
+              <label><input type="radio" name="r-meaning" id="r-meaning-2" value="2"><span>2</span></label>
+              <label><input type="radio" name="r-meaning" id="r-meaning-3" value="3"><span>3</span></label>
+              <label><input type="radio" name="r-meaning" id="r-meaning-4" value="4"><span>4</span></label>
+              <label><input type="radio" name="r-meaning" id="r-meaning-5" value="5"><span>5</span></label>
+            </div>
+          </td>
+          <td class="notes-cell"><input type="text" id="n2-meaning" placeholder="Notes..."></td>
+        </tr>
+        <tr>
+          <td class="area-name">Close relationships</td>
+          <td>
+            <div class="radio-group">
+              <label><input type="radio" name="r-relationships" id="r-relationships-1" value="1"><span>1</span></label>
+              <label><input type="radio" name="r-relationships" id="r-relationships-2" value="2"><span>2</span></label>
+              <label><input type="radio" name="r-relationships" id="r-relationships-3" value="3"><span>3</span></label>
+              <label><input type="radio" name="r-relationships" id="r-relationships-4" value="4"><span>4</span></label>
+              <label><input type="radio" name="r-relationships" id="r-relationships-5" value="5"><span>5</span></label>
+            </div>
+          </td>
+          <td class="notes-cell"><input type="text" id="n2-relationships" placeholder="Notes..."></td>
+        </tr>
+        <tr>
+          <td class="area-name">Physical health</td>
+          <td>
+            <div class="radio-group">
+              <label><input type="radio" name="r-health" id="r-health-1" value="1"><span>1</span></label>
+              <label><input type="radio" name="r-health" id="r-health-2" value="2"><span>2</span></label>
+              <label><input type="radio" name="r-health" id="r-health-3" value="3"><span>3</span></label>
+              <label><input type="radio" name="r-health" id="r-health-4" value="4"><span>4</span></label>
+              <label><input type="radio" name="r-health" id="r-health-5" value="5"><span>5</span></label>
+            </div>
+          </td>
+          <td class="notes-cell"><input type="text" id="n2-health" placeholder="Notes..."></td>
+        </tr>
+        <tr>
+          <td class="area-name">Autonomy and choice</td>
+          <td>
+            <div class="radio-group">
+              <label><input type="radio" name="r-autonomy" id="r-autonomy-1" value="1"><span>1</span></label>
+              <label><input type="radio" name="r-autonomy" id="r-autonomy-2" value="2"><span>2</span></label>
+              <label><input type="radio" name="r-autonomy" id="r-autonomy-3" value="3"><span>3</span></label>
+              <label><input type="radio" name="r-autonomy" id="r-autonomy-4" value="4"><span>4</span></label>
+              <label><input type="radio" name="r-autonomy" id="r-autonomy-5" value="5"><span>5</span></label>
+            </div>
+          </td>
+          <td class="notes-cell"><input type="text" id="n2-autonomy" placeholder="Notes..."></td>
+        </tr>
+        <tr>
+          <td class="area-name">Contribution</td>
+          <td>
+            <div class="radio-group">
+              <label><input type="radio" name="r-contribution" id="r-contribution-1" value="1"><span>1</span></label>
+              <label><input type="radio" name="r-contribution" id="r-contribution-2" value="2"><span>2</span></label>
+              <label><input type="radio" name="r-contribution" id="r-contribution-3" value="3"><span>3</span></label>
+              <label><input type="radio" name="r-contribution" id="r-contribution-4" value="4"><span>4</span></label>
+              <label><input type="radio" name="r-contribution" id="r-contribution-5" value="5"><span>5</span></label>
+            </div>
+          </td>
+          <td class="notes-cell"><input type="text" id="n2-contribution" placeholder="Notes..."></td>
+        </tr>
+        <tr>
+          <td class="area-name">Present-moment experience</td>
+          <td>
+            <div class="radio-group">
+              <label><input type="radio" name="r-present" id="r-present-1" value="1"><span>1</span></label>
+              <label><input type="radio" name="r-present" id="r-present-2" value="2"><span>2</span></label>
+              <label><input type="radio" name="r-present" id="r-present-3" value="3"><span>3</span></label>
+              <label><input type="radio" name="r-present" id="r-present-4" value="4"><span>4</span></label>
+              <label><input type="radio" name="r-present" id="r-present-5" value="5"><span>5</span></label>
+            </div>
+          </td>
+          <td class="notes-cell"><input type="text" id="n2-present" placeholder="Notes..."></td>
+        </tr>
+        <tr>
+          <td class="area-name">Growth and learning</td>
+          <td>
+            <div class="radio-group">
+              <label><input type="radio" name="r-growth" id="r-growth-1" value="1"><span>1</span></label>
+              <label><input type="radio" name="r-growth" id="r-growth-2" value="2"><span>2</span></label>
+              <label><input type="radio" name="r-growth" id="r-growth-3" value="3"><span>3</span></label>
+              <label><input type="radio" name="r-growth" id="r-growth-4" value="4"><span>4</span></label>
+              <label><input type="radio" name="r-growth" id="r-growth-5" value="5"><span>5</span></label>
+            </div>
+          </td>
+          <td class="notes-cell"><input type="text" id="n2-growth" placeholder="Notes..."></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="section-block">
+    <div class="section-num">3</div>
+    <h2>What do I make this mean?</h2>
+    <p>Sometimes the gap between what's important and what we experience isn't just about circumstance — it's about the stories we tell ourselves. Look at the areas where you scored 3 or below. What do you tend to tell yourself about this? Be honest and write a few of the common thoughts.</p>
+    <table class="meaning-table">
+      <thead>
+        <tr>
+          <th style="width:35%">Area (from section 2)</th>
+          <th>The story I tell myself</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="text" id="m3-area1" placeholder="Which area?"></td>
+          <td><textarea id="m3-story1" placeholder="What do you tell yourself about this?"></textarea></td>
+        </tr>
+        <tr>
+          <td><input type="text" id="m3-area2" placeholder="Which area?"></td>
+          <td><textarea id="m3-story2" placeholder="What do you tell yourself about this?"></textarea></td>
+        </tr>
+        <tr>
+          <td><input type="text" id="m3-area3" placeholder="Which area?"></td>
+          <td><textarea id="m3-story3" placeholder="What do you tell yourself about this?"></textarea></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 4 -->
+  <div class="section-block">
+    <div class="section-num">4</div>
+    <h2>What gets in the way?</h2>
+    <p>Which of these are most influential for you right now? Tick the ones that play a significant role, or add your own.</p>
+    <div class="cb-grid">
+      <label class="cb-item"><input type="checkbox" id="cb-time"><label for="cb-time">Time constraints</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-oldhabits"><label for="cb-oldhabits">Old habits / comfort zone</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-financial"><label for="cb-financial">Financial pressures</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-comparison"><label for="cb-comparison">Comparison with others</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-responsibilities"><label for="cb-responsibilities">Responsibilities (work / family)</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-perfectionism"><label for="cb-perfectionism">Perfectionism</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-expectations"><label for="cb-expectations">Expectations from others</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-tech"><label for="cb-tech">Technology / constant distraction</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-fearchange"><label for="cb-fearchange">Fear of change</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-worldevents"><label for="cb-worldevents">World events / uncertainty</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-uncertainty"><label for="cb-uncertainty">Uncertainty about what I want</label></label>
+    </div>
+    <div style="margin-top:0.75rem;display:flex;flex-direction:column;gap:0.4rem">
+      <div class="cb-other"><label>Other:</label><input type="text" id="cb-other1"></div>
+      <div class="cb-other"><label>Other:</label><input type="text" id="cb-other2"></div>
+    </div>
+  </div>
+
+  <!-- Section 5 -->
+  <div class="section-block">
+    <div class="section-num">5</div>
+    <h2>What feels most important now?</h2>
+    <p>Based on what you've written, if you could focus on just two or three areas that would make the biggest positive difference to how your life feels over the next year, what would they be and why?</p>
+    <div class="priority-list">
+      <div class="priority-item">
+        <div class="priority-num">1</div>
+        <textarea id="p5-1" placeholder="Which area and why..."></textarea>
+      </div>
+      <div class="priority-item">
+        <div class="priority-num">2</div>
+        <textarea id="p5-2" placeholder="Which area and why..."></textarea>
+      </div>
+      <div class="priority-item">
+        <div class="priority-num">3</div>
+        <textarea id="p5-3" placeholder="Which area and why..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="complete-wrap">
+    <button class="complete-btn" id="mark-complete-btn" onclick="markComplete()" style="display:none">Mark as complete ✓</button>
+    <p id="tlr-autosave-note" class="tlr-autosave-note" style="font-size:0.78rem;color:var(--text-muted);margin-top:0.75rem"></p>
+  </div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'tlr-what-makes-a-good-life';
+const AREAS = ['meaning','relationships','health','autonomy','contribution','present','growth'];
+const CB_IDS = ['cb-time','cb-financial','cb-responsibilities','cb-expectations','cb-fearchange','cb-uncertainty','cb-oldhabits','cb-comparison','cb-perfectionism','cb-tech','cb-worldevents'];
+
+function v(id){ const el=document.getElementById(id); return el ? (el.value||'') : ''; }
+function sv(id,val){ const el=document.getElementById(id); if(el && val!=null) el.value=val; }
+
+function getRadio(name){
+  const sel = document.querySelector(`input[name="${name}"]:checked`);
+  return sel ? sel.value : '';
+}
+function setRadio(name, val){
+  if(!val) return;
+  const el = document.querySelector(`input[name="${name}"][value="${val}"]`);
+  if(el) el.checked = true;
+}
+
+function collectData(){
+  const ev = {}, rt = {}, notes = {};
+  AREAS.forEach(a => {
+    ev[a] = v('e1-' + a);
+    rt[a] = getRadio('r-' + a);
+    notes[a] = v('n2-' + a);
+  });
+  return {
+    evidence: ev,
+    ratings: rt,
+    ratingNotes: notes,
+    meaning: { area1: v('m3-area1'), story1: v('m3-story1'), area2: v('m3-area2'), story2: v('m3-story2'), area3: v('m3-area3'), story3: v('m3-story3') },
+    barriers: CB_IDS.reduce((a,id)=>({...a,[id]:document.getElementById(id)?.checked||false}),{}),
+    otherBarriers: { other1: v('cb-other1'), other2: v('cb-other2') },
+    priorities: { p1: v('p5-1'), p2: v('p5-2'), p3: v('p5-3') }
+  };
+}
+
+function populateData(d){
+  if(!d) return;
+  AREAS.forEach(a => {
+    sv('e1-'+a, d.evidence?.[a]);
+    setRadio('r-'+a, d.ratings?.[a]);
+    sv('n2-'+a, d.ratingNotes?.[a]);
+  });
+  if(d.meaning){
+    sv('m3-area1',d.meaning.area1); sv('m3-story1',d.meaning.story1);
+    sv('m3-area2',d.meaning.area2); sv('m3-story2',d.meaning.story2);
+    sv('m3-area3',d.meaning.area3); sv('m3-story3',d.meaning.story3);
+  }
+  if(d.barriers) CB_IDS.forEach(id=>{ const el=document.getElementById(id); if(el) el.checked=!!d.barriers[id]; });
+  if(d.otherBarriers){ sv('cb-other1',d.otherBarriers.other1); sv('cb-other2',d.otherBarriers.other2); }
+  if(d.priorities){ sv('p5-1',d.priorities.p1); sv('p5-2',d.priorities.p2); sv('p5-3',d.priorities.p3); }
+}
+
+function updateProgress(){
+  const d = collectData();
+  const s1 = Object.values(d.evidence).some(Boolean) ? 1 : 0;
+  const s2 = Object.values(d.ratings).some(Boolean) ? 1 : 0;
+  const s3 = (d.meaning.story1||d.meaning.story2||d.meaning.story3) ? 1 : 0;
+  const s4 = (Object.values(d.barriers).some(Boolean) || d.otherBarriers.other1 || d.otherBarriers.other2) ? 1 : 0;
+  const s5 = (d.priorities.p1||d.priorities.p2||d.priorities.p3) ? 1 : 0;
+  const done = s1+s2+s3+s4+s5;
+  const pct = Math.round((done/5)*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'%';
+  document.getElementById('prog-hint').textContent = `${done} of 5 sections done`;
+  const btn = document.getElementById('mark-complete-btn');
+  if(btn) btn.style.display = done >= 3 ? '' : 'none';
+}
+
+async function markComplete(){
+  const data = collectData();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  if(!done.includes(STORAGE_KEY)) done.push(STORAGE_KEY);
+  localStorage.setItem('tlr_completed', JSON.stringify(done));
+  await saveProgress(STORAGE_KEY, true, data);
+  document.getElementById('completed-banner').style.display='flex';
+  const btn=document.getElementById('mark-complete-btn');
+  if(btn) btn.style.display='none';
+  const hint=document.getElementById('prog-hint');
+  if(hint){ hint.textContent='Completed ✓'; hint.className='prog-hint done'; }
+  document.getElementById('prog-fill').style.width='100%';
+  document.getElementById('prog-pct').textContent='100%';
+  if(typeof logActivity === 'function') logActivity('tool_complete', window.location.pathname, {tool: STORAGE_KEY});
+}
+
+async function resetComplete(){
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  const idx = done.indexOf(STORAGE_KEY);
+  if(idx > -1){ done.splice(idx,1); localStorage.setItem('tlr_completed', JSON.stringify(done)); }
+  const data = collectData();
+  await saveProgress(STORAGE_KEY, false, data);
+  document.getElementById('completed-banner').style.display='none';
+  const btn=document.getElementById('mark-complete-btn');
+  if(btn) btn.style.display='';
+}
+
+requireAuth().then(async () => {
+  showUserBadge('#user-badge');
+  TLRHistory.init(STORAGE_KEY, collectData, populateData);
+  const remote = await loadProgress();
+  const local = localStorage.getItem(STORAGE_KEY);
+  if(!remote && local){ try{ populateData(JSON.parse(local)); }catch(e){} }
+  updateProgress();
+  document.addEventListener('input', updateProgress);
+  document.addEventListener('change', updateProgress);
+
+  const saved = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  if(saved.includes(STORAGE_KEY)){
+    document.getElementById('completed-banner').style.display='flex';
+    const btn=document.getElementById('mark-complete-btn');
+    if(btn) btn.style.display='none';
+  }
+}).catch(()=>{ window.location.href='login.html'; });
+</script>
+</body>
+</html>
