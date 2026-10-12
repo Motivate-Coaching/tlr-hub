@@ -58,8 +58,9 @@
   .area-table td{border:1px solid var(--border);padding:0.4rem 0.5rem;vertical-align:middle}
   .area-table td.area-name{color:var(--text-mid);font-size:0.82rem;white-space:nowrap;padding:0.5rem 0.75rem;background:var(--cream);font-weight:500;width:160px}
   .area-table td.research{font-size:0.82rem;color:var(--text-mid);padding:0.5rem 0.75rem;width:40%}
-  .area-table input[type=text]{width:100%;border:none;background:transparent;font-family:var(--font-body);font-size:0.85rem;color:var(--text-dark);padding:0.35rem 0.5rem;outline:none}
-  .area-table input[type=text]:focus{background:rgba(232,168,0,0.04)}
+  .area-table textarea{width:100%;border:none;background:transparent;font-family:var(--font-body);font-size:0.85rem;color:var(--text-dark);padding:0.5rem;outline:none;resize:vertical;min-height:72px;line-height:1.5}
+  .area-table textarea:focus{background:rgba(232,168,0,0.04)}
+  .area-table textarea::placeholder{color:var(--text-muted);opacity:0.7}
   .area-table tr:hover td{background:rgba(249,247,242,0.5)}
   .area-table tr:hover td.area-name{background:var(--cream-dark)}
 
@@ -163,44 +164,44 @@
         <tr>
           <th>Area</th>
           <th class="research-th">What the research says</th>
-          <th>My notes / reflections</th>
+          <th>Your reaction</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td class="area-name">Meaning and purpose</td>
           <td class="research">Having a sense of purpose is strongly linked to wellbeing, resilience and life satisfaction.</td>
-          <td><input type="text" id="e1-meaning" placeholder="What lands for you?"></td>
+          <td><textarea id="e1-meaning" placeholder="Your reaction here..."></textarea></td>
         </tr>
         <tr>
           <td class="area-name">Close relationships</td>
           <td class="research">Deep, supportive relationships are one of the most consistent predictors of a good life.</td>
-          <td><input type="text" id="e1-relationships" placeholder="What lands for you?"></td>
+          <td><textarea id="e1-relationships" placeholder="Your reaction here..."></textarea></td>
         </tr>
         <tr>
           <td class="area-name">Physical health</td>
           <td class="research">Movement, good sleep and looking after physical health significantly impact mood, energy and longevity.</td>
-          <td><input type="text" id="e1-health" placeholder="What lands for you?"></td>
+          <td><textarea id="e1-health" placeholder="Your reaction here..."></textarea></td>
         </tr>
         <tr>
           <td class="area-name">Autonomy and choice</td>
           <td class="research">Feeling a sense of control and freedom in how we live and work is closely linked to wellbeing.</td>
-          <td><input type="text" id="e1-autonomy" placeholder="What lands for you?"></td>
+          <td><textarea id="e1-autonomy" placeholder="Your reaction here..."></textarea></td>
         </tr>
         <tr>
           <td class="area-name">Contribution</td>
           <td class="research">Feeling that we make a positive difference to others increases happiness and life satisfaction.</td>
-          <td><input type="text" id="e1-contribution" placeholder="What lands for you?"></td>
+          <td><textarea id="e1-contribution" placeholder="Your reaction here..."></textarea></td>
         </tr>
         <tr>
           <td class="area-name">Present-moment experience</td>
           <td class="research">Being able to notice and enjoy everyday experiences is linked to greater wellbeing.</td>
-          <td><input type="text" id="e1-present" placeholder="What lands for you?"></td>
+          <td><textarea id="e1-present" placeholder="Your reaction here..."></textarea></td>
         </tr>
         <tr>
           <td class="area-name">Growth and learning</td>
           <td class="research">Continuing to learn and develop is associated with higher satisfaction and resilience.</td>
-          <td><input type="text" id="e1-growth" placeholder="What lands for you?"></td>
+          <td><textarea id="e1-growth" placeholder="Your reaction here..."></textarea></td>
         </tr>
       </tbody>
     </table>
@@ -319,7 +320,7 @@
   <div class="section-block">
     <div class="section-num">3</div>
     <h2>What do I make this mean?</h2>
-    <p>Sometimes the gap between what's important and what we experience isn't just about circumstance — it's about the stories we tell ourselves. Look at the areas where you scored 3 or below. What do you tend to tell yourself about this? Be honest and write a few of the common thoughts.</p>
+    <p>Sometimes the gap between what's important and what we experience isn't just about circumstance. It's about the stories we tell ourselves. Look at the areas where you scored 3 or below. What do you tend to tell yourself about this? Be honest and write a few of the common thoughts.</p>
     <table class="meaning-table">
       <thead>
         <tr>
