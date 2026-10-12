@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Hidden Things That Get In The Way | The Living Room</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js?v=20260922"></script>
+<script src="history.js?v=20260922b"></script>
+<style>
+  :root{
+    --navy:#0F1215;--navy-mid:#1C2B3A;--gold:#E8A800;--gold-light:#F5C842;
+    --cream:#F9F7F2;--cream-dark:#EFE9DF;--white:#FFFFFF;
+    --text-dark:#111820;--text-mid:#445566;--text-muted:#8899AA;
+    --border:#E2D9CE;--accent:#1A6B72;
+    --font-body:'Inter',sans-serif;--font-display:'Playfair Display',serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);font-size:15px;line-height:1.6}
+  .topbar{background:var(--navy);padding:0.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .topbar-left{display:flex;align-items:center;gap:1rem}
+  .back-btn{background:none;border:none;color:rgba(255,255,255,0.55);cursor:pointer;font-size:0.8rem;font-family:var(--font-body);display:flex;align-items:center;gap:0.4rem;padding:0.3rem 0;transition:color 0.2s}
+  .back-btn:hover{color:var(--white)}
+  .logo{font-family:var(--font-display);color:var(--white);font-size:1rem;font-weight:700}
+  .saved-badge{display:none;align-items:center;gap:0.4rem;background:rgba(232,168,0,0.15);border:1px solid rgba(232,168,0,0.3);border-radius:20px;padding:0.25rem 0.75rem;font-size:0.72rem;color:var(--gold);font-weight:500}
+  #user-badge{font-size:0.75rem;color:rgba(255,255,255,0.5);white-space:nowrap}
+  .tool-hero{background:var(--navy);padding:2.5rem 1.5rem 2rem;text-align:center}
+  .theme-pill{display:inline-flex;align-items:center;gap:0.4rem;background:rgba(232,168,0,0.12);border:1px solid rgba(232,168,0,0.25);border-radius:20px;padding:0.3rem 0.9rem;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);font-weight:600;cursor:pointer;margin-bottom:1rem}
+  .tool-hero h1{font-family:var(--font-display);font-size:clamp(1.5rem,4vw,2.2rem);color:var(--white);font-weight:700;line-height:1.2;margin-bottom:0.75rem}
+  .tool-hero p{color:rgba(255,255,255,0.65);font-size:0.9rem;max-width:560px;margin:0 auto}
+  .topic-label{font-size:0.72rem;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem}
+  .prog-wrap{background:var(--navy-mid);padding:0.9rem 1.5rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid rgba(255,255,255,0.06)}
+  .prog-bar{flex:1;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden}
+  .prog-fill{height:100%;background:var(--gold);border-radius:3px;width:0%;transition:width 0.5s}
+  .prog-pct{font-size:0.75rem;color:var(--gold);font-weight:600;min-width:2.5rem;text-align:right}
+  .prog-hint{font-size:0.72rem;color:rgba(255,255,255,0.35);min-width:8rem}
+  .prog-hint.done{color:var(--gold)}
+  .tool-body{max-width:800px;margin:0 auto;padding:2rem 1.5rem 4rem}
+  .section-block{background:var(--white);border-radius:12px;padding:1.75rem;margin-bottom:1.5rem;border:1px solid var(--border)}
+  .section-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--navy);color:var(--white);font-size:0.75rem;font-weight:700;margin-bottom:0.75rem}
+  .section-block h2{font-family:var(--font-display);font-size:1.15rem;color:var(--text-dark);margin-bottom:0.35rem}
+  .section-block p{font-size:0.85rem;color:var(--text-mid);margin-bottom:1.25rem}
+
+  /* Story table */
+  .story-table{width:100%;border-collapse:collapse;font-size:0.85rem}
+  .story-table th{background:var(--cream-dark);color:var(--text-mid);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;padding:0.6rem 0.75rem;text-align:left;font-weight:600;border:1px solid var(--border)}
+  .story-table td{border:1px solid var(--border);vertical-align:middle}
+  .story-table td.area-name{color:var(--text-mid);font-size:0.82rem;padding:0.5rem 0.75rem;background:var(--cream);font-weight:500;width:180px;white-space:nowrap}
+  .story-table textarea{width:100%;border:none;background:transparent;font-family:var(--font-body);font-size:0.85rem;color:var(--text-dark);padding:0.5rem 0.6rem;outline:none;resize:vertical;min-height:52px;line-height:1.5}
+  .story-table textarea::placeholder{color:var(--text-muted);opacity:0.7}
+  .story-table textarea:focus{background:rgba(232,168,0,0.04)}
+  .story-table tr:hover td{background:rgba(249,247,242,0.5)}
+  .story-table tr:hover td.area-name{background:var(--cream-dark)}
+
+  /* Wall table */
+  .wall-table{width:100%;border-collapse:collapse;font-size:0.83rem}
+  .wall-table th{background:var(--cream-dark);color:var(--text-mid);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;padding:0.55rem 0.65rem;text-align:left;font-weight:600;border:1px solid var(--border)}
+  .wall-table td{border:1px solid var(--border);vertical-align:middle;padding:0.3rem 0.5rem}
+  .wall-table td.area-name{color:var(--text-mid);font-size:0.82rem;padding:0.5rem 0.75rem;background:var(--cream);font-weight:500;width:160px;white-space:nowrap}
+  .wall-table input[type=text]{width:100%;border:none;background:transparent;font-family:var(--font-body);font-size:0.83rem;color:var(--text-dark);padding:0.35rem 0.4rem;outline:none}
+  .wall-table input[type=text]::placeholder{color:var(--text-muted);opacity:0.7}
+  .wall-table input[type=text]:focus{background:rgba(232,168,0,0.04)}
+  .wall-table tr:hover td{background:rgba(249,247,242,0.5)}
+  .wall-table tr:hover td.area-name{background:var(--cream-dark)}
+  .radio-trio{display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.4rem 0.5rem}
+  .radio-trio label{display:flex;flex-direction:column;align-items:center;gap:0.25rem;cursor:pointer;font-size:0.68rem;color:var(--text-muted);text-align:center;line-height:1.2}
+  .radio-trio input[type=radio]{appearance:none;-webkit-appearance:none;width:16px;height:16px;border:2px solid var(--border);border-radius:50%;cursor:pointer;transition:all 0.15s;background:var(--white)}
+  .radio-trio input[type=radio]:checked{background:var(--navy);border-color:var(--navy)}
+  .radio-trio input[type=radio]:hover{border-color:var(--gold)}
+
+  /* Checkbox grid */
+  .cb-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.4rem 0.75rem}
+  .cb-item{display:flex;align-items:flex-start;gap:0.5rem;padding:0.4rem 0.4rem;border-radius:5px;cursor:pointer;transition:background 0.15s}
+  .cb-item:hover{background:var(--cream)}
+  .cb-item input[type=checkbox]{width:14px;height:14px;accent-color:var(--navy);cursor:pointer;flex-shrink:0;margin-top:2px}
+  .cb-item label{font-size:0.8rem;color:var(--text-dark);cursor:pointer;line-height:1.4}
+  .cb-other-row{display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.4rem}
+  .cb-other-row label{font-size:0.8rem;color:var(--text-muted);white-space:nowrap}
+  .cb-other-row input[type=text]{border:none;border-bottom:1px solid var(--border);background:transparent;font-family:var(--font-body);font-size:0.8rem;color:var(--text-dark);padding:0.2rem 0.3rem;outline:none;flex:1}
+  .cb-other-row input[type=text]:focus{border-bottom-color:var(--gold)}
+
+  /* Textarea */
+  textarea.free{width:100%;min-height:120px;border:1px solid var(--border);border-radius:8px;padding:0.85rem;font-family:var(--font-body);font-size:0.88rem;color:var(--text-dark);resize:vertical;background:var(--cream);line-height:1.6;outline:none;transition:border-color 0.2s}
+  textarea.free:focus{border-color:var(--gold)}
+  textarea.free::placeholder{color:var(--text-muted)}
+
+  /* Experiment fields */
+  .exp-fields{display:flex;flex-direction:column;gap:0.65rem;margin-top:0.5rem}
+  .exp-row{display:flex;align-items:center;gap:0.85rem}
+  .exp-label{font-size:0.8rem;color:var(--text-mid);font-weight:500;white-space:nowrap;min-width:180px}
+  .exp-row input[type=text]{flex:1;border:none;border-bottom:1px solid var(--border);background:transparent;font-family:var(--font-body);font-size:0.85rem;color:var(--text-dark);padding:0.4rem 0.3rem;outline:none}
+  .exp-row input[type=text]::placeholder{color:var(--text-muted);opacity:0.7}
+  .exp-row input[type=text]:focus{border-bottom-color:var(--gold)}
+
+  /* Two-col layout for s4/s5 */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+
+  /* Complete */
+  .complete-wrap{text-align:center;padding:2rem 0 0.5rem}
+  .complete-btn{background:var(--navy);color:var(--white);border:none;padding:0.85rem 2.5rem;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background 0.2s}
+  .complete-btn:hover{background:var(--navy-mid)}
+
+  @media(max-width:680px){
+    .cb-grid{grid-template-columns:1fr 1fr}
+    .two-col{grid-template-columns:1fr}
+    .wall-table th.hide-sm,.wall-table td.hide-sm{display:none}
+  }
+  @media(max-width:480px){
+    .cb-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="back-btn" onclick="history.back()">← Back</button>
+    <span class="logo">The Living Room</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <span class="saved-badge" id="saved-badge">✓ Saved</span>
+    <span id="user-badge"></span>
+  </div>
+</div>
+
+<div class="tool-hero">
+  <div class="topic-label">M8 · Week 3</div>
+  <div class="theme-pill" onclick="history.back()">↩ I Have A Good Life. Why Doesn't It Feel Like It?</div>
+  <h1>The Hidden Things That Get In The Way</h1>
+  <p>Notice. Question. Test.</p>
+</div>
+
+<div class="prog-wrap">
+  <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+  <span class="prog-pct" id="prog-pct">0%</span>
+  <span class="prog-hint" id="prog-hint">0 of 5 sections done</span>
+</div>
+
+<div id="completed-banner" style="display:none;background:rgba(26,107,114,0.08);border-top:2px solid var(--accent);padding:0.85rem 1.5rem;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap">
+  <span style="color:var(--accent);font-weight:600;font-size:0.9rem">✓ You've marked this tool as complete</span>
+  <button onclick="resetComplete()" style="background:none;border:1px solid var(--accent);color:var(--accent);padding:0.3rem 0.9rem;border-radius:6px;font-size:0.78rem;cursor:pointer;font-family:var(--font-body)">Edit my answers</button>
+</div>
+
+<div class="tool-body">
+
+  <!-- Section 1 -->
+  <div class="section-block">
+    <div class="section-num">1</div>
+    <h2>My current story</h2>
+    <p>We all have stories about why things are the way they are. These stories can be helpful, but sometimes they keep us stuck. Write down the stories you tell yourself in the areas below. Be honest and keep it simple.</p>
+    <table class="story-table">
+      <thead>
+        <tr>
+          <th>Area</th>
+          <th>The story I tell myself</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="area-name">Time and energy</td><td><textarea id="s1-time" placeholder="Your notes here..."></textarea></td></tr>
+        <tr><td class="area-name">Money and financial security</td><td><textarea id="s1-money" placeholder="Your notes here..."></textarea></td></tr>
+        <tr><td class="area-name">Work / career</td><td><textarea id="s1-work" placeholder="Your notes here..."></textarea></td></tr>
+        <tr><td class="area-name">Relationships and family</td><td><textarea id="s1-relationships" placeholder="Your notes here..."></textarea></td></tr>
+        <tr><td class="area-name">Health and fitness</td><td><textarea id="s1-health" placeholder="Your notes here..."></textarea></td></tr>
+        <tr><td class="area-name">Personal growth / learning</td><td><textarea id="s1-growth" placeholder="Your notes here..."></textarea></td></tr>
+        <tr><td class="area-name">Lifestyle / experiences</td><td><textarea id="s1-lifestyle" placeholder="Your notes here..."></textarea></td></tr>
+        <tr><td class="area-name">Contribution / impact</td><td><textarea id="s1-contribution" placeholder="Your notes here..."></textarea></td></tr>
+        <tr><td class="area-name">Other</td><td><textarea id="s1-other" placeholder="Your notes here..."></textarea></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="section-block">
+    <div class="section-num">2</div>
+    <h2>Is it a real wall or a paper wall?</h2>
+    <p>Some of the things that limit us are real constraints. Others are "paper walls" -- preferences, habits or traditions we've accepted as unmoveable, but haven't actually tested. Look at each story and consider the questions below.</p>
+    <div style="overflow-x:auto">
+    <table class="wall-table">
+      <thead>
+        <tr>
+          <th>Area (from section 1)</th>
+          <th style="text-align:center">Is this a real constraint right now?<br><span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.65rem">Definitely real &nbsp;|&nbsp; Unsure &nbsp;|&nbsp; Probably not</span></th>
+          <th class="hide-sm">What evidence do I have?</th>
+          <th class="hide-sm">What might be possible if I questioned it?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="area-name">Time and energy</td>
+          <td><div class="radio-trio">
+            <label><input type="radio" name="w2-time" value="real"><span>Definitely<br>real</span></label>
+            <label><input type="radio" name="w2-time" value="unsure"><span>Unsure</span></label>
+            <label><input type="radio" name="w2-time" value="not"><span>Probably<br>not</span></label>
+          </div></td>
+          <td class="hide-sm"><input type="text" id="w2-time-ev" placeholder="Your notes here..."></td>
+          <td class="hide-sm"><input type="text" id="w2-time-pos" placeholder="Your notes here..."></td>
+        </tr>
+        <tr>
+          <td class="area-name">Money and financial security</td>
+          <td><div class="radio-trio">
+            <label><input type="radio" name="w2-money" value="real"><span>Definitely<br>real</span></label>
+            <label><input type="radio" name="w2-money" value="unsure"><span>Unsure</span></label>
+            <label><input type="radio" name="w2-money" value="not"><span>Probably<br>not</span></label>
+          </div></td>
+          <td class="hide-sm"><input type="text" id="w2-money-ev" placeholder="Your notes here..."></td>
+          <td class="hide-sm"><input type="text" id="w2-money-pos" placeholder="Your notes here..."></td>
+        </tr>
+        <tr>
+          <td class="area-name">Work / career</td>
+          <td><div class="radio-trio">
+            <label><input type="radio" name="w2-work" value="real"><span>Definitely<br>real</span></label>
+            <label><input type="radio" name="w2-work" value="unsure"><span>Unsure</span></label>
+            <label><input type="radio" name="w2-work" value="not"><span>Probably<br>not</span></label>
+          </div></td>
+          <td class="hide-sm"><input type="text" id="w2-work-ev" placeholder="Your notes here..."></td>
+          <td class="hide-sm"><input type="text" id="w2-work-pos" placeholder="Your notes here..."></td>
+        </tr>
+        <tr>
+          <td class="area-name">Relationships and family</td>
+          <td><div class="radio-trio">
+            <label><input type="radio" name="w2-rel" value="real"><span>Definitely<br>real</span></label>
+            <label><input type="radio" name="w2-rel" value="unsure"><span>Unsure</span></label>
+            <label><input type="radio" name="w2-rel" value="not"><span>Probably<br>not</span></label>
+          </div></td>
+          <td class="hide-sm"><input type="text" id="w2-rel-ev" placeholder="Your notes here..."></td>
+          <td class="hide-sm"><input type="text" id="w2-rel-pos" placeholder="Your notes here..."></td>
+        </tr>
+        <tr>
+          <td class="area-name">Health and fitness</td>
+          <td><div class="radio-trio">
+            <label><input type="radio" name="w2-health" value="real"><span>Definitely<br>real</span></label>
+            <label><input type="radio" name="w2-health" value="unsure"><span>Unsure</span></label>
+            <label><input type="radio" name="w2-health" value="not"><span>Probably<br>not</span></label>
+          </div></td>
+          <td class="hide-sm"><input type="text" id="w2-health-ev" placeholder="Your notes here..."></td>
+          <td class="hide-sm"><input type="text" id="w2-health-pos" placeholder="Your notes here..."></td>
+        </tr>
+        <tr>
+          <td class="area-name">Personal growth / learning</td>
+          <td><div class="radio-trio">
+            <label><input type="radio" name="w2-pg" value="real"><span>Definitely<br>real</span></label>
+            <label><input type="radio" name="w2-pg" value="unsure"><span>Unsure</span></label>
+            <label><input type="radio" name="w2-pg" value="not"><span>Probably<br>not</span></label>
+          </div></td>
+          <td class="hide-sm"><input type="text" id="w2-pg-ev" placeholder="Your notes here..."></td>
+          <td class="hide-sm"><input type="text" id="w2-pg-pos" placeholder="Your notes here..."></td>
+        </tr>
+        <tr>
+          <td class="area-name">Lifestyle / experiences</td>
+          <td><div class="radio-trio">
+            <label><input type="radio" name="w2-life" value="real"><span>Definitely<br>real</span></label>
+            <label><input type="radio" name="w2-life" value="unsure"><span>Unsure</span></label>
+            <label><input type="radio" name="w2-life" value="not"><span>Probably<br>not</span></label>
+          </div></td>
+          <td class="hide-sm"><input type="text" id="w2-life-ev" placeholder="Your notes here..."></td>
+          <td class="hide-sm"><input type="text" id="w2-life-pos" placeholder="Your notes here..."></td>
+        </tr>
+        <tr>
+          <td class="area-name">Contribution / impact</td>
+          <td><div class="radio-trio">
+            <label><input type="radio" name="w2-contrib" value="real"><span>Definitely<br>real</span></label>
+            <label><input type="radio" name="w2-contrib" value="unsure"><span>Unsure</span></label>
+            <label><input type="radio" name="w2-contrib" value="not"><span>Probably<br>not</span></label>
+          </div></td>
+          <td class="hide-sm"><input type="text" id="w2-contrib-ev" placeholder="Your notes here..."></td>
+          <td class="hide-sm"><input type="text" id="w2-contrib-pos" placeholder="Your notes here..."></td>
+        </tr>
+        <tr>
+          <td class="area-name">Other</td>
+          <td><div class="radio-trio">
+            <label><input type="radio" name="w2-other" value="real"><span>Definitely<br>real</span></label>
+            <label><input type="radio" name="w2-other" value="unsure"><span>Unsure</span></label>
+            <label><input type="radio" name="w2-other" value="not"><span>Probably<br>not</span></label>
+          </div></td>
+          <td class="hide-sm"><input type="text" id="w2-other-ev" placeholder="Your notes here..."></td>
+          <td class="hide-sm"><input type="text" id="w2-other-pos" placeholder="Your notes here..."></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="section-block">
+    <div class="section-num">3</div>
+    <h2>Where do these stories come from?</h2>
+    <p>Our stories are often shaped by many influences. Which of these have had the biggest impact on how you think and what you believe is possible? Tick the ones that feel relevant, or add your own.</p>
+    <div class="cb-grid">
+      <label class="cb-item"><input type="checkbox" id="cb-family"><label for="cb-family">Family upbringing</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-friends"><label for="cb-friends">Friends and social circles</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-judgement"><label for="cb-judgement">Fear of judgement</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-other1-cb"><label for="cb-other1-cb">Other:</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-education"><label for="cb-education">Education / school</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-workplaces"><label for="cb-workplaces">Workplaces / industry norms</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-failures"><label for="cb-failures">Previous failures</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-other2-cb"><label for="cb-other2-cb">Other:</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-culture"><label for="cb-culture">Culture and society</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-media"><label for="cb-media">Media / social media</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-safety"><label for="cb-safety">Desire for safety and security</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-other3-cb"><label for="cb-other3-cb">Other:</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-past"><label for="cb-past">Past experiences</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-comparison"><label for="cb-comparison">Comparison with others</label></label>
+      <label class="cb-item"><input type="checkbox" id="cb-expectations"><label for="cb-expectations">Expectations (my own or others')</label></label>
+    </div>
+    <div style="margin-top:0.75rem;display:flex;flex-direction:column;gap:0.4rem">
+      <div class="cb-other-row"><label>Other:</label><input type="text" id="cb-other1-text"></div>
+      <div class="cb-other-row"><label>Other:</label><input type="text" id="cb-other2-text"></div>
+      <div class="cb-other-row"><label>Other:</label><input type="text" id="cb-other3-text"></div>
+    </div>
+  </div>
+
+  <!-- Sections 4 + 5 -->
+  <div class="two-col">
+
+    <div class="section-block" style="margin-bottom:0">
+      <div class="section-num">4</div>
+      <h2>What would happen if I pushed on it?</h2>
+      <p>Choose one story from above that feels important. If you actually questioned this and explored what might be possible, what could change?</p>
+      <textarea class="free" id="s4-push" placeholder="Write freely here..."></textarea>
+    </div>
+
+    <div class="section-block" style="margin-bottom:0">
+      <div class="section-num">5</div>
+      <h2>My next small experiment</h2>
+      <p>What's one small, low-risk step you could take to test this out? It doesn't have to be big -- just something real.</p>
+      <div class="exp-fields">
+        <div class="exp-row"><span class="exp-label">The story I'm exploring</span><input type="text" id="s5-story" placeholder="..."></div>
+        <div class="exp-row"><span class="exp-label">The small step I'll take</span><input type="text" id="s5-step" placeholder="..."></div>
+        <div class="exp-row"><span class="exp-label">When will I do it?</span><input type="text" id="s5-when" placeholder="..."></div>
+        <div class="exp-row"><span class="exp-label">How will I know what I've learned?</span><input type="text" id="s5-howknow" placeholder="..."></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="complete-wrap">
+    <button class="complete-btn" id="mark-complete-btn" onclick="markComplete()" style="display:none">Mark as complete ✓</button>
+    <p id="tlr-autosave-note" class="tlr-autosave-note" style="font-size:0.78rem;color:var(--text-muted);margin-top:0.75rem"></p>
+  </div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'tlr-hidden-things';
+const AREAS = ['time','money','work','relationships','health','growth','lifestyle','contribution','other'];
+const WALL_KEYS = ['time','money','work','rel','health','pg','life','contrib','other'];
+const CB_IDS = ['cb-family','cb-education','cb-culture','cb-past','cb-friends','cb-workplaces','cb-media','cb-comparison','cb-judgement','cb-failures','cb-safety','cb-expectations','cb-other1-cb','cb-other2-cb','cb-other3-cb'];
+
+function v(id){ const el=document.getElementById(id); return el ? (el.value||'') : ''; }
+function sv(id,val){ const el=document.getElementById(id); if(el && val!=null) el.value=val; }
+function getRadio(name){ const s=document.querySelector(`input[name="${name}"]:checked`); return s?s.value:''; }
+function setRadio(name,val){ if(!val) return; const el=document.querySelector(`input[name="${name}"][value="${val}"]`); if(el) el.checked=true; }
+
+function collectData(){
+  const s1={};
+  AREAS.forEach(a=>{ s1[a]=v('s1-'+a); });
+  const s2={};
+  WALL_KEYS.forEach(k=>{
+    s2[k]={ rating: getRadio('w2-'+k), evidence: v('w2-'+k+'-ev'), possible: v('w2-'+k+'-pos') };
+  });
+  return {
+    s1,
+    s2,
+    checkboxes: CB_IDS.reduce((a,id)=>({...a,[id]:document.getElementById(id)?.checked||false}),{}),
+    cbOther: { t1: v('cb-other1-text'), t2: v('cb-other2-text'), t3: v('cb-other3-text') },
+    s4: v('s4-push'),
+    s5: { story: v('s5-story'), step: v('s5-step'), when: v('s5-when'), howknow: v('s5-howknow') }
+  };
+}
+
+function populateData(d){
+  if(!d) return;
+  if(d.s1) AREAS.forEach(a=>{ sv('s1-'+a, d.s1[a]); });
+  if(d.s2) WALL_KEYS.forEach(k=>{
+    if(d.s2[k]){
+      setRadio('w2-'+k, d.s2[k].rating);
+      sv('w2-'+k+'-ev', d.s2[k].evidence);
+      sv('w2-'+k+'-pos', d.s2[k].possible);
+    }
+  });
+  if(d.checkboxes) CB_IDS.forEach(id=>{ const el=document.getElementById(id); if(el) el.checked=!!d.checkboxes[id]; });
+  if(d.cbOther){ sv('cb-other1-text',d.cbOther.t1); sv('cb-other2-text',d.cbOther.t2); sv('cb-other3-text',d.cbOther.t3); }
+  sv('s4-push', d.s4);
+  if(d.s5){ sv('s5-story',d.s5.story); sv('s5-step',d.s5.step); sv('s5-when',d.s5.when); sv('s5-howknow',d.s5.howknow); }
+}
+
+function updateProgress(){
+  const d = collectData();
+  const s1 = Object.values(d.s1).some(Boolean) ? 1 : 0;
+  const s2 = WALL_KEYS.some(k=>d.s2[k]?.rating) ? 1 : 0;
+  const s3 = (Object.values(d.checkboxes).some(Boolean)||d.cbOther.t1||d.cbOther.t2||d.cbOther.t3) ? 1 : 0;
+  const s4 = d.s4.trim().length > 5 ? 1 : 0;
+  const s5 = Object.values(d.s5).some(Boolean) ? 1 : 0;
+  const done = s1+s2+s3+s4+s5;
+  const pct = Math.round((done/5)*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'%';
+  document.getElementById('prog-hint').textContent = `${done} of 5 sections done`;
+  const btn = document.getElementById('mark-complete-btn');
+  if(btn) btn.style.display = done >= 3 ? '' : 'none';
+}
+
+async function markComplete(){
+  const data = collectData();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  if(!done.includes(STORAGE_KEY)) done.push(STORAGE_KEY);
+  localStorage.setItem('tlr_completed', JSON.stringify(done));
+  await saveProgress(STORAGE_KEY, true, data);
+  document.getElementById('completed-banner').style.display='flex';
+  const btn=document.getElementById('mark-complete-btn'); if(btn) btn.style.display='none';
+  const hint=document.getElementById('prog-hint'); if(hint){ hint.textContent='Completed ✓'; hint.className='prog-hint done'; }
+  document.getElementById('prog-fill').style.width='100%';
+  document.getElementById('prog-pct').textContent='100%';
+  if(typeof logActivity==='function') logActivity('tool_complete', window.location.pathname, {tool:STORAGE_KEY});
+}
+
+async function resetComplete(){
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  const idx = done.indexOf(STORAGE_KEY);
+  if(idx>-1){ done.splice(idx,1); localStorage.setItem('tlr_completed', JSON.stringify(done)); }
+  await saveProgress(STORAGE_KEY, false, collectData());
+  document.getElementById('completed-banner').style.display='none';
+  const btn=document.getElementById('mark-complete-btn'); if(btn) btn.style.display='';
+}
+
+requireAuth().then(async()=>{
+  showUserBadge('#user-badge');
+  TLRHistory.init(STORAGE_KEY, collectData, populateData);
+  const remote = await loadProgress();
+  const local = localStorage.getItem(STORAGE_KEY);
+  if(!remote && local){ try{ populateData(JSON.parse(local)); }catch(e){} }
+  updateProgress();
+  document.addEventListener('input', updateProgress);
+  document.addEventListener('change', updateProgress);
+  const saved = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  if(saved.includes(STORAGE_KEY)){
+    document.getElementById('completed-banner').style.display='flex';
+    const btn=document.getElementById('mark-complete-btn'); if(btn) btn.style.display='none';
+  }
+}).catch(()=>{ window.location.href='login.html'; });
+</script>
+</body>
+</html>

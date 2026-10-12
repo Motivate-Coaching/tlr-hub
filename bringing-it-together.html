@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bringing It Together | The Living Room</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js?v=20260922"></script>
+<script src="history.js?v=20260922b"></script>
+<style>
+  :root{
+    --navy:#0F1215;--navy-mid:#1C2B3A;--gold:#E8A800;--gold-light:#F5C842;
+    --cream:#F9F7F2;--cream-dark:#EFE9DF;--white:#FFFFFF;
+    --text-dark:#111820;--text-mid:#445566;--text-muted:#8899AA;
+    --border:#E2D9CE;--accent:#1A6B72;
+    --font-body:'Inter',sans-serif;--font-display:'Playfair Display',serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);font-size:15px;line-height:1.6}
+  .topbar{background:var(--navy);padding:0.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .topbar-left{display:flex;align-items:center;gap:1rem}
+  .back-btn{background:none;border:none;color:rgba(255,255,255,0.55);cursor:pointer;font-size:0.8rem;font-family:var(--font-body);display:flex;align-items:center;gap:0.4rem;padding:0.3rem 0;transition:color 0.2s}
+  .back-btn:hover{color:var(--white)}
+  .logo{font-family:var(--font-display);color:var(--white);font-size:1rem;font-weight:700}
+  .saved-badge{display:none;align-items:center;gap:0.4rem;background:rgba(232,168,0,0.15);border:1px solid rgba(232,168,0,0.3);border-radius:20px;padding:0.25rem 0.75rem;font-size:0.72rem;color:var(--gold);font-weight:500}
+  #user-badge{font-size:0.75rem;color:rgba(255,255,255,0.5);white-space:nowrap}
+  .tool-hero{background:var(--navy);padding:2.5rem 1.5rem 2rem;text-align:center}
+  .theme-pill{display:inline-flex;align-items:center;gap:0.4rem;background:rgba(232,168,0,0.12);border:1px solid rgba(232,168,0,0.25);border-radius:20px;padding:0.3rem 0.9rem;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);font-weight:600;cursor:pointer;margin-bottom:1rem}
+  .tool-hero h1{font-family:var(--font-display);font-size:clamp(1.5rem,4vw,2.2rem);color:var(--white);font-weight:700;line-height:1.2;margin-bottom:0.75rem}
+  .tool-hero p{color:rgba(255,255,255,0.65);font-size:0.9rem;max-width:560px;margin:0 auto}
+  .topic-label{font-size:0.72rem;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem}
+  .prog-wrap{background:var(--navy-mid);padding:0.9rem 1.5rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid rgba(255,255,255,0.06)}
+  .prog-bar{flex:1;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden}
+  .prog-fill{height:100%;background:var(--gold);border-radius:3px;width:0%;transition:width 0.5s}
+  .prog-pct{font-size:0.75rem;color:var(--gold);font-weight:600;min-width:2.5rem;text-align:right}
+  .prog-hint{font-size:0.72rem;color:rgba(255,255,255,0.35);min-width:8rem}
+  .prog-hint.done{color:var(--gold)}
+  .tool-body{max-width:800px;margin:0 auto;padding:2rem 1.5rem 4rem}
+  .section-block{background:var(--white);border-radius:12px;padding:1.75rem;margin-bottom:1.5rem;border:1px solid var(--border)}
+  .section-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--navy);color:var(--white);font-size:0.75rem;font-weight:700;margin-bottom:0.75rem}
+  .section-block h2{font-family:var(--font-display);font-size:1.15rem;color:var(--text-dark);margin-bottom:0.35rem}
+  .section-block p{font-size:0.85rem;color:var(--text-mid);margin-bottom:1.25rem}
+
+  /* Learnt table */
+  .learnt-table{width:100%;border-collapse:collapse;font-size:0.85rem}
+  .learnt-table th{background:var(--cream-dark);color:var(--text-mid);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;padding:0.6rem 0.75rem;text-align:left;font-weight:600;border:1px solid var(--border)}
+  .learnt-table td{border:1px solid var(--border);vertical-align:middle}
+  .learnt-table td.week-cell{background:var(--cream);padding:0.6rem 0.75rem;width:180px}
+  .learnt-table td.week-cell strong{display:block;font-size:0.85rem;color:var(--text-dark);font-weight:600}
+  .learnt-table td.week-cell span{font-size:0.78rem;color:var(--text-muted)}
+  .learnt-table textarea{width:100%;border:none;background:transparent;font-family:var(--font-body);font-size:0.85rem;color:var(--text-dark);padding:0.5rem 0.6rem;outline:none;resize:vertical;min-height:60px;line-height:1.5}
+  .learnt-table textarea::placeholder{color:var(--text-muted);opacity:0.7}
+  .learnt-table textarea:focus{background:rgba(232,168,0,0.04)}
+  .learnt-table tr:hover td{background:rgba(249,247,242,0.5)}
+  .learnt-table tr:hover td.week-cell{background:var(--cream-dark)}
+
+  /* Matters most */
+  .matters-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0}
+  .matters-col{border:1px solid var(--border);border-radius:0}
+  .matters-col:first-child{border-radius:8px 0 0 8px}
+  .matters-col:last-child{border-radius:0 8px 8px 0}
+  .matters-col + .matters-col{border-left:none}
+  .matters-col-head{padding:0.7rem 0.75rem;text-align:center;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;border-bottom:1px solid var(--border);min-height:3.5rem;display:flex;flex-direction:column;justify-content:center}
+  .matters-col-head span{font-size:0.68rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-muted);display:block;margin-top:0.2rem}
+  .matters-col-head.most{background:#1C2B3A;color:var(--gold)}
+  .matters-col-head.important{background:var(--cream-dark);color:var(--text-dark)}
+  .matters-col-head.less{background:#EEE9E2;color:var(--text-mid)}
+  .matters-items{padding:0.75rem}
+  .matters-item{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.6rem}
+  .matters-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0}
+  .most .matters-num{background:var(--gold);color:var(--navy)}
+  .important .matters-num{background:var(--cream-dark);color:var(--text-mid);border:1px solid var(--border)}
+  .less .matters-num{background:#DDD8D0;color:var(--text-mid)}
+  .matters-item input[type=text]{flex:1;border:none;border-bottom:1px solid var(--border);background:transparent;font-family:var(--font-body);font-size:0.85rem;color:var(--text-dark);padding:0.3rem 0.3rem;outline:none}
+  .matters-item input[type=text]::placeholder{color:var(--text-muted);opacity:0.7}
+  .matters-item input[type=text]:focus{border-bottom-color:var(--gold)}
+
+  /* More / obstacle tables */
+  .data-table{width:100%;border-collapse:collapse;font-size:0.85rem}
+  .data-table th{background:var(--cream-dark);color:var(--text-mid);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;padding:0.6rem 0.75rem;text-align:left;font-weight:600;border:1px solid var(--border)}
+  .data-table td{border:1px solid var(--border);vertical-align:middle}
+  .data-table td.row-num{background:var(--cream);padding:0.5rem 0.75rem;color:var(--text-muted);font-size:0.82rem;font-weight:600;width:32px;text-align:center}
+  .data-table input[type=text]{width:100%;border:none;background:transparent;font-family:var(--font-body);font-size:0.85rem;color:var(--text-dark);padding:0.45rem 0.6rem;outline:none}
+  .data-table input[type=text]::placeholder{color:var(--text-muted);opacity:0.7}
+  .data-table input[type=text]:focus{background:rgba(232,168,0,0.04)}
+  .data-table tr:hover td{background:rgba(249,247,242,0.5)}
+  .data-table tr:hover td.row-num{background:var(--cream-dark)}
+
+  /* Next step */
+  .next-step-fields{display:flex;flex-direction:column;gap:0.75rem;background:var(--cream);border-radius:8px;padding:1.25rem}
+  .ns-row{display:flex;align-items:center;gap:0.85rem}
+  .ns-label{font-size:0.82rem;color:var(--text-mid);font-weight:500;min-width:200px;flex-shrink:0}
+  .ns-row input[type=text]{flex:1;border:none;border-bottom:1px solid var(--border);background:transparent;font-family:var(--font-body);font-size:0.85rem;color:var(--text-dark);padding:0.4rem 0.3rem;outline:none}
+  .ns-row input[type=text]::placeholder{color:var(--text-muted);opacity:0.7}
+  .ns-row input[type=text]:focus{border-bottom-color:var(--gold)}
+
+  /* Complete */
+  .complete-wrap{text-align:center;padding:2rem 0 0.5rem}
+  .complete-btn{background:var(--navy);color:var(--white);border:none;padding:0.85rem 2.5rem;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background 0.2s}
+  .complete-btn:hover{background:var(--navy-mid)}
+
+  @media(max-width:600px){
+    .matters-grid{grid-template-columns:1fr}
+    .matters-col:first-child{border-radius:8px 8px 0 0}
+    .matters-col:last-child{border-radius:0 0 8px 8px}
+    .matters-col + .matters-col{border-left:1px solid var(--border);border-top:none}
+    .ns-label{min-width:140px}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="back-btn" onclick="history.back()">← Back</button>
+    <span class="logo">The Living Room</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <span class="saved-badge" id="saved-badge">✓ Saved</span>
+    <span id="user-badge"></span>
+  </div>
+</div>
+
+<div class="tool-hero">
+  <div class="topic-label">M8 · Week 4</div>
+  <div class="theme-pill" onclick="history.back()">↩ I Have A Good Life. Why Doesn't It Feel Like It?</div>
+  <h1>Bringing It Together</h1>
+  <p>Clarity creates choice.</p>
+</div>
+
+<div class="prog-wrap">
+  <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+  <span class="prog-pct" id="prog-pct">0%</span>
+  <span class="prog-hint" id="prog-hint">0 of 5 sections done</span>
+</div>
+
+<div id="completed-banner" style="display:none;background:rgba(26,107,114,0.08);border-top:2px solid var(--accent);padding:0.85rem 1.5rem;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap">
+  <span style="color:var(--accent);font-weight:600;font-size:0.9rem">✓ You've marked this tool as complete</span>
+  <button onclick="resetComplete()" style="background:none;border:1px solid var(--accent);color:var(--accent);padding:0.3rem 0.9rem;border-radius:6px;font-size:0.78rem;cursor:pointer;font-family:var(--font-body)">Edit my answers</button>
+</div>
+
+<div class="tool-body">
+
+  <!-- Section 1 -->
+  <div class="section-block">
+    <div class="section-num">1</div>
+    <h2>What I've learnt this month</h2>
+    <p>Look back over the past few weeks. What are the key insights, realisations or reminders for you? Use the prompts below to help you capture what stands out.</p>
+    <table class="learnt-table">
+      <thead>
+        <tr>
+          <th>Week</th>
+          <th>Key insights for me</th>
+          <th>Notes / examples</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="week-cell"><strong>Week 1</strong><span>My expectations vs reality</span></td>
+          <td><textarea id="l1-insights" placeholder="Your notes here..."></textarea></td>
+          <td><textarea id="l1-notes" placeholder="Your notes here..."></textarea></td>
+        </tr>
+        <tr>
+          <td class="week-cell"><strong>Week 2</strong><span>What actually makes a good life</span></td>
+          <td><textarea id="l2-insights" placeholder="Your notes here..."></textarea></td>
+          <td><textarea id="l2-notes" placeholder="Your notes here..."></textarea></td>
+        </tr>
+        <tr>
+          <td class="week-cell"><strong>Week 3</strong><span>The hidden things that get in the way</span></td>
+          <td><textarea id="l3-insights" placeholder="Your notes here..."></textarea></td>
+          <td><textarea id="l3-notes" placeholder="Your notes here..."></textarea></td>
+        </tr>
+        <tr>
+          <td class="week-cell"><strong>Week 4</strong><span>Bringing it together</span></td>
+          <td><textarea id="l4-insights" placeholder="Your notes here..."></textarea></td>
+          <td><textarea id="l4-notes" placeholder="Your notes here..."></textarea></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="section-block">
+    <div class="section-num">2</div>
+    <h2>What matters most to me now?</h2>
+    <p>Based on everything we've explored, what are the things that matter most to you right now? These could be areas of your life, qualities, experiences or ways of being. There's no right or wrong -- just what feels true for you.</p>
+    <div class="matters-grid">
+      <div class="matters-col">
+        <div class="matters-col-head most">Most Important<span>The top 3 that matter most to me right now.</span></div>
+        <div class="matters-items">
+          <div class="matters-item"><div class="matters-num most">1</div><input type="text" id="m-most-1" placeholder="..."></div>
+          <div class="matters-item"><div class="matters-num most">2</div><input type="text" id="m-most-2" placeholder="..."></div>
+          <div class="matters-item"><div class="matters-num most">3</div><input type="text" id="m-most-3" placeholder="..."></div>
+        </div>
+      </div>
+      <div class="matters-col">
+        <div class="matters-col-head important">Important<span>Still important, but not in my top 3.</span></div>
+        <div class="matters-items">
+          <div class="matters-item"><div class="matters-num important">1</div><input type="text" id="m-imp-1" placeholder="..."></div>
+          <div class="matters-item"><div class="matters-num important">2</div><input type="text" id="m-imp-2" placeholder="..."></div>
+          <div class="matters-item"><div class="matters-num important">3</div><input type="text" id="m-imp-3" placeholder="..."></div>
+        </div>
+      </div>
+      <div class="matters-col">
+        <div class="matters-col-head less">Less Important (For Now)<span>Important, but lower on my list at the moment.</span></div>
+        <div class="matters-items">
+          <div class="matters-item"><div class="matters-num less">1</div><input type="text" id="m-less-1" placeholder="..."></div>
+          <div class="matters-item"><div class="matters-num less">2</div><input type="text" id="m-less-2" placeholder="..."></div>
+          <div class="matters-item"><div class="matters-num less">3</div><input type="text" id="m-less-3" placeholder="..."></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="section-block">
+    <div class="section-num">3</div>
+    <h2>What do I want more of?</h2>
+    <p>Looking at what matters most, where would you like to create more of this in your life over the next 3 to 12 months? Be specific -- what would "more" look like?</p>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width:28px"></th>
+          <th>Area</th>
+          <th>What I want more of</th>
+          <th>What it might look like</th>
+          <th>Why this matters</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-num">1</td>
+          <td><input type="text" id="more-area-1" placeholder="..."></td>
+          <td><input type="text" id="more-want-1" placeholder="..."></td>
+          <td><input type="text" id="more-look-1" placeholder="..."></td>
+          <td><input type="text" id="more-why-1" placeholder="..."></td>
+        </tr>
+        <tr>
+          <td class="row-num">2</td>
+          <td><input type="text" id="more-area-2" placeholder="..."></td>
+          <td><input type="text" id="more-want-2" placeholder="..."></td>
+          <td><input type="text" id="more-look-2" placeholder="..."></td>
+          <td><input type="text" id="more-why-2" placeholder="..."></td>
+        </tr>
+        <tr>
+          <td class="row-num">3</td>
+          <td><input type="text" id="more-area-3" placeholder="..."></td>
+          <td><input type="text" id="more-want-3" placeholder="..."></td>
+          <td><input type="text" id="more-look-3" placeholder="..."></td>
+          <td><input type="text" id="more-why-3" placeholder="..."></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 4 -->
+  <div class="section-block">
+    <div class="section-num">4</div>
+    <h2>What could get in the way?</h2>
+    <p>Even when we know what we want, there can still be things that make it difficult. Based on what you've learnt, what might get in the way, and how could you work with or around these?</p>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Potential obstacle</th>
+          <th>How it might show up</th>
+          <th>What could help?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="text" id="ob-what-1" placeholder="..."></td>
+          <td><input type="text" id="ob-how-1" placeholder="..."></td>
+          <td><input type="text" id="ob-help-1" placeholder="..."></td>
+        </tr>
+        <tr>
+          <td><input type="text" id="ob-what-2" placeholder="..."></td>
+          <td><input type="text" id="ob-how-2" placeholder="..."></td>
+          <td><input type="text" id="ob-help-2" placeholder="..."></td>
+        </tr>
+        <tr>
+          <td><input type="text" id="ob-what-3" placeholder="..."></td>
+          <td><input type="text" id="ob-how-3" placeholder="..."></td>
+          <td><input type="text" id="ob-help-3" placeholder="..."></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 5 -->
+  <div class="section-block">
+    <div class="section-num">5</div>
+    <h2>My next step</h2>
+    <p>What's one small, clear step you can take in the coming week or two to move towards a life that feels more aligned with what matters to you? Keep it realistic and specific.</p>
+    <div class="next-step-fields">
+      <div class="ns-row"><span class="ns-label">My next step is...</span><input type="text" id="ns-step" placeholder="..."></div>
+      <div class="ns-row"><span class="ns-label">I'll do it by...</span><input type="text" id="ns-by" placeholder="..."></div>
+      <div class="ns-row"><span class="ns-label">What will tell me it's working?</span><input type="text" id="ns-working" placeholder="..."></div>
+    </div>
+  </div>
+
+  <div class="complete-wrap">
+    <button class="complete-btn" id="mark-complete-btn" onclick="markComplete()" style="display:none">Mark as complete ✓</button>
+    <p id="tlr-autosave-note" class="tlr-autosave-note" style="font-size:0.78rem;color:var(--text-muted);margin-top:0.75rem"></p>
+  </div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'tlr-bringing-it-together';
+
+function v(id){ const el=document.getElementById(id); return el ? (el.value||'') : ''; }
+function sv(id,val){ const el=document.getElementById(id); if(el && val!=null) el.value=val; }
+
+function collectData(){
+  return {
+    learnt: {
+      w1: { insights: v('l1-insights'), notes: v('l1-notes') },
+      w2: { insights: v('l2-insights'), notes: v('l2-notes') },
+      w3: { insights: v('l3-insights'), notes: v('l3-notes') },
+      w4: { insights: v('l4-insights'), notes: v('l4-notes') }
+    },
+    matters: {
+      most: [v('m-most-1'), v('m-most-2'), v('m-most-3')],
+      imp:  [v('m-imp-1'),  v('m-imp-2'),  v('m-imp-3')],
+      less: [v('m-less-1'), v('m-less-2'), v('m-less-3')]
+    },
+    more: [
+      { area: v('more-area-1'), want: v('more-want-1'), look: v('more-look-1'), why: v('more-why-1') },
+      { area: v('more-area-2'), want: v('more-want-2'), look: v('more-look-2'), why: v('more-why-2') },
+      { area: v('more-area-3'), want: v('more-want-3'), look: v('more-look-3'), why: v('more-why-3') }
+    ],
+    obstacles: [
+      { what: v('ob-what-1'), how: v('ob-how-1'), help: v('ob-help-1') },
+      { what: v('ob-what-2'), how: v('ob-how-2'), help: v('ob-help-2') },
+      { what: v('ob-what-3'), how: v('ob-how-3'), help: v('ob-help-3') }
+    ],
+    nextStep: { step: v('ns-step'), by: v('ns-by'), working: v('ns-working') }
+  };
+}
+
+function populateData(d){
+  if(!d) return;
+  if(d.learnt){
+    ['w1','w2','w3','w4'].forEach((w,i)=>{
+      const n = i+1;
+      sv('l'+n+'-insights', d.learnt[w]?.insights);
+      sv('l'+n+'-notes', d.learnt[w]?.notes);
+    });
+  }
+  if(d.matters){
+    [1,2,3].forEach(i=>{ sv('m-most-'+i, d.matters.most?.[i-1]); sv('m-imp-'+i, d.matters.imp?.[i-1]); sv('m-less-'+i, d.matters.less?.[i-1]); });
+  }
+  if(d.more){
+    [1,2,3].forEach((n,i)=>{
+      sv('more-area-'+n, d.more[i]?.area); sv('more-want-'+n, d.more[i]?.want);
+      sv('more-look-'+n, d.more[i]?.look); sv('more-why-'+n, d.more[i]?.why);
+    });
+  }
+  if(d.obstacles){
+    [1,2,3].forEach((n,i)=>{
+      sv('ob-what-'+n, d.obstacles[i]?.what); sv('ob-how-'+n, d.obstacles[i]?.how); sv('ob-help-'+n, d.obstacles[i]?.help);
+    });
+  }
+  if(d.nextStep){ sv('ns-step', d.nextStep.step); sv('ns-by', d.nextStep.by); sv('ns-working', d.nextStep.working); }
+}
+
+function updateProgress(){
+  const d = collectData();
+  const s1 = Object.values(d.learnt).some(w=>w.insights||w.notes) ? 1 : 0;
+  const s2 = [...d.matters.most,...d.matters.imp,...d.matters.less].some(Boolean) ? 1 : 0;
+  const s3 = d.more.some(r=>r.area||r.want) ? 1 : 0;
+  const s4 = d.obstacles.some(r=>r.what||r.how) ? 1 : 0;
+  const s5 = (d.nextStep.step||d.nextStep.by||d.nextStep.working) ? 1 : 0;
+  const done = s1+s2+s3+s4+s5;
+  const pct = Math.round((done/5)*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'%';
+  document.getElementById('prog-hint').textContent = `${done} of 5 sections done`;
+  const btn = document.getElementById('mark-complete-btn');
+  if(btn) btn.style.display = done >= 3 ? '' : 'none';
+}
+
+async function markComplete(){
+  const data = collectData();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  if(!done.includes(STORAGE_KEY)) done.push(STORAGE_KEY);
+  localStorage.setItem('tlr_completed', JSON.stringify(done));
+  await saveProgress(STORAGE_KEY, true, data);
+  document.getElementById('completed-banner').style.display='flex';
+  const btn=document.getElementById('mark-complete-btn'); if(btn) btn.style.display='none';
+  const hint=document.getElementById('prog-hint'); if(hint){ hint.textContent='Completed ✓'; hint.className='prog-hint done'; }
+  document.getElementById('prog-fill').style.width='100%';
+  document.getElementById('prog-pct').textContent='100%';
+  if(typeof logActivity==='function') logActivity('tool_complete', window.location.pathname, {tool:STORAGE_KEY});
+}
+
+async function resetComplete(){
+  const done = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  const idx = done.indexOf(STORAGE_KEY);
+  if(idx>-1){ done.splice(idx,1); localStorage.setItem('tlr_completed', JSON.stringify(done)); }
+  await saveProgress(STORAGE_KEY, false, collectData());
+  document.getElementById('completed-banner').style.display='none';
+  const btn=document.getElementById('mark-complete-btn'); if(btn) btn.style.display='';
+}
+
+requireAuth().then(async()=>{
+  showUserBadge('#user-badge');
+  TLRHistory.init(STORAGE_KEY, collectData, populateData);
+  const remote = await loadProgress();
+  const local = localStorage.getItem(STORAGE_KEY);
+  if(!remote && local){ try{ populateData(JSON.parse(local)); }catch(e){} }
+  updateProgress();
+  document.addEventListener('input', updateProgress);
+  const saved = JSON.parse(localStorage.getItem('tlr_completed')||'[]');
+  if(saved.includes(STORAGE_KEY)){
+    document.getElementById('completed-banner').style.display='flex';
+    const btn=document.getElementById('mark-complete-btn'); if(btn) btn.style.display='none';
+  }
+}).catch(()=>{ window.location.href='login.html'; });
+</script>
+</body>
+</html>
