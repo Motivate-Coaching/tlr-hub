@@ -15,6 +15,8 @@ const ZOOM_MASTERCLASS         = Deno.env.get('ZOOM_MASTERCLASS')!
 
 const FROM = 'The Living Room <stuart@motivate-coaching.com>'
 const HUB_URL = 'https://motivate-coaching.github.io/tlr-hub/dashboard.html'
+// Served by GitHub Pages from email/tlr-logo-email.png (240x196, shown at 120x98 for retina sharpness)
+const LOGO_URL = 'https://motivate-coaching.github.io/tlr-hub/email/tlr-logo-email.png'
 
 // ── Timezone helpers ──────────────────────────────────────────────────────────
 
@@ -188,10 +190,10 @@ function emailHtml(opts: {
 <tr><td align="center">
 <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
 
-  <!-- Header bar -->
-  <tr><td style="background:#0F1215;border-radius:12px 12px 0 0;padding:24px 36px;text-align:center;">
-    <p style="margin:0 0 3px;color:#E8A800;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;">The Living Room</p>
-    <p style="margin:0;color:rgba(255,255,255,0.4);font-size:12px;">Motivate Coaching</p>
+  <!-- Header bar: real TLR logo. Logo is flattened onto #0F1215 so it holds up in
+       dark-mode clients that invert backgrounds; styled alt text covers image-blocking clients. -->
+  <tr><td bgcolor="#0F1215" align="center" style="background:#0F1215;border-radius:12px 12px 0 0;padding:28px 36px 24px;text-align:center;">
+    <a href="${HUB_URL}" style="text-decoration:none;"><img src="${LOGO_URL}" width="120" height="98" alt="The Living Room" style="display:block;margin:0 auto;width:120px;height:98px;border:0;outline:none;color:#FFFFFF;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:18px;font-weight:700;letter-spacing:0.08em;text-align:center;"></a>
   </td></tr>
 
   <!-- Body -->
