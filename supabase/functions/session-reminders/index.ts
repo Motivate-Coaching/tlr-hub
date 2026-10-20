@@ -280,8 +280,11 @@ Deno.serve(async (_req) => {
     return new Response(JSON.stringify({ error: usersErr.message }), { status: 500, headers: { 'Content-Type': 'application/json' } })
   }
 
-  const emails = users.map(u => u.email).filter(Boolean) as string[]
-  console.log(`[session-reminders] ${emails.length} member(s) to notify`)
+  // Skip anyone opted out of reminders (paused or former members). Set server-side only:
+  // auth.users.raw_app_meta_data -> {"reminders": false, "member_status": "paused" | "former"}
+  const active  = users.filter((u: { app_metadata?: { reminders?: boolean } }) => u.app_metadata?.reminders !== false)
+  const emails  = active.map((u: { email?: string }) => u.email).filter(Boolean) as string[]
+  console.log(`[session-reminders] ${emails.length} member(s) to notify, ${users.length - active.length} opted out`)
 
   if (emails.length === 0) {
     return new Response(JSON.stringify({ sent: 0, message: 'No members found' }), {
