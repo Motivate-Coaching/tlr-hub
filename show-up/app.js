@@ -27,7 +27,7 @@
     ['Message one friend a day', 'Connection'], ['Write tomorrow’s top three tonight', 'Clarity']
   ];
   var SCIENCE = [
-    ['Plan for the hard days', 'Deciding in advance what you’ll do when it gets hard (an if-then plan) had a medium-to-large effect on reaching goals, across 94 tests.', 'Gollwitzer & Sheeran (2006), Advances in Experimental Social Psychology', 'https://doi.org/10.1016/S0065-2601(06)38002-1'],
+    ['Plan for the tough days', 'Deciding in advance what you’ll do when it gets hard (an if-then plan) had a medium-to-large effect on reaching goals, across 94 tests.', 'Gollwitzer & Sheeran (2006), Advances in Experimental Social Psychology', 'https://doi.org/10.1016/S0065-2601(06)38002-1'],
     ['Picture it, then plan for what’s in the way', 'Imagining how it will feel, then planning around the obstacles, helped people reach their goals (21 studies, 15,907 people).', 'Wang and colleagues (2021), Frontiers in Psychology', 'https://www.frontiersin.org/articles/10.3389/fpsyg.2021.565202/full'],
     ['Tick it off', 'Tracking progress helped people reach their goals (138 studies, 19,951 people), and worked better when it was written down or shared.', 'Harkin and colleagues (2016), Psychological Bulletin', 'https://doi.org/10.1037/bul0000025'],
     ['Miss a day, lose nothing', 'New habits took 66 days on average to become automatic, with a wide range (18 to 254). A single missed day made little difference.', 'Lally and colleagues (2010), European Journal of Social Psychology', 'https://doi.org/10.1002/ejsp.674'],
@@ -79,7 +79,7 @@
   function pencil() { return '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>'; }
   // Setup steps: a numbered label, a bar that fills as you go, and the newest segment animates in.
   function steps() { return S.draft.mode === 'less' ? ['what', 'less', 'feel', 'dimmer'] : ['what', 'feel', 'dimmer']; }
-  var STEP_LABEL = { what: 'Your habit', less: 'What it gives you', feel: 'How it’ll feel', dimmer: 'Your hard-day plan' };
+  var STEP_LABEL = { what: 'Your habit', less: 'What it gives you', feel: 'How it’ll feel', dimmer: 'Your tough-day plan' };
   function progress(key) {
     var st = steps(), n = st.indexOf(key) + 1, T = st.length;
     var h = '<div class="stepper"><div class="progress" style="grid-template-columns:repeat(' + T + ',1fr)" role="progressbar" aria-valuemin="1" aria-valuemax="' + T + '" aria-valuenow="' + n + '">';
@@ -211,7 +211,7 @@
         '<p class="sub2">One minute to set up, one tap a day.</p>' +
         '<div class="full-only">' + todayCard('Morning walk', 'Day 12 · Felt proud', true, true) + '</div>' +
         '<ul class="points full-only">' +
-        '<li><b>Plan for the hard days</b><span>One bad day never ends it.</span></li>' +
+        '<li><b>Plan for the tough days</b><span>One bad day never ends it.</span></li>' +
         '<li><b>Miss a day, lose nothing</b><span>Nothing resets. Comebacks count.</span></li>' +
         '<li><b>See it working</b><span>A morning nudge, then one quick tick.</span></li>' +
         '</ul>' +
@@ -251,9 +251,10 @@
     },
     dimmer: function () {
       var d = S.draft, less = d.mode === 'less';
-      return '<section class="screen">' + progress('dimmer') + '<h1>' + (less ? 'On a hard day, what will you settle for?' : 'On a hard day, what’s your dimmer version?') + '</h1>' +
-        '<p class="lede">' + (less ? 'Not all or nothing. A smaller version still counts.' : 'Some days you’re a 10. Some days a 1. Both count.') + '</p>' +
-        '<div class="field"><label class="label" for="dim">' + (less ? 'If it’s a tough one, I’ll...' : 'On a low day, I’ll...') + '</label>' +
+      return '<section class="screen">' + progress('dimmer') + '<h1>' + (less ? 'On a tough day, what will you settle for?' : 'On a tough day, what’s your dimmer version?') + '</h1>' +
+        '<p class="lede">Nobody’s consistent every day. Deciding now what you’ll do on the tough ones is what keeps you going.</p>' +
+        '<p class="hint" style="margin-top:-12px">' + (less ? 'Not all or nothing. A smaller version still counts.' : 'Some days you’re a 10, some days a 1. Both count.') + '</p>' +
+        '<div class="field"><label class="label" for="dim">' + (less ? 'If it’s a tough one, I’ll...' : 'On a tough day, I’ll...') + '</label>' +
         '<textarea id="dim" rows="1" data-bind="dimmer" placeholder="' + (less ? 'Have one square, not the whole bar' : 'Have a 30 second cold shower') + '">' + esc(d.dimmer) + '</textarea></div>' +
         '<details class="full-only"><summary class="link" style="list-style:none;display:flex;align-items:center">Need an example?</summary><div class="card small" style="margin-top:8px">' +
         (less ? '<span>Wine on weeknights? <b>One small glass, not the bottle.</b></span><span>Phone in bed? <b>Five minutes, then it charges outside the room.</b></span><span>Afternoon snacking? <b>Fruit first, then decide.</b></span>'
@@ -336,7 +337,7 @@
       return '<section class="screen"><h1>Hey. It happens.</h1><p class="lede">Falling off isn’t the end of anything. Getting back on is where the real work lives.</p>' +
         '<div class="card"><div class="eyebrow">What you told yourself on day one</div>' +
         '<div><div class="hint">You want to feel</div><div style="font-weight:600">' + esc(words().join(', ')) + '</div></div>' +
-        '<div><div class="hint">On a hard day</div><div style="font-weight:600">' + esc(h.dimmer || 'Your dimmer version') + '</div></div></div>' +
+        '<div><div class="hint">On a tough day</div><div style="font-weight:600">' + esc(h.dimmer || 'Your dimmer version') + '</div></div></div>' +
         '<div class="card soft small"><span>Today doesn’t need to be a 10. Your dimmer version counts as showing up.</span></div>' +
         '<div class="spacer"></div>' + (S.entries[todayNum()] ? '<p style="margin:0;text-align:center">You’ve already shown up today.</p>' :
         '<button class="btn" data-tick="full" data-from="slipped"><span class="star" style="margin:0"></span>I’m back. Count me in today</button><button class="btn grey" data-tick="dimmer" data-from="slipped">Back with a dimmer day</button>') + '</section>';
@@ -466,7 +467,7 @@
     var h = '<section class="screen focus"><div><div class="eyebrow">' + (t > L ? 'Complete' : 'Day ' + t + ' of ' + L) + '</div><h1>' + esc(habitName()) + '</h1></div>';
     if (t > L) h += '<div class="big"><button class="btn" data-go="reflect">Start my look back</button></div>';
     else if (!e) h += '<div class="big"><button class="btn" data-tick="full">' + checkIcon('#FFFFFF') + 'Full on</button><button class="btn grey" data-tick="dimmer">Dimmer day</button></div>' +
-      '<p class="hint">Hard day? Your dimmer version: <b>' + esc(S.habit.dimmer) + '</b></p>';
+      '<p class="hint">Tough day? Your dimmer version: <b>' + esc(S.habit.dimmer) + '</b></p>';
     else h += '<div class="done"><span class="bigstar"></span><span class="msg">' + esc(doneMsg(e)) + '</span><button data-go="note">' + (e.note ? 'Edit note' : 'Note') + '</button></div><p class="count">That’s today done. See you tomorrow.</p>';
     return h + '<div class="spacer"></div></section>';
   }
@@ -494,7 +495,7 @@
     words().forEach(function (w) { h += '<span>' + esc(w.toLowerCase()) + '</span>'; });
     h += '</div>';
     if (hb.mode === 'less' && (hb.instead || '').trim()) h += '<div class="soft" style="font-size:14px">Instead: ' + esc(hb.instead) + '</div>';
-    return h + '<div class="soft" style="font-size:14px">Hard day: ' + esc(hb.dimmer || '') + '</div></div>';
+    return h + '<div class="soft" style="font-size:14px">Tough day: ' + esc(hb.dimmer || '') + '</div></div>';
   }
   function gridHTML(t) {
     var h = '<div class="grid">';
@@ -673,7 +674,7 @@
       if (moved > 6) { e.stopPropagation(); moved = 0; return; }
       var b = e.target.closest('[data-word]'), card = document.getElementById('wordcard');
       if (b) card.innerHTML = '<div class="card"><div class="eyebrow">You’ll feel</div><div style="font-family:var(--display);font-size:38px;line-height:1">' + esc(w[+b.dataset.word].toLowerCase()) + '</div><div>Because you’re showing up for <b>' + esc(habitName().toLowerCase()) + '</b>.</div></div>';
-      if (e.target.closest('[data-act="whole"]')) { card.innerHTML = '<div class="why"><div class="eyebrow">The whole picture</div><div style="font-family:var(--display);font-size:24px;line-height:1.35">It’s an ordinary morning. You’ve done it: ' + esc(habitName().toLowerCase()) + '. You feel ' + esc(w.join(', ').toLowerCase()) + '.</div><div class="soft" style="font-size:14px">And on the hard days: ' + esc((S.habit || S.draft).dimmer) + '.</div></div>'; e.stopPropagation(); }
+      if (e.target.closest('[data-act="whole"]')) { card.innerHTML = '<div class="why"><div class="eyebrow">The whole picture</div><div style="font-family:var(--display);font-size:24px;line-height:1.35">It’s an ordinary morning. You’ve done it: ' + esc(habitName().toLowerCase()) + '. You feel ' + esc(w.join(', ').toLowerCase()) + '.</div><div class="soft" style="font-size:14px">And on the tough days: ' + esc((S.habit || S.draft).dimmer) + '.</div></div>'; e.stopPropagation(); }
     });
   }
 
