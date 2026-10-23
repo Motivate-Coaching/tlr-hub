@@ -11,7 +11,7 @@ const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const VAPID_PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY') || ''
-const VAPID_PUBLIC_KEY = 'BLxIzE7DzUGKkaQUbzjfXhwxdLIjbcmtp-g-QxVHTIVI3qR3D5SkyxEEoIYZKmO7xXPmxkMvOnWa1n44YGUm_Lo'
+const VAPID_PUBLIC_KEY = 'BHJYn9pn53bnDmtHCvr-ysfBqueL-9zH4_0hvmPRvgpEBhfLeNxBeuBOSgCKiGzar2NOPyghfanKgdud1DbxjOk'
 
 const FROM = 'Stuart Fairbairns <stuart@motivate-coaching.com>'
 const APP_URL = 'https://motivate-coaching.github.io/tlr-hub/show-up/'

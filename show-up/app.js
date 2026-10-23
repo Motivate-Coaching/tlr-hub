@@ -8,7 +8,7 @@
   var SUPABASE_URL = 'https://tsusrzkpzevpiuvsppls.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzdXNyemtwemV2cGl1dnNwcGxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3NDAzMzUsImV4cCI6MjEwMTMxNjMzNX0.UQD9BaOjYWNOEVeV3QCF2sdlNc9SYJ2PrcZgpCtlQ8s';
   // Public half of the phone-notification key pair (the private half lives only in Supabase secrets).
-  var VAPID_PUBLIC = 'BLxIzE7DzUGKkaQUbzjfXhwxdLIjbcmtp-g-QxVHTIVI3qR3D5SkyxEEoIYZKmO7xXPmxkMvOnWa1n44YGUm_Lo';
+  var VAPID_PUBLIC = 'BHJYn9pn53bnDmtHCvr-ysfBqueL-9zH4_0hvmPRvgpEBhfLeNxBeuBOSgCKiGzar2NOPyghfanKgdud1DbxjOk';
   var KEY = 'showup-v1';
   var ADMIN_EMAIL = 'stuart.fairbairns@gmail.com';
 
