@@ -252,7 +252,7 @@
     dimmer: function () {
       var d = S.draft, less = d.mode === 'less';
       return '<section class="screen">' + progress('dimmer') + '<h1>' + (less ? 'On a tough day, what will you settle for?' : 'On a tough day, how far will you turn it down?') + '</h1>' +
-        '<p class="lede">Nobody’s consistent every day. Deciding now what you’ll do on the tough ones is what keeps you going.</p>' +
+        '<p class="lede">Nobody’s consistent every day. Deciding now what you’ll do on the tough days is what keeps you going.</p>' +
         '<p class="hint" style="margin-top:-12px">' + (less ? 'Not all or nothing. A smaller version still counts.' : 'Turn it down, don’t switch it off. Some days a 10, some days a 1. Both count.') + '</p>' +
         '<div class="field"><label class="label" for="dim">' + (less ? 'If it’s a tough one, I’ll...' : 'On a tough day, I’ll...') + '</label>' +
         '<textarea id="dim" rows="1" data-bind="dimmer" placeholder="' + (less ? 'Have one square, not the whole bar' : 'A quick dip, or a cold shower at home') + '">' + esc(d.dimmer) + '</textarea></div>' +
