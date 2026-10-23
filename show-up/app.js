@@ -77,7 +77,16 @@
   function buzz() { if (!S.settings.buzz) return; try { if (navigator.vibrate) navigator.vibrate([15, 60, 25]); } catch (e) {} }
   function checkIcon(c) { return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'; }
   function pencil() { return '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>'; }
-  function progress(n) { var h = '<div class="progress" style="grid-template-columns:repeat(3,1fr)">'; for (var i = 1; i <= 3; i++) h += '<span class="' + (i <= n ? 'on' : '') + '"></span>'; return h + '</div>'; }
+  // Setup steps: a numbered label, a bar that fills as you go, and the newest segment animates in.
+  function steps() { return S.draft.mode === 'less' ? ['what', 'less', 'feel', 'dimmer'] : ['what', 'feel', 'dimmer']; }
+  var STEP_LABEL = { what: 'Your habit', less: 'What it gives you', feel: 'How it’ll feel', dimmer: 'Your hard-day plan' };
+  function progress(key) {
+    var st = steps(), n = st.indexOf(key) + 1, T = st.length;
+    var h = '<div class="stepper"><div class="progress" style="grid-template-columns:repeat(' + T + ',1fr)" role="progressbar" aria-valuemin="1" aria-valuemax="' + T + '" aria-valuenow="' + n + '">';
+    for (var i = 1; i <= T; i++) h += '<span class="' + (i < n ? 'on' : (i === n ? 'on now' : '')) + '"></span>';
+    return h + '</div><span class="eyebrow">Step ' + n + ' of ' + T + ' · ' + STEP_LABEL[key] + '</span></div>';
+  }
+  function nextLabel(key) { var st = steps(), nx = st[st.indexOf(key) + 1]; return nx ? 'Next: ' + STEP_LABEL[nx].toLowerCase() : 'Finish setup'; }
   function isStandalone() { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true; }
   function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
   function fmtTime(t) { var p = t.split(':'), h = +p[0], m = +p[1]; return (h % 12 || 12) + (m ? ':' + String(m).padStart(2, '0') : '') + (h < 12 ? 'am' : 'pm'); }
@@ -213,7 +222,7 @@
     },
     what: function () {
       var d = S.draft, more = d.mode === 'more';
-      return '<section class="screen">' + progress(1) +
+      return '<section class="screen">' + progress('what') +
         '<h1>' + (more ? 'What habit do you want to build?' : 'What do you want to cut back on?') + '</h1>' +
         '<div class="field"><label class="label" for="what">' + (more ? 'I’m going to...' : 'I’m cutting back on...') + '</label>' +
         '<textarea id="what" rows="1" data-bind="what" placeholder="' + (more ? 'Have a cold sea swim every morning' : 'Chocolate in the afternoons') + '">' + esc(d.what) + '</textarea>' +
@@ -221,40 +230,41 @@
         '<div class="starters">' + (more ? STARTERS_MORE : STARTERS_LESS).map(function (s) { return '<button class="chip" data-starter="' + esc(s) + '">' + esc(s) + '</button>'; }).join('') + '</div>' +
         (more ? '<button class="link" data-act="ideas">More ideas</button>' : '') +
         '<div style="display:flex;flex-direction:column;gap:8px"><span class="eyebrow">Your tracker</span>' + todayCard(d.what.trim() || 'Your habit', 'Day 1 · Today', false, false, 'previewName') + '</div>' +
-        '<div class="spacer"></div><button class="btn" data-next="what" ' + (d.what.trim() ? '' : 'disabled') + '>Next</button></section>' +
+        '<div class="spacer"></div><button class="btn" data-next="what" ' + (d.what.trim() ? '' : 'disabled') + '>' + nextLabel('what') + '</button></section>' +
         (ui.ideasOpen ? ideasSheet() : '');
     },
     less: function () {
       var d = S.draft;
-      var h = '<section class="screen">' + progress(1) + '<h1>What does it give you right now?</h1><p class="lede">No judgement. It’s there for a reason.</p><div class="chips">';
+      var h = '<section class="screen">' + progress('less') + '<h1>What does it give you right now?</h1><p class="lede">No judgement. It’s there for a reason.</p><div class="chips">';
       GIVES.forEach(function (g) { h += '<button class="chip" data-give="' + esc(g) + '" aria-pressed="' + (d.gives.indexOf(g) >= 0) + '">' + esc(g) + '</button>'; });
       return h + '</div><div class="field"><label class="label" for="instead">What could give you some of that instead?</label>' +
         '<textarea id="instead" rows="1" data-bind="instead" placeholder="A walk and a proper cup of tea at 4pm">' + esc(d.instead) + '</textarea></div>' +
-        '<div class="spacer"></div><button class="btn" data-go="feel">Next</button></section>';
+        '<div class="spacer"></div><button class="btn" data-go="feel">' + nextLabel('less') + '</button></section>';
     },
     feel: function () {
-      var d = S.draft;
-      var h = '<section class="screen">' + progress(2) + '<h1>When you’ve done it, how will you feel?</h1><p class="lede">Tap a few.</p><div class="chips">';
+      var d = S.draft, less = d.mode === 'less';
+      var h = '<section class="screen">' + progress('feel') + '<h1>' + (less ? 'Once you’ve cut back, how will you feel?' : 'When you’ve done it, how will you feel?') + '</h1><p class="lede">' + (less ? 'Picture a good day without it. Tap a few.' : 'Tap a few.') + '</p><div class="chips">';
       FEELINGS.forEach(function (f) { h += '<button class="chip" data-feel="' + esc(f) + '" aria-pressed="' + (d.feel.indexOf(f) >= 0) + '">' + esc(f) + '</button>'; });
       return h + '</div><div class="field"><label class="label" for="own">Your own words (optional)</label>' +
         '<textarea id="own" rows="1" data-bind="ownFeel" placeholder="Separate with commas">' + esc(d.ownFeel) + '</textarea></div>' +
-        '<div class="spacer"></div><button class="btn" data-go="dimmer" ' + (d.feel.length || d.ownFeel.trim() ? '' : 'disabled') + '>Next</button></section>';
+        '<div class="spacer"></div><button class="btn" data-go="dimmer" ' + (d.feel.length || d.ownFeel.trim() ? '' : 'disabled') + '>' + nextLabel('feel') + '</button></section>';
     },
     dimmer: function () {
-      var d = S.draft;
-      return '<section class="screen">' + progress(3) + '<h1>On a hard day, what’s your dimmer version?</h1>' +
-        '<p class="lede">Some days you’re a 10. Some days a 1. Both count.</p>' +
-        '<div class="field"><label class="label" for="dim">On a low day, I’ll...</label>' +
-        '<textarea id="dim" rows="1" data-bind="dimmer" placeholder="Have a 30 second cold shower">' + esc(d.dimmer) + '</textarea></div>' +
+      var d = S.draft, less = d.mode === 'less';
+      return '<section class="screen">' + progress('dimmer') + '<h1>' + (less ? 'On a hard day, what will you settle for?' : 'On a hard day, what’s your dimmer version?') + '</h1>' +
+        '<p class="lede">' + (less ? 'Not all or nothing. A smaller version still counts.' : 'Some days you’re a 10. Some days a 1. Both count.') + '</p>' +
+        '<div class="field"><label class="label" for="dim">' + (less ? 'If it’s a tough one, I’ll...' : 'On a low day, I’ll...') + '</label>' +
+        '<textarea id="dim" rows="1" data-bind="dimmer" placeholder="' + (less ? 'Have one square, not the whole bar' : 'Have a 30 second cold shower') + '">' + esc(d.dimmer) + '</textarea></div>' +
         '<details><summary class="link" style="list-style:none;display:flex;align-items:center">Need an example?</summary><div class="card small" style="margin-top:8px">' +
-        '<span>Going to the gym? <b>Just put your kit on and stretch.</b></span><span>Reading 10 pages? <b>Read one.</b></span><span>Cutting back on wine? <b>One small glass, not the bottle.</b></span></div></details>' +
-        '<div class="spacer"></div><button class="btn" data-act="finish" ' + (d.dimmer.trim() ? '' : 'disabled') + '>Done</button></section>';
+        (less ? '<span>Wine on weeknights? <b>One small glass, not the bottle.</b></span><span>Phone in bed? <b>Five minutes, then it charges outside the room.</b></span><span>Afternoon snacking? <b>Fruit first, then decide.</b></span>'
+          : '<span>Going to the gym? <b>Just put your kit on and stretch.</b></span><span>Reading 10 pages? <b>Read one.</b></span><span>A cold sea swim? <b>Feet in the water counts.</b></span>') + '</div></details>' +
+        '<div class="spacer"></div><button class="btn" data-act="finish" ' + (d.dimmer.trim() ? '' : 'disabled') + '>' + nextLabel('dimmer') + '</button></section>';
     },
     ready: function () {
       var ticked = !!S.entries[1];
       var h = '<section class="screen"><h1>You’re all set.</h1>' + whyCard(true);
       if (!ticked) {
-        h += '<div class="card"><b style="font-size:20px;font-weight:600">Done it today?</b><span style="color:var(--text-mid)">If you have, tick day one now. Starting counts.</span>' +
+        h += '<div class="card"><b style="font-size:20px;font-weight:600">' + (S.habit.mode === 'less' ? 'Kept to it today?' : 'Done it today?') + '</b><span style="color:var(--text-mid)">If you have, tick day one now. Starting counts.</span>' +
           '<button class="btn" data-tick="full">' + checkIcon('#FFFFFF') + 'Tick day one</button>' +
           (S.later ? '<p style="margin:0;text-align:center">Lovely. Day one is tomorrow.</p>' : '<button class="link center" data-act="later">I’ll start tomorrow</button>') + '</div>';
       } else {
@@ -292,7 +302,7 @@
       if (t > L) {
         h += '<div class="card"><b style="font-size:20px;font-weight:600">You gave it ' + L + ' days.</b><span style="color:var(--text-mid)">Time for your look back: what you noticed, and what’s next. Your call.</span><button class="btn" data-go="reflect">Start my look back</button></div>';
       } else if (!e) {
-        h += '<div style="display:flex;flex-direction:column;gap:8px"><b style="font-weight:600">Showed up today?</b><div class="tick-row">' +
+        h += '<div style="display:flex;flex-direction:column;gap:8px"><b style="font-weight:600">' + (S.habit.mode === 'less' ? 'Kept to it today?' : 'Showed up today?') + '</b><div class="tick-row">' +
           '<button class="btn" data-tick="full">' + checkIcon('#FFFFFF') + 'Full on</button>' +
           '<button class="btn grey" data-tick="dimmer">Dimmer day</button>' +
           '<button class="note-btn" data-go="note" aria-label="Add a note">' + pencil() + '</button></div></div>';

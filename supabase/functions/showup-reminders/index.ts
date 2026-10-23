@@ -52,12 +52,12 @@ function esc(s: string) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!))
 }
 
-function emailHtml(o: { day: number; length: number; what: string; dimmer: string; line: string; comeback: boolean }) {
+function emailHtml(o: { day: number; length: number; what: string; dimmer: string; line: string; comeback: boolean; less: boolean }) {
   const year = new Date().getUTCFullYear()
   const headline = o.comeback ? `Day ${o.day}. A comeback day.` : `Day ${o.day}. Today counts.`
   const intro = o.comeback
     ? 'Yesterday didn’t happen. That’s fine. Today is the one that matters, and getting back on is the real work.'
-    : 'Done it already, or about to? One tap and it’s logged.'
+    : o.less ? 'Keeping to it today? One tap tonight and it’s logged.' : 'Done it already, or about to? One tap and it’s logged.'
   return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(headline)}</title></head>
 <body style="margin:0;padding:0;background:#F5F1EB;font-family:Poppins,'Helvetica Neue',Helvetica,Arial,sans-serif;">
@@ -74,7 +74,7 @@ function emailHtml(o: { day: number; length: number; what: string; dimmer: strin
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F1EB;border-radius:6px;margin-bottom:24px;"><tr><td style="padding:18px 20px;">
       <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#4A4A4A;">My habit</p>
       <p style="margin:0 0 12px;font-size:18px;font-weight:600;color:#1A1A1A;">${esc(o.what)}</p>
-      <p style="margin:0;font-size:14px;line-height:1.5;color:#4A4A4A;">Hard day? Your dimmer version still counts: <b style="color:#1A1A1A;">${esc(o.dimmer)}</b></p>
+      <p style="margin:0;font-size:14px;line-height:1.5;color:#4A4A4A;">${o.less ? 'Tough day? Your smaller version still counts:' : 'Hard day? Your dimmer version still counts:'} <b style="color:#1A1A1A;">${esc(o.dimmer)}</b></p>
     </td></tr></table>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:26px;"><tr><td align="center">
       <a href="${APP_URL}?from=email" style="display:inline-block;background:#0F1215;color:#FFFFFF;text-decoration:none;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:16px 36px;border-radius:4px;">Tick today</a>
@@ -133,7 +133,7 @@ Deno.serve(async () => {
         const res = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ from: FROM, to: [emailById.get(p.user_id)], subject: `Day ${day}: ${habit.what}`, html: emailHtml({ day, length: habit.length_days, what: habit.what, dimmer: habit.dimmer, line, comeback }) }),
+          body: JSON.stringify({ from: FROM, to: [emailById.get(p.user_id)], subject: `Day ${day}: ${habit.what}`, html: emailHtml({ day, length: habit.length_days, what: habit.what, dimmer: habit.dimmer, line, comeback, less: habit.mode === 'less' }) }),
         })
         if (res.ok) emails++
         else { console.error('[showup-reminders] Resend error', await res.text()); await admin.from('showup_reminder_log').delete().match({ user_id: p.user_id, local_date: local.date, channel: 'email' }) }
@@ -144,7 +144,7 @@ Deno.serve(async () => {
       const { error: logErr } = await admin.from('showup_reminder_log').insert({ user_id: p.user_id, local_date: local.date, channel: 'push' })
       if (!logErr) {
         const { data: subs } = await admin.from('showup_push_subscriptions').select('*').eq('user_id', p.user_id)
-        const payload = JSON.stringify({ title: comeback ? `Day ${day}: a comeback day` : `Day ${day}: ${habit.what}`, body: `Done it? One tap. Hard day? ${habit.dimmer}`, url: APP_URL + '?from=push' })
+        const payload = JSON.stringify({ title: comeback ? `Day ${day}: a comeback day` : `Day ${day}: ${habit.what}`, body: habit.mode === 'less' ? `Keeping to it? One tap when you have. Tough day? ${habit.dimmer}` : `Done it? One tap. Hard day? ${habit.dimmer}`, url: APP_URL + '?from=push' })
         for (const s of subs || []) {
           try {
             await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload, { TTL: 3 * 3600 })
