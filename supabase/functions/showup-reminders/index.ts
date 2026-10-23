@@ -74,7 +74,7 @@ function emailHtml(o: { day: number; length: number; what: string; dimmer: strin
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F1EB;border-radius:6px;margin-bottom:24px;"><tr><td style="padding:18px 20px;">
       <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#4A4A4A;">My habit</p>
       <p style="margin:0 0 12px;font-size:18px;font-weight:600;color:#1A1A1A;">${esc(o.what)}</p>
-      <p style="margin:0;font-size:14px;line-height:1.5;color:#4A4A4A;">${o.less ? 'Tough day? Your smaller version still counts:' : 'Tough day? Your dimmer version still counts:'} <b style="color:#1A1A1A;">${esc(o.dimmer)}</b></p>
+      <p style="margin:0;font-size:14px;line-height:1.5;color:#4A4A4A;">${o.less ? 'Tough day? Your smaller version still counts:' : 'Tough day? Turn it down, don’t switch it off:'} <b style="color:#1A1A1A;">${esc(o.dimmer)}</b></p>
     </td></tr></table>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:26px;"><tr><td align="center">
       <a href="${APP_URL}?from=email" style="display:inline-block;background:#0F1215;color:#FFFFFF;text-decoration:none;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:16px 36px;border-radius:4px;">Tick today</a>
