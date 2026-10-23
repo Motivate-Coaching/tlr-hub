@@ -18,6 +18,8 @@
   // ── Content ───────────────────────────────────────────────────────────────
   var FEELINGS = ['Proud', 'Strong', 'Calm', 'Alive', 'Like I trust myself', 'Free', 'Clear-headed', 'Like me again', 'Lighter', 'In control', 'Grounded', 'Brave'];
   var GIVES = ['A reward', 'Comfort', 'A break', 'Switching off', 'Energy', 'Something to do'];
+  // For cutting back: what you're moving towards (outcomes and feelings together).
+  var GAINS = ['Better sleep', 'More energy', 'Better health', 'Lighter', 'Clear-headed', 'In control', 'Proud', 'Calm', 'Money saved', 'Like me again', 'Free', 'More present'];
   var STARTERS_MORE = ['A 10 minute walk', 'Read before bed', 'In bed by 10:30', 'Drink more water'];
   var STARTERS_LESS = ['Phone in bed', 'Afternoon snacking', 'Wine on weeknights', 'Mindless scrolling'];
   var IDEAS = [
@@ -78,15 +80,18 @@
   function checkIcon(c) { return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'; }
   function pencil() { return '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>'; }
   // Setup steps: a numbered label, a bar that fills as you go, and the newest segment animates in.
-  function steps() { return S.draft.mode === 'less' ? ['what', 'less', 'feel', 'dimmer'] : ['what', 'feel', 'dimmer']; }
-  var STEP_LABEL = { what: 'Your habit', less: 'What it gives you', feel: 'How it’ll feel', dimmer: 'Your tough-day plan' };
+  function steps() { return S.draft.mode === 'less' ? ['what', 'feel', 'less', 'dimmer'] : ['what', 'feel', 'dimmer']; }
+  var STEP_LABEL = { what: 'Your habit', less: 'What you’ll do instead', feel: 'How it’ll feel', dimmer: 'Your tough-day plan' };
+  function stepLabel(k) { return k === 'feel' && S.draft.mode === 'less' ? 'What you’re moving towards' : STEP_LABEL[k]; }
+  function nextStep(k) { var st = steps(); return st[st.indexOf(k) + 1]; }
+  function stepValid(k) { var d = S.draft; return k === 'what' ? !!d.what.trim() : k === 'feel' ? !!(d.feel.length || d.ownFeel.trim()) : k === 'less' ? !!d.instead.trim() : k === 'dimmer' ? !!d.dimmer.trim() : true; }
+  function stepButton(k) { var nx = nextStep(k); return '<button class="btn" data-step-next="' + k + '" ' + (stepValid(k) ? '' : 'disabled') + '>' + (nx ? 'Next: ' + stepLabel(nx).toLowerCase() : 'Finish setup') + '</button>'; }
   function progress(key) {
     var st = steps(), n = st.indexOf(key) + 1, T = st.length;
     var h = '<div class="stepper"><div class="progress" style="grid-template-columns:repeat(' + T + ',1fr)" role="progressbar" aria-valuemin="1" aria-valuemax="' + T + '" aria-valuenow="' + n + '">';
     for (var i = 1; i <= T; i++) h += '<span class="' + (i < n ? 'on' : (i === n ? 'on now' : '')) + '"></span>';
-    return h + '</div><span class="eyebrow">Step ' + n + ' of ' + T + ' · ' + STEP_LABEL[key] + '</span></div>';
+    return h + '</div><span class="eyebrow">Step ' + n + ' of ' + T + ' · ' + stepLabel(key) + '</span></div>';
   }
-  function nextLabel(key) { var st = steps(), nx = st[st.indexOf(key) + 1]; return nx ? 'Next: ' + STEP_LABEL[nx].toLowerCase() : 'Finish setup'; }
   function isStandalone() { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true; }
   function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
   function fmtTime(t) { var p = t.split(':'), h = +p[0], m = +p[1]; return (h % 12 || 12) + (m ? ':' + String(m).padStart(2, '0') : '') + (h < 12 ? 'am' : 'pm'); }
@@ -192,7 +197,7 @@
 
   // ── Screens ───────────────────────────────────────────────────────────────
   var BACK = {
-    what: 'landing', less: 'what', feel: function () { return S.draft.mode === 'less' ? 'less' : 'what'; }, dimmer: 'feel',
+    what: 'landing', less: 'feel', feel: 'what', dimmer: function () { return S.draft.mode === 'less' ? 'less' : 'feel'; },
     length: function () { return ui.returnTo || 'ready'; }, note: 'tracker', slipped: 'tracker', share: 'tracker', science: function () { return S.habit ? 'settings' : 'landing'; },
     words: function () { return ui.wordsFrom || 'tracker'; }, settings: 'tracker', edit: 'settings', reflect: 'tracker', install: 'settings', account: function () { return ui.returnTo || 'tracker'; }
   };
@@ -230,36 +235,39 @@
         '<div class="starters full-only">' + (more ? STARTERS_MORE : STARTERS_LESS).map(function (s) { return '<button class="chip" data-starter="' + esc(s) + '">' + esc(s) + '</button>'; }).join('') + '</div>' +
         (more ? '<button class="link full-only" data-act="ideas">More ideas</button>' : '') +
         '<div class="full-only" style="display:flex;flex-direction:column;gap:8px"><span class="eyebrow">Your tracker</span>' + todayCard(d.what.trim() || 'Your habit', 'Day 1 · Today', false, false, 'previewName') + '</div>' +
-        '<div class="spacer"></div><button class="btn" data-next="what" ' + (d.what.trim() ? '' : 'disabled') + '>' + nextLabel('what') + '</button></section>' +
+        '<div class="spacer"></div>' + stepButton('what') + '</section>' +
         (ui.ideasOpen ? ideasSheet() : '');
     },
     less: function () {
       var d = S.draft;
-      var h = '<section class="screen">' + progress('less') + '<h1>What does it give you right now?</h1><p class="lede">No judgement. It’s there for a reason.</p><div class="chips">';
+      var h = '<section class="screen">' + progress('less') + '<h1>When it pulls at you, what will you do instead?</h1>' +
+        '<p class="lede">It’s there for a reason. What does it usually give you? No judgement.</p><div class="chips">';
       GIVES.forEach(function (g) { h += '<button class="chip" data-give="' + esc(g) + '" aria-pressed="' + (d.gives.indexOf(g) >= 0) + '">' + esc(g) + '</button>'; });
-      return h + '</div><div class="field"><label class="label" for="instead">What could give you some of that instead?</label>' +
-        '<textarea id="instead" rows="1" data-bind="instead" placeholder="A walk and a proper cup of tea at 4pm">' + esc(d.instead) + '</textarea></div>' +
-        '<div class="spacer"></div><button class="btn" data-go="feel">' + nextLabel('less') + '</button></section>';
+      return h + '</div><div class="field"><label class="label" for="instead">Instead, I’ll...</label>' +
+        '<textarea id="instead" rows="1" data-bind="instead" placeholder="Go for a 20 minute walk and make a proper cup of tea">' + esc(d.instead) + '</textarea>' +
+        '<span class="hint">Something that gives you some of the same, and moves you towards what you want.</span></div>' +
+        '<div class="spacer"></div>' + stepButton('less') + '</section>';
     },
     feel: function () {
-      var d = S.draft, less = d.mode === 'less';
-      var h = '<section class="screen">' + progress('feel') + '<h1>' + (less ? 'Once you’ve cut back, how will you feel?' : 'When you’ve done it, how will you feel?') + '</h1><p class="lede">' + (less ? 'Picture a good day without it. Tap a few.' : 'Tap a few.') + '</p><div class="chips">';
-      FEELINGS.forEach(function (f) { h += '<button class="chip" data-feel="' + esc(f) + '" aria-pressed="' + (d.feel.indexOf(f) >= 0) + '">' + esc(f) + '</button>'; });
+      var d = S.draft, less = d.mode === 'less', list = less ? GAINS : FEELINGS;
+      var h = '<section class="screen">' + progress('feel') + '<h1>' + (less ? 'What are you moving towards?' : 'When you’ve done it, how will you feel?') + '</h1>' +
+        '<p class="lede">' + (less ? 'Cutting back is the how. This is the why. Tap a few.' : 'Tap a few.') + '</p><div class="chips">';
+      list.forEach(function (f) { h += '<button class="chip" data-feel="' + esc(f) + '" aria-pressed="' + (d.feel.indexOf(f) >= 0) + '">' + esc(f) + '</button>'; });
       return h + '</div><div class="field"><label class="label" for="own">Your own words (optional)</label>' +
-        '<textarea id="own" rows="1" data-bind="ownFeel" placeholder="Separate with commas">' + esc(d.ownFeel) + '</textarea></div>' +
-        '<div class="spacer"></div><button class="btn" data-go="dimmer" ' + (d.feel.length || d.ownFeel.trim() ? '' : 'disabled') + '>' + nextLabel('feel') + '</button></section>';
+        '<textarea id="own" rows="1" data-bind="ownFeel" placeholder="' + (less ? 'Fit into my jeans, wake up fresh' : 'Separate with commas') + '">' + esc(d.ownFeel) + '</textarea></div>' +
+        '<div class="spacer"></div>' + stepButton('feel') + '</section>';
     },
     dimmer: function () {
       var d = S.draft, less = d.mode === 'less';
-      return '<section class="screen">' + progress('dimmer') + '<h1>' + (less ? 'On a tough day, what will you settle for?' : 'On a tough day, how far will you turn it down?') + '</h1>' +
+      return '<section class="screen">' + progress('dimmer') + '<h1>On a tough day, how far will you turn it down?</h1>' +
         '<p class="lede">Nobody’s consistent every day. Deciding now what you’ll do on the tough days is what keeps you going.</p>' +
-        '<p class="hint" style="margin-top:-12px">' + (less ? 'Not all or nothing. A smaller version still counts.' : 'Turn it down, don’t switch it off. Some days a 10, some days a 1. Both count.') + '</p>' +
-        '<div class="field"><label class="label" for="dim">' + (less ? 'If it’s a tough one, I’ll...' : 'On a tough day, I’ll...') + '</label>' +
-        '<textarea id="dim" rows="1" data-bind="dimmer" placeholder="' + (less ? 'Have one square, not the whole bar' : 'A quick dip, or a cold shower at home') + '">' + esc(d.dimmer) + '</textarea></div>' +
+        '<p class="hint" style="margin-top:-12px">Turn it down, don’t switch it off. Some days a 10, some days a 1. Both count.</p>' +
+        '<div class="field"><label class="label" for="dim">On a tough day, I’ll...</label>' +
+        '<textarea id="dim" rows="1" data-bind="dimmer" placeholder="' + (less ? 'Have one block of chocolate, not the whole bar' : 'A quick dip, or a cold shower at home') + '">' + esc(d.dimmer) + '</textarea></div>' +
         '<details class="full-only"><summary class="link" style="list-style:none;display:flex;align-items:center">Need an example?</summary><div class="card small" style="margin-top:8px">' +
-        (less ? '<span>Wine on weeknights? <b>One small glass, not the bottle.</b></span><span>Phone in bed? <b>Five minutes, then it charges outside the room.</b></span><span>Afternoon snacking? <b>Fruit first, then decide.</b></span>'
+        (less ? '<span>Chocolate? <b>One block, not the whole bar.</b></span><span>Wine on weeknights? <b>One small glass, or something fizzy instead.</b></span><span>Your instead? <b>Five minutes of it, not the full twenty.</b></span>'
           : '<span>A gym session? <b>A shorter workout, a brisk walk, or kit on and a stretch.</b></span><span>Reading 10 pages? <b>Five pages, one page, or one paragraph.</b></span><span>A cold sea swim? <b>A quick dip, feet in, or a cold shower at home.</b></span>') + '</div></details>' +
-        '<div class="spacer"></div><button class="btn" data-act="finish" ' + (d.dimmer.trim() ? '' : 'disabled') + '>' + nextLabel('dimmer') + '</button></section>';
+        '<div class="spacer"></div>' + stepButton('dimmer') + '</section>';
     },
     ready: function () {
       var ticked = !!S.entries[1];
@@ -336,7 +344,8 @@
       var h = S.habit;
       return '<section class="screen"><h1>Hey. It happens.</h1><p class="lede">Falling off isn’t the end of anything. Getting back on is where the real work lives.</p>' +
         '<div class="card"><div class="eyebrow">What you told yourself on day one</div>' +
-        '<div><div class="hint">You want to feel</div><div style="font-weight:600">' + esc(words().join(', ')) + '</div></div>' +
+        '<div><div class="hint">' + (h.mode === 'less' ? 'You’re moving towards' : 'You want to feel') + '</div><div style="font-weight:600">' + esc(words().join(', ')) + '</div></div>' +
+        (h.mode === 'less' && (h.instead || '').trim() ? '<div><div class="hint">When it pulls at you</div><div style="font-weight:600">' + esc(h.instead) + '</div></div>' : '') +
         '<div><div class="hint">On a tough day</div><div style="font-weight:600">' + esc(h.dimmer || 'Your turned-down version') + '</div></div></div>' +
         '<div class="card soft small"><span>Today doesn’t need to be a 10. Turned down still counts as showing up.</span></div>' +
         '<div class="spacer"></div>' + (S.entries[todayNum()] ? '<p style="margin:0;text-align:center">You’ve already shown up today.</p>' :
@@ -437,8 +446,8 @@
         '<div class="field"><label class="label" for="ewhat">' + (h.mode === 'less' ? 'I’m cutting back on...' : 'I’m going to...') + '</label><textarea id="ewhat" rows="1" data-hbind="what">' + esc(h.what) + '</textarea></div>' +
         '<div class="field"><label class="label" for="edim">On a low day, I’ll...</label><textarea id="edim" rows="1" data-hbind="dimmer">' + esc(h.dimmer) + '</textarea></div>' +
         (h.mode === 'less' ? '<div class="field"><label class="label" for="einst">What gives me some of that instead</label><textarea id="einst" rows="1" data-hbind="instead">' + esc(h.instead) + '</textarea></div>' : '') +
-        '<span class="label">How I’ll feel</span><div class="chips">';
-      FEELINGS.forEach(function (f) { w += '<button class="chip" data-hfeel="' + esc(f) + '" aria-pressed="' + (h.feel.indexOf(f) >= 0) + '">' + esc(f) + '</button>'; });
+        '<span class="label">' + (h.mode === 'less' ? 'What I’m moving towards' : 'How I’ll feel') + '</span><div class="chips">';
+      (h.mode === 'less' ? GAINS : FEELINGS).forEach(function (f) { w += '<button class="chip" data-hfeel="' + esc(f) + '" aria-pressed="' + (h.feel.indexOf(f) >= 0) + '">' + esc(f) + '</button>'; });
       return w + '</div><div class="field"><label class="label" for="eown">My own words</label><textarea id="eown" rows="1" data-hbind="ownFeel" placeholder="Separate with commas">' + esc(h.ownFeel) + '</textarea></div>' +
         '<div class="spacer"></div><button class="btn" data-back="1">Done</button></section>';
     },
@@ -685,8 +694,8 @@
     if (t.dataset.bind) {
       S.draft[t.dataset.bind] = t.value; save(false);
       var pn = document.getElementById('previewName'); if (pn && t.dataset.bind === 'what') pn.textContent = t.value.trim() || 'Your habit';
-      var next = view.querySelector('[data-next],[data-act="finish"],[data-go="dimmer"]');
-      if (next && t.dataset.bind !== 'instead') next.disabled = !t.value.trim() && !(t.dataset.bind === 'ownFeel' && S.draft.feel.length);
+      var next = view.querySelector('[data-step-next]');
+      if (next) next.disabled = !stepValid(next.dataset.stepNext);
     }
     if (t.dataset.hbind && S.habit) { if (t.dataset.hbind === 'what' && !t.value.trim()) return; S.habit[t.dataset.hbind] = t.value; save(); }
     if (t.dataset.rbind) { ui.reflect[t.dataset.rbind] = t.value; }
@@ -701,9 +710,9 @@
     if (d.back) return goBack();
     if (d.start) { S.draft.mode = d.start; return go('what'); }
     if (d.starter) { S.draft.what = d.starter; save(false); return render(); }
-    if (d.next === 'what') return go(S.draft.mode === 'less' ? 'less' : 'feel');
+    if (d.stepNext) { if (!stepValid(d.stepNext)) return; var nx = nextStep(d.stepNext); if (nx) return go(nx); return finishSetup(); }
     if (d.give) { var gi = S.draft.gives.indexOf(d.give); gi >= 0 ? S.draft.gives.splice(gi, 1) : S.draft.gives.push(d.give); save(false); b.setAttribute('aria-pressed', gi < 0); return; }
-    if (d.feel) { var fi = S.draft.feel.indexOf(d.feel); fi >= 0 ? S.draft.feel.splice(fi, 1) : S.draft.feel.push(d.feel); save(false); b.setAttribute('aria-pressed', fi < 0); var nx = view.querySelector('[data-go="dimmer"]'); if (nx) nx.disabled = !S.draft.feel.length && !S.draft.ownFeel.trim(); return; }
+    if (d.feel) { var fi = S.draft.feel.indexOf(d.feel); fi >= 0 ? S.draft.feel.splice(fi, 1) : S.draft.feel.push(d.feel); save(false); b.setAttribute('aria-pressed', fi < 0); var nb = view.querySelector('[data-step-next]'); if (nb) nb.disabled = !stepValid(nb.dataset.stepNext); return; }
     if (d.hfeel) { var hf = S.habit.feel.indexOf(d.hfeel); hf >= 0 ? S.habit.feel.splice(hf, 1) : S.habit.feel.push(d.hfeel); save(); b.setAttribute('aria-pressed', hf < 0); return; }
     if (d.len) { if (S.habit) S.habit.length = +d.len; else S.draft.length = +d.len; save(); return render(); }
     if (d.length) { ui.returnTo = d.length; return go('length'); }
@@ -724,11 +733,7 @@
     switch (d.act) {
       case 'ideas': ui.ideasOpen = true; return render();
       case 'closeideas': if (e.target.closest('[data-stop]') && !b.matches('button')) return; ui.ideasOpen = false; return render();
-      case 'finish': {
-        var dr = S.draft;
-        S.habit = { id: uuid(), mode: dr.mode, what: dr.what.trim(), gives: dr.gives.slice(), instead: dr.instead, feel: dr.feel.slice(), ownFeel: dr.ownFeel, dimmer: dr.dimmer.trim(), length: dr.length, start: todayStr(), status: 'active', extra: {}, createdAt: new Date().toISOString() };
-        S.entries = {}; S.later = false; S.fb = {}; save(); return go('ready');
-      }
+      case 'finish': return finishSetup();
       case 'later': S.later = true; if (S.habit && !count(function () { return true; })) S.habit.start = addDays(todayStr(), 1); save(); return render();
       case 'gosettings': return go('settings');
       case 'starttoday': S.habit.start = todayStr(); S.later = false; save(); return render();
@@ -755,6 +760,11 @@
   backBtn.addEventListener('click', goBack);
   settingsBtn.addEventListener('click', function () { go('settings'); });
 
+  function finishSetup() {
+    var dr = S.draft;
+    S.habit = { id: uuid(), mode: dr.mode, what: dr.what.trim(), gives: dr.gives.slice(), instead: dr.instead, feel: dr.feel.slice(), ownFeel: dr.ownFeel, dimmer: dr.dimmer.trim(), length: dr.length, start: todayStr(), status: 'active', extra: {}, createdAt: new Date().toISOString() };
+    S.entries = {}; S.later = false; S.fb = {}; save(); go('ready');
+  }
   function resetForNew() { S.habit = null; S.entries = {}; S.fb = {}; S.later = false; S.draft = fresh().draft; save(); go('landing'); }
 
   function confirmSheet(title, body, yes, fn) {
