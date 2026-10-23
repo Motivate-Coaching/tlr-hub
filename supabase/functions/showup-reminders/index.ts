@@ -21,6 +21,7 @@ const WINDOW_MINS = 60 // send any time in the hour after their chosen time, onc
 const LINES = [
   'Showing up beats consistency.',
   'Follow the plan, not the feeling.',
+  'On any given day, if you only have 20% to give and you give that 20%, you’re giving 100%.',
   'Imperfect action beats perfect inaction.',
   'It’s a dimmer switch, not a light switch. Some days a 10, some days a 1. Both count.',
   'You don’t need to feel like it. You just need to start.',
