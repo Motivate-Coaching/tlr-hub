@@ -209,8 +209,8 @@
         '<h1>Build a habit that sticks.</h1>' +
         '<p class="sub">Or break one that doesn’t.</p>' +
         '<p class="sub2">One minute to set up, one tap a day.</p>' +
-        todayCard('Morning walk', 'Day 12 · Felt proud', true, true) +
-        '<ul class="points">' +
+        '<div class="full-only">' + todayCard('Morning walk', 'Day 12 · Felt proud', true, true) + '</div>' +
+        '<ul class="points full-only">' +
         '<li><b>Plan for the hard days</b><span>One bad day never ends it.</span></li>' +
         '<li><b>Miss a day, lose nothing</b><span>Nothing resets. Comebacks count.</span></li>' +
         '<li><b>See it working</b><span>A morning nudge, then one quick tick.</span></li>' +
@@ -227,9 +227,9 @@
         '<div class="field"><label class="label" for="what">' + (more ? 'I’m going to...' : 'I’m cutting back on...') + '</label>' +
         '<textarea id="what" rows="1" data-bind="what" placeholder="' + (more ? 'Have a cold sea swim every morning' : 'Chocolate in the afternoons') + '">' + esc(d.what) + '</textarea>' +
         '<span class="hint">In your own words.' + (more ? ' Small enough to do on a rubbish day.' : '') + '</span></div>' +
-        '<div class="starters">' + (more ? STARTERS_MORE : STARTERS_LESS).map(function (s) { return '<button class="chip" data-starter="' + esc(s) + '">' + esc(s) + '</button>'; }).join('') + '</div>' +
-        (more ? '<button class="link" data-act="ideas">More ideas</button>' : '') +
-        '<div style="display:flex;flex-direction:column;gap:8px"><span class="eyebrow">Your tracker</span>' + todayCard(d.what.trim() || 'Your habit', 'Day 1 · Today', false, false, 'previewName') + '</div>' +
+        '<div class="starters full-only">' + (more ? STARTERS_MORE : STARTERS_LESS).map(function (s) { return '<button class="chip" data-starter="' + esc(s) + '">' + esc(s) + '</button>'; }).join('') + '</div>' +
+        (more ? '<button class="link full-only" data-act="ideas">More ideas</button>' : '') +
+        '<div class="full-only" style="display:flex;flex-direction:column;gap:8px"><span class="eyebrow">Your tracker</span>' + todayCard(d.what.trim() || 'Your habit', 'Day 1 · Today', false, false, 'previewName') + '</div>' +
         '<div class="spacer"></div><button class="btn" data-next="what" ' + (d.what.trim() ? '' : 'disabled') + '>' + nextLabel('what') + '</button></section>' +
         (ui.ideasOpen ? ideasSheet() : '');
     },
@@ -255,14 +255,14 @@
         '<p class="lede">' + (less ? 'Not all or nothing. A smaller version still counts.' : 'Some days you’re a 10. Some days a 1. Both count.') + '</p>' +
         '<div class="field"><label class="label" for="dim">' + (less ? 'If it’s a tough one, I’ll...' : 'On a low day, I’ll...') + '</label>' +
         '<textarea id="dim" rows="1" data-bind="dimmer" placeholder="' + (less ? 'Have one square, not the whole bar' : 'Have a 30 second cold shower') + '">' + esc(d.dimmer) + '</textarea></div>' +
-        '<details><summary class="link" style="list-style:none;display:flex;align-items:center">Need an example?</summary><div class="card small" style="margin-top:8px">' +
+        '<details class="full-only"><summary class="link" style="list-style:none;display:flex;align-items:center">Need an example?</summary><div class="card small" style="margin-top:8px">' +
         (less ? '<span>Wine on weeknights? <b>One small glass, not the bottle.</b></span><span>Phone in bed? <b>Five minutes, then it charges outside the room.</b></span><span>Afternoon snacking? <b>Fruit first, then decide.</b></span>'
           : '<span>Going to the gym? <b>Just put your kit on and stretch.</b></span><span>Reading 10 pages? <b>Read one.</b></span><span>A cold sea swim? <b>Feet in the water counts.</b></span>') + '</div></details>' +
         '<div class="spacer"></div><button class="btn" data-act="finish" ' + (d.dimmer.trim() ? '' : 'disabled') + '>' + nextLabel('dimmer') + '</button></section>';
     },
     ready: function () {
       var ticked = !!S.entries[1];
-      var h = '<section class="screen"><h1>You’re all set.</h1>' + whyCard(true);
+      var h = '<section class="screen"><h1>You’re all set.</h1><div class="full-only">' + whyCard(true) + '</div>';
       if (!ticked) {
         h += '<div class="card"><b style="font-size:20px;font-weight:600">' + (S.habit.mode === 'less' ? 'Kept to it today?' : 'Done it today?') + '</b><span style="color:var(--text-mid)">If you have, tick day one now. Starting counts.</span>' +
           '<button class="btn" data-tick="full">' + checkIcon('#FFFFFF') + 'Tick day one</button>' +
@@ -276,7 +276,7 @@
         h += '<div class="card"><b style="font-size:18px;font-weight:600">Keep your progress safe</b><span style="color:var(--text-mid)">Sign in so nothing is lost, your morning nudge can find you, and you can use it on any device.</span>' +
           '<button class="btn outline" data-account="ready">Save to my account</button></div>';
       }
-      h += reminderCard() +
+      h += '<div class="full-only">' + reminderCard() + '</div>' +
         '<div class="spacer"></div><button class="btn" data-go="tracker">Go to my tracker</button><button class="link center" data-words="ready">See my words</button></section>';
       return h;
     },
@@ -294,7 +294,7 @@
       if (daysBetween(S.habit.start, todayStr()) < 0) return '<section class="screen"><div><div class="eyebrow">My habit</div><h1>' + esc(habitName()) + '</h1></div>' +
         '<div class="card"><b style="font-size:20px;font-weight:600">Day one is tomorrow.</b><span style="color:var(--text-mid)">Your nudge arrives at ' + esc(fmtTime(S.settings.time)) + '. Changed your mind?</span><button class="btn outline" data-act="starttoday">Start today instead</button></div>' +
         whyCard(false) + '</section>';
-      if (S.settings.view === 'focus' && !ui.peek) return focusTracker();
+      if (S.settings.view === 'focus') return focusTracker();
       var t = todayNum(), L = S.habit.length, e = S.entries[t];
       var h = '<section class="screen" style="gap:16px"><div><div class="eyebrow">My habit</div><h1>' + esc(habitName()) + '</h1>' +
         '<div style="color:var(--text-mid)">' + (t > L ? 'All ' + L + ' days · complete' : 'Day ' + t + ' of ' + L) + '</div></div>';
@@ -320,7 +320,7 @@
         '<div class="stat"><small>Most felt</small><b class="word">' + esc(top || 'Not yet') + '</b></div></div>';
       h += '<button class="btn outline" data-go="share">Share my progress</button>' +
         '<div class="row" style="justify-content:center;flex-wrap:wrap;gap:4px 16px"><button class="link" data-words="tracker">My words</button><button class="link" data-go="slipped">Slipped off track?</button>' +
-        (S.settings.view === 'focus' ? '<button class="link" data-act="unpeek">Back to Focus view</button>' : '') + '</div></section>';
+        '</div></section>';
       return h;
     },
     note: function () {
@@ -468,7 +468,7 @@
     else if (!e) h += '<div class="big"><button class="btn" data-tick="full">' + checkIcon('#FFFFFF') + 'Full on</button><button class="btn grey" data-tick="dimmer">Dimmer day</button></div>' +
       '<p class="hint">Hard day? Your dimmer version: <b>' + esc(S.habit.dimmer) + '</b></p>';
     else h += '<div class="done"><span class="bigstar"></span><span class="msg">' + esc(doneMsg(e)) + '</span><button data-go="note">' + (e.note ? 'Edit note' : 'Note') + '</button></div><p class="count">That’s today done. See you tomorrow.</p>';
-    return h + '<div class="spacer"></div><button class="link center" data-act="peek">Show everything</button></section>';
+    return h + '<div class="spacer"></div></section>';
   }
 
   function extraCards(t) {
@@ -533,6 +533,9 @@
   function render() {
     var s = screens[S.screen] ? S.screen : 'landing';
     if (s === 'tracker' && !S.habit) s = 'landing';
+    var focus = S.settings.view === 'focus';
+    document.documentElement.classList.toggle('focus-mode', focus);
+    document.querySelectorAll('#viewbar [data-view]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.view === S.settings.view)); });
     view.innerHTML = screens[s]();
     backBtn.classList.toggle('ghost', !BACK[s]);
     settingsBtn.classList.toggle('ghost', !S.habit || s === 'settings' || ['what', 'less', 'feel', 'dimmer'].indexOf(s) >= 0);
@@ -707,7 +710,7 @@
     if (d.words) { ui.wordsFrom = d.words; return go('words'); }
     if (d.account) { ui.returnTo = d.account; return go('account'); }
     if (d.tick) { var from = d.from || (S.screen === 'ready' ? 'ready' : 'tracker'); return tick(d.tick, from); }
-    if (d.view) { S.settings.view = d.view; ui.peek = false; save(); return render(); }
+    if (d.view) { if (S.settings.view !== d.view) { S.settings.view = d.view; save(); toast(d.view === 'focus' ? 'Focus view: just the one thing.' : 'Full view: everything in one place.'); } return render(); }
     if (d.text) { S.settings.text = d.text; applyComfort(); save(); return render(); }
     if (d.toggle) {
       if (d.toggle === 'email' && !user) { ui.returnTo = 'settings'; return go('account'); }
@@ -730,8 +733,6 @@
       case 'starttoday': S.habit.start = todayStr(); S.later = false; save(); return render();
       case 'savenote': { var t = todayNum(); var v = document.getElementById('note').value.trim(); if (!S.entries[t] && v) { toast('Tick today first, then your note is saved with it.'); return; } if (S.entries[t]) { S.entries[t].note = v; S.entries[t].at = new Date().toISOString(); } save(); toast('Note saved.'); return go('tracker'); }
       case 'undo': delete S.entries[todayNum()]; save(); toast('Undone.'); return render();
-      case 'peek': ui.peek = true; return render();
-      case 'unpeek': ui.peek = false; return render();
       case 'sharenote': ui.shareNote = !ui.shareNote; return render();
       case 'shareimg': return void shareImage();
       case 'whatsapp': { var tt = Math.min(todayNum(), S.habit.length); window.open('https://wa.me/?text=' + encodeURIComponent('Day ' + tt + ' of ' + S.habit.length + ': ' + habitName() + '. ' + count(function () { return true; }) + ' show-ups so far.'), '_blank', 'noopener'); return; }
