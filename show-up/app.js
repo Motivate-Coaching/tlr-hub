@@ -406,7 +406,7 @@
         '<p>His work rests on two ideas: <b>Do It Your Way</b>, because change sticks when it fits who you are, and <b>Hold It Lightly</b>, because a bad day is part of the process, not the end of it. Both run through this tool, and through his forthcoming book, <i>Do It Your Way</i>. He is also the author of <i>10 Ways to Be Happy Today</i>.</p>' +
         '<p>He never stops learning. He is working towards Master Certified Coach, the International Coaching Federation’s highest credential, and has trained further in neuroscience and positive psychology. You may have heard him on Coaches Rising, The Coaching Hour or Coach Conversations.</p>' +
         '<p>What drives him is simple: helping people understand themselves, lead themselves, and build a life that feels like their own.</p></div>' +
-        '<p class="hint">This page explains the research the tool is built on. The researchers named here have not reviewed or endorsed it.</p></section>';
+        '<p class="hint">This page explains the research the tool is built on. The researchers named here have not reviewed or endorsed it.</p>' + '<a class="link center tlr-link" href="https://www.motivate-coaching.com/thelivingroom" target="_blank" rel="noopener">About The Living Room (TLR) <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a>' + '</section>';
     },
     settings: function () {
       var s = S.settings;
@@ -443,7 +443,7 @@
         (user ? '<span>Signed in as <b>' + esc(user.email) + '</b></span>' : '<span>Not signed in. Your progress is saved on this device only.</span><button class="btn" data-account="settings">Sign in to save</button>') +
         '<p class="hint">Your notes are only ever seen by you. During the pilot, Stuart sees how often people show up and any feedback you send, never your notes.</p>' +
         (user ? '<button class="switch" role="switch" aria-checked="' + !!s.marketing + '" data-toggle="marketing"><span><b>Ideas and updates from Stuart</b><span class="hint">Occasional emails. Off unless you choose.</span></span><span class="track"></span></button><button class="link" data-act="signout">Sign out</button>' : '') +
-        '</div>' + (focusMode ? '</div></details>' : '') + '<button class="link center" data-go="science">The science behind it</button></section>';
+        '</div>' + (focusMode ? '</div></details>' : '') + '<button class="link center" data-go="science">The science behind it</button>' + '<a class="link center tlr-link" href="https://www.motivate-coaching.com/thelivingroom" target="_blank" rel="noopener">About The Living Room (TLR) <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a>' + '</section>';
       return h;
     },
     edit: function () {
@@ -770,6 +770,7 @@
   });
   backBtn.addEventListener('click', goBack);
   settingsBtn.addEventListener('click', function () { go('settings'); });
+  document.getElementById('homeBtn').addEventListener('click', function () { ui.ideasOpen = false; go(S.habit ? 'tracker' : 'landing'); });
 
   // Suggestions and examples: always shown in Full; in Focus they wait behind one tap.
   function optional(label, html) {
