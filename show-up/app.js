@@ -56,7 +56,7 @@
   try { var saved = JSON.parse(localStorage.getItem(KEY) || 'null'); if (saved && typeof saved === 'object') { S = Object.assign(fresh(), saved); S.settings = Object.assign(fresh().settings, saved.settings || {}); S.draft = Object.assign(fresh().draft, saved.draft || {}); } } catch (e) {}
   var user = null; // signed-in Supabase user
   var syncState = 'local'; // local | saving | saved | error
-  var ui = { ideasOpen: false, wordsFrom: null, returnTo: null, peek: false, authMode: null };
+  var ui = { ideasOpen: false, wordsFrom: null, returnTo: null, authMode: null, moreChips: false };
 
   function save(touch) { if (touch !== false) S.updatedAt = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} if (user) queueSync(); }
 
@@ -100,7 +100,7 @@
     var r = document.documentElement;
     r.classList.toggle('size-large', S.settings.text === 'large');
     r.classList.toggle('size-larger', S.settings.text === 'larger');
-    r.classList.toggle('calm', !!S.settings.calm);
+    r.classList.toggle('calm', !!S.settings.calm || S.settings.view === 'focus');
   }
 
   function stage() {
@@ -232,41 +232,45 @@
         '<div class="field"><label class="label" for="what">' + (more ? 'I’m going to...' : 'I’m cutting back on...') + '</label>' +
         '<textarea id="what" rows="1" data-bind="what" placeholder="' + (more ? 'Have a cold sea swim every morning' : 'Chocolate in the afternoons') + '">' + esc(d.what) + '</textarea>' +
         '<span class="hint">In your own words.' + (more ? ' Small enough to do on a rubbish day.' : '') + '</span></div>' +
-        '<div class="starters full-only">' + (more ? STARTERS_MORE : STARTERS_LESS).map(function (s) { return '<button class="chip" data-starter="' + esc(s) + '">' + esc(s) + '</button>'; }).join('') + '</div>' +
-        (more ? '<button class="link full-only" data-act="ideas">More ideas</button>' : '') +
-        '<div class="full-only" style="display:flex;flex-direction:column;gap:8px"><span class="eyebrow">Your tracker</span>' + todayCard(d.what.trim() || 'Your habit', 'Day 1 · Today', false, false, 'previewName') + '</div>' +
+        optional('Show me some ideas', '<div class="starters">' + (more ? STARTERS_MORE : STARTERS_LESS).map(function (s) { return '<button class="chip" data-starter="' + esc(s) + '">' + esc(s) + '</button>'; }).join('') + '</div>' +
+          (more ? '<button class="link" data-act="ideas">More ideas</button>' : '')) +
+        '<div class="full-only" id="previewWrap" style="flex-direction:column;gap:8px;display:' + (d.what.trim() ? 'flex' : 'none') + '"><span class="eyebrow">Your tracker</span>' + todayCard(d.what.trim() || 'Your habit', 'Day 1 · Today', false, false, 'previewName') + '</div>' +
         '<div class="spacer"></div>' + stepButton('what') + '</section>' +
         (ui.ideasOpen ? ideasSheet() : '');
     },
     less: function () {
       var d = S.draft;
-      var h = '<section class="screen">' + progress('less') + '<h1>When it pulls at you, what will you do instead?</h1>' +
-        '<p class="lede">It’s there for a reason. What does it usually give you? No judgement.</p>' + loopCard() + '<div class="chips">';
-      GIVES.forEach(function (g) { h += '<button class="chip" data-give="' + esc(g) + '" aria-pressed="' + (d.gives.indexOf(g) >= 0) + '">' + esc(g) + '</button>'; });
-      return h + '</div><div class="field"><label class="label" for="instead">Instead, I’ll...</label>' +
+      var gives = '<span class="label">It usually gives me...</span><div class="chips" style="margin-top:8px">' +
+        GIVES.map(function (g) { return '<button class="chip" data-give="' + esc(g) + '" aria-pressed="' + (d.gives.indexOf(g) >= 0) + '">' + esc(g) + '</button>'; }).join('') + '</div>';
+      return '<section class="screen">' + progress('less') + '<h1>When it pulls at you, what will you do instead?</h1>' +
+        '<p class="lede full-only">No judgement. It’s there for a reason.</p>' +
+        optional('What does it usually give you?', gives) +
+        '<div class="field"><label class="label" for="instead">Instead, I’ll...</label>' +
         '<textarea id="instead" rows="1" data-bind="instead" placeholder="Go for a 20 minute walk and make a proper cup of tea">' + esc(d.instead) + '</textarea>' +
-        '<span class="hint">Something that gives you some of the same, and moves you towards what you want.</span></div>' +
+        '<span class="hint full-only">Something that gives you some of the same, and moves you towards what you want.</span></div>' +
+        optional('See how the swap works', loopCard()) +
         '<div class="spacer"></div>' + stepButton('less') + '</section>';
     },
     feel: function () {
       var d = S.draft, less = d.mode === 'less', list = less ? GAINS : FEELINGS;
       var h = '<section class="screen">' + progress('feel') + '<h1>' + (less ? 'What are you moving towards?' : 'When you’ve done it, how will you feel?') + '</h1>' +
         '<p class="lede">' + (less ? 'Cutting back is the how. This is the why. Tap a few.' : 'Tap a few.') + '</p><div class="chips">';
-      list.forEach(function (f) { h += '<button class="chip" data-feel="' + esc(f) + '" aria-pressed="' + (d.feel.indexOf(f) >= 0) + '">' + esc(f) + '</button>'; });
-      return h + '</div><div class="field"><label class="label" for="own">Your own words (optional)</label>' +
+      list.forEach(function (f, i) { h += '<button class="chip' + (i >= 6 && !ui.moreChips && d.feel.indexOf(f) < 0 ? ' extra' : '') + '" data-feel="' + esc(f) + '" aria-pressed="' + (d.feel.indexOf(f) >= 0) + '">' + esc(f) + '</button>'; });
+      h += '</div>' + (ui.moreChips ? '' : '<button class="link focus-only" data-act="morechips">Show more words</button>');
+      return h + '<div class="field"><label class="label" for="own">Your own words (optional)</label>' +
         '<textarea id="own" rows="1" data-bind="ownFeel" placeholder="' + (less ? 'Fit into my jeans, wake up fresh' : 'Separate with commas') + '">' + esc(d.ownFeel) + '</textarea></div>' +
         '<div class="spacer"></div>' + stepButton('feel') + '</section>';
     },
     dimmer: function () {
       var d = S.draft, less = d.mode === 'less';
       return '<section class="screen">' + progress('dimmer') + '<h1>On a tough day, how far will you turn it down?</h1>' +
-        '<p class="lede">Nobody’s consistent every day. Deciding now what you’ll do on the tough days is what keeps you going.</p>' +
-        '<p class="hint" style="margin-top:-12px">Turn it down, don’t switch it off. Some days a 10, some days a 1. Both count.</p>' +
+        '<p class="lede"><span class="full-only">Nobody’s consistent every day. Deciding now what you’ll do on the tough days is what keeps you going.</span><span class="focus-only">A plan for tough days keeps you going.</span></p>' +
+        '<p class="hint full-only" style="margin-top:-12px">Turn it down, don’t switch it off. Some days a 10, some days a 1. Both count.</p>' +
         '<div class="field"><label class="label" for="dim">On a tough day, I’ll...</label>' +
         '<textarea id="dim" rows="1" data-bind="dimmer" placeholder="' + (less ? 'Have one block of chocolate, not the whole bar' : 'A quick dip, or a cold shower at home') + '">' + esc(d.dimmer) + '</textarea></div>' +
-        '<details class="full-only"><summary class="link" style="list-style:none;display:flex;align-items:center">Need an example?</summary><div class="card small" style="margin-top:8px">' +
+        optional('Show me examples', '<div class="card small">' +
         (less ? '<span>Chocolate? <b>One block, not the whole bar.</b></span><span>Wine on weeknights? <b>One small glass, or something fizzy instead.</b></span><span>Your instead? <b>Five minutes of it, not the full twenty.</b></span>'
-          : '<span>A gym session? <b>A shorter workout, a brisk walk, or kit on and a stretch.</b></span><span>Reading 10 pages? <b>Five pages, one page, or one paragraph.</b></span><span>A cold sea swim? <b>A quick dip, feet in, or a cold shower at home.</b></span>') + '</div></details>' +
+          : '<span>A gym session? <b>A shorter workout, a brisk walk, or kit on and a stretch.</b></span><span>Reading 10 pages? <b>Five pages, one page, or one paragraph.</b></span><span>A cold sea swim? <b>A quick dip, feet in, or a cold shower at home.</b></span>') + '</div>') +
         '<div class="spacer"></div>' + stepButton('dimmer') + '</section>';
     },
     ready: function () {
@@ -285,8 +289,8 @@
         h += '<div class="card"><b style="font-size:18px;font-weight:600">Keep your progress safe</b><span style="color:var(--text-mid)">Sign in so nothing is lost, your morning nudge can find you, and you can use it on any device.</span>' +
           '<button class="btn outline" data-account="ready">Save to my account</button></div>';
       }
-      h += '<div class="full-only">' + reminderCard() + '</div>' +
-        '<div class="spacer"></div><button class="btn" data-go="tracker">Go to my tracker</button><button class="link center" data-words="ready">See my words</button></section>';
+      h += nextNudge() +
+        '<div class="spacer"></div><button class="btn" data-go="tracker">Go to my tracker</button><button class="link center full-only" data-words="ready">See my words</button></section>';
       return h;
     },
     length: function () {
@@ -312,8 +316,8 @@
         h += '<div class="card"><b style="font-size:20px;font-weight:600">You gave it ' + L + ' days.</b><span style="color:var(--text-mid)">Time for your look back: what you noticed, and what’s next. Your call.</span><button class="btn" data-go="reflect">Start my look back</button></div>';
       } else if (!e) {
         h += '<div style="display:flex;flex-direction:column;gap:8px"><b style="font-weight:600">' + (S.habit.mode === 'less' ? 'Kept to it today?' : 'Showed up today?') + '</b><div class="tick-row">' +
-          '<button class="btn" data-tick="full">' + checkIcon('#FFFFFF') + 'Full on</button>' +
-          '<button class="btn grey" data-tick="dimmer">Turned down</button>' +
+          '<button class="btn" data-tick="full">' + iconFull('#FFFFFF', 16) + (S.habit.mode === 'less' ? 'Kept to it' : 'Full on') + '</button>' +
+          '<button class="btn grey" data-tick="dimmer">' + iconDown('#0F1215', 16) + 'Turned down</button>' +
           '<button class="note-btn" data-go="note" aria-label="Add a note">' + pencil() + '</button></div></div>';
       } else {
         h += '<div class="done"><span class="bigstar"></span><span class="msg">' + esc(doneMsg(e)) + '</span><button data-go="note">' + (e.note ? 'Edit note' : 'Add a note') + '</button></div>' +
@@ -323,10 +327,10 @@
       h += extraCards(t);
       var felt = {}; Object.keys(S.entries).forEach(function (k) { var f = S.entries[k].felt; if (f && f !== 'Honestly, tough') felt[f] = (felt[f] || 0) + 1; });
       var top = Object.keys(felt).sort(function (a, b) { return felt[b] - felt[a]; })[0];
-      h += '<div class="stats"><div class="stat"><small>Show-ups</small><b>' + count(function () { return true; }) + '</b></div>' +
-        '<div class="stat"><small>Turned-down days</small><b>' + count(function (x) { return x.kind === 'dimmer'; }) + '</b></div>' +
-        '<div class="stat"><small>Comebacks</small><b>' + count(function (x) { return x.comeback; }) + '</b></div>' +
-        '<div class="stat"><small>Most felt</small><b class="word">' + esc(top || 'Not yet') + '</b></div></div>';
+      h += '<div class="statline"><div><b>' + count(function () { return true; }) + '</b><small>Show-ups</small></div>' +
+        '<div><b>' + count(function (x) { return x.kind === 'dimmer'; }) + '</b><small>Turned down</small></div>' +
+        '<div><b>' + count(function (x) { return x.comeback; }) + '</b><small>Comebacks</small></div></div>' +
+        (top ? '<p class="felt-line">Most often you’ve felt <b>' + esc(top.toLowerCase()) + '</b>.</p>' : '');
       h += '<button class="btn outline" data-go="share">Share my progress</button>' +
         '<div class="row" style="justify-content:center;flex-wrap:wrap;gap:4px 16px"><button class="link" data-words="tracker">My words</button><button class="link" data-go="slipped">Slipped off track?</button>' +
         '</div></section>';
@@ -413,18 +417,20 @@
         '<button class="choice" data-view="full" aria-pressed="' + (s.view === 'full') + '"><b>Full</b><small>Everything on one page</small></button>' +
         '<button class="choice" data-view="focus" aria-pressed="' + (s.view === 'focus') + '"><b>Focus</b><small>Just today’s one thing</small></button></div>' +
         '<span class="label">Text size</span><div class="chips">' + [['standard', 'Standard'], ['large', 'Large'], ['larger', 'Larger']].map(function (o) { return '<button class="chip" data-text="' + o[0] + '" aria-pressed="' + (s.text === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>' +
-        '<button class="switch" role="switch" aria-checked="' + !!s.calm + '" data-toggle="calm"><span><b>Less movement</b><span class="hint">Calmer screens, no animation.</span></span><span class="track"></span></button>' +
+        (s.view === 'focus' ? '<p class="hint">Focus keeps screens still and calm.</p>' : '<button class="switch" role="switch" aria-checked="' + !!s.calm + '" data-toggle="calm"><span><b>Less movement</b><span class="hint">Calmer screens, no animation.</span></span><span class="track"></span></button>') +
         '<button class="switch" role="switch" aria-checked="' + !!s.buzz + '" data-toggle="buzz"><span><b>Buzz when I tick</b><span class="hint">On phones that support it.</span></span><span class="track"></span></button></div>';
       // Reminders
       h += '<div class="card" id="reminders"><span class="eyebrow">Morning nudge</span>' +
         '<div class="field"><label class="label" for="rtime">What time?</label><input class="input" id="rtime" type="time" step="900" value="' + esc(s.time) + '" style="max-width:200px"></div>' +
-        '<span class="label">Which days?</span><div class="days">' + DAY_NAMES.map(function (n, i) { return '<button class="chip" data-rday="' + i + '" aria-pressed="' + (s.days.indexOf(i) >= 0) + '" aria-label="' + DAY_LABELS[i] + '">' + n + '</button>'; }).join('') + '</div>' +
+        '<span class="label full-only">Which days?</span><div class="days full-only">' + DAY_NAMES.map(function (n, i) { return '<button class="chip" data-rday="' + i + '" aria-pressed="' + (s.days.indexOf(i) >= 0) + '" aria-label="' + DAY_LABELS[i] + '">' + n + '</button>'; }).join('') + '</div>' +
         '<button class="switch" role="switch" aria-checked="' + !!s.email + '" data-toggle="email"><span><b>Email</b><span class="hint">' + (user ? 'To ' + esc(user.email) : 'Sign in to switch this on') + '</span></span><span class="track"></span></button>' +
         '<button class="switch" role="switch" aria-checked="' + !!s.push + '" data-act="push"><span><b>Phone notification</b><span class="hint" id="pushHint">' + pushHint() + '</span></span><span class="track"></span></button>' +
         '<div class="divider"></div><span class="label">Need a break?</span>' +
         (s.pausedUntil && s.pausedUntil >= todayStr() ? '<div class="row"><span>Nudges paused until ' + esc(prettyDate(s.pausedUntil)) + '.</span><button class="chip" data-pause="0">Resume</button></div>' :
           '<div class="chips">' + [[1, 'Tomorrow'], [3, '3 days'], [7, '7 days']].map(function (o) { return '<button class="chip" data-pause="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>') +
         '<p class="hint">Nudges skip any day you’ve already ticked, and pausing never touches your progress.</p></div>';
+      var focusMode = s.view === 'focus';
+      if (focusMode) h += '<details class="ask"><summary>More settings</summary><div style="display:flex;flex-direction:column;gap:22px">';
       // Habit
       if (S.habit) h += '<div class="card"><span class="eyebrow">My habit</span><b style="font-weight:600;font-size:18px">' + esc(habitName()) + '</b>' +
         '<button class="btn outline" data-go="edit">Edit my habit and words</button>' +
@@ -437,7 +443,7 @@
         (user ? '<span>Signed in as <b>' + esc(user.email) + '</b></span>' : '<span>Not signed in. Your progress is saved on this device only.</span><button class="btn" data-account="settings">Sign in to save</button>') +
         '<p class="hint">Your notes are only ever seen by you. During the pilot, Stuart sees how often people show up and any feedback you send, never your notes.</p>' +
         (user ? '<button class="switch" role="switch" aria-checked="' + !!s.marketing + '" data-toggle="marketing"><span><b>Ideas and updates from Stuart</b><span class="hint">Occasional emails. Off unless you choose.</span></span><span class="track"></span></button><button class="link" data-act="signout">Sign out</button>' : '') +
-        '</div><button class="link center" data-go="science">The science behind it</button></section>';
+        '</div>' + (focusMode ? '</div></details>' : '') + '<button class="link center" data-go="science">The science behind it</button></section>';
       return h;
     },
     edit: function () {
@@ -472,12 +478,15 @@
   };
 
   function focusTracker() {
-    var t = todayNum(), L = S.habit.length, e = S.entries[t];
-    var h = '<section class="screen focus"><div><div class="eyebrow">' + (t > L ? 'Complete' : 'Day ' + t + ' of ' + L) + '</div><h1>' + esc(habitName()) + '</h1></div>';
+    var t = todayNum(), L = S.habit.length, e = S.entries[t], less = S.habit.mode === 'less';
+    var h = '<section class="screen focus"><h1 style="text-align:center">' + esc(habitName()) + '</h1>' + ring(t, L) +
+      '<p class="hint" style="text-align:center;margin-top:-12px">' + (t > L ? 'All ' + L + ' days done' : 'Day ' + t + ' of ' + L) + '</p>';
     if (t > L) h += '<div class="big"><button class="btn" data-go="reflect">Start my look back</button></div>';
-    else if (!e) h += '<div class="big"><button class="btn" data-tick="full">' + checkIcon('#FFFFFF') + 'Full on</button><button class="btn grey" data-tick="dimmer">Turned down</button></div>' +
-      '<p class="hint">Tough day? Turn it down: <b>' + esc(S.habit.dimmer) + '</b></p>';
-    else h += '<div class="done"><span class="bigstar"></span><span class="msg">' + esc(doneMsg(e)) + '</span><button data-go="note">' + (e.note ? 'Edit note' : 'Note') + '</button></div><p class="count">That’s today done. See you tomorrow.</p>';
+    else if (!e) h += '<div class="big"><button class="btn" data-tick="full">' + iconFull('#FFFFFF') + (less ? 'Kept to it' : 'Full on') + '</button>' +
+      '<button class="btn grey" data-tick="dimmer">' + iconDown('#0F1215') + 'Turned down</button></div>' +
+      '<div class="plan">' + iconDown('#888880', 32) + '<div><small>Tough day? Turn it down to</small><b>' + esc(S.habit.dimmer) + '</b></div></div>';
+    else h += '<div class="done"><span class="bigstar"></span><span class="msg">' + esc(doneMsg(e)) + '</span><button data-go="note">' + (e.note ? 'Edit note' : 'Note') + '</button></div>' + nextNudge();
+    h += '<details class="ask" style="align-self:center"><summary>See all my days</summary><div class="card" style="padding:16px">' + gridHTML(t) + '</div></details>';
     return h + '<div class="spacer"></div></section>';
   }
 
@@ -693,8 +702,8 @@
     if (t.tagName === 'TEXTAREA') grow(t);
     if (t.dataset.bind) {
       S.draft[t.dataset.bind] = t.value; save(false);
-      var pn = document.getElementById('previewName'); if (pn && t.dataset.bind === 'what') pn.textContent = t.value.trim() || 'Your habit';
-      if (t.dataset.bind === 'instead') { var li = document.getElementById('loopInstead'); if (li) li.textContent = t.value.trim() || 'Your instead'; }
+      var pn = document.getElementById('previewName'); if (pn && t.dataset.bind === 'what') { pn.textContent = t.value.trim() || 'Your habit'; var pw = document.getElementById('previewWrap'); if (pw) pw.style.display = t.value.trim() ? 'flex' : 'none'; }
+      if (t.dataset.bind === 'instead') { view.querySelectorAll('[data-loop="instead"]').forEach(function (li) { li.textContent = t.value.trim() || 'Your instead'; }); }
       var next = view.querySelector('[data-step-next]');
       if (next) next.disabled = !stepValid(next.dataset.stepNext);
     }
@@ -712,7 +721,7 @@
     if (d.start) { S.draft.mode = d.start; return go('what'); }
     if (d.starter) { S.draft.what = d.starter; save(false); return render(); }
     if (d.stepNext) { if (!stepValid(d.stepNext)) return; var nx = nextStep(d.stepNext); if (nx) return go(nx); return finishSetup(); }
-    if (d.give) { var gi = S.draft.gives.indexOf(d.give); gi >= 0 ? S.draft.gives.splice(gi, 1) : S.draft.gives.push(d.give); save(false); b.setAttribute('aria-pressed', gi < 0); var lg = document.getElementById('loopGives'); if (lg) lg.textContent = S.draft.gives.length ? S.draft.gives.join(', ') : 'Tap below'; return; }
+    if (d.give) { var gi = S.draft.gives.indexOf(d.give); gi >= 0 ? S.draft.gives.splice(gi, 1) : S.draft.gives.push(d.give); save(false); b.setAttribute('aria-pressed', gi < 0); view.querySelectorAll('[data-loop="gives"]').forEach(function (lg) { lg.textContent = S.draft.gives.length ? S.draft.gives.join(', ') : 'Tap above'; }); view.querySelectorAll('[data-give="' + d.give + '"]').forEach(function (x) { x.setAttribute('aria-pressed', gi < 0); }); return; }
     if (d.feel) { var fi = S.draft.feel.indexOf(d.feel); fi >= 0 ? S.draft.feel.splice(fi, 1) : S.draft.feel.push(d.feel); save(false); b.setAttribute('aria-pressed', fi < 0); var nb = view.querySelector('[data-step-next]'); if (nb) nb.disabled = !stepValid(nb.dataset.stepNext); return; }
     if (d.hfeel) { var hf = S.habit.feel.indexOf(d.hfeel); hf >= 0 ? S.habit.feel.splice(hf, 1) : S.habit.feel.push(d.hfeel); save(); b.setAttribute('aria-pressed', hf < 0); return; }
     if (d.len) { if (S.habit) S.habit.length = +d.len; else S.draft.length = +d.len; save(); return render(); }
@@ -739,6 +748,7 @@
       case 'gosettings': return go('settings');
       case 'starttoday': S.habit.start = todayStr(); S.later = false; save(); return render();
       case 'savenote': { var t = todayNum(); var v = document.getElementById('note').value.trim(); if (!S.entries[t] && v) { toast('Tick today first, then your note is saved with it.'); return; } if (S.entries[t]) { S.entries[t].note = v; S.entries[t].at = new Date().toISOString(); } save(); toast('Note saved.'); return go('tracker'); }
+      case 'morechips': ui.moreChips = true; return render();
       case 'undo': delete S.entries[todayNum()]; save(); toast('Undone.'); return render();
       case 'sharenote': ui.shareNote = !ui.shareNote; return render();
       case 'shareimg': return void shareImage();
@@ -761,16 +771,34 @@
   backBtn.addEventListener('click', goBack);
   settingsBtn.addEventListener('click', function () { go('settings'); });
 
+  // Suggestions and examples: always shown in Full; in Focus they wait behind one tap.
+  function optional(label, html) {
+    return '<div class="full-only">' + html + '</div><details class="ask focus-only"><summary>' + esc(label) + '</summary>' + html + '</details>';
+  }
+  function iconFull(c, z) { z = z || 20; return '<svg width="' + z + '" height="' + z + '" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="' + c + '"/></svg>'; }
+  function iconDown(c, z) { z = z || 20; return '<svg width="' + z + '" height="' + z + '" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="' + c + '" stroke-width="2"/><path d="M12 3a9 9 0 0 1 0 18z" fill="' + c + '"/></svg>'; }
+  function iconClock(c) { return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'; }
+  function ring(t, L) {
+    var r = 56, c = 2 * Math.PI * r, n = count(function () { return true; }), f = Math.min(1, n / L);
+    return '<div class="ring" role="img" aria-label="' + n + ' show-ups, day ' + Math.min(t, L) + ' of ' + L + '"><svg width="132" height="132" viewBox="0 0 132 132"><circle cx="66" cy="66" r="' + r + '" fill="none" stroke="#E5DDD1" stroke-width="10"/>' +
+      (n ? '<circle cx="66" cy="66" r="' + r + '" fill="none" stroke="#0F1215" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + (c * f).toFixed(1) + ' ' + c.toFixed(1) + '"/>' : '') + '</svg>' +
+      '<div class="lbl"><b>' + n + '</b><small>show-up' + (n === 1 ? '' : 's') + '</small></div></div>';
+  }
+  function nextNudge() {
+    var s = S.settings; if (!(s.email || s.push)) return '';
+    return '<p class="next-up">' + iconClock('#888880') + '<span>What happens next: <b>your nudge arrives tomorrow at ' + esc(fmtTime(s.time)) + '</b>. Change it any time in Settings.</span></p>';
+  }
+
   // The habit loop: the pull still comes, you choose what happens next, you still get something.
   function loopCard() {
     var d = S.draft;
-    return '<div class="loop full-only" aria-label="How the swap works">' +
+    return '<div class="loop" aria-label="How the swap works">' +
       '<div class="lp"><span class="n">1</span><div><b>The pull</b><span>The urge, the moment, the 4pm slump</span></div></div>' +
       '<div class="arrow" aria-hidden="true"></div>' +
       '<div class="lp choose"><span class="n">2</span><div><b>What you do</b><span class="old">' + esc(d.what.trim() || 'The old habit') + '</span>' +
-      '<span class="new" id="loopInstead">' + esc(d.instead.trim() || 'Your instead') + '</span></div></div>' +
+      '<span class="new" data-loop="instead">' + esc(d.instead.trim() || 'Your instead') + '</span></div></div>' +
       '<div class="arrow" aria-hidden="true"></div>' +
-      '<div class="lp"><span class="n">3</span><div><b>What you get</b><span id="loopGives">' + esc(d.gives.length ? d.gives.join(', ') : 'Tap below') + '</span></div></div>' +
+      '<div class="lp"><span class="n">3</span><div><b>What you get</b><span data-loop="gives">' + esc(d.gives.length ? d.gives.join(', ') : 'Tap above') + '</span></div></div>' +
       '<p class="cap">The pull still comes. You choose what happens next.</p></div>';
   }
   function finishSetup() {
