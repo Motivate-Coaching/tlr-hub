@@ -16,7 +16,7 @@ Stuart is coach and product owner. Claude builds. Stuart is not a developer: exp
 
 ## Stack
 
-Plain HTML, CSS and vanilla JS on GitHub Pages. No framework, no build step, no npm. Supabase JS v2 from the jsDelivr CDN for auth and data. Google Fonts: Playfair Display (headings) and Inter (body). GitHub Pages deploys automatically from main, usually live within 1 to 2 minutes.
+Plain HTML, CSS and vanilla JS on GitHub Pages. No framework, no build step, no npm. Supabase JS v2 from the jsDelivr CDN for auth and data. Google Fonts: Poppins (all UI and body text) and Playfair Display (the one headline per page), as set in tlr-design-system.html. Many older pages still load Inter; that is a known inconsistency, not the standard. GitHub Pages deploys automatically from main, usually live within 1 to 2 minutes.
 
 ## How to work in this repo
 
@@ -64,4 +64,14 @@ Tables created with raw SQL need explicit GRANTs.
 
 ## Design system
 
---navy #0F1215, --navy-mid #1C2B3A, --gold #E8A800, --gold-light #F5C842, --cream #F9F7F2, --cream-dark #EFE9DF, --white #FFFFFF, --text-dark #111820, --text-mid #445566, --text-muted #8899AA, --border #E2D9CE, --accent #1A6B72 (teal, history.js UI). Full reference: tlr-design-system.html.
+tlr-design-system.html (TLR Design System v1.0) is the single source of truth for anything members see, including mockups and emails. Read it in full before designing or styling anything, and check finished work against it before showing Stuart. If this file and the design system disagree, the design system wins.
+
+Summary (from the design system):
+- Fonts: Poppins for everything functional (body, labels, inputs, buttons). Playfair Display 400 for the tool title only. Never introduce other fonts.
+- Base palette: --navy #0F1215 (headers, topbar, primary buttons), --navy-mid #1C2B3A, --cream #F5F1EB (page background), --cream-dark #EDE8DF, --cream-deep #E5DDD1, --text-dark #1A1A1A, --text-mid #4A4A4A, --text-muted #888880, --border rgba(0,0,0,0.1). Green #3B6D11 for success states only.
+- Theme accents (one per theme): Theme 1 #2B4A6F slate, Theme 2 #5C6B3A olive, Theme 3 #8C4A2F terracotta, Theme 4 #1A6B72 teal, Theme 5 #C9930A amber. Never introduce a colour outside this system.
+- Radius: 4px buttons, 6px inputs and cards, 10px major panels. Spacing on a 4px base.
+- Inputs: auto-expanding textarea rows="1", never input type="text".
+- Copy: no em dashes; write "The Living Room (TLR)" in full on first use; say "theme" or "topic", never "month" or "week"; sentence case; no clichés; at most one exclamation mark per tool.
+
+Known inconsistencies to fix over time: 38 of 47 pages still load Inter instead of Poppins, and two creams are in use (#F5F1EB is correct, #F9F7F2 is not). The dashboard also uses gold #E8A800, which is not in the design system.
