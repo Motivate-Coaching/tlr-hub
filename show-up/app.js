@@ -199,7 +199,7 @@
   var BACK = {
     what: 'landing', less: 'feel', feel: 'what', dimmer: function () { return S.draft.mode === 'less' ? 'less' : 'feel'; },
     length: function () { return ui.returnTo || 'ready'; }, note: 'tracker', slipped: 'tracker', share: 'tracker', science: function () { return S.habit ? 'settings' : 'landing'; },
-    words: function () { return ui.wordsFrom || 'tracker'; }, settings: 'tracker', edit: 'settings', reflect: 'tracker', install: 'settings', account: function () { return ui.returnTo || 'tracker'; }
+    words: function () { return ui.wordsFrom || 'tracker'; }, settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', install: 'settings', account: function () { return ui.returnTo || 'tracker'; }
   };
 
   function todayCard(name, line, done, decorative, id) {
@@ -275,7 +275,7 @@
     },
     ready: function () {
       var ticked = !!S.entries[1];
-      var h = '<section class="screen"><h1>You’re all set.</h1><div class="full-only">' + whyCard(true) + '</div>';
+      var h = '<section class="screen"><div><div class="eyebrow">Your plan is ready</div><h1>Here’s your plan.</h1></div>' + planCard('ready');
       if (!ticked) {
         h += '<div class="card"><b style="font-size:20px;font-weight:600">' + (S.habit.mode === 'less' ? 'Kept to it today?' : 'Done it today?') + '</b><span style="color:var(--text-mid)">If you have, tick day one now. Starting counts.</span>' +
           '<button class="btn" data-tick="full">' + checkIcon('#FFFFFF') + 'Tick day one</button>' +
@@ -293,6 +293,12 @@
         '<div class="spacer"></div><button class="btn" data-go="tracker">Go to my tracker</button><button class="link center full-only" data-words="ready">See my words</button></section>';
       return h;
     },
+    plan: function () {
+      if (!S.habit) return screens.landing();
+      return '<section class="screen"><div><div class="eyebrow">My plan</div><h1>' + esc(habitName()) + '</h1></div>' + planCard('plan') +
+        '<p class="hint">Change anything, any time. Your ticks stay as they are.</p>' +
+        '<div class="spacer"></div><button class="btn" data-go="tracker">Back to my tracker</button></section>';
+    },
     length: function () {
       var cur = S.habit ? S.habit.length : S.draft.length;
       var h = '<section class="screen"><h1>How long do you want to give it?</h1><p class="lede">We set 30 days to start. Change it any time.</p><div style="display:flex;flex-direction:column;gap:10px">';
@@ -309,7 +315,7 @@
         whyCard(false) + '</section>';
       if (S.settings.view === 'focus') return focusTracker();
       var t = todayNum(), L = S.habit.length, e = S.entries[t];
-      var h = '<section class="screen" style="gap:16px"><div><div class="eyebrow">My habit</div><h1>' + esc(habitName()) + '</h1>' +
+      var h = '<section class="screen" style="gap:16px"><div><div class="row"><span class="eyebrow">My habit</span><button class="plan-link" data-go="plan">' + iconPlan() + 'My plan</button></div><h1>' + esc(habitName()) + '</h1>' +
         '<div style="color:var(--text-mid)">' + (t > L ? 'All ' + L + ' days · complete' : 'Day ' + t + ' of ' + L) + '</div></div>';
       h += '<div class="card" style="padding:16px">' + gridHTML(t) + '<div class="legend"><span><i style="background:var(--navy)"></i>Full on</span><span><i style="background:var(--muted)"></i>Turned down</span><span><span class="star"></span>Got back up</span></div></div>';
       if (t > L) {
@@ -433,7 +439,8 @@
       if (focusMode) h += '<details class="ask"><summary>More settings</summary><div style="display:flex;flex-direction:column;gap:22px">';
       // Habit
       if (S.habit) h += '<div class="card"><span class="eyebrow">My habit</span><b style="font-weight:600;font-size:18px">' + esc(habitName()) + '</b>' +
-        '<button class="btn outline" data-go="edit">Edit my habit and words</button>' +
+        '<button class="btn outline" data-go="plan">See my plan</button>' +
+        '<button class="btn outline" data-edit="settings">Edit my habit and words</button>' +
         '<button class="btn outline" data-length="settings">Length: ' + S.habit.length + ' days</button>' +
         '<button class="link" data-act="newhabit">Start a new habit</button></div>';
       // Install
@@ -450,8 +457,8 @@
       var h = S.habit;
       var w = '<section class="screen"><h1>Edit my habit</h1>' +
         '<div class="field"><label class="label" for="ewhat">' + (h.mode === 'less' ? 'I’m cutting back on...' : 'I’m going to...') + '</label><textarea id="ewhat" rows="1" data-hbind="what">' + esc(h.what) + '</textarea></div>' +
-        '<div class="field"><label class="label" for="edim">On a low day, I’ll...</label><textarea id="edim" rows="1" data-hbind="dimmer">' + esc(h.dimmer) + '</textarea></div>' +
-        (h.mode === 'less' ? '<div class="field"><label class="label" for="einst">What gives me some of that instead</label><textarea id="einst" rows="1" data-hbind="instead">' + esc(h.instead) + '</textarea></div>' : '') +
+        '<div class="field"><label class="label" for="edim">On a tough day, I’ll...</label><textarea id="edim" rows="1" data-hbind="dimmer">' + esc(h.dimmer) + '</textarea></div>' +
+        (h.mode === 'less' ? '<div class="field"><label class="label" for="einst">When it pulls at me, I’ll...</label><textarea id="einst" rows="1" data-hbind="instead">' + esc(h.instead) + '</textarea></div>' : '') +
         '<span class="label">' + (h.mode === 'less' ? 'What I’m moving towards' : 'How I’ll feel') + '</span><div class="chips">';
       (h.mode === 'less' ? GAINS : FEELINGS).forEach(function (f) { w += '<button class="chip" data-hfeel="' + esc(f) + '" aria-pressed="' + (h.feel.indexOf(f) >= 0) + '">' + esc(f) + '</button>'; });
       return w + '</div><div class="field"><label class="label" for="eown">My own words</label><textarea id="eown" rows="1" data-hbind="ownFeel" placeholder="Separate with commas">' + esc(h.ownFeel) + '</textarea></div>' +
@@ -479,7 +486,7 @@
 
   function focusTracker() {
     var t = todayNum(), L = S.habit.length, e = S.entries[t], less = S.habit.mode === 'less';
-    var h = '<section class="screen focus"><h1 style="text-align:center">' + esc(habitName()) + '</h1>' + ring(t, L) +
+    var h = '<section class="screen focus"><div class="row" style="justify-content:flex-end;margin-bottom:-12px"><button class="plan-link" data-go="plan">' + iconPlan() + 'My plan</button></div><h1 style="text-align:center">' + esc(habitName()) + '</h1>' + ring(t, L) +
       '<p class="hint" style="text-align:center;margin-top:-12px">' + (t > L ? 'All ' + L + ' days done' : 'Day ' + t + ' of ' + L) + '</p>';
     if (t > L) h += '<div class="big"><button class="btn" data-go="reflect">Start my look back</button></div>';
     else if (!e) h += '<div class="big"><button class="btn" data-tick="full">' + iconFull('#FFFFFF') + (less ? 'Kept to it' : 'Full on') + '</button>' +
@@ -726,6 +733,7 @@
     if (d.hfeel) { var hf = S.habit.feel.indexOf(d.hfeel); hf >= 0 ? S.habit.feel.splice(hf, 1) : S.habit.feel.push(d.hfeel); save(); b.setAttribute('aria-pressed', hf < 0); return; }
     if (d.len) { if (S.habit) S.habit.length = +d.len; else S.draft.length = +d.len; save(); return render(); }
     if (d.length) { ui.returnTo = d.length; return go('length'); }
+    if (d.edit) { ui.returnTo = d.edit; return go('edit'); }
     if (d.idea) { S.draft.what = IDEAS[+d.idea][0]; ui.ideasOpen = false; save(false); return render(); }
     if (d.words) { ui.wordsFrom = d.words; return go('words'); }
     if (d.account) { ui.returnTo = d.account; return go('account'); }
@@ -790,6 +798,31 @@
     return '<p class="next-up">' + iconClock('#888880') + '<span>What happens next: <b>your nudge arrives tomorrow at ' + esc(fmtTime(s.time)) + '</b>. Change it any time in Settings.</span></p>';
   }
 
+  function iconPlan() { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>'; }
+  var PICON = {
+    what: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#0F1215"/></svg>',
+    why: '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z" fill="#C9930A"/></svg>',
+    swap: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>',
+    when: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>'
+  };
+  // The plan: their own answers, laid out simply, each one editable.
+  function planCard(from) {
+    var h = S.habit, less = h.mode === 'less', s = S.settings;
+    var row = function (icon, label, body, edit) {
+      return '<div class="prow"><span class="pic">' + icon + '</span><div class="pbody"><small>' + label + '</small>' + body + '</div>' + edit + '</div>';
+    };
+    var ed = '<button class="pedit" data-edit="' + from + '">Edit</button>';
+    var chips = '<div class="pchips">' + words().map(function (w, i) { return '<span' + (i === 0 ? ' class="first"' : '') + '>' + esc(w.toLowerCase()) + '</span>'; }).join('') + '</div>';
+    var out = '<div class="plancard">' +
+      row(PICON.what, less ? 'I’m cutting back on' : 'I’m going to', '<b>' + esc(h.what) + '</b>', ed) +
+      row(PICON.why, less ? 'What I’m moving towards' : 'How I’ll feel', chips, ed);
+    if (less && (h.instead || '').trim()) out += row(PICON.swap, 'When it pulls at me, I’ll', '<b>' + esc(h.instead) + '</b>', ed);
+    out += row(iconDown('#0F1215', 22), 'On a tough day, I’ll turn it down to', '<b>' + esc(h.dimmer) + '</b>', ed) +
+      row(PICON.when, 'For how long', '<b>' + h.length + ' days</b><span class="psub">Morning nudge at ' + esc(fmtTime(s.time)) + '</span>', '<button class="pedit" data-length="' + from + '">Change</button>') +
+      '</div>';
+    return out;
+  }
+
   // The habit loop: the pull still comes, you choose what happens next, you still get something.
   function loopCard() {
     var d = S.draft;
@@ -805,7 +838,32 @@
   function finishSetup() {
     var dr = S.draft;
     S.habit = { id: uuid(), mode: dr.mode, what: dr.what.trim(), gives: dr.gives.slice(), instead: dr.instead, feel: dr.feel.slice(), ownFeel: dr.ownFeel, dimmer: dr.dimmer.trim(), length: dr.length, start: todayStr(), status: 'active', extra: {}, createdAt: new Date().toISOString() };
-    S.entries = {}; S.later = false; S.fb = {}; save(); go('ready');
+    S.entries = {}; S.later = false; S.fb = {}; save();
+    finishMoment();
+  }
+  // The end of setup: a proper moment, then their plan (peak-end rule).
+  function finishMoment() {
+    var calm = document.documentElement.classList.contains('calm') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    var el = document.createElement('div');
+    el.className = 'celebrate finish'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Your plan is ready');
+    var bits = '';
+    if (!calm) {
+      var cols = ['#C9930A', '#F5F1EB', '#FFFFFF', '#888880', '#EDE8DF'];
+      for (var i = 0; i < 70; i++) {
+        var x = Math.random() * 100, dx = (Math.random() * 60 - 30).toFixed(0), rot = (Math.random() * 720 - 360).toFixed(0);
+        var w = 6 + Math.random() * 6, h2 = 8 + Math.random() * 10, d = (1.6 + Math.random() * 1.4).toFixed(2), del = (Math.random() * 0.5).toFixed(2);
+        bits += '<i class="cf" style="left:' + x.toFixed(1) + '%;width:' + w.toFixed(0) + 'px;height:' + h2.toFixed(0) + 'px;background:' + cols[i % cols.length] + ';--dx:' + dx + 'vw;--rot:' + rot + 'deg;animation-duration:' + d + 's;animation-delay:' + del + 's;border-radius:' + (i % 3 ? '2px' : '50%') + '"></i>';
+      }
+    }
+    el.innerHTML = '<div class="confetti" aria-hidden="true">' + bits + '</div>' +
+      '<div class="burst"><span class="ring"></span><div class="disc"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div></div>' +
+      '<div><div class="t">Your plan is ready.</div><div class="s">' + esc(habitName()) + ', for ' + S.habit.length + ' days. In your words.</div></div>' +
+      '<button class="btn" style="max-width:320px;background:var(--amber);color:var(--navy)" data-finish="1">See my plan</button>';
+    buzz();
+    app.appendChild(el);
+    var done = function () { if (el.parentNode) { el.remove(); go('ready'); } };
+    el.addEventListener('click', function (ev) { if (ev.target.closest('[data-finish]')) done(); });
+    var b = el.querySelector('[data-finish]'); if (b) b.focus({ preventScroll: true });
   }
   function resetForNew() { S.habit = null; S.entries = {}; S.fb = {}; S.later = false; S.draft = fresh().draft; save(); go('landing'); }
 

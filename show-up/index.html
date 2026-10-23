@@ -142,6 +142,25 @@ textarea::placeholder, .input::placeholder { color: var(--muted); }
 .stat b { font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.2; }
 .stat b.word { font-size: 18px; }
 
+/* The plan */
+.plancard { background: var(--white); border-radius: 10px; padding: 6px 16px; display: flex; flex-direction: column; }
+.prow { display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: start; padding: 14px 0; }
+.prow + .prow { border-top: 1px solid var(--cream-deep); }
+.pic { width: 36px; height: 36px; border-radius: 18px; background: var(--cream-dark); display: flex; align-items: center; justify-content: center; }
+.pbody { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.pbody small { font-size: 13px; color: var(--text-mid); }
+.pbody b { font-size: 17px; font-weight: 600; overflow-wrap: anywhere; }
+.psub { font-size: 14px; color: var(--text-mid); }
+.pchips { display: flex; flex-wrap: wrap; gap: 6px; }
+.pchips span { padding: 3px 10px; border-radius: 4px; background: var(--cream-dark); font-size: 14px; font-weight: 600; }
+.pchips span.first { background: var(--amber); }
+.pedit { min-height: 44px; padding: 0 6px; border: 0; background: transparent; font-size: 14px; font-weight: 600; color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
+.plan-link { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px; border: 1px solid var(--cream-deep); border-radius: 4px; background: var(--white); font-size: 13px; font-weight: 600; color: var(--navy); }
+/* Finish confetti */
+.confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.confetti .cf { position: absolute; top: -20px; display: block; animation-name: cf-fall; animation-timing-function: cubic-bezier(.25,.6,.4,1); animation-fill-mode: both; }
+@keyframes cf-fall { 0% { transform: translate(0, 0) rotate(0); opacity: 1; } 85% { opacity: 1; } 100% { transform: translate(var(--dx), 105vh) rotate(var(--rot)); opacity: 0; } }
+.celebrate.finish .t { font-size: 36px; }
 /* Habit loop diagram (cutting back, step 3) */
 .loop { background: var(--white); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 4px; }
 .loop .lp { display: grid; grid-template-columns: 28px 1fr; gap: 12px; align-items: start; }
@@ -297,6 +316,6 @@ html.calm *, html.calm *::before, html.calm *::after { animation-duration: 1ms !
   <main id="view"></main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=20261023k"></script>
+<script src="app.js?v=20261023l"></script>
 </body>
 </html>
