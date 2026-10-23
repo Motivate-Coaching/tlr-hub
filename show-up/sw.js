@@ -1,6 +1,6 @@
 /* Show Up service worker: works offline and shows the morning nudge. */
-const CACHE = 'showup-20261023h';
-const SHELL = ['./', './index.html', './app.js?v=20261023h', './manifest.webmanifest', './logo-white.png', './stuart.jpg',
+const CACHE = 'showup-20261023i';
+const SHELL = ['./', './index.html', './app.js?v=20261023i', './manifest.webmanifest', './logo-white.png', './stuart.jpg',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png'];
 
 self.addEventListener('install', (e) => {

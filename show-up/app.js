@@ -241,7 +241,7 @@
     less: function () {
       var d = S.draft;
       var h = '<section class="screen">' + progress('less') + '<h1>When it pulls at you, what will you do instead?</h1>' +
-        '<p class="lede">It’s there for a reason. What does it usually give you? No judgement.</p><div class="chips">';
+        '<p class="lede">It’s there for a reason. What does it usually give you? No judgement.</p>' + loopCard() + '<div class="chips">';
       GIVES.forEach(function (g) { h += '<button class="chip" data-give="' + esc(g) + '" aria-pressed="' + (d.gives.indexOf(g) >= 0) + '">' + esc(g) + '</button>'; });
       return h + '</div><div class="field"><label class="label" for="instead">Instead, I’ll...</label>' +
         '<textarea id="instead" rows="1" data-bind="instead" placeholder="Go for a 20 minute walk and make a proper cup of tea">' + esc(d.instead) + '</textarea>' +
@@ -694,6 +694,7 @@
     if (t.dataset.bind) {
       S.draft[t.dataset.bind] = t.value; save(false);
       var pn = document.getElementById('previewName'); if (pn && t.dataset.bind === 'what') pn.textContent = t.value.trim() || 'Your habit';
+      if (t.dataset.bind === 'instead') { var li = document.getElementById('loopInstead'); if (li) li.textContent = t.value.trim() || 'Your instead'; }
       var next = view.querySelector('[data-step-next]');
       if (next) next.disabled = !stepValid(next.dataset.stepNext);
     }
@@ -711,7 +712,7 @@
     if (d.start) { S.draft.mode = d.start; return go('what'); }
     if (d.starter) { S.draft.what = d.starter; save(false); return render(); }
     if (d.stepNext) { if (!stepValid(d.stepNext)) return; var nx = nextStep(d.stepNext); if (nx) return go(nx); return finishSetup(); }
-    if (d.give) { var gi = S.draft.gives.indexOf(d.give); gi >= 0 ? S.draft.gives.splice(gi, 1) : S.draft.gives.push(d.give); save(false); b.setAttribute('aria-pressed', gi < 0); return; }
+    if (d.give) { var gi = S.draft.gives.indexOf(d.give); gi >= 0 ? S.draft.gives.splice(gi, 1) : S.draft.gives.push(d.give); save(false); b.setAttribute('aria-pressed', gi < 0); var lg = document.getElementById('loopGives'); if (lg) lg.textContent = S.draft.gives.length ? S.draft.gives.join(', ') : 'Tap below'; return; }
     if (d.feel) { var fi = S.draft.feel.indexOf(d.feel); fi >= 0 ? S.draft.feel.splice(fi, 1) : S.draft.feel.push(d.feel); save(false); b.setAttribute('aria-pressed', fi < 0); var nb = view.querySelector('[data-step-next]'); if (nb) nb.disabled = !stepValid(nb.dataset.stepNext); return; }
     if (d.hfeel) { var hf = S.habit.feel.indexOf(d.hfeel); hf >= 0 ? S.habit.feel.splice(hf, 1) : S.habit.feel.push(d.hfeel); save(); b.setAttribute('aria-pressed', hf < 0); return; }
     if (d.len) { if (S.habit) S.habit.length = +d.len; else S.draft.length = +d.len; save(); return render(); }
@@ -760,6 +761,18 @@
   backBtn.addEventListener('click', goBack);
   settingsBtn.addEventListener('click', function () { go('settings'); });
 
+  // The habit loop: the pull still comes, you choose what happens next, you still get something.
+  function loopCard() {
+    var d = S.draft;
+    return '<div class="loop full-only" aria-label="How the swap works">' +
+      '<div class="lp"><span class="n">1</span><div><b>The pull</b><span>The urge, the moment, the 4pm slump</span></div></div>' +
+      '<div class="arrow" aria-hidden="true"></div>' +
+      '<div class="lp choose"><span class="n">2</span><div><b>What you do</b><span class="old">' + esc(d.what.trim() || 'The old habit') + '</span>' +
+      '<span class="new" id="loopInstead">' + esc(d.instead.trim() || 'Your instead') + '</span></div></div>' +
+      '<div class="arrow" aria-hidden="true"></div>' +
+      '<div class="lp"><span class="n">3</span><div><b>What you get</b><span id="loopGives">' + esc(d.gives.length ? d.gives.join(', ') : 'Tap below') + '</span></div></div>' +
+      '<p class="cap">The pull still comes. You choose what happens next.</p></div>';
+  }
   function finishSetup() {
     var dr = S.draft;
     S.habit = { id: uuid(), mode: dr.mode, what: dr.what.trim(), gives: dr.gives.slice(), instead: dr.instead, feel: dr.feel.slice(), ownFeel: dr.ownFeel, dimmer: dr.dimmer.trim(), length: dr.length, start: todayStr(), status: 'active', extra: {}, createdAt: new Date().toISOString() };
