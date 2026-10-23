@@ -251,14 +251,14 @@
     },
     dimmer: function () {
       var d = S.draft, less = d.mode === 'less';
-      return '<section class="screen">' + progress('dimmer') + '<h1>' + (less ? 'On a tough day, what will you settle for?' : 'On a tough day, what’s your dimmer version?') + '</h1>' +
+      return '<section class="screen">' + progress('dimmer') + '<h1>' + (less ? 'On a tough day, what will you settle for?' : 'On a tough day, how far will you turn it down?') + '</h1>' +
         '<p class="lede">Nobody’s consistent every day. Deciding now what you’ll do on the tough ones is what keeps you going.</p>' +
-        '<p class="hint" style="margin-top:-12px">' + (less ? 'Not all or nothing. A smaller version still counts.' : 'Some days you’re a 10, some days a 1. Both count.') + '</p>' +
+        '<p class="hint" style="margin-top:-12px">' + (less ? 'Not all or nothing. A smaller version still counts.' : 'Turn it down, don’t switch it off. Some days a 10, some days a 1. Both count.') + '</p>' +
         '<div class="field"><label class="label" for="dim">' + (less ? 'If it’s a tough one, I’ll...' : 'On a tough day, I’ll...') + '</label>' +
-        '<textarea id="dim" rows="1" data-bind="dimmer" placeholder="' + (less ? 'Have one square, not the whole bar' : 'Have a 30 second cold shower') + '">' + esc(d.dimmer) + '</textarea></div>' +
+        '<textarea id="dim" rows="1" data-bind="dimmer" placeholder="' + (less ? 'Have one square, not the whole bar' : 'A quick dip, or a cold shower at home') + '">' + esc(d.dimmer) + '</textarea></div>' +
         '<details class="full-only"><summary class="link" style="list-style:none;display:flex;align-items:center">Need an example?</summary><div class="card small" style="margin-top:8px">' +
         (less ? '<span>Wine on weeknights? <b>One small glass, not the bottle.</b></span><span>Phone in bed? <b>Five minutes, then it charges outside the room.</b></span><span>Afternoon snacking? <b>Fruit first, then decide.</b></span>'
-          : '<span>Going to the gym? <b>Just put your kit on and stretch.</b></span><span>Reading 10 pages? <b>Read one.</b></span><span>A cold sea swim? <b>Feet in the water counts.</b></span>') + '</div></details>' +
+          : '<span>A gym session? <b>A shorter workout, a brisk walk, or kit on and a stretch.</b></span><span>Reading 10 pages? <b>Five pages, one page, or one paragraph.</b></span><span>A cold sea swim? <b>A quick dip, feet in, or a cold shower at home.</b></span>') + '</div></details>' +
         '<div class="spacer"></div><button class="btn" data-act="finish" ' + (d.dimmer.trim() ? '' : 'disabled') + '>' + nextLabel('dimmer') + '</button></section>';
     },
     ready: function () {
@@ -299,13 +299,13 @@
       var t = todayNum(), L = S.habit.length, e = S.entries[t];
       var h = '<section class="screen" style="gap:16px"><div><div class="eyebrow">My habit</div><h1>' + esc(habitName()) + '</h1>' +
         '<div style="color:var(--text-mid)">' + (t > L ? 'All ' + L + ' days · complete' : 'Day ' + t + ' of ' + L) + '</div></div>';
-      h += '<div class="card" style="padding:16px">' + gridHTML(t) + '<div class="legend"><span><i style="background:var(--navy)"></i>Full on</span><span><i style="background:var(--muted)"></i>Dimmer day</span><span><span class="star"></span>Got back up</span></div></div>';
+      h += '<div class="card" style="padding:16px">' + gridHTML(t) + '<div class="legend"><span><i style="background:var(--navy)"></i>Full on</span><span><i style="background:var(--muted)"></i>Turned down</span><span><span class="star"></span>Got back up</span></div></div>';
       if (t > L) {
         h += '<div class="card"><b style="font-size:20px;font-weight:600">You gave it ' + L + ' days.</b><span style="color:var(--text-mid)">Time for your look back: what you noticed, and what’s next. Your call.</span><button class="btn" data-go="reflect">Start my look back</button></div>';
       } else if (!e) {
         h += '<div style="display:flex;flex-direction:column;gap:8px"><b style="font-weight:600">' + (S.habit.mode === 'less' ? 'Kept to it today?' : 'Showed up today?') + '</b><div class="tick-row">' +
           '<button class="btn" data-tick="full">' + checkIcon('#FFFFFF') + 'Full on</button>' +
-          '<button class="btn grey" data-tick="dimmer">Dimmer day</button>' +
+          '<button class="btn grey" data-tick="dimmer">Turned down</button>' +
           '<button class="note-btn" data-go="note" aria-label="Add a note">' + pencil() + '</button></div></div>';
       } else {
         h += '<div class="done"><span class="bigstar"></span><span class="msg">' + esc(doneMsg(e)) + '</span><button data-go="note">' + (e.note ? 'Edit note' : 'Add a note') + '</button></div>' +
@@ -316,7 +316,7 @@
       var felt = {}; Object.keys(S.entries).forEach(function (k) { var f = S.entries[k].felt; if (f && f !== 'Honestly, tough') felt[f] = (felt[f] || 0) + 1; });
       var top = Object.keys(felt).sort(function (a, b) { return felt[b] - felt[a]; })[0];
       h += '<div class="stats"><div class="stat"><small>Show-ups</small><b>' + count(function () { return true; }) + '</b></div>' +
-        '<div class="stat"><small>Dimmer days</small><b>' + count(function (x) { return x.kind === 'dimmer'; }) + '</b></div>' +
+        '<div class="stat"><small>Turned-down days</small><b>' + count(function (x) { return x.kind === 'dimmer'; }) + '</b></div>' +
         '<div class="stat"><small>Comebacks</small><b>' + count(function (x) { return x.comeback; }) + '</b></div>' +
         '<div class="stat"><small>Most felt</small><b class="word">' + esc(top || 'Not yet') + '</b></div></div>';
       h += '<button class="btn outline" data-go="share">Share my progress</button>' +
@@ -337,10 +337,10 @@
       return '<section class="screen"><h1>Hey. It happens.</h1><p class="lede">Falling off isn’t the end of anything. Getting back on is where the real work lives.</p>' +
         '<div class="card"><div class="eyebrow">What you told yourself on day one</div>' +
         '<div><div class="hint">You want to feel</div><div style="font-weight:600">' + esc(words().join(', ')) + '</div></div>' +
-        '<div><div class="hint">On a tough day</div><div style="font-weight:600">' + esc(h.dimmer || 'Your dimmer version') + '</div></div></div>' +
-        '<div class="card soft small"><span>Today doesn’t need to be a 10. Your dimmer version counts as showing up.</span></div>' +
+        '<div><div class="hint">On a tough day</div><div style="font-weight:600">' + esc(h.dimmer || 'Your turned-down version') + '</div></div></div>' +
+        '<div class="card soft small"><span>Today doesn’t need to be a 10. Turned down still counts as showing up.</span></div>' +
         '<div class="spacer"></div>' + (S.entries[todayNum()] ? '<p style="margin:0;text-align:center">You’ve already shown up today.</p>' :
-        '<button class="btn" data-tick="full" data-from="slipped"><span class="star" style="margin:0"></span>I’m back. Count me in today</button><button class="btn grey" data-tick="dimmer" data-from="slipped">Back with a dimmer day</button>') + '</section>';
+        '<button class="btn" data-tick="full" data-from="slipped"><span class="star" style="margin:0"></span>I’m back. Count me in today</button><button class="btn grey" data-tick="dimmer" data-from="slipped">Back, turned down</button>') + '</section>';
     },
     share: function () {
       var t = Math.min(todayNum(), S.habit.length), e = S.entries[todayNum()] || {};
@@ -466,8 +466,8 @@
     var t = todayNum(), L = S.habit.length, e = S.entries[t];
     var h = '<section class="screen focus"><div><div class="eyebrow">' + (t > L ? 'Complete' : 'Day ' + t + ' of ' + L) + '</div><h1>' + esc(habitName()) + '</h1></div>';
     if (t > L) h += '<div class="big"><button class="btn" data-go="reflect">Start my look back</button></div>';
-    else if (!e) h += '<div class="big"><button class="btn" data-tick="full">' + checkIcon('#FFFFFF') + 'Full on</button><button class="btn grey" data-tick="dimmer">Dimmer day</button></div>' +
-      '<p class="hint">Tough day? Your dimmer version: <b>' + esc(S.habit.dimmer) + '</b></p>';
+    else if (!e) h += '<div class="big"><button class="btn" data-tick="full">' + checkIcon('#FFFFFF') + 'Full on</button><button class="btn grey" data-tick="dimmer">Turned down</button></div>' +
+      '<p class="hint">Tough day? Turn it down: <b>' + esc(S.habit.dimmer) + '</b></p>';
     else h += '<div class="done"><span class="bigstar"></span><span class="msg">' + esc(doneMsg(e)) + '</span><button data-go="note">' + (e.note ? 'Edit note' : 'Note') + '</button></div><p class="count">That’s today done. See you tomorrow.</p>';
     return h + '<div class="spacer"></div></section>';
   }
@@ -512,7 +512,7 @@
     if (e.felt === 'Honestly, tough') return 'Tough one, and you still showed up. Logged.';
     var total = count(function () { return true; }) + ' show-up' + (count(function () { return true; }) === 1 ? '' : 's');
     if (e.felt) return e.felt + '. Logged. That’s ' + total + '.';
-    return (e.kind === 'dimmer' ? 'Dimmer day, still counts. ' : 'Done. ') + 'That’s ' + total + '.';
+    return (e.kind === 'dimmer' ? 'Turned down, still counts. ' : 'Done. ') + 'That’s ' + total + '.';
   }
   function ideasSheet() {
     var h = '<div class="sheet-bg" data-act="closeideas"><div class="sheet" role="dialog" aria-label="Ideas" data-stop="1"><div class="row"><b style="font-size:20px;font-weight:600">Some ideas</b><button class="link" data-act="closeideas">Close</button></div>' +
@@ -558,7 +558,7 @@
     save(); buzz();
     var title = t === 1 ? 'Day one. Done.' : (kind === 'dimmer' ? 'Day ' + t + '. Still counts.' : 'Day ' + t + '. Done.');
     var n = count(function () { return true; });
-    var sub = S.entries[t].comeback ? 'You got back up. That’s the real work.' : (t === 1 ? 'You’ve started. That’s the hardest bit.' : (kind === 'dimmer' ? 'A dimmer day is still showing up.' : 'That’s ' + n + ' show-ups.'));
+    var sub = S.entries[t].comeback ? 'You got back up. That’s the real work.' : (t === 1 ? 'You’ve started. That’s the hardest bit.' : (kind === 'dimmer' ? 'Turned down is still showing up.' : 'That’s ' + n + ' show-ups.'));
     var sparks = ''; for (var i = 0; i < 10; i++) sparks += '<span class="spark" style="transform:rotate(' + (i * 36) + 'deg)"><i style="animation-delay:' + (180 + (i % 3) * 40) + 'ms"></i></span>';
     var el = document.createElement('div');
     el.className = 'celebrate'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Day logged');
