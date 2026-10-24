@@ -16,15 +16,25 @@ Stuart is coach and product owner. Claude builds. Stuart is not a developer: exp
 
 ## Stack
 
-Plain HTML, CSS and vanilla JS on GitHub Pages. No framework, no build step, no npm. Supabase JS v2 from the jsDelivr CDN for auth and data. Google Fonts: Playfair Display (headings) and Inter (body). GitHub Pages deploys automatically from main, usually live within 1 to 2 minutes.
+Plain HTML, CSS and vanilla JS on GitHub Pages. No framework, no build step, no npm. Supabase JS v2 from the jsDelivr CDN for auth and data. Google Fonts: Poppins (all UI and body text) and Playfair Display (the one headline per page), as set in tlr-design-system.html. Most older Hub pages still load Inter; that is a known inconsistency, not the standard. GitHub Pages deploys automatically from main, usually live within 1 to 2 minutes.
 
 ## How to work in this repo
 
 1. Work on a branch and open a pull request. Merging to main makes changes live for members, so before merging anything that changes pages members use, tell Stuart what will change and get his OK.
 2. Database changes go in supabase/migrations/ as a new timestamped .sql file (YYYYMMDDHHMMSS_short_name.sql). Never edit an existing migration. Cloud sessions can reach Supabase through the Supabase connector, but the database is live, so show Stuart the change in plain language and get his OK before applying any migration.
 3. Never commit secrets. The Supabase anon key in auth.js is public by design and fine. Any other key (service role, Resend, Mailchimp, Stripe) must never appear in any file.
-4. When auth.js or history.js change, bump the ?v= query string on every page that loads them. Current: auth.js?v=20260922, history.js?v=20260922b.
+4. When auth.js or history.js change, bump the ?v= query string on every page that loads them. Pages are currently mixed (auth.js?v=20260922 on most, 20260930 on a few; history.js?v=20260930 on most, 20260922b on a few), so set every page to the new value when you next bump.
 5. Back buttons always use onclick="history.back()". Never hardcode index.html.
+6. Verify before saying anything is done: run it, look at screenshots, and for live changes confirm the GitHub Pages deployment for the merge commit succeeded (gh api repos/Motivate-Coaching/tlr-hub/deployments). github.io and jsdelivr are blocked from cloud sessions, so check deployments via the API, not by fetching the site.
+7. GitHub GraphQL is blocked here, so `gh pr create` fails. Open and merge pull requests with the REST API (gh api repos/Motivate-Coaching/tlr-hub/pulls ...). After a push, wait for mergeable_state to be clean before merging.
+8. Secrets Stuart must set himself go in Supabase, Edge Functions, Secrets. Never ask him to paste a secret into chat, and never put one in a file. If you generate one for him, give it to him privately and delete it afterwards.
+
+## Working with Stuart
+
+- Keep replies short. Plain English, no jargon. No em dashes anywhere, in copy or in replies.
+- He wants decisions grounded in evidence that works, not assumptions, with hyperlinked sources.
+- He often leaves work running, so keep pauses to the ones the rules above require.
+- Write his name as Stuart Fairbairns (with the s), and Stuart Fairbairns PCC professionally. He goes by Stu.
 
 ## Shared JS
 
@@ -46,6 +56,8 @@ Canonical reference: identity-audit.html. Every worksheet loads supabase-js, aut
 - M6 Difficult Conversations: getting-clear-before-you-speak, having-the-conversation, after-the-conversation, why-we-avoid-them
 - M7 Identity (redesigned): identity-audit, stories-i-inherited, who-am-i-now, identity-i-choose
 
+Show Up (show-up/): see the Show Up section below.
+
 Other pages: index.html (resource library), dashboard.html, login.html, reset-password.html, my-wheel.html, my-journal.html, values-discovery.html (public, no login), tlr-quiz.html (Clarity Scorecard), tlr-5states.html (The 5 Ways We Get Lost), tlr-admin.html (analytics, Stuart only, enforced by RLS), tlr-design-system.html.
 
 ## Database
@@ -54,14 +66,45 @@ Other pages: index.html (resource library), dashboard.html, login.html, reset-pa
 - tool_snapshots: named version history. RLS: own rows only, authenticated role.
 - activity_log: page views and events. RLS: own rows, plus Stuart's email can read all.
 - values_responses: public Values Discovery submissions. Anyone can insert; nobody can update; only Stuart's email can read. Email is not unique, so retakes add a new row.
-Tables created with raw SQL need explicit GRANTs.
+- showup_profiles, showup_habits, showup_entries, showup_push_subscriptions, showup_feedback, showup_reminder_log: see Show Up below.
+Tables created with raw SQL need explicit GRANTs, including for service_role when an Edge Function reads them.
+
+## Edge functions and schedules
+
+- session-reminders: TLR session reminder emails (1 hour and 24 hours before), run by pg_cron every 30 minutes.
+- showup-reminders: Show Up morning nudges by email (Resend, from stuart@motivate-coaching.com) and web push, run by pg_cron every 15 minutes. Sends once per person per day (showup_reminder_log), only to people with a profile row, so a person must be signed in inside Show Up to get nudges.
+- Secret names (values live only in Supabase secrets): RESEND_API_KEY, VAPID_PRIVATE_KEY, and ANTHROPIC_API_KEY once Stuart adds it. The VAPID public key in show-up/app.js and the function is public by design.
+
+## Show Up (habit app, show-up/)
+
+A separate product from TLR, piloted with TLR members as founding testers. Planned price $9.99 a month or $59.99 a year. "Show Up" is a working name.
+
+- Files: show-up/index.html (shell and all CSS), app.js (all logic, one IIFE), sw.js (service worker, network-first cache), manifest.webmanifest, icons/, qr.svg, logo-white.png, stuart.jpg. When app.js changes, bump app.js?v= in index.html and the CACHE name and shell entry in sw.js together.
+- State lives in localStorage key showup-v1 and syncs to Supabase when signed in. Sign-in uses the TLR Hub email and password during the pilot. Extra per-habit data (noticed days, what's worked, past wins, chosen focus) lives in showup_habits.extra.
+- Two views of the same data: Full (everything, examples shown) and Focus (for ADHD and anxiety: one thing per screen, extras behind one tap, calm motion). Use optional(label, html), .full-only and .focus-only. Check both views for every change.
+- Core flow: name ("What should we call you?", once) then Build, Break or Find my focus, then what, feel, (instead), tough-day plan, then a confetti finish, the plan, and once, install steps.
+- Daily: one "I showed up today" button (every show-up counts the same, lighter versions included) and an "I'm struggling" button (three situations, a rotating question, What's worked for me, one small step; video slots in STRUGGLE_VIDEO). Missed days stay plain and can be tapped later to count or to note what got in the way. Count show-ups and comebacks, never streaks.
+- Copy rules: warm, direct, never shaming. "Tough day", not "hard day". Never "failed" or "missed".
+- Tests: Playwright scripts against a local server (python3 -m http.server 8765 from the repo root), Chromium at /opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell, phone viewport 390x844. Block external requests in tests; stub window.supabase when a test needs the signed-out state.
 
 ## Known issues and open work
 
-1. Design and tone pass on M1, M2, M3, M4 and M6 (21 tools) to match the redesigned M5 and M7, plus checking each tool follows the standard pattern.
-2. Research what members value on Skool, Circle and similar platforms.
-3. Long term: white-label platform for other coaches (workspace_id multi-tenancy with RLS, Stripe billing, coach admin view, course builder).
+1. Show Up parking lot: AI "what I'm hearing" reflection in Find my focus (needs ANTHROPIC_API_KEY), Stuart's struggling videos, email capture for the public launch (separate unticked marketing box), prescriptive challenges (for example a fitness challenge), real app name, sales page, Stripe product.
+2. Design and tone pass on M1, M2, M3, M4 and M6 (21 tools) to match the redesigned M5 and M7, plus checking each tool follows the standard pattern.
+3. Research what members value on Skool, Circle and similar platforms.
+4. Long term: white-label platform for other coaches (workspace_id multi-tenancy with RLS, Stripe billing, coach admin view, course builder).
 
 ## Design system
 
---navy #0F1215, --navy-mid #1C2B3A, --gold #E8A800, --gold-light #F5C842, --cream #F9F7F2, --cream-dark #EFE9DF, --white #FFFFFF, --text-dark #111820, --text-mid #445566, --text-muted #8899AA, --border #E2D9CE, --accent #1A6B72 (teal, history.js UI). Full reference: tlr-design-system.html.
+tlr-design-system.html (TLR Design System v1.0) is the single source of truth for anything members see, including mockups and emails. Read it in full before designing or styling anything, and check finished work against it before showing Stuart. If this file and the design system disagree, the design system wins.
+
+Summary (from the design system):
+- Fonts: Poppins for everything functional (body, labels, inputs, buttons). Playfair Display 400 for the page or tool title only. Never introduce other fonts.
+- Base palette: --navy #0F1215 (headers, topbar, primary buttons), --navy-mid #1C2B3A, --cream #F5F1EB (page background), --cream-dark #EDE8DF, --cream-deep #E5DDD1, --text-dark #1A1A1A, --text-mid #4A4A4A, --text-muted #888880, --border rgba(0,0,0,0.1). Green #3B6D11 for success states only.
+- Theme accents (one per theme): Theme 1 #2B4A6F slate, Theme 2 #5C6B3A olive, Theme 3 #8C4A2F terracotta, Theme 4 #1A6B72 teal, Theme 5 #C9930A amber. Show Up uses amber #C9930A as its accent. Never introduce a colour outside this system.
+- Radius: 4px buttons, 6px inputs and cards, 10px major panels. Spacing on a 4px base.
+- Buttons: uppercase, 0.08em letter-spacing.
+- Inputs: auto-expanding textarea rows="1", never input type="text".
+- Copy: no em dashes; write "The Living Room (TLR)" in full on first use; say "theme" or "topic", never "month" or "week"; sentence case; no clichés; at most one exclamation mark per tool.
+
+Known inconsistencies to fix over time: 38 of 49 pages still load Inter instead of Poppins; 15 pages use cream #F9F7F2 instead of #F5F1EB; the dashboard uses gold #E8A800, which is not in the design system.
