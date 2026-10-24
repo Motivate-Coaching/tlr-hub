@@ -305,6 +305,30 @@ html.calm *, html.calm *::before, html.calm *::after { animation-duration: 1ms !
   .app { min-height: calc(100vh - 48px); border-radius: 10px; overflow: hidden; }
   .bar { border-radius: 10px 10px 0 0; top: 0; }
 }
+
+/* Show up: the two buttons that matter */
+.showup { display: flex; flex-direction: column; gap: 10px; }
+.showup .showup-btn { min-height: 64px; font-size: 15px; gap: 10px; }
+.focus .big .showup .btn.outline { min-height: 56px; font-size: 14px; }
+/* Tappable days */
+button.day { border: 0; padding: 0; font: inherit; font-size: 15px; cursor: pointer; color: inherit; background: transparent; }
+button.day.missed { border: 1px solid var(--cream-deep); }
+button.day.today { border: 2px dashed var(--navy); }
+button.day.full { background: var(--navy); color: var(--white); }
+button.day:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.day.noticed { border-style: dashed; border-color: var(--muted); }
+.day.has-note::before { content: ""; position: absolute; bottom: 6px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 2px; background: currentColor; opacity: 0.7; }
+.celebrate .confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+
+/* Find my focus */
+.btn.findbtn { background: var(--cream-dark); color: var(--navy); text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 15px; min-height: 52px; }
+.btn.findbtn b { font-weight: 600; margin-left: 4px; white-space: nowrap; }
+h1.findq { font-size: clamp(26px, 7vw, 34px); line-height: 1.2; }
+.mic { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid var(--muted); border-radius: 4px; background: var(--white); color: var(--navy); font: inherit; font-size: 14px; font-weight: 600; }
+.mic[aria-pressed="true"] { background: var(--navy); color: var(--white); border-color: var(--navy); }
+.choice.findpick { text-align: left; align-items: flex-start; }
+.choice.findpick small { display: block; margin-bottom: 4px; }
+.choice.findpick b { overflow-wrap: anywhere; }
 </style>
 </head>
 <body>
@@ -320,6 +344,6 @@ html.calm *, html.calm *::before, html.calm *::after { animation-duration: 1ms !
   <main id="view"></main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=20261024b"></script>
+<script src="app.js?v=20261024e"></script>
 </body>
 </html>

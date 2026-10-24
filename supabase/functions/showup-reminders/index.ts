@@ -53,12 +53,15 @@ function esc(s: string) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!))
 }
 
-function emailHtml(o: { day: number; length: number; what: string; dimmer: string; line: string; comeback: boolean; less: boolean }) {
+function emailHtml(o: { day: number; length: number; what: string; dimmer: string; line: string; comeback: boolean; less: boolean; noticed: boolean }) {
   const year = new Date().getUTCFullYear()
   const headline = o.comeback ? `Day ${o.day}. A comeback day.` : `Day ${o.day}. Today counts.`
   const intro = o.comeback
-    ? 'Yesterday didn’t happen. That’s fine. Today is the one that matters, and getting back on is the real work.'
-    : o.less ? 'Keeping to it today? One tap tonight and it’s logged.' : 'Done it already, or about to? One tap and it’s logged.'
+    ? 'Missed a day, or just didn’t log it? Either way, today is the one that matters. If you did show up, you can fill it in on your tracker.'
+    : 'Showed up already, or about to? One tap and it counts.'
+  const noticed = o.noticed
+    ? `<p style="margin:0 0 22px;font-size:15px;line-height:1.6;color:#1A1A1A;background:#F5F1EB;border-left:3px solid #C9930A;padding:12px 16px;border-radius:4px;">Thank you for looking back at the days that didn’t go to plan. Noticing what gets in the way is how you learn to work around it. That’s you still showing up, even when it’s tough. Let’s go again today.</p>`
+    : ''
   return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(headline)}</title></head>
 <body style="margin:0;padding:0;background:#F5F1EB;font-family:Poppins,'Helvetica Neue',Helvetica,Arial,sans-serif;">
@@ -72,13 +75,14 @@ function emailHtml(o: { day: number; length: number; what: string; dimmer: strin
     <p style="margin:0 0 6px;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#4A4A4A;">Day ${o.day} of ${o.length}</p>
     <h1 style="margin:0 0 10px;font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-weight:400;font-size:30px;line-height:1.15;color:#1A1A1A;">${esc(headline)}</h1>
     <p style="margin:0 0 22px;font-size:15px;line-height:1.6;color:#4A4A4A;">${intro}</p>
+    ${noticed}
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F1EB;border-radius:6px;margin-bottom:24px;"><tr><td style="padding:18px 20px;">
       <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#4A4A4A;">My habit</p>
       <p style="margin:0 0 12px;font-size:18px;font-weight:600;color:#1A1A1A;">${esc(o.what)}</p>
-      <p style="margin:0;font-size:14px;line-height:1.5;color:#4A4A4A;">${o.less ? 'Tough day? Your smaller version still counts:' : 'Tough day? Turn it down, don’t switch it off:'} <b style="color:#1A1A1A;">${esc(o.dimmer)}</b></p>
+      <p style="margin:0;font-size:14px;line-height:1.5;color:#4A4A4A;">${o.less ? 'Tough day? Your smaller version still counts:' : 'Tough day? A lighter version still counts:'} <b style="color:#1A1A1A;">${esc(o.dimmer)}</b></p>
     </td></tr></table>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:26px;"><tr><td align="center">
-      <a href="${APP_URL}?from=email" style="display:inline-block;background:#0F1215;color:#FFFFFF;text-decoration:none;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:16px 36px;border-radius:4px;">Tick today</a>
+      <a href="${APP_URL}?from=email" style="display:inline-block;background:#0F1215;color:#FFFFFF;text-decoration:none;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:16px 36px;border-radius:4px;">I showed up today</a>
     </td></tr></table>
     <p style="margin:0;font-family:'Playfair Display',Georgia,serif;font-size:19px;line-height:1.4;color:#1A1A1A;text-align:center;">${esc(o.line)}</p>
   </td></tr>
@@ -110,7 +114,7 @@ Deno.serve(async () => {
   if (!due.length) return new Response(JSON.stringify({ due: 0 }), { headers: { 'Content-Type': 'application/json' } })
 
   const ids = due.map((d) => d.p.user_id)
-  const { data: habits } = await admin.from('showup_habits').select('id,user_id,what,dimmer,length_days,start_date,mode').in('user_id', ids).eq('status', 'active').order('created_at', { ascending: false })
+  const { data: habits } = await admin.from('showup_habits').select('id,user_id,what,dimmer,length_days,start_date,mode,extra').in('user_id', ids).eq('status', 'active').order('created_at', { ascending: false })
   const habitByUser = new Map<string, Habit>()
   for (const h of (habits || []) as Habit[]) if (!habitByUser.has(h.user_id)) habitByUser.set(h.user_id, h)
   const { data: users } = await admin.auth.admin.listUsers({ perPage: 1000 })
@@ -127,6 +131,9 @@ Deno.serve(async () => {
     if (ticked.has(day)) continue
     const comeback = day > 1 && !ticked.has(day - 1) && ticked.size > 0
     const line = LINES[(day - 1) % LINES.length]
+    // Recognise anyone who looked back at a missed day since yesterday's nudge.
+    const noticedMap = ((habit as unknown as { extra?: { noticed?: Record<string, { at?: string }> } }).extra?.noticed) || {}
+    const noticed = Object.values(noticedMap).some((n) => n?.at && now.getTime() - Date.parse(n.at) < 24 * 3600_000)
 
     if (p.remind_email && emailById.get(p.user_id)) {
       const { error: logErr } = await admin.from('showup_reminder_log').insert({ user_id: p.user_id, local_date: local.date, channel: 'email' })
@@ -134,7 +141,7 @@ Deno.serve(async () => {
         const res = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ from: FROM, to: [emailById.get(p.user_id)], subject: `Day ${day}: ${habit.what}`, html: emailHtml({ day, length: habit.length_days, what: habit.what, dimmer: habit.dimmer, line, comeback, less: habit.mode === 'less' }) }),
+          body: JSON.stringify({ from: FROM, to: [emailById.get(p.user_id)], subject: `Day ${day}: ${habit.what}`, html: emailHtml({ day, length: habit.length_days, what: habit.what, dimmer: habit.dimmer, line, comeback, less: habit.mode === 'less', noticed }) }),
         })
         if (res.ok) emails++
         else { console.error('[showup-reminders] Resend error', await res.text()); await admin.from('showup_reminder_log').delete().match({ user_id: p.user_id, local_date: local.date, channel: 'email' }) }
@@ -145,7 +152,7 @@ Deno.serve(async () => {
       const { error: logErr } = await admin.from('showup_reminder_log').insert({ user_id: p.user_id, local_date: local.date, channel: 'push' })
       if (!logErr) {
         const { data: subs } = await admin.from('showup_push_subscriptions').select('*').eq('user_id', p.user_id)
-        const payload = JSON.stringify({ title: comeback ? `Day ${day}: a comeback day` : `Day ${day}: ${habit.what}`, body: habit.mode === 'less' ? `Keeping to it? One tap when you have. Tough day? ${habit.dimmer}` : `Done it? One tap. Tough day? ${habit.dimmer}`, url: APP_URL + '?from=push' })
+        const payload = JSON.stringify({ title: comeback ? `Day ${day}: a comeback day` : `Day ${day}: ${habit.what}`, body: `Showed up? One tap. Tough day? ${habit.dimmer}`, url: APP_URL + '?from=push' })
         for (const s of subs || []) {
           try {
             await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload, { TTL: 3 * 3600 })
