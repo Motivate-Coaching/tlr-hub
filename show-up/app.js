@@ -95,7 +95,7 @@
   function isStandalone() { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true; }
   function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
   function fmtTime(t) { var p = t.split(':'), h = +p[0], m = +p[1]; return (h % 12 || 12) + (m ? ':' + String(m).padStart(2, '0') : '') + (h < 12 ? 'am' : 'pm'); }
-  function toast(msg) { var el = document.createElement('div'); el.className = 'toast'; el.setAttribute('role', 'status'); el.textContent = msg; app.appendChild(el); setTimeout(function () { el.remove(); }, 2800); }
+  function toast(msg) { document.querySelectorAll('.toast').forEach(function (t) { t.remove(); }); var el = document.createElement('div'); el.className = 'toast'; el.setAttribute('role', 'status'); el.textContent = msg; app.appendChild(el); setTimeout(function () { el.remove(); }, 2800); }
   function applyComfort() {
     var r = document.documentElement;
     r.classList.toggle('size-large', S.settings.text === 'large');
@@ -176,6 +176,11 @@
         S.entries = {};
       }
       if (S.habit && h.data && S.habit.id === h.data.id) {
+        // Merge what was noticed and what's worked across devices.
+        var rx = h.data.extra || {}, lx = extra();
+        if (rx.noticed) { lx.noticed = lx.noticed || {}; Object.keys(rx.noticed).forEach(function (k) { var a = lx.noticed[k], b2 = rx.noticed[k]; if (!a || new Date(b2.at || 0) > new Date(a.at || 0)) lx.noticed[k] = b2; }); }
+        if (rx.worked) { var seenAt = {}; (lx.worked || []).forEach(function (w) { seenAt[w.at] = 1; }); lx.worked = (lx.worked || []).concat(rx.worked.filter(function (w) { return !seenAt[w.at]; })).sort(function (a, b2) { return new Date(a.at) - new Date(b2.at); }); }
+        if (rx.sq) lx.sq = Object.assign({}, rx.sq, lx.sq || {});
         var e = await sb.from('showup_entries').select('*').eq('habit_id', S.habit.id);
         if (e.error) throw e.error;
         (e.data || []).forEach(function (r) {
@@ -278,13 +283,13 @@
       var ticked = !!S.entries[1];
       var h = '<section class="screen"><div><div class="eyebrow">Your plan is ready</div><h1>Here’s your plan.</h1></div>' + planCard('ready');
       if (!ticked) {
-        h += '<div class="card"><b style="font-size:20px;font-weight:600">' + (S.habit.mode === 'less' ? 'Kept to it today?' : 'Done it today?') + '</b><span style="color:var(--text-mid)">If you have, tick day one now. Starting counts.</span>' +
-          '<button class="btn" data-tick="full">' + checkIcon('#FFFFFF') + 'Tick day one</button>' +
+        h += '<div class="card"><b style="font-size:20px;font-weight:600">' + 'Showed up today?</b><span style="color:var(--text-mid)">If you have, count day one now. A lighter version counts too.</span>' +
+          '<button class="btn" data-tick="full">' + checkIcon('#FFFFFF') + 'I showed up today</button>' +
           (S.later ? '<p style="margin:0;text-align:center">Lovely. Day one is tomorrow.</p>' : '<button class="link center" data-act="later">I’ll start tomorrow</button>') + '</div>';
       } else {
         var e = S.entries[1];
         h += '<div class="card" style="flex-direction:row;align-items:center;gap:14px"><span class="bigstar" style="width:32px;height:32px"></span>' +
-          '<span><b>Day one, done' + (e.felt && e.felt !== 'Honestly, tough' ? '. ' + esc(e.felt) : '') + '.</b> You’ve started, and that’s the hardest bit.</span></div>';
+          '<span><b>You showed up on day one' + (e.felt && e.felt !== 'Honestly, tough' ? '. ' + esc(e.felt) : '') + '.</b> You’ve started, and that’s the hardest bit.</span></div>';
       }
       if (!user && (ticked || S.later)) {
         h += '<div class="card"><b style="font-size:18px;font-weight:600">Keep your progress safe</b><span style="color:var(--text-mid)">Sign in so nothing is lost, your morning nudge can find you, and you can use it on any device.</span>' +
@@ -319,14 +324,13 @@
       var t = todayNum(), L = S.habit.length, e = S.entries[t];
       var h = '<section class="screen" style="gap:16px"><div><div class="row"><span class="eyebrow">My habit</span><button class="plan-link" data-go="plan">' + iconPlan() + 'My plan</button></div><h1>' + esc(habitName()) + '</h1>' +
         '<div style="color:var(--text-mid)">' + (t > L ? 'All ' + L + ' days · complete' : 'Day ' + t + ' of ' + L) + '</div></div>';
-      h += '<div class="card" style="padding:16px">' + gridHTML(t) + '<div class="legend"><span><i style="background:var(--navy)"></i>Full on</span><span><i style="background:var(--muted)"></i>Turned down</span><span><span class="star"></span>Got back up</span></div></div>';
+      h += signInCard();
+      h += '<div class="card" style="padding:16px">' + gridHTML(t, true) + '<div class="legend"><span><i style="background:var(--navy)"></i>Showed up</span><span><span class="star"></span>Got back up</span></div><p class="hint" style="margin:0">Tap any day to fill it in or add a note.</p></div>';
+      h += catchUpCard(t);
       if (t > L) {
         h += '<div class="card"><b style="font-size:20px;font-weight:600">You gave it ' + L + ' days.</b><span style="color:var(--text-mid)">Time for your look back: what you noticed, and what’s next. Your call.</span><button class="btn" data-go="reflect">Start my look back</button></div>';
       } else if (!e) {
-        h += '<div style="display:flex;flex-direction:column;gap:8px"><b style="font-weight:600">' + (S.habit.mode === 'less' ? 'Kept to it today?' : 'Showed up today?') + '</b><div class="tick-row">' +
-          '<button class="btn" data-tick="full">' + iconFull('#FFFFFF', 16) + (S.habit.mode === 'less' ? 'Kept to it' : 'Full on') + '</button>' +
-          '<button class="btn grey" data-tick="dimmer">' + iconDown('#0F1215', 16) + 'Turned down</button>' +
-          '<button class="note-btn" data-go="note" aria-label="Add a note">' + pencil() + '</button></div></div>';
+        h += showUpButtons();
       } else {
         h += '<div class="done"><span class="bigstar"></span><span class="msg">' + esc(doneMsg(e)) + '</span><button data-go="note">' + (e.note ? 'Edit note' : 'Add a note') + '</button></div>' +
           '<button class="link center" data-act="undo" style="margin-top:-10px;font-size:14px;font-weight:500">Tapped by mistake? Undo today</button>';
@@ -336,33 +340,23 @@
       var felt = {}; Object.keys(S.entries).forEach(function (k) { var f = S.entries[k].felt; if (f && f !== 'Honestly, tough') felt[f] = (felt[f] || 0) + 1; });
       var top = Object.keys(felt).sort(function (a, b) { return felt[b] - felt[a]; })[0];
       h += '<div class="statline"><div><b>' + count(function () { return true; }) + '</b><small>Show-ups</small></div>' +
-        '<div><b>' + count(function (x) { return x.kind === 'dimmer'; }) + '</b><small>Turned down</small></div>' +
-        '<div><b>' + count(function (x) { return x.comeback; }) + '</b><small>Comebacks</small></div></div>' +
+        '<div><b>' + count(function (x) { return x.comeback; }) + '</b><small>Comebacks</small></div>' +
+        '<div><b>' + Math.max(0, L - t) + '</b><small>Days to go</small></div></div>' +
         (top ? '<p class="felt-line">Most often you’ve felt <b>' + esc(top.toLowerCase()) + '</b>.</p>' : '');
       h += '<button class="btn outline" data-go="share">Share my progress</button>' +
-        '<div class="row" style="justify-content:center;flex-wrap:wrap;gap:4px 16px"><button class="link" data-words="tracker">My words</button><button class="link" data-go="slipped">Slipped off track?</button>' +
+        '<div class="row" style="justify-content:center;flex-wrap:wrap;gap:4px 16px"><button class="link" data-words="tracker">My words</button>' + (e ? '<button class="link" data-go="slipped">I’m struggling</button>' : '') + '' +
         '</div></section>';
       return h;
     },
     note: function () {
-      var t = todayNum(), e = S.entries[t] || {};
+      var t = ui.noteDay || todayNum(), e = S.entries[t] || {};
       return '<section class="screen"><div><div class="eyebrow">Day ' + t + '</div><h1>How did it go?</h1></div>' +
         '<div class="field"><label class="label" for="note">A word or a paragraph. Whatever’s true today.</label>' +
         '<textarea id="note" rows="3" style="min-height:120px">' + esc(e.note || '') + '</textarea></div>' +
         '<p class="hint">Your notes are only ever seen by you, unless you choose to share one.</p>' +
         '<div class="spacer"></div><button class="btn" data-act="savenote">Save note</button></section>';
     },
-    slipped: function () {
-      var h = S.habit;
-      return '<section class="screen"><h1>Hey. It happens.</h1><p class="lede">Falling off isn’t the end of anything. Getting back on is where the real work lives.</p>' +
-        '<div class="card"><div class="eyebrow">What you told yourself on day one</div>' +
-        '<div><div class="hint">' + (h.mode === 'less' ? 'You’re moving towards' : 'You want to feel') + '</div><div style="font-weight:600">' + esc(words().join(', ')) + '</div></div>' +
-        (h.mode === 'less' && (h.instead || '').trim() ? '<div><div class="hint">When it pulls at you</div><div style="font-weight:600">' + esc(h.instead) + '</div></div>' : '') +
-        '<div><div class="hint">On a tough day</div><div style="font-weight:600">' + esc(h.dimmer || 'Your turned-down version') + '</div></div></div>' +
-        '<div class="card soft small"><span>Today doesn’t need to be a 10. Turned down still counts as showing up.</span></div>' +
-        '<div class="spacer"></div>' + (S.entries[todayNum()] ? '<p style="margin:0;text-align:center">You’ve already shown up today.</p>' :
-        '<button class="btn" data-tick="full" data-from="slipped"><span class="star" style="margin:0"></span>I’m back. Count me in today</button><button class="btn grey" data-tick="dimmer" data-from="slipped">Back, turned down</button>') + '</section>';
-    },
+    slipped: function () { return struggleScreen(); },
     share: function () {
       var t = Math.min(todayNum(), S.habit.length), e = S.entries[todayNum()] || {};
       return '<section class="screen"><h1>Share your progress</h1><p class="lede">People who share how they’re getting on tend to keep going. This is what others will see.</p>' +
@@ -428,7 +422,7 @@
         (s.view === 'focus' ? '<p class="hint">Focus keeps screens still and calm.</p>' : '<button class="switch" role="switch" aria-checked="' + !!s.calm + '" data-toggle="calm"><span><b>Less movement</b><span class="hint">Calmer screens, no animation.</span></span><span class="track"></span></button>') +
         '<button class="switch" role="switch" aria-checked="' + !!s.buzz + '" data-toggle="buzz"><span><b>Buzz when I tick</b><span class="hint">On phones that support it.</span></span><span class="track"></span></button></div>';
       // Reminders
-      h += '<div class="card" id="reminders"><span class="eyebrow">Morning nudge</span>' +
+      h += '<div class="card" id="reminders"><span class="eyebrow">Morning nudge</span>' + (user || !sb || !authChecked ? '' : '<div class="card soft small" style="padding:12px 14px"><b style="font-weight:600">Sign in to get your nudge</b><span>Nudges come from your account, so they only reach you once you’re signed in.</span><button class="chip" data-account="settings" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Sign in</button></div>') +
         '<div class="field"><label class="label" for="rtime">What time?</label><input class="input" id="rtime" type="time" step="900" value="' + esc(s.time) + '" style="max-width:200px"></div>' +
         '<span class="label full-only">Which days?</span><div class="days full-only">' + DAY_NAMES.map(function (n, i) { return '<button class="chip" data-rday="' + i + '" aria-pressed="' + (s.days.indexOf(i) >= 0) + '" aria-label="' + DAY_LABELS[i] + '">' + n + '</button>'; }).join('') + '</div>' +
         '<button class="switch" role="switch" aria-checked="' + !!s.email + '" data-toggle="email"><span><b>Email</b><span class="hint">' + (user ? 'To ' + esc(user.email) : 'Sign in to switch this on') + '</span></span><span class="track"></span></button>' +
@@ -492,11 +486,11 @@
     var h = '<section class="screen focus"><div class="row" style="justify-content:flex-end;margin-bottom:-12px"><button class="plan-link" data-go="plan">' + iconPlan() + 'My plan</button></div><h1 style="text-align:center">' + esc(habitName()) + '</h1>' + ring(t, L) +
       '<p class="hint" style="text-align:center;margin-top:-12px">' + (t > L ? 'All ' + L + ' days done' : 'Day ' + t + ' of ' + L) + '</p>';
     if (t > L) h += '<div class="big"><button class="btn" data-go="reflect">Start my look back</button></div>';
-    else if (!e) h += '<div class="big"><button class="btn" data-tick="full">' + iconFull('#FFFFFF') + (less ? 'Kept to it' : 'Full on') + '</button>' +
-      '<button class="btn grey" data-tick="dimmer">' + iconDown('#0F1215') + 'Turned down</button></div>' +
-      '<div class="plan">' + iconDown('#888880', 32) + '<div><small>Tough day? Turn it down to</small><b>' + esc(S.habit.dimmer) + '</b></div></div>';
+    else if (!e) h += '<div class="big">' + showUpButtons(true) + '</div>' +
+      '<div class="plan">' + iconDown('#888880', 32) + '<div><small>Tough day? A lighter version counts</small><b>' + esc(S.habit.dimmer) + '</b></div></div>';
     else h += '<div class="done"><span class="bigstar"></span><span class="msg">' + esc(doneMsg(e)) + '</span><button data-go="note">' + (e.note ? 'Edit note' : 'Note') + '</button></div>' + nextNudge();
-    h += '<details class="ask" style="align-self:center"><summary>See all my days</summary><div class="card" style="padding:16px">' + gridHTML(t) + '</div></details>';
+    h += catchUpCard(t) + signInCard();
+    h += '<details class="ask" style="align-self:center"><summary>See all my days</summary><div class="card" style="padding:16px">' + gridHTML(t, true) + '<p class="hint" style="margin:0">Tap any day to fill it in or add a note.</p></div></details>';
     return h + '<div class="spacer"></div></section>';
   }
 
@@ -525,22 +519,24 @@
     if (hb.mode === 'less' && (hb.instead || '').trim()) h += '<div class="soft" style="font-size:14px">Instead: ' + esc(hb.instead) + '</div>';
     return h + '<div class="soft" style="font-size:14px">Tough day: ' + esc(hb.dimmer || '') + '</div></div>';
   }
-  function gridHTML(t) {
-    var h = '<div class="grid">';
+  function gridHTML(t, tappable) {
+    var h = '<div class="grid">', nt = extra().noticed || {};
     for (var n = 1; n <= S.habit.length; n++) {
-      var e = S.entries[n], c = 'day';
-      if (e) c += ' ' + e.kind + (e.comeback ? ' comeback' : '');
-      else if (n < t) c += ' missed';
-      else if (n === t) c += ' today';
-      h += '<span class="' + c + '">' + n + '</span>';
+      var e = S.entries[n], c = 'day', lab = 'Day ' + n;
+      if (e) { c += ' full' + (e.comeback ? ' comeback' : ''); lab += ', showed up'; }
+      else if (n < t) { c += ' missed' + (nt[n] ? ' noticed' : ''); }
+      else if (n === t) { c += ' today'; lab += ', today'; }
+      if (e && e.note) c += ' has-note';
+      if (tappable && n <= t) h += '<button class="' + c + '" data-day="' + n + '" aria-label="' + lab + '">' + n + '</button>';
+      else h += '<span class="' + c + '">' + n + '</span>';
     }
     return h + '</div>';
   }
   function doneMsg(e) {
-    if (e.felt === 'Honestly, tough') return 'Tough one, and you still showed up. Logged.';
     var total = count(function () { return true; }) + ' show-up' + (count(function () { return true; }) === 1 ? '' : 's');
-    if (e.felt) return e.felt + '. Logged. That’s ' + total + '.';
-    return (e.kind === 'dimmer' ? 'Turned down, still counts. ' : 'Done. ') + 'That’s ' + total + '.';
+    if (e.felt === 'Honestly, tough') return 'Tough one, and you still showed up. That’s ' + total + '.';
+    if (e.felt) return 'You showed up today. ' + e.felt + '. That’s ' + total + '.';
+    return 'You showed up today. That’s ' + total + '.';
   }
   function ideasSheet() {
     var h = '<div class="sheet-bg" data-act="closeideas"><div class="sheet" role="dialog" aria-label="Ideas" data-stop="1"><div class="row"><b style="font-size:20px;font-weight:600">Some ideas</b><button class="link" data-act="closeideas">Close</button></div>' +
@@ -612,20 +608,51 @@
   function grow(t) { t.style.height = 'auto'; t.style.height = Math.max(t.scrollHeight + 3, 58) + 'px'; }
 
   // ── The tick ──────────────────────────────────────────────────────────────
+  var authChecked = false;
+  function isCalm() { return document.documentElement.classList.contains('calm') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  function confettiHTML(n) {
+    if (isCalm()) return '';
+    var bits = '', cols = ['#C9930A', '#F5F1EB', '#FFFFFF', '#888880', '#EDE8DF'];
+    for (var i = 0; i < n; i++) {
+      var x = Math.random() * 100, dx = (Math.random() * 60 - 30).toFixed(0), rot = (Math.random() * 720 - 360).toFixed(0);
+      var w = 6 + Math.random() * 6, h2 = 8 + Math.random() * 10, d = (1.6 + Math.random() * 1.4).toFixed(2), del = (Math.random() * 0.5).toFixed(2);
+      bits += '<i class="cf" style="left:' + x.toFixed(1) + '%;width:' + w.toFixed(0) + 'px;height:' + h2.toFixed(0) + 'px;background:' + cols[i % cols.length] + ';--dx:' + dx + 'vw;--rot:' + rot + 'deg;animation-duration:' + d + 's;animation-delay:' + del + 's;border-radius:' + (i % 3 ? '2px' : '50%') + '"></i>';
+    }
+    return '<div class="confetti" aria-hidden="true">' + bits + '</div>';
+  }
+  function extra() { if (!S.habit) return {}; if (!S.habit.extra || typeof S.habit.extra !== 'object') S.habit.extra = {}; return S.habit.extra; }
+  // A comeback is the first show-up after a gap. Worked out from the whole record, so filling in past days keeps it right.
+  function recomputeComebacks() {
+    var seen = false;
+    for (var n = 1; n <= Math.max(todayNum(), S.habit ? S.habit.length : 0); n++) {
+      var e = S.entries[n]; if (!e) continue;
+      var cb = seen && n > 1 && !S.entries[n - 1];
+      if (!!e.comeback !== cb) { e.comeback = cb; e.at = new Date().toISOString(); }
+      seen = true;
+    }
+  }
+  function markDay(n) {
+    if (!S.habit || n < 1 || n > todayNum() || S.entries[n]) return;
+    S.entries[n] = { kind: 'full', comeback: false, at: new Date().toISOString() };
+    var nt = extra().noticed; if (nt && nt[n]) delete nt[n];
+    recomputeComebacks(); save(); buzz();
+    var c = count(function () { return true; });
+    toast('Day ' + n + ' counted. That’s ' + c + ' show-up' + (c === 1 ? '' : 's') + '.');
+  }
   function tick(kind, from) {
     if (notStarted()) { S.habit.start = todayStr(); S.later = false; }
     var t = todayNum();
     if (S.entries[t]) return;
-    var prev = t > 1 && !S.entries[t - 1];
-    S.entries[t] = { kind: kind, comeback: prev && count(function () { return true; }) > 0, at: new Date().toISOString() };
+    S.entries[t] = { kind: 'full', comeback: false, at: new Date().toISOString() };
+    recomputeComebacks();
     save(); buzz();
-    var title = t === 1 ? 'Day one. Done.' : (kind === 'dimmer' ? 'Day ' + t + '. Still counts.' : 'Day ' + t + '. Done.');
-    var n = count(function () { return true; });
-    var sub = S.entries[t].comeback ? 'You got back up. That’s the real work.' : (t === 1 ? 'You’ve started. That’s the hardest bit.' : (kind === 'dimmer' ? 'Turned down is still showing up.' : 'That’s ' + n + ' show-ups.'));
-    var sparks = ''; for (var i = 0; i < 10; i++) sparks += '<span class="spark" style="transform:rotate(' + (i * 36) + 'deg)"><i style="animation-delay:' + (180 + (i % 3) * 40) + 'ms"></i></span>';
+    var n = count(function () { return true; }), name = firstName();
+    var title = 'Good work' + (name ? ', ' + esc(name) : '') + '.';
+    var sub = S.entries[t].comeback ? 'You showed up today. Getting back on is the real work.' :
+      (t === 1 ? 'You showed up on day one. That’s the hardest bit done.' : 'You showed up today. That’s ' + n + ' show-ups.');
     var el = document.createElement('div');
-    el.className = 'celebrate'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Day logged');
-    el.innerHTML = '<div class="burst"><span class="ring"></span>' + sparks + '<div class="disc"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div></div>' +
+    el.className = 'celebrate'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'You showed up today');
+    el.innerHTML = confettiHTML(60) + '<div class="burst"><span class="ring"></span><div class="disc"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div></div>' +
       '<div><div class="t">' + title + '</div><div class="s">' + sub + '</div></div><div id="ask"></div>';
     app.appendChild(el);
     setTimeout(function () {
@@ -634,13 +661,143 @@
       words().slice(0, 3).concat(['Honestly, tough']).forEach(function (w) { h += '<button class="chip" data-felt="' + esc(w) + '">' + esc(w) + '</button>'; });
       ask.innerHTML = h + '</div><button class="skip" data-felt="">Skip</button></div>';
       var first = ask.querySelector('button'); if (first) first.focus({ preventScroll: true });
-    }, S.settings.calm ? 300 : 1150);
+    }, isCalm() ? 300 : 1400);
     el.addEventListener('click', function (ev) {
       var b = ev.target.closest('[data-felt]'); if (!b) return;
       if (b.dataset.felt) S.entries[t].felt = b.dataset.felt;
       save(); el.remove();
-      if (from === 'slipped' || from === 'ready') { if (from === 'slipped') go('tracker'); else render(); } else render();
+      if (from === 'slipped') go('tracker'); else render();
     });
+  }
+
+  // ── One day, opened from the grid ─────────────────────────────────────────
+  var GOT_IN_WAY = ['I just forgot', 'Ran out of time', 'Too tired', 'Plans changed', 'Wasn’t feeling it', 'Something else'];
+  function openDay(n) {
+    if (!S.habit) return;
+    var t = todayNum(); if (n > t) return;
+    if (n === t && !S.entries[n]) { var sc = document.querySelector('[data-tick]'); if (sc) { sc.scrollIntoView({ behavior: isCalm() ? 'auto' : 'smooth', block: 'center' }); sc.focus({ preventScroll: true }); } return; }
+    var e = S.entries[n], nt = (extra().noticed || {})[n] || { why: [], note: '' };
+    var date = prettyDate(addDays(S.habit.start, n - 1));
+    var el = document.createElement('div'); el.className = 'sheet-bg';
+    var h = '<div class="sheet" role="dialog" aria-label="Day ' + n + '"><div class="row"><span><span class="eyebrow">Day ' + n + '</span><b style="display:block;font-size:20px;font-weight:600">' + esc(date) + '</b></span><button class="link" data-x="close">Close</button></div>';
+    if (e) {
+      h += '<div class="done" style="background:var(--white)"><span class="bigstar"></span><span class="msg">You showed up' + (e.felt ? '. ' + esc(e.felt) : '') + '.</span></div>' +
+        '<div class="field"><label class="label" for="dnote">Anything to remember about this day?</label><textarea id="dnote" rows="2" placeholder="Only you see this">' + esc(e.note || '') + '</textarea></div>' +
+        '<button class="btn" data-x="savenote">Save</button>' +
+        '<button class="link center" data-x="unmark" style="font-size:14px">Tapped this by mistake? Remove it</button>';
+    } else {
+      h += '<button class="btn" data-x="mark">' + checkIcon('#FFFFFF') + 'I showed up this day</button>' +
+        '<div class="divider" style="margin:6px 0"></div>' +
+        '<span class="eyebrow">If it didn’t happen</span>' +
+        '<b style="font-weight:600">Looking back, what do you notice about this day?</b>' +
+        '<span class="hint" style="margin-top:-6px">Spotting what gets in the way is useful. It’s how you learn to work around it.</span>' +
+        '<div class="chips">' + GOT_IN_WAY.map(function (w) { return '<button class="chip" data-why="' + esc(w) + '" aria-pressed="' + (nt.why.indexOf(w) >= 0) + '">' + esc(w) + '</button>'; }).join('') + '</div>' +
+        '<textarea id="dwhy" rows="1" placeholder="Anything else you noticed (just for you)">' + esc(nt.note || '') + '</textarea>' +
+        '<button class="btn outline" data-x="savewhy">Save what I noticed</button>' +
+        '<p class="hint" style="text-align:center;margin:0">Totally optional. Some days you’d rather leave be, and that’s fine.</p>';
+    }
+    el.innerHTML = h + '</div>';
+    app.appendChild(el);
+    el.querySelectorAll('textarea').forEach(grow);
+    var why = nt.why.slice();
+    el.addEventListener('input', function (ev) { if (ev.target.tagName === 'TEXTAREA') grow(ev.target); });
+    el.addEventListener('click', function (ev) {
+      if (ev.target === el) return el.remove();
+      var b = ev.target.closest('button'); if (!b) return;
+      if (b.dataset.why) { var i = why.indexOf(b.dataset.why); i >= 0 ? why.splice(i, 1) : why.push(b.dataset.why); b.setAttribute('aria-pressed', i < 0); return; }
+      var x = b.dataset.x;
+      if (x === 'close') return el.remove();
+      if (x === 'mark') { el.remove(); markDay(n); return render(); }
+      if (x === 'savenote') { e.note = el.querySelector('#dnote').value.trim(); e.at = new Date().toISOString(); save(); el.remove(); toast('Saved.'); return render(); }
+      if (x === 'unmark') { delete S.entries[n]; recomputeComebacks(); save(); el.remove(); toast('Removed.'); return render(); }
+      if (x === 'savewhy') {
+        var note = el.querySelector('#dwhy').value.trim(), ex = extra(); ex.noticed = ex.noticed || {};
+        if (!why.length && !note) delete ex.noticed[n];
+        else ex.noticed[n] = { why: why, note: note, at: new Date().toISOString() };
+        save(); el.remove(); toast(why.length || note ? 'Saved. Good noticing.' : 'Cleared.'); return render();
+      }
+    });
+    var f = el.querySelector('button.btn'); if (f) f.focus({ preventScroll: true });
+  }
+
+  // ── Catch-up after a gap ──────────────────────────────────────────────────
+  function catchDays(t) {
+    var out = [], nt = extra().noticed || {}, dis = S.catchup || [];
+    for (var n = Math.max(1, t - 7); n < t && n <= S.habit.length; n++) if (!S.entries[n] && !nt[n] && dis.indexOf(n) < 0) out.push(n);
+    return out;
+  }
+  function catchUpCard(t) {
+    if (!S.habit || t > S.habit.length + 1) return '';
+    var days = catchDays(t); if (!days.length) return '';
+    var gap = days.length > 1;
+    var h = '<div class="card soft"><span class="eyebrow">' + (gap ? 'Welcome back' : 'Yesterday') + '</span>' +
+      '<b style="font-weight:600">' + (gap ? 'Did you show up on any of these days?' : 'Did you show up yesterday?') + '</b>' +
+      '<span class="hint" style="margin-top:-6px">Life gets busy. Tap any you did, and they’ll count.</span><div class="chips">';
+    days.forEach(function (n) {
+      var d = new Date(addDays(S.habit.start, n - 1) + 'T12:00:00');
+      var lab = !gap ? 'Yes, I did' : n === t - 1 ? 'Yesterday' : d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' });
+      h += '<button class="chip" data-catch="' + n + '">' + esc(lab) + '</button>';
+    });
+    return h + '</div><button class="link" data-act="catchdone" style="align-self:flex-start;font-size:14px">' + (gap ? 'That’s everything' : 'No, carry on') + '</button></div>';
+  }
+
+  // ── The two buttons that matter ───────────────────────────────────────────
+  function showUpButtons(big) {
+    return '<div class="showup">' +
+      '<button class="btn showup-btn" data-tick="full">' + checkIcon('#FFFFFF') + 'I showed up today</button>' +
+      (big ? '' : '<p class="hint" style="margin:0;text-align:center">A lighter version on a tough day counts too.</p>') +
+      '<button class="btn outline" data-go="slipped">I’m struggling</button></div>';
+  }
+
+  // ── Not signed in: nudges can't reach you ─────────────────────────────────
+  function signInCard() {
+    if (user || !sb || !authChecked) return '';
+    return '<div class="card soft small"><b style="font-weight:600">Your morning nudge can’t reach you yet</b><span>Sign in with your TLR Hub email and password so it can find you, and so your progress is kept safe.</span>' +
+      '<button class="chip" data-account="tracker" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Sign in</button></div>';
+  }
+
+  // ── I'm struggling ────────────────────────────────────────────────────────
+  // Stuart's videos go here when they're ready (a URL per situation). Empty = no video shown.
+  var STRUGGLE_VIDEO = { start: '', off: '', spark: '' };
+  var STRUGGLE = {
+    start: { label: 'I can’t get started today', qs: ['What’s helped you get going before, even a little?', 'What’s the smallest version you could do in the next five minutes?', 'What’s one thing you could move out of the way right now?'] },
+    off: { label: 'I’ve fallen off track', qs: ['What helped you get back on last time?', 'What would make tomorrow easier to show up for?', 'Who or what could help you get going again?'] },
+    spark: { label: 'I’ve lost the spark', qs: ['What made you want this in the first place?', 'What would make it feel fresh again?', 'What could you change so it feels more like you?'] }
+  };
+  function struggleScreen() {
+    var hb = S.habit, k = ui.struggle, ex = extra(), worked = ex.worked || [];
+    var h = '<section class="screen"><div><div class="eyebrow">I’m struggling</div><h1>' + (k ? esc(STRUGGLE[k].label) + '.' : 'Thanks for being honest.') + '</h1></div>';
+    if (!k) {
+      h += '<p class="lede">Struggling doesn’t mean you’ve failed. It means it matters. Which feels closest?</p><div style="display:flex;flex-direction:column;gap:10px">';
+      Object.keys(STRUGGLE).forEach(function (key) { h += '<button class="choice" style="min-height:62px" data-struggle="' + key + '"><b>' + esc(STRUGGLE[key].label) + '</b></button>'; });
+      h += '</div>';
+      if (worked.length) {
+        h += '<div class="card"><span class="eyebrow">What’s worked for me</span>';
+        worked.slice(-4).reverse().forEach(function (w) { h += '<span>“' + esc(w.a) + '”</span>'; });
+        h += '</div>';
+      }
+      return h + '</section>';
+    }
+    if (STRUGGLE_VIDEO[k]) h += '<video controls playsinline preload="metadata" src="' + esc(STRUGGLE_VIDEO[k]) + '" style="width:100%;border-radius:10px;background:#0F1215"></video>';
+    ex.sq = ex.sq || {};
+    if (!ui.struggleQ || ui.struggleKey !== k) { var i = ex.sq[k] || 0; ui.struggleQ = STRUGGLE[k].qs[i % STRUGGLE[k].qs.length]; ex.sq[k] = i + 1; ui.struggleKey = k; ui.struggleSaved = false; save(false); }
+    if (worked.length) {
+      h += '<div class="card soft small"><span class="eyebrow">What’s worked for you before</span>';
+      worked.slice(-3).reverse().forEach(function (w) { h += '<span>“' + esc(w.a) + '”</span>'; });
+      h += '</div>';
+    }
+    if (ui.struggleSaved) h += '<div class="card small"><b style="font-weight:600">Saved to What’s worked for me.</b><span>It’ll be here next time you need it.</span></div>';
+    else h += '<div class="field"><label class="label" for="worked">' + esc(ui.struggleQ) + '</label><textarea id="worked" rows="2" placeholder="A few words is plenty"></textarea></div>' +
+      '<button class="btn outline" data-act="saveworked">Save to What’s worked for me</button>';
+    var step = k === 'start' ? 'Do your tough-day version: <b>' + esc(hb.dimmer || 'a lighter version') + '</b>. That counts as showing up.' :
+      k === 'off' ? 'Show up once today, any size. That’s you back on. If you did show up on days you didn’t log, tap them on your tracker.' :
+      'Make it yours again. If your plan doesn’t fit any more, change it. Do it your way.';
+    h += '<div class="why"><span class="eyebrow">One small step</span><span>' + step + '</span></div>';
+    h += '<div class="spacer"></div>';
+    if (k === 'spark') h += '<button class="btn" data-go="plan">Change my plan</button>';
+    if (!S.entries[todayNum()] && todayNum() <= hb.length) h += '<button class="btn' + (k === 'spark' ? ' outline' : '') + '" data-tick="full" data-from="slipped">' + checkIcon(k === 'spark' ? '#0F1215' : '#FFFFFF') + 'I showed up today</button>';
+    else h += '<button class="btn outline" data-go="tracker">Back to my tracker</button>';
+    return h + '<button class="link center" data-struggle-back="1">Something else</button></section>';
   }
 
   // ── Share image ───────────────────────────────────────────────────────────
@@ -658,7 +815,7 @@
     for (var n = 1; n <= L; n++) {
       var col = (n - 1) % cols, row = Math.floor((n - 1) / cols), x = 80 + col * (size + gap), yy = y + row * (size + gap), e = S.entries[n];
       g.beginPath(); g.arc(x + size / 2, yy + size / 2, size / 2, 0, Math.PI * 2);
-      if (e) { g.fillStyle = e.kind === 'dimmer' ? '#888880' : '#F5F1EB'; g.fill(); if (e.comeback) { g.lineWidth = 6; g.strokeStyle = '#C9930A'; g.stroke(); } }
+      if (e) { g.fillStyle = '#F5F1EB'; g.fill(); if (e.comeback) { g.lineWidth = 6; g.strokeStyle = '#C9930A'; g.stroke(); } }
       else if (n < t) { g.lineWidth = 2; g.strokeStyle = '#1C2B3A'; g.stroke(); }
       else { g.fillStyle = '#1C2B3A'; g.fill(); }
     }
@@ -763,7 +920,11 @@
   app.addEventListener('click', function (e) {
     var b = e.target.closest('button, [data-act="closeideas"]'); if (!b || b.closest('.celebrate')) return;
     var d = b.dataset;
-    if (d.go) { if (d.go === 'reflect') ui.reflect = null; return go(d.go); }
+    if (d.go) { if (d.go === 'reflect') ui.reflect = null; if (d.go === 'note') ui.noteDay = null; if (d.go === 'slipped') ui.struggle = null; return go(d.go); }
+    if (d.day) return openDay(+d.day);
+    if (d.catch) { markDay(+d.catch); return render(); }
+    if (d.struggle) { ui.struggle = d.struggle; return render(); }
+    if (d.struggleBack) { ui.struggle = null; return render(); }
     if (d.back) return goBack();
     if (d.start) { S.draft.mode = d.start; return go('what'); }
     if (d.starter) { S.draft.what = d.starter; save(false); return render(); }
@@ -795,9 +956,12 @@
       case 'later': S.later = true; if (S.habit && !count(function () { return true; })) S.habit.start = addDays(todayStr(), 1); save(); return render();
       case 'gosettings': return go('settings');
       case 'starttoday': S.habit.start = todayStr(); S.later = false; save(); return render();
-      case 'savenote': { var t = todayNum(); var v = document.getElementById('note').value.trim(); if (!S.entries[t] && v) { toast('Tick today first, then your note is saved with it.'); return; } if (S.entries[t]) { S.entries[t].note = v; S.entries[t].at = new Date().toISOString(); } save(); toast('Note saved.'); return go('tracker'); }
+      case 'savenote': { var t = ui.noteDay || todayNum(); ui.noteDay = null; var v = document.getElementById('note').value.trim(); if (!S.entries[t] && v) { toast('Tick today first, then your note is saved with it.'); return; } if (S.entries[t]) { S.entries[t].note = v; S.entries[t].at = new Date().toISOString(); } save(); toast('Note saved.'); return go('tracker'); }
       case 'morechips': ui.moreChips = true; return render();
-      case 'undo': delete S.entries[todayNum()]; save(); toast('Undone.'); return render();
+      case 'undo': delete S.entries[todayNum()]; recomputeComebacks(); save(); toast('Undone.'); return render();
+      case 'catchdone': { var cd = catchDays(todayNum()); S.catchup = (S.catchup || []).concat(cd); save(false); return render(); }
+      case 'saveworked': { var wv = (document.getElementById('worked') || {}).value || ''; if (!wv.trim()) { toast('Write a few words first, or skip it.'); return; }
+        var ex = extra(); ex.worked = (ex.worked || []).concat([{ q: ui.struggleQ || '', a: wv.trim(), at: new Date().toISOString() }]); save(); toast('Saved to What’s worked for me.'); ui.struggleSaved = true; return render(); }
       case 'sharenote': ui.shareNote = !ui.shareNote; return render();
       case 'shareimg': return void shareImage();
       case 'whatsapp': { var tt = Math.min(todayNum(), S.habit.length); window.open('https://wa.me/?text=' + encodeURIComponent('Day ' + tt + ' of ' + S.habit.length + ': ' + habitName() + '. ' + count(function () { return true; }) + ' show-ups so far.'), '_blank', 'noopener'); return; }
@@ -834,7 +998,7 @@
       '<div class="lbl"><b>' + n + '</b><small>show-up' + (n === 1 ? '' : 's') + '</small></div></div>';
   }
   function nextNudge() {
-    var s = S.settings; if (!(s.email || s.push)) return '';
+    var s = S.settings; if (!user && sb && authChecked) return signInCard(); if (!(s.email || s.push)) return '';
     return '<p class="next-up">' + iconClock('#888880') + '<span>What happens next: <b>your nudge arrives tomorrow at ' + esc(fmtTime(s.time)) + '</b>. Change it any time in Settings.</span></p>';
   }
 
@@ -883,19 +1047,9 @@
   }
   // The end of setup: a proper moment, then their plan (peak-end rule).
   function finishMoment() {
-    var calm = document.documentElement.classList.contains('calm') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
     var el = document.createElement('div');
     el.className = 'celebrate finish'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Your plan is ready');
-    var bits = '';
-    if (!calm) {
-      var cols = ['#C9930A', '#F5F1EB', '#FFFFFF', '#888880', '#EDE8DF'];
-      for (var i = 0; i < 70; i++) {
-        var x = Math.random() * 100, dx = (Math.random() * 60 - 30).toFixed(0), rot = (Math.random() * 720 - 360).toFixed(0);
-        var w = 6 + Math.random() * 6, h2 = 8 + Math.random() * 10, d = (1.6 + Math.random() * 1.4).toFixed(2), del = (Math.random() * 0.5).toFixed(2);
-        bits += '<i class="cf" style="left:' + x.toFixed(1) + '%;width:' + w.toFixed(0) + 'px;height:' + h2.toFixed(0) + 'px;background:' + cols[i % cols.length] + ';--dx:' + dx + 'vw;--rot:' + rot + 'deg;animation-duration:' + d + 's;animation-delay:' + del + 's;border-radius:' + (i % 3 ? '2px' : '50%') + '"></i>';
-      }
-    }
-    el.innerHTML = '<div class="confetti" aria-hidden="true">' + bits + '</div>' +
+    el.innerHTML = confettiHTML(70) +
       '<div class="burst"><span class="ring"></span><div class="disc"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div></div>' +
       '<div><div class="t">Your plan is ready.</div><div class="s">' + esc(habitName()) + ', for ' + S.habit.length + ' days. In your words.</div></div>' +
       '<button class="btn" style="max-width:320px;background:var(--amber);color:var(--navy)" data-finish="1">See my plan</button>';
@@ -951,10 +1105,11 @@
     try {
       var sres = await sb.auth.getSession();
       user = sres.data.session ? sres.data.session.user : null;
+      authChecked = true; if (!user) render();
       if (user && user.user_metadata && user.user_metadata.first_name && !S.settings.name) { S.settings.name = user.user_metadata.first_name; save(false); }
       greet(); // after sign-in is known, so the greeting can use their name
       if (user) { await pullRemote(); await syncAll(); render(); }
-    } catch (e) { greet(); }
+    } catch (e) { authChecked = true; greet(); }
     sb.auth.onAuthStateChange(function (ev, session) { if (ev === 'SIGNED_OUT') user = null; else if (session) user = session.user; });
   })();
   window.addEventListener('online', function () { if (user) queueSync(); });
