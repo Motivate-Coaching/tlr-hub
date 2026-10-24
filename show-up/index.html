@@ -363,6 +363,14 @@ ol.isteps { list-style: none; margin: 0; padding: 0; display: flex; flex-directi
 .qrcard div { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; min-width: 0; }
 .qrcard .chip { white-space: nowrap; min-height: 40px; padding: 0 12px; font-size: 14px; }
 details.ask .isteps { margin-top: 10px; }
+
+/* Past wins */
+.winlist { display: flex; flex-direction: column; gap: 8px; }
+.win { text-align: left; display: flex; flex-direction: column; gap: 3px; padding: 14px 16px; border: 1px solid var(--cream-deep); border-radius: 10px; background: var(--white); font: inherit; color: inherit; }
+.win b { font-weight: 600; font-size: 17px; }
+.win small { font-size: 13px; color: var(--text-mid); }
+.wo { align-self: flex-start; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; background: var(--cream-dark); color: var(--navy); }
+.wo.did { background: var(--amber); color: var(--navy); }
 </style>
 </head>
 <body>
@@ -378,6 +386,6 @@ details.ask .isteps { margin-top: 10px; }
   <main id="view"></main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=20261024h"></script>
+<script src="app.js?v=20261024i"></script>
 </body>
 </html>

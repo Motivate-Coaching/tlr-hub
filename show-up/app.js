@@ -174,6 +174,7 @@
         var x = h.data;
         S.habit = { id: x.id, mode: x.mode, what: x.what, gives: x.gives || [], instead: x.instead, feel: x.feelings || [], ownFeel: x.own_feel, dimmer: x.dimmer, length: x.length_days, start: x.start_date, status: x.status, extra: x.extra || {}, createdAt: x.created_at, synced: true };
         S.entries = {};
+        if (x.extra && x.extra.wins && (!S.wins || !S.wins.length)) S.wins = x.extra.wins.slice();
       }
       if (S.habit && h.data && S.habit.id === h.data.id) {
         // Merge what was noticed and what's worked across devices.
@@ -181,6 +182,7 @@
         if (rx.noticed) { lx.noticed = lx.noticed || {}; Object.keys(rx.noticed).forEach(function (k) { var a = lx.noticed[k], b2 = rx.noticed[k]; if (!a || new Date(b2.at || 0) > new Date(a.at || 0)) lx.noticed[k] = b2; }); }
         if (rx.worked) { var seenAt = {}; (lx.worked || []).forEach(function (w) { seenAt[w.at] = 1; }); lx.worked = (lx.worked || []).concat(rx.worked.filter(function (w) { return !seenAt[w.at]; })).sort(function (a, b2) { return new Date(a.at) - new Date(b2.at); }); }
         if (rx.sq) lx.sq = Object.assign({}, rx.sq, lx.sq || {});
+        if (rx.wins && (!S.wins || !S.wins.length)) { S.wins = rx.wins.slice(); lx.wins = rx.wins.slice(); }
         var e = await sb.from('showup_entries').select('*').eq('habit_id', S.habit.id);
         if (e.error) throw e.error;
         (e.data || []).forEach(function (r) {
@@ -203,7 +205,7 @@
 
   // ── Screens ───────────────────────────────────────────────────────────────
   var BACK = {
-    what: function () { return S.draft.found ? 'find' : 'landing'; }, name: 'landing', less: 'feel',
+    what: function () { return S.draft.found ? 'find' : 'landing'; }, name: 'landing', wins: 'tracker', less: 'feel',
     find: function () { var f = S.find || {}; if (f.step > 0) { f.step--; save(false); return 'find'; } return 'landing'; }, feel: 'what', dimmer: function () { return S.draft.mode === 'less' ? 'less' : 'feel'; },
     length: function () { return ui.returnTo || 'ready'; }, note: 'tracker', slipped: 'tracker', share: 'tracker', science: function () { return S.habit ? 'settings' : 'landing'; },
     words: function () { return ui.wordsFrom || 'tracker'; }, settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', install: function () { return ui.installFrom || (S.habit ? 'settings' : 'landing'); }, account: function () { return ui.returnTo || 'tracker'; }
@@ -347,7 +349,7 @@
         '<div><b>' + Math.max(0, L - t) + '</b><small>Days to go</small></div></div>' +
         (top ? '<p class="felt-line">Most often you’ve felt <b>' + esc(top.toLowerCase()) + '</b>.</p>' : '');
       h += '<button class="btn outline" data-go="share">Share my progress</button>' +
-        '<div class="row" style="justify-content:center;flex-wrap:wrap;gap:4px 16px"><button class="link" data-words="tracker">My words</button>' + (e ? '<button class="link" data-go="slipped">I’m struggling</button>' : '') + '' +
+        '<div class="row" style="justify-content:center;flex-wrap:wrap;gap:4px 16px"><button class="link" data-words="tracker">My words</button><button class="link" data-go="wins">My past wins</button>' + (e ? '<button class="link" data-go="slipped">I’m struggling</button>' : '') + '' +
         '</div></section>';
       return h;
     },
@@ -361,6 +363,7 @@
     },
     slipped: function () { return struggleScreen(); },
     find: function () { return findScreen(); },
+    wins: function () { return winsScreen(false); },
     name: function () {
       return '<section class="screen"><div><div class="eyebrow">Before we start</div><h1>What should we call you?</h1></div>' +
         '<p class="lede" style="margin-top:-6px">We’ll use it when we check in with you.</p>' +
@@ -829,24 +832,30 @@
     var f = S.find || (S.find = { step: 0, answers: {} }), qs = FIND_QS();
     if (f.step < qs.length) {
       var q = qs[f.step], v = f.answers[q.key] || '';
-      return '<section class="screen"><div><div class="eyebrow">Find my focus · ' + (f.step + 1) + ' of ' + qs.length + '</div><h1 class="findq">' + esc(q.q) + '</h1></div>' +
+      return '<section class="screen"><div><div class="eyebrow">Find my focus · ' + (f.step + 1) + ' of ' + (qs.length + 1) + '</div><h1 class="findq">' + esc(q.q) + '</h1></div>' +
         (f.step === 0 ? '<div class="chips" role="group" aria-label="How far ahead"><span class="label" style="width:100%">Looking back from</span>' + HORIZONS.map(function (x) { return '<button class="chip" data-horizon="' + x[0] + '" aria-pressed="' + ((f.horizon || '90') === x[0]) + '">' + (x[0] === '30' ? '30 days' : x[0] === '90' ? '3 months' : 'A year') + '</button>'; }).join('') + '</div>' : '') +
         '<p class="hint" style="margin-top:-8px">' + esc(q.hint) + '</p>' +
         '<div class="field"><textarea id="findans" rows="3" style="min-height:120px" placeholder="Write whatever comes. Only you see this.">' + esc(v) + '</textarea>' + micButton() + '</div>' +
-        '<div class="spacer"></div><button class="btn" data-find="next">' + (f.step === qs.length - 1 ? 'See what I wrote' : 'Next') + '</button>' +
+        '<div class="spacer"></div><button class="btn" data-find="next">' + 'Next' + '</button>' +
         '<button class="link center" data-find="skip">Skip this one</button></section>';
     }
-    if (f.step === qs.length) {
+    if (f.step === qs.length) return winsScreen(true);
+    if (f.step === qs.length + 1) {
       var picks = qs.filter(function (q) { return (f.answers[q.key] || '').trim(); });
       var h = '<section class="screen"><div><div class="eyebrow">Find my focus</div><h1>Here’s what you said.</h1></div>' +
-        '<p class="lede">Read it back. Which one gives you a little jolt? That’s usually the one. Pick one for the next 30 days.</p><div style="display:flex;flex-direction:column;gap:10px">';
+        '<p class="lede">Read it back. Which one gives you a little jolt? That’s usually the one. Try something again, or push yourself with something new.</p><div style="display:flex;flex-direction:column;gap:10px">';
       picks.forEach(function (q) { h += '<button class="choice findpick" data-find="pick" data-key="' + q.key + '" aria-pressed="' + (f.pick === q.key) + '"><small>' + esc(q.q.replace(/^Imagine it’s [^.?]*? looking back\. /, '')) + '</small><b>' + esc(f.answers[q.key].trim()) + '</b></button>'; });
-      if (!picks.length) h += '<div class="card soft small"><span>Nothing written yet, and that’s fine. Go back and jot down a few words, or name your focus below.</span></div>';
+      var wins = S.wins || [];
+      if (!picks.length && !wins.length) h += '<div class="card soft small"><span>Nothing written yet, and that’s fine. Go back and jot down a few words, or name your focus below.</span></div>';
+      if (wins.length) {
+        h += '<span class="eyebrow" style="margin-top:6px">Or try one again</span>';
+        wins.forEach(function (w) { h += '<button class="choice findpick" data-find="pick" data-key="win:' + w.id + '" aria-pressed="' + (f.pick === 'win:' + w.id) + '"><small>' + esc(OUTCOME[w.outcome] || 'Done before') + '</small><b>' + esc(w.name) + '</b></button>'; });
+      }
       h += '<button class="choice findpick" data-find="pick" data-key="own" aria-pressed="' + (f.pick === 'own') + '"><b>Something else</b><small>I know what it is now.</small></button></div>';
       return h + '<div class="spacer"></div><button class="btn" data-find="chosen"' + (f.pick ? '' : ' disabled') + '>This is my focus</button></section>';
     }
-    if (f.step === qs.length + 1) {
-      var big = f.pick === 'own' ? '' : (f.answers[f.pick] || '').trim();
+    if (f.step === qs.length + 2) {
+      var big = f.pick === 'own' ? '' : pickText(f);
       return '<section class="screen"><div><div class="eyebrow">Find my focus</div><h1>Make it something you can do most days.</h1></div>' +
         (big ? '<div class="why"><span class="eyebrow">Your focus</span><span style="font-weight:600">' + esc(big) + '</span></div>' : '<div class="field"><label class="label" for="findbig">What’s your focus?</label><textarea id="findbig" rows="1" placeholder="In your words">' + esc(f.own || '') + '</textarea></div>') +
         '<div class="field"><label class="label" for="finddo">What could you do most days that moves you towards it?</label><textarea id="finddo" rows="1" placeholder="Something small enough to do on a busy day">' + esc(f.daily || '') + '</textarea></div>' +
@@ -859,6 +868,60 @@
       '<div class="why"><span class="eyebrow">You chose</span><span style="font-weight:600">' + esc(f.daily || '') + '</span>' + (f.big ? '<span class="soft" style="font-size:14px">Towards: ' + esc(f.big) + '</span>' : '') + '</div>' +
       '<div class="spacer"></div><button class="btn" data-find="go">Let’s set it up</button></section>';
   }
+  function pickText(f) {
+    if (f.pick && f.pick.indexOf('win:') === 0) { var w = (S.wins || []).filter(function (x) { return x.id === f.pick.slice(4); })[0]; return w ? w.name : ''; }
+    return (f.answers[f.pick] || '').trim();
+  }
+
+  // ── Past wins: things they've taken on before ─────────────────────────────
+  // Remembering past successes is the strongest builder of self-belief (Bandura's mastery experiences).
+  var OUTCOME = { did: 'I did it', partly: 'Partly', not: 'Didn’t stick' };
+  var WIN_IDEAS = ['30 days of exercise', 'No sugar', 'A month off alcohol', 'Learning a language', 'Waking up earlier', 'Speaking up more', 'A new hobby'];
+  function syncWins() { if (S.habit) extra().wins = (S.wins || []).slice(); save(); }
+  function winsScreen(inFind) {
+    var wins = S.wins || [], did = wins.filter(function (w) { return w.outcome === 'did'; }).length, qs = FIND_QS();
+    var h = '<section class="screen"><div><div class="eyebrow">' + (inFind ? 'Find my focus · ' + (qs.length + 1) + ' of ' + (qs.length + 1) : 'My past wins') + '</div><h1 class="findq">' + (inFind ? 'What have you taken on before?' : 'Things you’ve taken on') + '</h1></div>' +
+      '<p class="hint" style="margin-top:-8px">A 30-day challenge, giving something up, learning a skill. Big or small, it all counts, even the ones that didn’t stick.</p>';
+    if (wins.length) {
+      h += '<div class="winlist">';
+      wins.forEach(function (w) { h += '<button class="win" data-win="' + w.id + '"><span class="wo ' + w.outcome + '">' + esc(OUTCOME[w.outcome]) + '</span><b>' + esc(w.name) + '</b><small>' + (w.helped || w.felt ? 'Tap to read what you noticed' : 'Tap to look back on it') + '</small></button>'; });
+      h += '</div>';
+      if (did) h += '<div class="why"><span>Look at that. You’ve done ' + (did === 1 ? 'a hard thing' : did + ' hard things') + ' before. That’s proof you can do it again.</span></div>';
+    }
+    h += '<div class="card"><label class="label" for="winname">' + (wins.length ? 'Add another' : 'Add one') + '</label>' +
+      '<textarea id="winname" rows="1" placeholder="e.g. 30 days of yoga">' + esc(ui.winDraft || '') + '</textarea>' +
+      (wins.length ? '' : '<div class="chips starters">' + WIN_IDEAS.map(function (x) { return '<button class="chip" data-winidea="' + esc(x) + '">' + esc(x) + '</button>'; }).join('') + '</div>') +
+      '<span class="label" style="margin-top:4px">How did it go?</span><div class="chips">' + Object.keys(OUTCOME).map(function (k) { return '<button class="chip" data-winout="' + k + '">' + OUTCOME[k] + '</button>'; }).join('') + '</div></div>';
+    h += '<div class="spacer"></div>';
+    if (inFind) h += '<button class="btn" data-find="next">See what I wrote</button>' + (wins.length ? '' : '<button class="link center" data-find="skip">Skip this one</button>');
+    else h += '<button class="btn outline" data-back="1">Back</button>';
+    return h + '</section>';
+  }
+  function addWin(outcome) {
+    var ta = document.getElementById('winname'), name = ta ? ta.value.replace(/\s+/g, ' ').trim() : '';
+    if (!name) { toast('Write what it was first, then tap how it went.'); if (ta) ta.focus(); return; }
+    S.wins = (S.wins || []).concat([{ id: uuid().slice(0, 8), name: name, outcome: outcome, at: new Date().toISOString() }]);
+    ui.winDraft = ''; syncWins(); toast(outcome === 'did' ? 'Added. Nice one.' : 'Added. Worth learning from.'); render();
+  }
+  function openWin(id) {
+    var w = (S.wins || []).filter(function (x) { return x.id === id; })[0]; if (!w) return;
+    var q2 = w.outcome === 'did' ? 'How does it feel, looking back on it now?' : 'What got in the way, and what would you do differently?';
+    var el = document.createElement('div'); el.className = 'sheet-bg';
+    el.innerHTML = '<div class="sheet" role="dialog" aria-label="' + esc(w.name) + '"><div class="row"><span><span class="wo ' + w.outcome + '">' + esc(OUTCOME[w.outcome]) + '</span><b style="display:block;font-size:20px;font-weight:600;margin-top:6px">' + esc(w.name) + '</b></span><button class="link" data-x="close">Close</button></div>' +
+      '<div class="field"><label class="label" for="whelped">What helped?</label><textarea id="whelped" rows="2" placeholder="Even small things count">' + esc(w.helped || '') + '</textarea></div>' +
+      '<div class="field"><label class="label" for="wfelt">' + q2 + '</label><textarea id="wfelt" rows="2" placeholder="A few words is plenty">' + esc(w.felt || '') + '</textarea></div>' +
+      '<button class="btn" data-x="save">Save</button><button class="link center" data-x="remove" style="font-size:14px">Remove this one</button></div>';
+    app.appendChild(el);
+    el.querySelectorAll('textarea').forEach(grow);
+    el.addEventListener('input', function (ev) { if (ev.target.tagName === 'TEXTAREA') grow(ev.target); });
+    el.addEventListener('click', function (ev) {
+      if (ev.target === el) return el.remove();
+      var b = ev.target.closest('button'); if (!b) return;
+      if (b.dataset.x === 'close') return el.remove();
+      if (b.dataset.x === 'save') { w.helped = el.querySelector('#whelped').value.trim(); w.felt = el.querySelector('#wfelt').value.trim(); syncWins(); el.remove(); toast('Saved.'); return render(); }
+      if (b.dataset.x === 'remove') { S.wins = S.wins.filter(function (x) { return x.id !== id; }); syncWins(); el.remove(); return render(); }
+    });
+  }
   function findAct(a, b) {
     var f = S.find || (S.find = { step: 0, answers: {} }), qs = FIND_QS();
     if (rec) { try { rec.stop(); } catch (e) {} }
@@ -866,13 +929,13 @@
     if (a === 'next') { findSave(); f.step++; save(false); return go('find'); }
     if (a === 'skip') { f.step++; save(false); return go('find'); }
     if (a === 'pick') { f.pick = b.dataset.key; save(false); return render(); }
-    if (a === 'chosen') { if (!f.pick) return; f.step = qs.length + 1; save(false); return go('find'); }
+    if (a === 'chosen') { if (!f.pick) return; f.step = qs.length + 2; save(false); return go('find'); }
     if (a === 'daily') {
-      var big = f.pick === 'own' ? ((document.getElementById('findbig') || {}).value || '').trim() : (f.answers[f.pick] || '').trim();
+      var big = f.pick === 'own' ? ((document.getElementById('findbig') || {}).value || '').trim() : pickText(f);
       var daily = ((document.getElementById('finddo') || {}).value || '').trim();
       if (f.pick === 'own') f.own = big;
       if (!daily) { toast('Write one small thing you could do most days.'); return; }
-      f.big = big; f.daily = daily; f.step = qs.length + 2; save(false); return go('find');
+      f.big = big; f.daily = daily; f.step = qs.length + 3; save(false); return go('find');
     }
     if (a === 'go') { S.draft.mode = 'more'; S.draft.what = f.daily; S.draft.found = f.big || f.daily; save(false); return go('what'); }
   }
@@ -1033,6 +1096,7 @@
     if (t.dataset.hbind && S.habit) { if (t.dataset.hbind === 'what' && !t.value.trim()) return; S.habit[t.dataset.hbind] = t.value; save(); }
     if (t.dataset.rbind) { ui.reflect[t.dataset.rbind] = t.value; }
     if (t.id === 'findans') findSave();
+    if (t.id === 'winname') ui.winDraft = t.value;
     if (t.id === 'finddo' && S.find) { S.find.daily = t.value; save(false); }
     if (t.id === 'findbig' && S.find) { S.find.own = t.value; save(false); }
   });
@@ -1050,6 +1114,9 @@
     if (d.catch) { markDay(+d.catch); return render(); }
     if (d.struggle) { ui.struggle = d.struggle; return render(); }
     if (d.find) return findAct(d.find, b);
+    if (d.winout) return addWin(d.winout);
+    if (d.win) return openWin(d.win);
+    if (d.winidea) { var wt = document.getElementById('winname'); if (wt) { wt.value = d.winidea; ui.winDraft = d.winidea; grow(wt); wt.focus(); } return; }
     if (d.mic) return toggleMic(b);
     if (d.horizon) { findSave(); S.find.horizon = d.horizon; save(false); return render(); }
     if (d.struggleBack) { ui.struggle = null; return render(); }
@@ -1203,7 +1270,7 @@
   }
   function finishSetup() {
     var dr = S.draft;
-    S.habit = { id: uuid(), mode: dr.mode, what: dr.what.trim(), gives: dr.gives.slice(), instead: dr.instead, feel: dr.feel.slice(), ownFeel: dr.ownFeel, dimmer: dr.dimmer.trim(), length: dr.length, start: todayStr(), status: 'active', extra: dr.found ? { found: dr.found } : {}, createdAt: new Date().toISOString() };
+    S.habit = { id: uuid(), mode: dr.mode, what: dr.what.trim(), gives: dr.gives.slice(), instead: dr.instead, feel: dr.feel.slice(), ownFeel: dr.ownFeel, dimmer: dr.dimmer.trim(), length: dr.length, start: todayStr(), status: 'active', extra: Object.assign(dr.found ? { found: dr.found } : {}, S.wins && S.wins.length ? { wins: S.wins.slice() } : {}), createdAt: new Date().toISOString() };
     S.entries = {}; S.later = false; S.fb = {}; save();
     finishMoment();
   }
