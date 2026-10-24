@@ -203,7 +203,7 @@
 
   // ── Screens ───────────────────────────────────────────────────────────────
   var BACK = {
-    what: function () { return S.draft.found ? 'find' : 'landing'; }, less: 'feel',
+    what: function () { return S.draft.found ? 'find' : 'landing'; }, name: 'landing', less: 'feel',
     find: function () { var f = S.find || {}; if (f.step > 0) { f.step--; save(false); return 'find'; } return 'landing'; }, feel: 'what', dimmer: function () { return S.draft.mode === 'less' ? 'less' : 'feel'; },
     length: function () { return ui.returnTo || 'ready'; }, note: 'tracker', slipped: 'tracker', share: 'tracker', science: function () { return S.habit ? 'settings' : 'landing'; },
     words: function () { return ui.wordsFrom || 'tracker'; }, settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', install: function () { return ui.installFrom || (S.habit ? 'settings' : 'landing'); }, account: function () { return ui.returnTo || 'tracker'; }
@@ -298,7 +298,7 @@
         h += '<div class="card"><b style="font-size:18px;font-weight:600">Keep your progress safe</b><span style="color:var(--text-mid)">Sign in so nothing is lost, your morning nudge can find you, and you can use it on any device.</span>' +
           '<button class="btn outline" data-account="ready">Save to my account</button></div>';
       }
-      h += '<div class="field"><label class="label" for="pname">What should we call you?</label><textarea id="pname" rows="1" data-name="1" autocomplete="given-name" placeholder="Your first name">' + esc(firstName()) + '</textarea></div>' +
+      h += (firstName() ? '' : '<div class="field"><label class="label" for="pname">What should we call you?</label><textarea id="pname" rows="1" data-name="1" autocomplete="given-name" placeholder="Your first name"></textarea></div>') +
         nextNudge() +
         '<div class="spacer"></div><button class="btn" data-act="readydone">Go to my tracker</button><button class="link center full-only" data-words="ready">See my words</button></section>';
       return h;
@@ -361,6 +361,12 @@
     },
     slipped: function () { return struggleScreen(); },
     find: function () { return findScreen(); },
+    name: function () {
+      return '<section class="screen"><div><div class="eyebrow">Before we start</div><h1>What should we call you?</h1></div>' +
+        '<p class="lede" style="margin-top:-6px">We’ll use it when we check in with you.</p>' +
+        '<div class="field"><label class="label" for="firstname">Your name</label><textarea id="firstname" rows="1" autocomplete="given-name" autocapitalize="words" spellcheck="false" enterkeyhint="next" maxlength="40" placeholder="First name, or a nickname">' + esc(firstName()) + '</textarea></div>' +
+        '<div class="spacer"></div><button class="btn" data-namego="go">Continue</button><button class="link center" data-namego="skip">Skip for now</button></section>';
+    },
     share: function () {
       var t = Math.min(todayNum(), S.habit.length), e = S.entries[todayNum()] || {};
       return '<section class="screen"><h1>Share your progress</h1><p class="lede">People who share how they’re getting on tend to keep going. This is what others will see.</p>' +
@@ -573,6 +579,19 @@
     var m = (user && user.user_metadata) || {}, n = m.first_name || m.name || '';
     if (!n && user && user.email) { var p = user.email.split('@')[0].split(/[._-]/)[0]; if (/^[a-z]{2,}$/i.test(p)) n = p; }
     return n ? n.charAt(0).toUpperCase() + n.slice(1).toLowerCase() : '';
+  }
+  // Ask their name once, right after they choose to begin (skipped if we already know it).
+  function askNameThen(next) {
+    ui.afterName = next;
+    if (firstName() || S.nameAsked) return go(next);
+    return go('name');
+  }
+  function nameDone(skip) {
+    var el = document.getElementById('firstname'), v = el ? el.value.replace(/\s+/g, ' ').trim() : '';
+    S.nameAsked = true;
+    if (!skip && v) { saveName(v); toast('Lovely to meet you, ' + v + '.'); }
+    else save(false);
+    go(ui.afterName || 'what');
   }
   function firstName() { return (S.settings.name || '').trim() || guessName(); }
   function saveName(n) {
@@ -843,7 +862,7 @@
   function findAct(a, b) {
     var f = S.find || (S.find = { step: 0, answers: {} }), qs = FIND_QS();
     if (rec) { try { rec.stop(); } catch (e) {} }
-    if (a === 'start') { S.find = { step: 0, answers: (S.find && S.find.answers) || {} }; save(false); return go('find'); }
+    if (a === 'start') { S.find = { step: 0, answers: (S.find && S.find.answers) || {} }; save(false); return askNameThen('find'); }
     if (a === 'next') { findSave(); f.step++; save(false); return go('find'); }
     if (a === 'skip') { f.step++; save(false); return go('find'); }
     if (a === 'pick') { f.pick = b.dataset.key; save(false); return render(); }
@@ -1017,6 +1036,7 @@
     if (t.id === 'finddo' && S.find) { S.find.daily = t.value; save(false); }
     if (t.id === 'findbig' && S.find) { S.find.own = t.value; save(false); }
   });
+  view.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.id === 'firstname') { e.preventDefault(); nameDone(false); } });
   view.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.dataset && e.target.dataset.name) { e.preventDefault(); e.target.blur(); } });
   view.addEventListener('change', function (e) {
     if (e.target.dataset && e.target.dataset.name) { e.target.value = e.target.value.replace(/\s+/g, ' ').trim(); saveName(e.target.value); if (e.target.value.trim()) toast('Lovely to meet you, ' + e.target.value.trim() + '.'); return; }
@@ -1034,7 +1054,8 @@
     if (d.horizon) { findSave(); S.find.horizon = d.horizon; save(false); return render(); }
     if (d.struggleBack) { ui.struggle = null; return render(); }
     if (d.back) return goBack();
-    if (d.start) { S.draft.mode = d.start; return go('what'); }
+    if (d.start) { S.draft.mode = d.start; return askNameThen('what'); }
+    if (d.namego) return nameDone(d.namego === 'skip');
     if (d.starter) { S.draft.what = d.starter; save(false); return render(); }
     if (d.stepNext) { if (!stepValid(d.stepNext)) return; var nx = nextStep(d.stepNext); if (nx) return go(nx); return finishSetup(); }
     if (d.give) { var gi = S.draft.gives.indexOf(d.give); gi >= 0 ? S.draft.gives.splice(gi, 1) : S.draft.gives.push(d.give); save(false); b.setAttribute('aria-pressed', gi < 0); view.querySelectorAll('[data-loop="gives"]').forEach(function (lg) { lg.textContent = S.draft.gives.length ? S.draft.gives.join(', ') : 'Tap above'; }); view.querySelectorAll('[data-give="' + d.give + '"]').forEach(function (x) { x.setAttribute('aria-pressed', gi < 0); }); return; }
@@ -1236,7 +1257,7 @@
 
   // ── Boot ──────────────────────────────────────────────────────────────────
   applyComfort();
-  if (S.habit && ['landing', 'what', 'less', 'feel', 'dimmer', 'find'].indexOf(S.screen) >= 0) S.screen = 'tracker';
+  if (S.habit && ['landing', 'what', 'less', 'feel', 'dimmer', 'find', 'name'].indexOf(S.screen) >= 0) S.screen = 'tracker';
   if (!S.habit && ['tracker', 'note', 'share', 'slipped', 'reflect', 'edit', 'settings'].indexOf(S.screen) >= 0) S.screen = 'landing';
   if (['account', 'install', 'length', 'words'].indexOf(S.screen) >= 0) S.screen = S.habit ? 'tracker' : 'landing';
   if (S.habit && ['ready', 'plan', 'settings', 'science', 'share', 'note', 'slipped'].indexOf(S.screen) >= 0) S.screen = 'tracker';
