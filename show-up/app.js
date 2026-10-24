@@ -945,15 +945,16 @@
   if (!S.habit && ['tracker', 'note', 'share', 'slipped', 'reflect', 'edit', 'settings'].indexOf(S.screen) >= 0) S.screen = 'landing';
   if (['account', 'install', 'length', 'words'].indexOf(S.screen) >= 0) S.screen = S.habit ? 'tracker' : 'landing';
   if (S.habit && ['ready', 'plan', 'settings', 'science', 'share', 'note', 'slipped'].indexOf(S.screen) >= 0) S.screen = 'tracker';
-  greet();
   render();
   (async function () {
-    if (!sb) return;
+    if (!sb) { greet(); return; }
     try {
       var sres = await sb.auth.getSession();
       user = sres.data.session ? sres.data.session.user : null;
+      if (user && user.user_metadata && user.user_metadata.first_name && !S.settings.name) { S.settings.name = user.user_metadata.first_name; save(false); }
+      greet(); // after sign-in is known, so the greeting can use their name
       if (user) { await pullRemote(); await syncAll(); render(); }
-    } catch (e) {}
+    } catch (e) { greet(); }
     sb.auth.onAuthStateChange(function (ev, session) { if (ev === 'SIGNED_OUT') user = null; else if (session) user = session.user; });
   })();
   window.addEventListener('online', function () { if (user) queueSync(); });
