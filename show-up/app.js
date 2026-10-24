@@ -466,21 +466,17 @@
         '<div class="spacer"></div><button class="btn" data-back="1">Done</button></section>';
     },
     install: function () {
-      var signStep = '<li>Sign in once inside the app (Settings, then Account) so your progress and nudges come with you.</li>';
       var ios = isIOS(), android = /android/i.test(navigator.userAgent), phone = ios || android, after = ui.installFrom === 'tracker';
-      var iosSteps = '<ol class="steps"><li>Open this page in <b>Safari</b>.</li><li>Tap the <b>Share</b> button, the square with an arrow. On newer iPhones, tap the <b>three dots</b> first.</li><li>Scroll down and tap <b>Add to Home Screen</b>, then <b>Add</b>.</li><li>Open Show Up from your home screen. Phone notifications work from there.</li>' + signStep + '</ol>';
-      var andSteps = (deferredInstall && android ? '<button class="btn" data-act="doinstall">Install it now</button><p class="hint" style="margin:0">Or do it yourself:</p>' : '') +
-        '<ol class="steps"><li>Open this page in <b>Chrome</b>.</li><li>Tap the <b>three dots</b> at the top right.</li><li>Tap <b>Add to Home screen</b> or <b>Install app</b>, then <b>Install</b>.</li><li>Open Show Up from your home screen.</li>' + signStep + '</ol>';
       var h = '<section class="screen"><div><div class="eyebrow">' + (after ? 'One last thing' : 'Get the app') + '</div><h1>Put it on your phone</h1></div>' +
-        '<p class="lede">It opens like an app, with its own icon, one tap away. No app store needed, and it takes about 20 seconds.</p>';
-      if (isStandalone()) h += '<div class="card soft"><b style="font-weight:600">You’re all set.</b><span>You’re already using it as an app on this device.</span></div>';
+        '<p class="lede"><span class="full-only">Three taps and it’s on your home screen, like any other app. No app store needed.</span><span class="focus-only">Three taps. That’s it.</span></p>';
+      if (isStandalone()) h += '<div class="card soft"><b style="font-weight:600">You’re all set.</b><span>It’s already on this device as an app.</span></div>';
       else if (phone) {
-        h += '<div class="card"><span class="eyebrow">' + (ios ? 'On your iPhone or iPad' : 'On your Android phone') + '</span>' + (ios ? iosSteps : andSteps) + '</div>' +
-          '<details class="ask"><summary>' + (ios ? 'On Android instead?' : 'On an iPhone instead?') + '</summary><div class="card">' + (ios ? andSteps : iosSteps) + '</div></details>';
+        h += installSteps(ios ? 'ios' : 'android');
+        h += '<details class="ask"><summary>' + (ios ? 'On Android instead?' : 'On an iPhone instead?') + '</summary>' + installSteps(ios ? 'android' : 'ios') + '</details>';
       } else {
-        h += '<div class="card"><span class="eyebrow">On your phone</span><span>Open this link on your phone, then follow the steps below.</span><div class="copyline"><span>' + esc(location.origin + location.pathname) + '</span><button class="chip" data-act="copylink">Copy link</button></div></div>' +
-          '<div class="card"><span class="eyebrow">iPhone</span>' + iosSteps + '</div><div class="card"><span class="eyebrow">Android</span>' + andSteps + '</div>' +
-          (deferredInstall ? '<div class="card soft"><span class="eyebrow">On this computer</span><button class="btn outline" data-act="doinstall">Install on this computer</button></div>' : '');
+        h += '<div class="card qrcard"><img src="qr.svg" width="132" height="132" alt="QR code for the Show Up app"><div><b>Point your phone’s camera here</b><span class="hint">Then tap the link that pops up.</span><button class="chip" data-act="copylink">Or copy the link</button></div></div>' +
+          '<details class="ask"><summary>Then what?</summary><span class="eyebrow" style="display:block;margin:10px 0 6px">iPhone</span>' + installSteps('ios') + '<span class="eyebrow" style="display:block;margin:16px 0 6px">Android</span>' + installSteps('android') + '</details>' +
+          (deferredInstall ? '<button class="btn outline" data-act="doinstall">Or install it on this computer</button>' : '');
       }
       return h + '<div class="spacer"></div>' + (after ? '<button class="btn' + (isStandalone() ? '' : ' outline') + '" data-act="installdone">' + (isStandalone() ? 'Go to my tracker' : 'Done, take me to my tracker') + '</button>' :
         '<button class="btn outline" data-back="1">Back</button>') + '</section>';
@@ -1117,6 +1113,35 @@
     return '<p class="next-up">' + iconClock('#888880') + '<span>What happens next: <b>your nudge arrives tomorrow at ' + esc(fmtTime(s.time)) + '</b>. Change it any time in Settings.</span></p>';
   }
 
+
+  // ── Install steps: three pictures, a few words each ───────────────────────
+  var IV = {
+    share: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 10H6v10h12V10h-2"/><path d="M12 3v11M8.5 6.5L12 3l3.5 3.5"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/></svg>',
+    dots: '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>',
+    down: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 20h14"/></svg>'
+  };
+  function visBar(icon, top) {
+    var dim = '<i></i><i></i>';
+    return '<div class="iv bar' + (top ? ' top' : '') + '">' + (top ? '<span class="url"></span><b class="hit">' + icon + '</b>' : dim + '<b class="hit">' + icon + '</b>' + dim) + '</div>';
+  }
+  function visMenu(icon, label) { return '<div class="iv menu"><i></i><i></i><b class="hit row">' + icon + '<span>' + label + '</span></b><i></i></div>'; }
+  function visHome() { return '<div class="iv ivhome"><i></i><i></i><i></i><i></i><b class="hit ivapp"><img src="icons/icon-192.png" alt=""></b><i></i></div>'; }
+  function installSteps(kind) {
+    var st = kind === 'ios' ? [
+      [visBar(IV.share), 'Tap Share', 'The square with an arrow. On newer iPhones, tap ··· first.'],
+      [visMenu(IV.plus, 'Add to Home Screen'), 'Tap Add to Home Screen', 'Scroll down a little if you can’t see it.'],
+      [visHome(), 'Open it and sign in', 'Same email and password as the TLR Hub.']
+    ] : [
+      [visBar(IV.dots, true), 'Tap the three dots', 'Top right in Chrome.'],
+      [visMenu(IV.down, 'Install app'), 'Tap Install app', 'Some phones say Add to Home screen.'],
+      [visHome(), 'Open it and sign in', 'Same email and password as the TLR Hub.']
+    ];
+    var h = '<ol class="isteps">';
+    st.forEach(function (x, i) { h += '<li class="istep">' + x[0] + '<div class="itxt"><span class="inum">' + (i + 1) + '</span><b>' + x[1] + '</b><small class="full-only">' + x[2] + '</small></div></li>'; });
+    if (kind === 'ios' && /CriOS|FxiOS|EdgiOS/.test(navigator.userAgent)) h += '<li class="hint" style="list-style:none">Using Chrome on iPhone? The Share button is at the top right.</li>';
+    return h + '</ol>';
+  }
   function phoneIcon() { return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg>'; }
   function iconPlan() { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>'; }
   var PICON = {
