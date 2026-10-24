@@ -761,15 +761,11 @@
 
   // ── Find my focus ─────────────────────────────────────────────────────────
   // Open questions first (their words), then they choose one thing, then why one thing matters.
-  function horizon() {
-    var now = new Date(), end = new Date(now.getFullYear(), 11, 31), days = Math.round((end - now) / 86400000);
-    if (days >= 21 && days <= 120) return 'It’s 31 December';
-    var d = new Date(now.getTime() + 90 * 86400000);
-    return 'It’s ' + d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }) + ', three months from now';
-  }
+  var HORIZONS = [['30', '30 days'], ['90', 'three months'], ['365', 'a year']];
+  function horizonLabel() { var f = S.find || {}, h = HORIZONS.filter(function (x) { return x[0] === f.horizon; })[0] || HORIZONS[1]; return h[1]; }
   function FIND_QS() {
     return [
-      { key: 'proud', q: horizon() + ' and you’re looking back. What did you do that made you insanely proud of yourself?', hint: 'Not a whole list. The one that would really mean something.' },
+      { key: 'proud', q: 'Imagine it’s ' + horizonLabel() + ' from now and you’re looking back. What did you do that made you insanely proud of yourself?', hint: 'Not a whole list. The one that would really mean something.' },
       { key: 'years', q: 'What have you wanted to do for years, and never quite got round to?', hint: 'Big or small. It still counts if it’s been on the list forever.' },
       { key: 'new', q: 'Is there something new you’re curious to explore?', hint: 'Something you keep noticing, or wondering about.' },
       { key: 'admire', q: 'Think of someone you admire. What is it about them? Is there something they do that you’d love to get better at?', hint: 'Speaking well. Being fit and strong. Staying calm and patient. These are all skills, and skills can be built.' }
@@ -805,6 +801,7 @@
     if (f.step < qs.length) {
       var q = qs[f.step], v = f.answers[q.key] || '';
       return '<section class="screen"><div><div class="eyebrow">Find my focus · ' + (f.step + 1) + ' of ' + qs.length + '</div><h1 class="findq">' + esc(q.q) + '</h1></div>' +
+        (f.step === 0 ? '<div class="chips" role="group" aria-label="How far ahead"><span class="label" style="width:100%">Looking back from</span>' + HORIZONS.map(function (x) { return '<button class="chip" data-horizon="' + x[0] + '" aria-pressed="' + ((f.horizon || '90') === x[0]) + '">' + (x[0] === '30' ? '30 days' : x[0] === '90' ? '3 months' : 'A year') + '</button>'; }).join('') + '</div>' : '') +
         '<p class="hint" style="margin-top:-8px">' + esc(q.hint) + '</p>' +
         '<div class="field"><textarea id="findans" rows="3" style="min-height:120px" placeholder="Write whatever comes. Only you see this.">' + esc(v) + '</textarea>' + micButton() + '</div>' +
         '<div class="spacer"></div><button class="btn" data-find="next">' + (f.step === qs.length - 1 ? 'See what I wrote' : 'Next') + '</button>' +
@@ -814,7 +811,7 @@
       var picks = qs.filter(function (q) { return (f.answers[q.key] || '').trim(); });
       var h = '<section class="screen"><div><div class="eyebrow">Find my focus</div><h1>Here’s what you said.</h1></div>' +
         '<p class="lede">Read it back. Which one gives you a little jolt? That’s usually the one. Pick one for the next 30 days.</p><div style="display:flex;flex-direction:column;gap:10px">';
-      picks.forEach(function (q) { h += '<button class="choice findpick" data-find="pick" data-key="' + q.key + '" aria-pressed="' + (f.pick === q.key) + '"><small>' + esc(q.q.replace(/^It’s [^.?]*? and you’re looking back\. /, '')) + '</small><b>' + esc(f.answers[q.key].trim()) + '</b></button>'; });
+      picks.forEach(function (q) { h += '<button class="choice findpick" data-find="pick" data-key="' + q.key + '" aria-pressed="' + (f.pick === q.key) + '"><small>' + esc(q.q.replace(/^Imagine it’s [^.?]*? looking back\. /, '')) + '</small><b>' + esc(f.answers[q.key].trim()) + '</b></button>'; });
       if (!picks.length) h += '<div class="card soft small"><span>Nothing written yet, and that’s fine. Go back and jot down a few words, or name your focus below.</span></div>';
       h += '<button class="choice findpick" data-find="pick" data-key="own" aria-pressed="' + (f.pick === 'own') + '"><b>Something else</b><small>I know what it is now.</small></button></div>';
       return h + '<div class="spacer"></div><button class="btn" data-find="chosen"' + (f.pick ? '' : ' disabled') + '>This is my focus</button></section>';
@@ -1024,6 +1021,7 @@
     if (d.struggle) { ui.struggle = d.struggle; return render(); }
     if (d.find) return findAct(d.find, b);
     if (d.mic) return toggleMic(b);
+    if (d.horizon) { findSave(); S.find.horizon = d.horizon; save(false); return render(); }
     if (d.struggleBack) { ui.struggle = null; return render(); }
     if (d.back) return goBack();
     if (d.start) { S.draft.mode = d.start; return go('what'); }
