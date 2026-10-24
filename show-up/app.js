@@ -48,7 +48,7 @@
       draft: { mode: 'more', what: '', gives: [], instead: '', feel: [], ownFeel: '', dimmer: '', length: 30 },
       habit: null, // { id, mode, what, gives, instead, feel, ownFeel, dimmer, length, start, status, createdAt }
       entries: {}, // day -> { kind, comeback, felt, note, at }
-      settings: { tz: tzGuess(), time: '07:00', days: [0, 1, 2, 3, 4, 5, 6], email: true, push: false, pausedUntil: null, view: 'full', text: 'standard', calm: false, buzz: true, marketing: false },
+      settings: { tz: tzGuess(), time: '07:00', days: [0, 1, 2, 3, 4, 5, 6], email: true, push: false, pausedUntil: null, view: 'full', text: 'standard', calm: false, buzz: true, marketing: false, name: '' },
       fb: {}, later: false, installDismissed: false, updatedAt: 0
     };
   }
@@ -184,6 +184,7 @@
         });
       }
       if (S.habit) S.habit.synced = true;
+      if (!S.settings.name && user.user_metadata && user.user_metadata.first_name) S.settings.name = user.user_metadata.first_name;
       save();
       if (S.habit && ['landing', 'what', 'less', 'feel', 'dimmer'].indexOf(S.screen) >= 0) S.screen = 'tracker';
       applyComfort();
@@ -289,7 +290,8 @@
         h += '<div class="card"><b style="font-size:18px;font-weight:600">Keep your progress safe</b><span style="color:var(--text-mid)">Sign in so nothing is lost, your morning nudge can find you, and you can use it on any device.</span>' +
           '<button class="btn outline" data-account="ready">Save to my account</button></div>';
       }
-      h += nextNudge() +
+      h += '<div class="field"><label class="label" for="pname">What should we call you?</label><textarea id="pname" rows="1" data-name="1" autocomplete="given-name" placeholder="Your first name">' + esc(firstName()) + '</textarea></div>' +
+        nextNudge() +
         '<div class="spacer"></div><button class="btn" data-go="tracker">Go to my tracker</button><button class="link center full-only" data-words="ready">See my words</button></section>';
       return h;
     },
@@ -447,6 +449,7 @@
       h += '<div class="card"><span class="eyebrow">On your home screen</span>' + (isStandalone() ? '<span>It’s installed. Nice.</span>' : '<span>Put it on your home screen or desktop so it opens like an app.</span><button class="btn outline" data-act="install">Show me how</button>') + '</div>';
       // Account
       h += '<div class="card"><span class="eyebrow">Account and privacy</span>' +
+        '<div class="field"><label class="label" for="sname">Your first name</label><textarea id="sname" rows="1" data-name="1" autocomplete="given-name" placeholder="So we can say hello">' + esc(firstName()) + '</textarea></div>' +
         (user ? '<span>Signed in as <b>' + esc(user.email) + '</b></span>' : '<span>Not signed in. Your progress is saved on this device only.</span><button class="btn" data-account="settings">Sign in to save</button>') +
         '<p class="hint">Your notes are only ever seen by you. During the pilot, Stuart sees how often people show up and any feedback you send, never your notes.</p>' +
         (user ? '<button class="switch" role="switch" aria-checked="' + !!s.marketing + '" data-toggle="marketing"><span><b>Ideas and updates from Stuart</b><span class="hint">Occasional emails. Off unless you choose.</span></span><span class="track"></span></button><button class="link" data-act="signout">Sign out</button>' : '') +
@@ -556,6 +559,41 @@
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
+  // Their name: what they told us, else their account, else a careful guess from the email.
+  function guessName() {
+    var m = (user && user.user_metadata) || {}, n = m.first_name || m.name || '';
+    if (!n && user && user.email) { var p = user.email.split('@')[0].split(/[._-]/)[0]; if (/^[a-z]{2,}$/i.test(p)) n = p; }
+    return n ? n.charAt(0).toUpperCase() + n.slice(1).toLowerCase() : '';
+  }
+  function firstName() { return (S.settings.name || '').trim() || guessName(); }
+  function saveName(n) {
+    S.settings.name = n.trim(); save();
+    if (user && sb && n.trim()) sb.auth.updateUser({ data: { first_name: n.trim() } }).catch(function () {});
+  }
+  function dayPart(h) { return h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening'; }
+  // Greeting: appears instantly, holds long enough to read, leaves quickly. Once per part of the day.
+  function greet() {
+    if (!S.habit) return;
+    var now = new Date(), part = dayPart(now.getHours()), key = todayStr() + '-' + part;
+    if (S.lastGreet === key) return;
+    S.lastGreet = key; save(false);
+    var n = firstName();
+    var el = document.createElement('div');
+    el.className = 'greet'; el.setAttribute('role', 'status');
+    el.innerHTML = '<p>Good ' + part + (n ? ',<br>' + esc(n) + '.' : '.') + '</p>';
+    document.body.appendChild(el);
+    var calm = document.documentElement.classList.contains('calm') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    var gone = false;
+    var leave = function () {
+      if (gone) return; gone = true;
+      if (calm) { el.remove(); return; }
+      el.classList.add('out'); setTimeout(function () { el.remove(); }, 220);
+    };
+    el.addEventListener('pointerdown', leave);
+    setTimeout(leave, 900);
+  }
+  window.__showupGreetReset = function () { S.lastGreet = ''; save(false); };
+
   function render() {
     var s = screens[S.screen] ? S.screen : 'landing';
     if (s === 'tracker' && !S.habit) s = 'landing';
@@ -717,7 +755,9 @@
     if (t.dataset.hbind && S.habit) { if (t.dataset.hbind === 'what' && !t.value.trim()) return; S.habit[t.dataset.hbind] = t.value; save(); }
     if (t.dataset.rbind) { ui.reflect[t.dataset.rbind] = t.value; }
   });
+  view.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.dataset && e.target.dataset.name) { e.preventDefault(); e.target.blur(); } });
   view.addEventListener('change', function (e) {
+    if (e.target.dataset && e.target.dataset.name) { e.target.value = e.target.value.replace(/\s+/g, ' ').trim(); saveName(e.target.value); if (e.target.value.trim()) toast('Lovely to meet you, ' + e.target.value.trim() + '.'); return; }
     if (e.target.id === 'rtime' && e.target.value) { S.settings.time = e.target.value; save(); toast('Nudge moved to ' + fmtTime(S.settings.time) + '.'); }
   });
   app.addEventListener('click', function (e) {
@@ -904,6 +944,8 @@
   if (S.habit && ['landing', 'what', 'less', 'feel', 'dimmer'].indexOf(S.screen) >= 0) S.screen = 'tracker';
   if (!S.habit && ['tracker', 'note', 'share', 'slipped', 'reflect', 'edit', 'settings'].indexOf(S.screen) >= 0) S.screen = 'landing';
   if (['account', 'install', 'length', 'words'].indexOf(S.screen) >= 0) S.screen = S.habit ? 'tracker' : 'landing';
+  if (S.habit && ['ready', 'plan', 'settings', 'science', 'share', 'note', 'slipped'].indexOf(S.screen) >= 0) S.screen = 'tracker';
+  greet();
   render();
   (async function () {
     if (!sb) return;
