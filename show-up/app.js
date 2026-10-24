@@ -206,7 +206,7 @@
     what: function () { return S.draft.found ? 'find' : 'landing'; }, less: 'feel',
     find: function () { var f = S.find || {}; if (f.step > 0) { f.step--; save(false); return 'find'; } return 'landing'; }, feel: 'what', dimmer: function () { return S.draft.mode === 'less' ? 'less' : 'feel'; },
     length: function () { return ui.returnTo || 'ready'; }, note: 'tracker', slipped: 'tracker', share: 'tracker', science: function () { return S.habit ? 'settings' : 'landing'; },
-    words: function () { return ui.wordsFrom || 'tracker'; }, settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', install: 'settings', account: function () { return ui.returnTo || 'tracker'; }
+    words: function () { return ui.wordsFrom || 'tracker'; }, settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', install: function () { return ui.installFrom || (S.habit ? 'settings' : 'landing'); }, account: function () { return ui.returnTo || 'tracker'; }
   };
 
   function todayCard(name, line, done, decorative, id) {
@@ -231,7 +231,8 @@
         '<button class="btn outline" data-start="less">Break a habit</button>' +
         '<button class="btn findbtn" data-find="start"><span>Not sure what to focus on? <b>Find my focus</b></span></button></div>' +
         '<p class="byline">No sign-up to start. Created by Stuart Fairbairns PCC, using <button class="link inline" data-go="science">proven behaviour science</button>.</p>' +
-        (user ? '' : '<button class="link center" data-account="landing" style="margin-top:-12px">Already started? Sign in</button>') + '</section>';
+        (user ? '' : '<button class="link center" data-account="landing" style="margin-top:-12px">Already started? Sign in</button>') +
+        (isStandalone() ? '' : '<button class="link center getapp" data-act="install">' + phoneIcon() + 'Put the app on my phone</button>') + '</section>';
     },
     what: function () {
       var d = S.draft, more = d.mode === 'more';
@@ -299,7 +300,7 @@
       }
       h += '<div class="field"><label class="label" for="pname">What should we call you?</label><textarea id="pname" rows="1" data-name="1" autocomplete="given-name" placeholder="Your first name">' + esc(firstName()) + '</textarea></div>' +
         nextNudge() +
-        '<div class="spacer"></div><button class="btn" data-go="tracker">Go to my tracker</button><button class="link center full-only" data-words="ready">See my words</button></section>';
+        '<div class="spacer"></div><button class="btn" data-act="readydone">Go to my tracker</button><button class="link center full-only" data-words="ready">See my words</button></section>';
       return h;
     },
     plan: function () {
@@ -465,11 +466,24 @@
         '<div class="spacer"></div><button class="btn" data-back="1">Done</button></section>';
     },
     install: function () {
-      var how;
-      if (isIOS()) how = '<ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px"><li>Open this page in <b>Safari</b>.</li><li>Tap the <b>Share</b> button (the square with an arrow).</li><li>Choose <b>Add to Home Screen</b>, then <b>Add</b>.</li><li>Open it from your home screen. Phone notifications work from there.</li></ol>';
-      else if (deferredInstall) how = '<span>One tap and it’s on your ' + (/android/i.test(navigator.userAgent) ? 'home screen' : 'desktop') + '.</span><button class="btn" data-act="doinstall">Install</button>';
-      else how = '<ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px"><li>Open your browser menu (the three dots or the share button).</li><li>Choose <b>Install app</b> or <b>Add to Home Screen</b>.</li></ol>';
-      return '<section class="screen"><h1>Put it on your home screen</h1><p class="lede">It opens like an app, with its own icon, on your phone, tablet or computer.</p><div class="card">' + how + '</div></section>';
+      var signStep = '<li>Sign in once inside the app (Settings, then Account) so your progress and nudges come with you.</li>';
+      var ios = isIOS(), android = /android/i.test(navigator.userAgent), phone = ios || android, after = ui.installFrom === 'tracker';
+      var iosSteps = '<ol class="steps"><li>Open this page in <b>Safari</b>.</li><li>Tap the <b>Share</b> button, the square with an arrow. On newer iPhones, tap the <b>three dots</b> first.</li><li>Scroll down and tap <b>Add to Home Screen</b>, then <b>Add</b>.</li><li>Open Show Up from your home screen. Phone notifications work from there.</li>' + signStep + '</ol>';
+      var andSteps = (deferredInstall && android ? '<button class="btn" data-act="doinstall">Install it now</button><p class="hint" style="margin:0">Or do it yourself:</p>' : '') +
+        '<ol class="steps"><li>Open this page in <b>Chrome</b>.</li><li>Tap the <b>three dots</b> at the top right.</li><li>Tap <b>Add to Home screen</b> or <b>Install app</b>, then <b>Install</b>.</li><li>Open Show Up from your home screen.</li>' + signStep + '</ol>';
+      var h = '<section class="screen"><div><div class="eyebrow">' + (after ? 'One last thing' : 'Get the app') + '</div><h1>Put it on your phone</h1></div>' +
+        '<p class="lede">It opens like an app, with its own icon, one tap away. No app store needed, and it takes about 20 seconds.</p>';
+      if (isStandalone()) h += '<div class="card soft"><b style="font-weight:600">You’re all set.</b><span>You’re already using it as an app on this device.</span></div>';
+      else if (phone) {
+        h += '<div class="card"><span class="eyebrow">' + (ios ? 'On your iPhone or iPad' : 'On your Android phone') + '</span>' + (ios ? iosSteps : andSteps) + '</div>' +
+          '<details class="ask"><summary>' + (ios ? 'On Android instead?' : 'On an iPhone instead?') + '</summary><div class="card">' + (ios ? andSteps : iosSteps) + '</div></details>';
+      } else {
+        h += '<div class="card"><span class="eyebrow">On your phone</span><span>Open this link on your phone, then follow the steps below.</span><div class="copyline"><span>' + esc(location.origin + location.pathname) + '</span><button class="chip" data-act="copylink">Copy link</button></div></div>' +
+          '<div class="card"><span class="eyebrow">iPhone</span>' + iosSteps + '</div><div class="card"><span class="eyebrow">Android</span>' + andSteps + '</div>' +
+          (deferredInstall ? '<div class="card soft"><span class="eyebrow">On this computer</span><button class="btn outline" data-act="doinstall">Install on this computer</button></div>' : '');
+      }
+      return h + '<div class="spacer"></div>' + (after ? '<button class="btn' + (isStandalone() ? '' : ' outline') + '" data-act="installdone">' + (isStandalone() ? 'Go to my tracker' : 'Done, take me to my tracker') + '</button>' :
+        '<button class="btn outline" data-back="1">Back</button>') + '</section>';
     },
     account: function () {
       var m = ui.authMode || 'signin';
@@ -1015,7 +1029,7 @@
   app.addEventListener('click', function (e) {
     var b = e.target.closest('button, [data-act="closeideas"]'); if (!b || b.closest('.celebrate')) return;
     var d = b.dataset;
-    if (d.go) { if (d.go === 'reflect') ui.reflect = null; if (d.go === 'note') ui.noteDay = null; if (d.go === 'slipped') ui.struggle = null; return go(d.go); }
+    if (d.go) { if (d.go === 'reflect') ui.reflect = null; if (d.go === 'note') ui.noteDay = null; if (d.go === 'install') ui.installFrom = null; if (d.go === 'slipped') ui.struggle = null; return go(d.go); }
     if (d.day) return openDay(+d.day);
     if (d.catch) { markDay(+d.catch); return render(); }
     if (d.struggle) { ui.struggle = d.struggle; return render(); }
@@ -1066,7 +1080,10 @@
       case 'fb3send': { var v3 = (document.getElementById('fb3') || {}).value || ''; void feedback('day3', v3.trim() || '(nothing)'); toast('Thank you. Stuart reads every one.'); return render(); }
       case 'fb3skip': S.fb.day3 = true; save(); return render();
       case 'installno': S.installDismissed = true; save(); return render();
-      case 'install': return go('install');
+      case 'install': ui.installFrom = null; return go('install');
+      case 'readydone': if (!isStandalone() && !S.installShown) { S.installShown = true; save(false); ui.installFrom = 'tracker'; return go('install'); } return go('tracker');
+      case 'installdone': ui.installFrom = null; S.installDismissed = true; save(false); return go('tracker');
+      case 'copylink': try { navigator.clipboard.writeText(location.origin + location.pathname); toast('Link copied. Open it on your phone.'); } catch (e) { toast(location.origin + location.pathname); } return;
       case 'doinstall': if (deferredInstall) { deferredInstall.prompt(); deferredInstall = null; } return;
       case 'push': return void togglePush();
       case 'quoteok': ui.reflect.ok = !ui.reflect.ok; return render();
@@ -1100,6 +1117,7 @@
     return '<p class="next-up">' + iconClock('#888880') + '<span>What happens next: <b>your nudge arrives tomorrow at ' + esc(fmtTime(s.time)) + '</b>. Change it any time in Settings.</span></p>';
   }
 
+  function phoneIcon() { return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg>'; }
   function iconPlan() { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>'; }
   var PICON = {
     what: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#0F1215"/></svg>',
