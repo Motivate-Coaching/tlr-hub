@@ -203,7 +203,8 @@
 
   // ── Screens ───────────────────────────────────────────────────────────────
   var BACK = {
-    what: 'landing', less: 'feel', feel: 'what', dimmer: function () { return S.draft.mode === 'less' ? 'less' : 'feel'; },
+    what: function () { return S.draft.found ? 'find' : 'landing'; }, less: 'feel',
+    find: function () { var f = S.find || {}; if (f.step > 0) { f.step--; save(false); return 'find'; } return 'landing'; }, feel: 'what', dimmer: function () { return S.draft.mode === 'less' ? 'less' : 'feel'; },
     length: function () { return ui.returnTo || 'ready'; }, note: 'tracker', slipped: 'tracker', share: 'tracker', science: function () { return S.habit ? 'settings' : 'landing'; },
     words: function () { return ui.wordsFrom || 'tracker'; }, settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', install: 'settings', account: function () { return ui.returnTo || 'tracker'; }
   };
@@ -227,7 +228,8 @@
         '<li><b>See it working</b><span>A morning nudge, then one quick tick.</span></li>' +
         '</ul>' +
         '<div class="spacer"></div><div class="btns"><button class="btn" data-start="more">Build a habit</button>' +
-        '<button class="btn outline" data-start="less">Break a habit</button></div>' +
+        '<button class="btn outline" data-start="less">Break a habit</button>' +
+        '<button class="btn findbtn" data-find="start"><span>Not sure what to focus on? <b>Find my focus</b></span></button></div>' +
         '<p class="byline">No sign-up to start. Created by Stuart Fairbairns PCC, using <button class="link inline" data-go="science">proven behaviour science</button>.</p>' +
         (user ? '' : '<button class="link center" data-account="landing" style="margin-top:-12px">Already started? Sign in</button>') + '</section>';
     },
@@ -357,6 +359,7 @@
         '<div class="spacer"></div><button class="btn" data-act="savenote">Save note</button></section>';
     },
     slipped: function () { return struggleScreen(); },
+    find: function () { return findScreen(); },
     share: function () {
       var t = Math.min(todayNum(), S.habit.length), e = S.entries[todayNum()] || {};
       return '<section class="screen"><h1>Share your progress</h1><p class="lede">People who share how they’re getting on tend to keep going. This is what others will see.</p>' +
@@ -756,6 +759,98 @@
       '<button class="chip" data-account="tracker" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Sign in</button></div>';
   }
 
+  // ── Find my focus ─────────────────────────────────────────────────────────
+  // Open questions first (their words), then they choose one thing, then why one thing matters.
+  function horizon() {
+    var now = new Date(), end = new Date(now.getFullYear(), 11, 31), days = Math.round((end - now) / 86400000);
+    if (days >= 21 && days <= 120) return 'It’s 31 December';
+    var d = new Date(now.getTime() + 90 * 86400000);
+    return 'It’s ' + d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }) + ', three months from now';
+  }
+  function FIND_QS() {
+    return [
+      { key: 'proud', q: horizon() + ' and you’re looking back. What did you do that made you insanely proud of yourself?', hint: 'Not a whole list. The one that would really mean something.' },
+      { key: 'years', q: 'What have you wanted to do for years, and never quite got round to?', hint: 'Big or small. It still counts if it’s been on the list forever.' },
+      { key: 'new', q: 'Is there something new you’re curious to explore?', hint: 'Something you keep noticing, or wondering about.' },
+      { key: 'admire', q: 'Think of someone you admire. What is it about them? Is there something they do that you’d love to get better at?', hint: 'Speaking well. Being fit and strong. Staying calm and patient. These are all skills, and skills can be built.' }
+    ];
+  }
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition, rec = null;
+  function micButton() {
+    if (!SR) return '';
+    return '<button class="mic" data-mic="1" aria-pressed="false" aria-label="Speak instead of typing"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Speak</span></button>';
+  }
+  function toggleMic(btn) {
+    var ta = document.getElementById('findans'); if (!SR || !ta) return;
+    if (rec) { rec.stop(); return; }
+    try {
+      rec = new SR(); rec.lang = 'en-GB'; rec.continuous = true; rec.interimResults = true;
+      var base = ta.value ? ta.value.replace(/\s*$/, ' ') : '';
+      rec.onresult = function (ev) {
+        var fin = '', tmp = '';
+        for (var i = 0; i < ev.results.length; i++) { if (ev.results[i].isFinal) fin += ev.results[i][0].transcript; else tmp += ev.results[i][0].transcript; }
+        ta.value = base + fin + tmp; grow(ta); findSave();
+      };
+      rec.onend = function () { rec = null; btn.setAttribute('aria-pressed', 'false'); btn.querySelector('span').textContent = 'Speak'; };
+      rec.onerror = function (e) { if (e.error === 'not-allowed') toast('Microphone blocked. You can allow it in your browser settings.'); };
+      rec.start(); btn.setAttribute('aria-pressed', 'true'); btn.querySelector('span').textContent = 'Listening… tap to stop';
+    } catch (e) { rec = null; toast('Speaking isn’t available here. Typing works just as well.'); }
+  }
+  function findSave() {
+    var ta = document.getElementById('findans'), f = S.find; if (!ta || !f) return;
+    var q = FIND_QS()[f.step]; if (q) { f.answers[q.key] = ta.value; save(false); }
+  }
+  function findScreen() {
+    var f = S.find || (S.find = { step: 0, answers: {} }), qs = FIND_QS();
+    if (f.step < qs.length) {
+      var q = qs[f.step], v = f.answers[q.key] || '';
+      return '<section class="screen"><div><div class="eyebrow">Find my focus · ' + (f.step + 1) + ' of ' + qs.length + '</div><h1 class="findq">' + esc(q.q) + '</h1></div>' +
+        '<p class="hint" style="margin-top:-8px">' + esc(q.hint) + '</p>' +
+        '<div class="field"><textarea id="findans" rows="3" style="min-height:120px" placeholder="Write whatever comes. Only you see this.">' + esc(v) + '</textarea>' + micButton() + '</div>' +
+        '<div class="spacer"></div><button class="btn" data-find="next">' + (f.step === qs.length - 1 ? 'See what I wrote' : 'Next') + '</button>' +
+        '<button class="link center" data-find="skip">Skip this one</button></section>';
+    }
+    if (f.step === qs.length) {
+      var picks = qs.filter(function (q) { return (f.answers[q.key] || '').trim(); });
+      var h = '<section class="screen"><div><div class="eyebrow">Find my focus</div><h1>Here’s what you said.</h1></div>' +
+        '<p class="lede">Read it back. Which one gives you a little jolt? That’s usually the one. Pick one for the next 30 days.</p><div style="display:flex;flex-direction:column;gap:10px">';
+      picks.forEach(function (q) { h += '<button class="choice findpick" data-find="pick" data-key="' + q.key + '" aria-pressed="' + (f.pick === q.key) + '"><small>' + esc(q.q.replace(/^It’s [^.?]*? and you’re looking back\. /, '')) + '</small><b>' + esc(f.answers[q.key].trim()) + '</b></button>'; });
+      if (!picks.length) h += '<div class="card soft small"><span>Nothing written yet, and that’s fine. Go back and jot down a few words, or name your focus below.</span></div>';
+      h += '<button class="choice findpick" data-find="pick" data-key="own" aria-pressed="' + (f.pick === 'own') + '"><b>Something else</b><small>I know what it is now.</small></button></div>';
+      return h + '<div class="spacer"></div><button class="btn" data-find="chosen"' + (f.pick ? '' : ' disabled') + '>This is my focus</button></section>';
+    }
+    if (f.step === qs.length + 1) {
+      var big = f.pick === 'own' ? '' : (f.answers[f.pick] || '').trim();
+      return '<section class="screen"><div><div class="eyebrow">Find my focus</div><h1>Make it something you can do most days.</h1></div>' +
+        (big ? '<div class="why"><span class="eyebrow">Your focus</span><span style="font-weight:600">' + esc(big) + '</span></div>' : '<div class="field"><label class="label" for="findbig">What’s your focus?</label><textarea id="findbig" rows="1" placeholder="In your words">' + esc(f.own || '') + '</textarea></div>') +
+        '<div class="field"><label class="label" for="finddo">What could you do most days that moves you towards it?</label><textarea id="finddo" rows="1" placeholder="Something small enough to do on a busy day">' + esc(f.daily || '') + '</textarea></div>' +
+        optional('Show me examples', '<div class="card small"><span>Speak better? <b>Read one page out loud a day.</b></span><span>Get fitter? <b>A 20-minute walk before work.</b></span><span>Calmer? <b>Five slow breaths before I open my phone.</b></span><span>Write the book? <b>200 words, first thing.</b></span></div>') +
+        '<div class="spacer"></div><button class="btn" data-find="daily">Next</button></section>';
+    }
+    return '<section class="screen"><div><div class="eyebrow">Find my focus</div><h1>One thing. On purpose.</h1></div>' +
+      '<p class="lede">The word priority came into English in the 1400s, and for about 500 years it was singular. The one thing that came first. We only started saying priorities in the 1900s. If everything’s a priority, nothing is.</p>' +
+      '<div class="why"><span class="eyebrow">Why one thing works</span><span>One focus, done most days, compounds. Small on its own, big over 30 days.</span><span>Some days will be tough. That’s part of it, and you’ve got a plan for those.</span><span>And underneath the habit, you’re building a skill: patience, focus, trusting yourself. Like wax on, wax off. It looks like painting the fence, and you’re learning karate.</span></div>' +
+      '<div class="why"><span class="eyebrow">You chose</span><span style="font-weight:600">' + esc(f.daily || '') + '</span>' + (f.big ? '<span class="soft" style="font-size:14px">Towards: ' + esc(f.big) + '</span>' : '') + '</div>' +
+      '<div class="spacer"></div><button class="btn" data-find="go">Let’s set it up</button></section>';
+  }
+  function findAct(a, b) {
+    var f = S.find || (S.find = { step: 0, answers: {} }), qs = FIND_QS();
+    if (rec) { try { rec.stop(); } catch (e) {} }
+    if (a === 'start') { S.find = { step: 0, answers: (S.find && S.find.answers) || {} }; save(false); return go('find'); }
+    if (a === 'next') { findSave(); f.step++; save(false); return go('find'); }
+    if (a === 'skip') { f.step++; save(false); return go('find'); }
+    if (a === 'pick') { f.pick = b.dataset.key; save(false); return render(); }
+    if (a === 'chosen') { if (!f.pick) return; f.step = qs.length + 1; save(false); return go('find'); }
+    if (a === 'daily') {
+      var big = f.pick === 'own' ? ((document.getElementById('findbig') || {}).value || '').trim() : (f.answers[f.pick] || '').trim();
+      var daily = ((document.getElementById('finddo') || {}).value || '').trim();
+      if (f.pick === 'own') f.own = big;
+      if (!daily) { toast('Write one small thing you could do most days.'); return; }
+      f.big = big; f.daily = daily; f.step = qs.length + 2; save(false); return go('find');
+    }
+    if (a === 'go') { S.draft.mode = 'more'; S.draft.what = f.daily; S.draft.found = f.big || f.daily; save(false); return go('what'); }
+  }
+
   // ── I'm struggling ────────────────────────────────────────────────────────
   // Stuart's videos go here when they're ready (a URL per situation). Empty = no video shown.
   var STRUGGLE_VIDEO = { start: '', off: '', spark: '' };
@@ -911,6 +1006,9 @@
     }
     if (t.dataset.hbind && S.habit) { if (t.dataset.hbind === 'what' && !t.value.trim()) return; S.habit[t.dataset.hbind] = t.value; save(); }
     if (t.dataset.rbind) { ui.reflect[t.dataset.rbind] = t.value; }
+    if (t.id === 'findans') findSave();
+    if (t.id === 'finddo' && S.find) { S.find.daily = t.value; save(false); }
+    if (t.id === 'findbig' && S.find) { S.find.own = t.value; save(false); }
   });
   view.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.dataset && e.target.dataset.name) { e.preventDefault(); e.target.blur(); } });
   view.addEventListener('change', function (e) {
@@ -924,6 +1022,8 @@
     if (d.day) return openDay(+d.day);
     if (d.catch) { markDay(+d.catch); return render(); }
     if (d.struggle) { ui.struggle = d.struggle; return render(); }
+    if (d.find) return findAct(d.find, b);
+    if (d.mic) return toggleMic(b);
     if (d.struggleBack) { ui.struggle = null; return render(); }
     if (d.back) return goBack();
     if (d.start) { S.draft.mode = d.start; return go('what'); }
@@ -1041,7 +1141,7 @@
   }
   function finishSetup() {
     var dr = S.draft;
-    S.habit = { id: uuid(), mode: dr.mode, what: dr.what.trim(), gives: dr.gives.slice(), instead: dr.instead, feel: dr.feel.slice(), ownFeel: dr.ownFeel, dimmer: dr.dimmer.trim(), length: dr.length, start: todayStr(), status: 'active', extra: {}, createdAt: new Date().toISOString() };
+    S.habit = { id: uuid(), mode: dr.mode, what: dr.what.trim(), gives: dr.gives.slice(), instead: dr.instead, feel: dr.feel.slice(), ownFeel: dr.ownFeel, dimmer: dr.dimmer.trim(), length: dr.length, start: todayStr(), status: 'active', extra: dr.found ? { found: dr.found } : {}, createdAt: new Date().toISOString() };
     S.entries = {}; S.later = false; S.fb = {}; save();
     finishMoment();
   }
@@ -1095,7 +1195,7 @@
 
   // ── Boot ──────────────────────────────────────────────────────────────────
   applyComfort();
-  if (S.habit && ['landing', 'what', 'less', 'feel', 'dimmer'].indexOf(S.screen) >= 0) S.screen = 'tracker';
+  if (S.habit && ['landing', 'what', 'less', 'feel', 'dimmer', 'find'].indexOf(S.screen) >= 0) S.screen = 'tracker';
   if (!S.habit && ['tracker', 'note', 'share', 'slipped', 'reflect', 'edit', 'settings'].indexOf(S.screen) >= 0) S.screen = 'landing';
   if (['account', 'install', 'length', 'words'].indexOf(S.screen) >= 0) S.screen = S.habit ? 'tracker' : 'landing';
   if (S.habit && ['ready', 'plan', 'settings', 'science', 'share', 'note', 'slipped'].indexOf(S.screen) >= 0) S.screen = 'tracker';
