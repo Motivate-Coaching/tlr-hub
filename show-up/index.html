@@ -142,6 +142,10 @@ textarea::placeholder, .input::placeholder { color: var(--muted); }
 .stat b { font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.2; }
 .stat b.word { font-size: 18px; }
 
+/* Greeting: instant in, quick out (exits faster than entrances) */
+.greet { position: fixed; inset: 0; z-index: 200; background: var(--cream-dark); display: flex; align-items: center; justify-content: center; padding: 32px; }
+.greet p { margin: 0; text-align: center; font-family: var(--display); font-size: clamp(36px, 10vw, 52px); line-height: 1.1; color: var(--navy); }
+.greet.out { opacity: 0; transform: translateY(-12px); transition: opacity 200ms ease-in, transform 200ms ease-in; }
 /* The plan */
 .plancard { background: var(--white); border-radius: 10px; padding: 6px 16px; display: flex; flex-direction: column; }
 .prow { display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: start; padding: 14px 0; }
@@ -316,6 +320,6 @@ html.calm *, html.calm *::before, html.calm *::after { animation-duration: 1ms !
   <main id="view"></main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=20261023l"></script>
+<script src="app.js?v=20261024a"></script>
 </body>
 </html>
