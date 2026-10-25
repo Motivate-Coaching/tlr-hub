@@ -231,8 +231,8 @@
         '</ul>' +
         '<div class="spacer"></div><div class="btns"><button class="btn" data-start="more">Build a habit</button>' +
         '<button class="btn outline" data-start="less">Break a habit</button>' +
-        '<button class="btn findbtn" data-find="start"><span>Not sure what to focus on? <b>Find my focus</b></span></button></div>' +
-        '<p class="byline">No sign-up to start. Created by Stuart Fairbairns PCC, using <button class="link inline" data-go="science">proven behaviour science</button>.</p>' +
+        '<button class="btn findbtn" data-find="start"><span>Not sure what to try? <b>Help me choose</b></span></button></div>' +
+        '<p class="byline">No sign-up to start. Created by Stuart Fairbairns PCC, using <button class="link inline" data-go="science">proven behaviour science</button>. <a class="link inline" href="privacy.html">Privacy</a></p>' +
         (user ? '' : '<button class="link center" data-account="landing" style="margin-top:-12px">Already started? Sign in</button>') +
         (isStandalone() ? '' : '<button class="link center getapp" data-act="install">' + phoneIcon() + 'Put the app on my phone</button>') + '</section>';
     },
@@ -458,7 +458,9 @@
       h += '<div class="card"><span class="eyebrow">Account and privacy</span>' +
         '<div class="field"><label class="label" for="sname">Your first name</label><textarea id="sname" rows="1" data-name="1" autocomplete="given-name" placeholder="So we can say hello">' + esc(firstName()) + '</textarea></div>' +
         (user ? '<span>Signed in as <b>' + esc(user.email) + '</b></span>' : '<span>Not signed in. Your progress is saved on this device only.</span><button class="btn" data-account="settings">Sign in to save</button>') +
-        '<p class="hint">Your notes are only ever seen by you. During the pilot, Stuart sees how often people show up and any feedback you send, never your notes.</p>' +
+        '<p class="hint">Your notes are only ever seen by you. During the pilot, Stuart sees your habit, how often people show up and any feedback you send, never your notes.</p>' +
+        '<div class="row" style="flex-wrap:wrap;gap:8px"><button class="chip" data-act="exportdata">Download my data</button><button class="chip" data-act="deletedata">Delete my Show Up data</button></div>' +
+        '<a class="link" href="privacy.html" style="align-self:flex-start">Privacy notice</a>' +
         (user ? '<button class="switch" role="switch" aria-checked="' + !!s.marketing + '" data-toggle="marketing"><span><b>Ideas and updates from Stuart</b><span class="hint">Occasional emails. Off unless you choose.</span></span><span class="track"></span></button><button class="link" data-act="signout">Sign out</button>' : '') +
         '</div>' + (focusMode ? '</div></details>' : '') + '<button class="link center" data-go="science">The science behind it</button>' + '<a class="link center tlr-link" href="https://www.motivate-coaching.com/thelivingroom" target="_blank" rel="noopener">About The Living Room (TLR) <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a>' + '</section>';
       return h;
@@ -499,7 +501,7 @@
         '<p class="err" id="aerr" hidden></p>' +
         '<button class="btn" data-act="signin">Sign in</button>' +
         '<a class="link center" href="../login.html" style="display:flex;align-items:center">Forgotten your password?</a>' +
-        '<p class="hint">Not a member yet? The pilot is for members for now. You can still use it on this device without signing in.</p></section>';
+        '<p class="hint">Not a member yet? The pilot is for members for now. You can still use it on this device without signing in.</p><p class="hint">Signing in saves your progress securely so it’s backed up and your nudges can reach you. <a href="privacy.html">How we look after your data</a></p></section>';
     }
   };
 
@@ -791,7 +793,7 @@
       '<button class="chip" data-account="tracker" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Sign in</button></div>';
   }
 
-  // ── Find my focus ─────────────────────────────────────────────────────────
+  // ── Help me choose ─────────────────────────────────────────────────────────
   // Open questions first (their words), then they choose one thing, then why one thing matters.
   var HORIZONS = [['30', '30 days'], ['90', 'three months'], ['365', 'a year']];
   function horizonLabel() { var f = S.find || {}, h = HORIZONS.filter(function (x) { return x[0] === f.horizon; })[0] || HORIZONS[1]; return h[1]; }
@@ -832,7 +834,7 @@
     var f = S.find || (S.find = { step: 0, answers: {} }), qs = FIND_QS();
     if (f.step < qs.length) {
       var q = qs[f.step], v = f.answers[q.key] || '';
-      return '<section class="screen"><div><div class="eyebrow">Find my focus · ' + (f.step + 1) + ' of ' + (qs.length + 1) + '</div><h1 class="findq">' + esc(q.q) + '</h1></div>' +
+      return '<section class="screen"><div><div class="eyebrow">Help me choose · ' + (f.step + 1) + ' of ' + (qs.length + 1) + '</div><h1 class="findq">' + esc(q.q) + '</h1></div>' +
         (f.step === 0 ? '<div class="chips" role="group" aria-label="How far ahead"><span class="label" style="width:100%">Looking back from</span>' + HORIZONS.map(function (x) { return '<button class="chip" data-horizon="' + x[0] + '" aria-pressed="' + ((f.horizon || '90') === x[0]) + '">' + (x[0] === '30' ? '30 days' : x[0] === '90' ? '3 months' : 'A year') + '</button>'; }).join('') + '</div>' : '') +
         '<p class="hint" style="margin-top:-8px">' + esc(q.hint) + '</p>' +
         '<div class="field"><textarea id="findans" rows="3" style="min-height:120px" placeholder="Write whatever comes. Only you see this.">' + esc(v) + '</textarea>' + micButton() + '</div>' +
@@ -842,7 +844,7 @@
     if (f.step === qs.length) return winsScreen(true);
     if (f.step === qs.length + 1) {
       var picks = qs.filter(function (q) { return (f.answers[q.key] || '').trim(); });
-      var h = '<section class="screen"><div><div class="eyebrow">Find my focus</div><h1>Here’s what you said.</h1></div>' +
+      var h = '<section class="screen"><div><div class="eyebrow">Help me choose</div><h1>Here’s what you said.</h1></div>' +
         '<p class="lede">Read it back. Which one gives you a little jolt? That’s usually the one. Try something again, or push yourself with something new.</p>' + aiCard(f, picks.length + (S.wins || []).length) + '<div style="display:flex;flex-direction:column;gap:10px">';
       if (f.ai && f.ai.options && f.ai.options.length) h += '<span class="eyebrow">In your own words</span>';
       picks.forEach(function (q) { h += '<button class="choice findpick" data-find="pick" data-key="' + q.key + '" aria-pressed="' + (f.pick === q.key) + '"><small>' + esc(q.q.replace(/^Imagine it’s [^.?]*? looking back\. /, '')) + '</small><b>' + esc(f.answers[q.key].trim()) + '</b></button>'; });
@@ -853,17 +855,17 @@
         wins.forEach(function (w) { h += '<button class="choice findpick" data-find="pick" data-key="win:' + w.id + '" aria-pressed="' + (f.pick === 'win:' + w.id) + '"><small>' + esc(OUTCOME[w.outcome] || 'Done before') + '</small><b>' + esc(w.name) + '</b></button>'; });
       }
       h += '<button class="choice findpick" data-find="pick" data-key="own" aria-pressed="' + (f.pick === 'own') + '"><b>Something else</b><small>I know what it is now.</small></button></div>';
-      return h + '<div class="spacer"></div><button class="btn" data-find="chosen"' + (f.pick ? '' : ' disabled') + '>This is my focus</button></section>';
+      return h + '<div class="spacer"></div><button class="btn" data-find="chosen"' + (f.pick ? '' : ' disabled') + '>This is the one</button></section>';
     }
     if (f.step === qs.length + 2) {
       var big = f.pick === 'own' ? '' : pickText(f);
-      return '<section class="screen"><div><div class="eyebrow">Find my focus</div><h1>Make it something you can do most days.</h1></div>' +
-        (big ? '<div class="why"><span class="eyebrow">Your focus</span><span style="font-weight:600">' + esc(big) + '</span></div>' : '<div class="field"><label class="label" for="findbig">What’s your focus?</label><textarea id="findbig" rows="1" placeholder="In your words">' + esc(f.own || '') + '</textarea></div>') +
+      return '<section class="screen"><div><div class="eyebrow">Help me choose</div><h1>Make it something you can do most days.</h1></div>' +
+        (big ? '<div class="why"><span class="eyebrow">What you’re working towards</span><span style="font-weight:600">' + esc(big) + '</span></div>' : '<div class="field"><label class="label" for="findbig">What do you want to work on?</label><textarea id="findbig" rows="1" placeholder="In your words">' + esc(f.own || '') + '</textarea></div>') +
         '<div class="field"><label class="label" for="finddo">What could you do most days that moves you towards it?</label><textarea id="finddo" rows="1" placeholder="Something small enough to do on a busy day">' + esc(f.daily || '') + '</textarea></div>' +
         optional('Show me examples', '<div class="card small"><span>Speak better? <b>Read one page out loud a day.</b></span><span>Get fitter? <b>A 20-minute walk before work.</b></span><span>Calmer? <b>Five slow breaths before I open my phone.</b></span><span>Write the book? <b>200 words, first thing.</b></span></div>') +
         '<div class="spacer"></div><button class="btn" data-find="daily">Next</button></section>';
     }
-    return '<section class="screen"><div><div class="eyebrow">Find my focus</div><h1>One thing. On purpose.</h1></div>' +
+    return '<section class="screen"><div><div class="eyebrow">Help me choose</div><h1>One thing. On purpose.</h1></div>' +
       '<p class="lede">The word priority came into English in the 1400s, and for about 500 years it was singular. The one thing that came first. We only started saying priorities in the 1900s. If everything’s a priority, nothing is.</p>' +
       '<div class="why"><span class="eyebrow">Why one thing works</span><span>One focus, done most days, compounds. Small on its own, big over 30 days.</span><span>Some days will be tough. That’s part of it, and you’ve got a plan for those.</span><span>And underneath the habit, you’re building a skill: patience, focus, trusting yourself. Like wax on, wax off. It looks like painting the fence, and you’re learning karate.</span></div>' +
       '<div class="why"><span class="eyebrow">You chose</span><span style="font-weight:600">' + esc(f.daily || '') + '</span>' + (f.big ? '<span class="soft" style="font-size:14px">Towards: ' + esc(f.big) + '</span>' : '') + '</div>' +
@@ -877,14 +879,14 @@
       var h = '<div class="card heard"><span class="eyebrow">What I’m hearing</span><p>' + esc(f.ai.heard) + '</p>' +
         (f.ai.themes && f.ai.themes.length ? '<div class="chips">' + f.ai.themes.map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('') + '</div>' : '') + '</div>';
       if (f.ai.options && f.ai.options.length) {
-        h += '<span class="eyebrow">Focus ideas from what you wrote</span><div style="display:flex;flex-direction:column;gap:10px">';
+        h += '<span class="eyebrow">Ideas from what you wrote</span><div style="display:flex;flex-direction:column;gap:10px">';
         f.ai.options.forEach(function (o, i) { h += '<button class="choice findpick" data-find="pick" data-key="ai:' + i + '" aria-pressed="' + (f.pick === 'ai:' + i) + '"><b>' + esc(o.focus) + '</b><small>' + esc(o.why) + '</small></button>'; });
         h += '</div>';
       }
       return h;
     }
     if (!user) return authChecked ? '<div class="card soft small"><b style="font-weight:600">Want a reflection on what you wrote?</b><span>Sign in and the app will read it back to you, picking out what seems to matter most.</span><button class="chip" data-account="find" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Sign in</button></div>' : '';
-    return '<div class="card soft"><b style="font-weight:600">Want a second pair of eyes?</b><span>Tap below and the app will read back what you wrote and point out what seems to matter most to you. It’s private, and nothing you write is kept.</span>' +
+    return '<div class="card soft"><b style="font-weight:600">Want a second pair of eyes?</b><span>Tap below and the app will read back what you wrote, spot what seems to matter most, and suggest a few things you could try for your next 30 days.</span><span class="hint">Private, and nothing is kept. <a href="privacy.html">How it works</a></span>' +
       '<button class="btn outline" data-act="reflectai"' + (ui.aiBusy ? ' disabled' : '') + '>' + (ui.aiBusy ? 'Reading what you wrote…' : 'Reflect it back to me') + '</button></div>';
   }
   async function reflectAI() {
@@ -912,7 +914,7 @@
   function syncWins() { if (S.habit) extra().wins = (S.wins || []).slice(); save(); }
   function winsScreen(inFind) {
     var wins = S.wins || [], did = wins.filter(function (w) { return w.outcome === 'did'; }).length, qs = FIND_QS();
-    var h = '<section class="screen"><div><div class="eyebrow">' + (inFind ? 'Find my focus · ' + (qs.length + 1) + ' of ' + (qs.length + 1) : 'My past wins') + '</div><h1 class="findq">' + (inFind ? 'What have you taken on before?' : 'Things you’ve taken on') + '</h1></div>' +
+    var h = '<section class="screen"><div><div class="eyebrow">' + (inFind ? 'Help me choose · ' + (qs.length + 1) + ' of ' + (qs.length + 1) : 'My past wins') + '</div><h1 class="findq">' + (inFind ? 'What have you taken on before?' : 'Things you’ve taken on') + '</h1></div>' +
       '<p class="hint" style="margin-top:-8px">A 30-day challenge, giving something up, learning a skill. Big or small, it all counts, even the ones that didn’t stick.</p>';
     if (wins.length) {
       h += '<div class="winlist">';
@@ -1209,6 +1211,8 @@
         if (S.habit) { S.habit.status = 'archived'; save(); if (user) void syncAll().then(function () { resetForNew(); }); else resetForNew(); } else resetForNew();
       });
       case 'signin': return void doSignIn();
+      case 'exportdata': return exportData();
+      case 'deletedata': return confirmSheet('Delete your Show Up data?', 'This deletes your habit, show-ups, notes, past wins and settings from this device' + (user ? ' and your account' : '') + '. It can’t be undone. Your TLR Hub account stays as it is.', 'Delete my data', function () { void deleteData(); });
       case 'signout': return void (async function () { await sb.auth.signOut(); user = null; S = fresh(); save(false); applyComfort(); go('landing'); })();
     }
   });
@@ -1323,6 +1327,28 @@
   }
   function resetForNew() { S.habit = null; S.entries = {}; S.fb = {}; S.later = false; S.draft = fresh().draft; save(); go('landing'); }
 
+  // ── Your data: download and delete ────────────────────────────────────────
+  function exportData() {
+    var out = { exported: new Date().toISOString(), app: 'Show Up', account: user ? user.email : null, name: S.settings.name || '', habit: S.habit, entries: S.entries, pastWins: S.wins || [], settings: S.settings };
+    var blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'show-up-my-data.json';
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    toast('Downloaded.');
+  }
+  async function deleteData() {
+    try {
+      if (user && sb) {
+        var uid = user.id, r;
+        r = await sb.from('showup_push_subscriptions').delete().eq('user_id', uid); if (r.error) throw r.error;
+        r = await sb.from('showup_habits').delete().eq('user_id', uid); if (r.error) throw r.error;
+        r = await sb.from('showup_profiles').delete().eq('user_id', uid); if (r.error) throw r.error;
+        try { await sb.auth.updateUser({ data: { first_name: null } }); } catch (e) {}
+        await sb.auth.signOut(); user = null;
+      }
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      S = fresh(); save(false); applyComfort(); go('landing'); toast('Deleted. Your Show Up data is gone.');
+    } catch (e) { toast('Couldn’t delete just now. Please try again, or email stuart@motivate-coaching.com.'); }
+  }
   function confirmSheet(title, body, yes, fn) {
     var el = document.createElement('div'); el.className = 'sheet-bg';
     el.innerHTML = '<div class="sheet" role="dialog" aria-label="' + esc(title) + '"><b style="font-size:20px;font-weight:600">' + esc(title) + '</b><p class="hint">' + esc(body) + '</p><button class="btn" data-c="yes">' + esc(yes) + '</button><button class="link center" data-c="no">Cancel</button></div>';
