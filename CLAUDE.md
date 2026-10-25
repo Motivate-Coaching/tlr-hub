@@ -73,7 +73,8 @@ Tables created with raw SQL need explicit GRANTs, including for service_role whe
 
 - session-reminders: TLR session reminder emails (1 hour and 24 hours before), run by pg_cron every 30 minutes.
 - showup-reminders: Show Up morning nudges by email (Resend, from stuart@motivate-coaching.com) and web push, run by pg_cron every 15 minutes. Sends once per person per day (showup_reminder_log), only to people with a profile row, so a person must be signed in inside Show Up to get nudges.
-- Secret names (values live only in Supabase secrets): RESEND_API_KEY, VAPID_PRIVATE_KEY, and ANTHROPIC_API_KEY once Stuart adds it. The VAPID public key in show-up/app.js and the function is public by design.
+- showup-reflect: the "What I'm hearing" reflection in Find my focus. Signed-in users only, 5 a day each (counted in app_metadata.showup_ai), Claude Haiku via forced tool output, nothing stored.
+- Secret names (values live only in Supabase secrets): RESEND_API_KEY, VAPID_PRIVATE_KEY, ANTHROPIC_API_KEY. The VAPID public key in show-up/app.js and the function is public by design.
 
 ## Show Up (habit app, show-up/)
 
@@ -89,7 +90,7 @@ A separate product from TLR, piloted with TLR members as founding testers. Plann
 
 ## Known issues and open work
 
-1. Show Up parking lot: AI "what I'm hearing" reflection in Find my focus (needs ANTHROPIC_API_KEY), Stuart's struggling videos, email capture for the public launch (separate unticked marketing box), prescriptive challenges (for example a fitness challenge), real app name, sales page, Stripe product.
+1. Show Up parking lot: Stuart's struggling videos, email capture for the public launch (separate unticked marketing box), prescriptive challenges (for example a fitness challenge), real app name, sales page, Stripe product.
 2. Design and tone pass on M1, M2, M3, M4 and M6 (21 tools) to match the redesigned M5 and M7, plus checking each tool follows the standard pattern.
 3. Research what members value on Skool, Circle and similar platforms.
 4. Long term: white-label platform for other coaches (workspace_id multi-tenancy with RLS, Stripe billing, coach admin view, course builder).

@@ -843,7 +843,8 @@
     if (f.step === qs.length + 1) {
       var picks = qs.filter(function (q) { return (f.answers[q.key] || '').trim(); });
       var h = '<section class="screen"><div><div class="eyebrow">Find my focus</div><h1>Here’s what you said.</h1></div>' +
-        '<p class="lede">Read it back. Which one gives you a little jolt? That’s usually the one. Try something again, or push yourself with something new.</p><div style="display:flex;flex-direction:column;gap:10px">';
+        '<p class="lede">Read it back. Which one gives you a little jolt? That’s usually the one. Try something again, or push yourself with something new.</p>' + aiCard(f, picks.length + (S.wins || []).length) + '<div style="display:flex;flex-direction:column;gap:10px">';
+      if (f.ai && f.ai.options && f.ai.options.length) h += '<span class="eyebrow">In your own words</span>';
       picks.forEach(function (q) { h += '<button class="choice findpick" data-find="pick" data-key="' + q.key + '" aria-pressed="' + (f.pick === q.key) + '"><small>' + esc(q.q.replace(/^Imagine it’s [^.?]*? looking back\. /, '')) + '</small><b>' + esc(f.answers[q.key].trim()) + '</b></button>'; });
       var wins = S.wins || [];
       if (!picks.length && !wins.length) h += '<div class="card soft small"><span>Nothing written yet, and that’s fine. Go back and jot down a few words, or name your focus below.</span></div>';
@@ -868,7 +869,38 @@
       '<div class="why"><span class="eyebrow">You chose</span><span style="font-weight:600">' + esc(f.daily || '') + '</span>' + (f.big ? '<span class="soft" style="font-size:14px">Towards: ' + esc(f.big) + '</span>' : '') + '</div>' +
       '<div class="spacer"></div><button class="btn" data-find="go">Let’s set it up</button></section>';
   }
+  // ── "What I'm hearing": an AI reflection of their own words (signed in, a few a day) ──
+  function aiCard(f, n) {
+    if (!n || !sb) return '';
+    if (f.ai && f.ai.care) return '<div class="why"><span class="eyebrow">Before anything else</span><span>' + esc(f.ai.care) + '</span></div>';
+    if (f.ai && f.ai.heard) {
+      var h = '<div class="card heard"><span class="eyebrow">What I’m hearing</span><p>' + esc(f.ai.heard) + '</p>' +
+        (f.ai.themes && f.ai.themes.length ? '<div class="chips">' + f.ai.themes.map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('') + '</div>' : '') + '</div>';
+      if (f.ai.options && f.ai.options.length) {
+        h += '<span class="eyebrow">Focus ideas from what you wrote</span><div style="display:flex;flex-direction:column;gap:10px">';
+        f.ai.options.forEach(function (o, i) { h += '<button class="choice findpick" data-find="pick" data-key="ai:' + i + '" aria-pressed="' + (f.pick === 'ai:' + i) + '"><b>' + esc(o.focus) + '</b><small>' + esc(o.why) + '</small></button>'; });
+        h += '</div>';
+      }
+      return h;
+    }
+    if (!user) return authChecked ? '<div class="card soft small"><b style="font-weight:600">Want a reflection on what you wrote?</b><span>Sign in and the app will read it back to you, picking out what seems to matter most.</span><button class="chip" data-account="find" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Sign in</button></div>' : '';
+    return '<div class="card soft"><b style="font-weight:600">Want a second pair of eyes?</b><span>Tap below and the app will read back what you wrote and point out what seems to matter most to you. It’s private, and nothing you write is kept.</span>' +
+      '<button class="btn outline" data-act="reflectai"' + (ui.aiBusy ? ' disabled' : '') + '>' + (ui.aiBusy ? 'Reading what you wrote…' : 'Reflect it back to me') + '</button></div>';
+  }
+  async function reflectAI() {
+    var f = S.find; if (!f || !sb || !user || ui.aiBusy) return;
+    ui.aiBusy = true; render();
+    try {
+      var r = await sb.functions.invoke('showup-reflect', { body: { answers: f.answers, wins: (S.wins || []).map(function (w) { return { name: w.name, outcome: w.outcome }; }), horizon: horizonLabel() } });
+      if (r.error) {
+        var st = r.error.context && r.error.context.status;
+        toast(st === 429 ? 'That’s today’s reflections used. Your own words below work just as well.' : 'Couldn’t reach it just now. Try again in a moment.');
+      } else if (r.data && (r.data.heard || r.data.care)) { f.ai = r.data; save(false); }
+    } catch (e) { toast('Couldn’t reach it just now. Try again in a moment.'); }
+    ui.aiBusy = false; render();
+  }
   function pickText(f) {
+    if (f.pick && f.pick.indexOf('ai:') === 0) { var o = f.ai && f.ai.options[+f.pick.slice(3)]; return o ? o.focus : ''; }
     if (f.pick && f.pick.indexOf('win:') === 0) { var w = (S.wins || []).filter(function (x) { return x.id === f.pick.slice(4); })[0]; return w ? w.name : ''; }
     return (f.answers[f.pick] || '').trim();
   }
@@ -929,7 +961,7 @@
     if (a === 'next') { findSave(); f.step++; save(false); return go('find'); }
     if (a === 'skip') { f.step++; save(false); return go('find'); }
     if (a === 'pick') { f.pick = b.dataset.key; save(false); return render(); }
-    if (a === 'chosen') { if (!f.pick) return; f.step = qs.length + 2; save(false); return go('find'); }
+    if (a === 'chosen') { if (!f.pick) return; if (f.pick.indexOf('ai:') === 0 && f.ai && !f.daily) { var ao = f.ai.options[+f.pick.slice(3)]; if (ao && ao.daily) f.daily = ao.daily; } f.step = qs.length + 2; save(false); return go('find'); }
     if (a === 'daily') {
       var big = f.pick === 'own' ? ((document.getElementById('findbig') || {}).value || '').trim() : pickText(f);
       var daily = ((document.getElementById('finddo') || {}).value || '').trim();
@@ -1156,6 +1188,7 @@
       case 'morechips': ui.moreChips = true; return render();
       case 'undo': delete S.entries[todayNum()]; recomputeComebacks(); save(); toast('Undone.'); return render();
       case 'catchdone': { var cd = catchDays(todayNum()); S.catchup = (S.catchup || []).concat(cd); save(false); return render(); }
+      case 'reflectai': return void reflectAI();
       case 'saveworked': { var wv = (document.getElementById('worked') || {}).value || ''; if (!wv.trim()) { toast('Write a few words first, or skip it.'); return; }
         var ex = extra(); ex.worked = (ex.worked || []).concat([{ q: ui.struggleQ || '', a: wv.trim(), at: new Date().toISOString() }]); save(); ui.struggleSaved = true; return render(); }
       case 'sharenote': ui.shareNote = !ui.shareNote; return render();
