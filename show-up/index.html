@@ -398,6 +398,29 @@ details.ask .isteps { margin-top: 10px; }
 .landing .btns .link b { font-weight: 600; text-decoration: underline; }
 .landing .foot { margin: 0; text-align: center; font-size: 14px; color: var(--muted); }
 .landing .foot .link { font-size: 14px; font-weight: 500; color: var(--text-mid); }
+/* Home: one action first, this week underneath */
+.home { gap: 18px; }
+.home .homesub { color: var(--text-mid); margin-top: 6px; }
+.struggle-link { font-size: 15px; font-weight: 500; margin-top: 2px; }
+.week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.week .wd { display: flex; flex-direction: column; align-items: center; gap: 6px; border: 0; background: transparent; padding: 4px 0; font: inherit; cursor: pointer; }
+.week .wd span { font-size: 12px; color: var(--muted); font-weight: 600; }
+.week .wd i { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--cream-deep); display: block; }
+.week .wd.on i { background: var(--navy); border-color: var(--navy); }
+.week .wd.today i { border: 2px dashed var(--navy); }
+.weekcard { gap: 10px; }
+details.alldays summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-mid); text-decoration: underline; list-style: none; }
+details.alldays summary::-webkit-details-marker { display: none; }
+details.alldays[open] summary { margin-bottom: 12px; }
+/* Settings: essentials first, the rest one tap away */
+.settings .sects { display: flex; flex-direction: column; background: var(--white); border-radius: 10px; }
+.settings details.sect { border-top: 1px solid var(--cream-deep); }
+.settings details.sect:first-child { border-top: 0; }
+.settings details.sect summary { list-style: none; cursor: pointer; min-height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; font-weight: 600; }
+.settings details.sect summary::-webkit-details-marker { display: none; }
+.settings details.sect summary::after { content: ""; width: 9px; height: 9px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); margin-top: -4px; transition: transform 150ms; }
+.settings details.sect[open] summary::after { transform: rotate(225deg); margin-top: 4px; }
+.settings .sbody { display: flex; flex-direction: column; gap: 14px; padding: 4px 16px 18px; }
 </style>
 </head>
 <body>
@@ -410,6 +433,6 @@ details.ask .isteps { margin-top: 10px; }
   <main id="view"></main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=20261026f"></script>
+<script src="app.js?v=20261026g"></script>
 </body>
 </html>
