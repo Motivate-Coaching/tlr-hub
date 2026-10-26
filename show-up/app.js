@@ -690,21 +690,12 @@
     var el = document.createElement('div');
     el.className = 'celebrate'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'You showed up today');
     el.innerHTML = confettiHTML(60) + '<div class="burst"><span class="ring"></span><div class="disc"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div></div>' +
-      '<div><div class="t">' + title + '</div><div class="s">' + sub + '</div></div><div id="ask"></div>';
+      '<div><div class="t">' + title + '</div><div class="s">' + sub + '</div></div><p class="tapon">Tap to carry on</p>';
     app.appendChild(el);
-    setTimeout(function () {
-      var ask = el.querySelector('#ask'); if (!ask) return;
-      var h = '<div class="ask"><span class="eyebrow">How did it feel?</span><div class="chips" style="justify-content:center">';
-      words().slice(0, 3).concat(['Honestly, tough']).forEach(function (w) { h += '<button class="chip" data-felt="' + esc(w) + '">' + esc(w) + '</button>'; });
-      ask.innerHTML = h + '</div><button class="skip" data-felt="">Skip</button></div>';
-      var first = ask.querySelector('button'); if (first) first.focus({ preventScroll: true });
-    }, isCalm() ? 300 : 1400);
-    el.addEventListener('click', function (ev) {
-      var b = ev.target.closest('[data-felt]'); if (!b) return;
-      if (b.dataset.felt) S.entries[t].felt = b.dataset.felt;
-      save(); el.remove();
-      if (from === 'slipped') go('tracker'); else render();
-    });
+    // Celebrate, then get out of the way: closes itself, or on a tap.
+    var closed = false, close = function () { if (closed) return; closed = true; el.remove(); if (from === 'slipped') go('tracker'); else render(); };
+    el.addEventListener('click', close);
+    setTimeout(close, isCalm() ? 2200 : 3200);
   }
 
   // ── One day, opened from the grid ─────────────────────────────────────────
