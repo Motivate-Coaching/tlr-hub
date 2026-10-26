@@ -1156,7 +1156,11 @@
     if (d.words) { ui.wordsFrom = d.words; return go('words'); }
     if (d.account) { ui.returnTo = d.account; return go('account'); }
     if (d.tick) { var from = d.from || (S.screen === 'ready' ? 'ready' : 'tracker'); return tick(d.tick, from); }
-    if (d.view) { if (S.settings.view !== d.view) { S.settings.view = d.view; save(); toast(d.view === 'focus' ? 'Simple view on.' : 'Detailed view on.'); if (S.screen === 'viewpick') { S.viewChosen = true; save(false); return go(ui.afterName || 'what'); } } return render(); }
+    if (d.view) {
+      if (S.screen === 'viewpick') { S.settings.view = d.view; S.viewChosen = true; save(); return go(ui.afterName || 'what'); }
+      if (S.settings.view !== d.view) { S.settings.view = d.view; save(); toast(d.view === 'focus' ? 'Simple view on.' : 'Detailed view on.'); }
+      return render();
+    }
     if (d.text) { S.settings.text = d.text; applyComfort(); save(); return render(); }
     if (d.toggle) {
       if (d.toggle === 'email' && !user) { ui.returnTo = 'settings'; return go('account'); }
