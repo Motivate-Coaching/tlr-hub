@@ -376,6 +376,19 @@ details.ask .isteps { margin-top: 10px; }
 .card.heard p { margin: 0; font-size: 18px; font-weight: 500; line-height: 1.5; color: var(--navy); }
 .tag { display: inline-flex; align-items: center; min-height: 30px; padding: 0 12px; border-radius: 4px; background: var(--cream-dark); font-size: 14px; font-weight: 600; }
 .celebrate .tapon { margin: 0; font-size: 13px; color: var(--cream-dark); opacity: 0.8; animation: rise 360ms 900ms ease-out both; }
+
+/* Choose your view, once */
+.viewpick { display: flex; flex-direction: column; gap: 12px; }
+.choice.vp { flex-direction: row; align-items: center; gap: 16px; padding: 14px 16px; }
+.choice.vp span { display: flex; flex-direction: column; gap: 2px; }
+.choice.vp b { font-size: 18px; }
+/* Share card: dots and a percentage */
+.sharedots { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; margin: 4px 0 8px; }
+.sharedots i { aspect-ratio: 1; border-radius: 50%; background: var(--navy-mid); }
+.sharedots i.on { background: var(--amber); }
+.sharedots i.off { background: transparent; border: 1px solid var(--navy-mid); }
+.sharestat { display: flex; align-items: baseline; gap: 12px; color: var(--cream-dark); }
+.sharestat b { font-size: 44px; font-weight: 600; color: var(--white); line-height: 1; }
 </style>
 </head>
 <body>
@@ -385,12 +398,9 @@ details.ask .isteps { margin-top: 10px; }
     <button class="home-btn" id="homeBtn" aria-label="Home"><img src="logo-white.png" alt="The Living Room (TLR), Tools for life" width="49" height="40"></button>
     <button class="icon-btn ghost" id="settingsBtn" aria-label="Settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </header>
-  <nav class="viewbar" id="viewbar" aria-label="How it looks">
-    <div class="seg"><button data-view="full" aria-pressed="true">Full</button><button data-view="focus" aria-pressed="false">Focus</button></div>
-  </nav>
   <main id="view"></main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=20261026a"></script>
+<script src="app.js?v=20261026b"></script>
 </body>
 </html>

@@ -205,7 +205,7 @@
 
   // ── Screens ───────────────────────────────────────────────────────────────
   var BACK = {
-    what: function () { return S.draft.found ? 'find' : 'landing'; }, name: 'landing', wins: 'tracker', less: 'feel',
+    what: function () { return S.draft.found ? 'find' : 'landing'; }, name: 'landing', viewpick: function () { return S.nameAsked ? 'landing' : 'name'; }, wins: 'tracker', less: 'feel',
     find: function () { var f = S.find || {}; if (f.step > 0) { f.step--; save(false); return 'find'; } return 'landing'; }, feel: 'what', dimmer: function () { return S.draft.mode === 'less' ? 'less' : 'feel'; },
     length: function () { return ui.returnTo || 'ready'; }, note: 'tracker', slipped: 'tracker', share: 'tracker', science: function () { return S.habit ? 'settings' : 'landing'; },
     words: function () { return ui.wordsFrom || 'tracker'; }, settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', install: function () { return ui.installFrom || (S.habit ? 'settings' : 'landing'); }, account: function () { return ui.returnTo || 'tracker'; }
@@ -285,6 +285,7 @@
         '<div class="spacer"></div>' + stepButton('dimmer') + '</section>';
     },
     ready: function () {
+      if (ui.planEdit) return planEditor();
       var ticked = !!S.entries[1];
       var h = '<section class="screen"><div><div class="eyebrow">Your plan is ready</div><h1>Here’s your plan.</h1></div>' + planCard('ready');
       if (!ticked) {
@@ -302,13 +303,13 @@
       }
       h += (firstName() ? '' : '<div class="field"><label class="label" for="pname">What should we call you?</label><textarea id="pname" rows="1" data-name="1" autocomplete="given-name" placeholder="Your first name"></textarea></div>') +
         nextNudge() +
-        '<div class="spacer"></div><button class="btn" data-act="readydone">Go to my tracker</button><button class="link center full-only" data-words="ready">See my words</button></section>';
+        '<div class="spacer"></div><button class="btn" data-act="readydone">Go to my tracker</button></section>';
       return h;
     },
     plan: function () {
       if (!S.habit) return screens.landing();
+      if (ui.planEdit) return planEditor();
       return '<section class="screen"><div><div class="eyebrow">My plan</div><h1>' + esc(habitName()) + '</h1></div>' + planCard('plan') +
-        '<p class="hint">Change anything, any time. Your ticks stay as they are.</p>' +
         '<div class="spacer"></div><button class="btn" data-go="tracker">Back to my tracker</button></section>';
     },
     length: function () {
@@ -333,7 +334,7 @@
       h += '<div class="card" style="padding:16px">' + gridHTML(t, true) + '<div class="legend"><span><i style="background:var(--navy)"></i>Showed up</span><span><span class="star"></span>Got back up</span></div><p class="hint" style="margin:0">Tap any day to fill it in or add a note.</p></div>';
       h += catchUpCard(t);
       if (t > L) {
-        h += '<div class="card"><b style="font-size:20px;font-weight:600">You gave it ' + L + ' days.</b><span style="color:var(--text-mid)">Time for your look back: what you noticed, and what’s next. Your call.</span><button class="btn" data-go="reflect">Start my look back</button></div>';
+        h += '<div class="card"><b style="font-size:20px;font-weight:600">You gave it ' + L + ' days.</b><span style="color:var(--text-mid)">Time for your look back: what you noticed, and what’s next. Your call.</span><button class="btn" data-go="reflect">Start my look back</button><button class="link center" data-go="share">Share that I did it</button></div>';
       } else if (!e) {
         h += showUpButtons();
       } else {
@@ -342,14 +343,7 @@
         if (t === L && !S.fb.reflect) h += '<div class="card soft"><b style="font-weight:600">That’s your last day.</b><button class="btn" data-go="reflect">Start my look back</button></div>';
       }
       h += extraCards(t);
-      var felt = {}; Object.keys(S.entries).forEach(function (k) { var f = S.entries[k].felt; if (f && f !== 'Honestly, tough') felt[f] = (felt[f] || 0) + 1; });
-      var top = Object.keys(felt).sort(function (a, b) { return felt[b] - felt[a]; })[0];
-      h += '<div class="statline"><div><b>' + count(function () { return true; }) + '</b><small>Show-ups</small></div>' +
-        '<div><b>' + count(function (x) { return x.comeback; }) + '</b><small>Comebacks</small></div>' +
-        '<div><b>' + Math.max(0, L - t) + '</b><small>Days to go</small></div></div>' +
-        (top ? '<p class="felt-line">Most often you’ve felt <b>' + esc(top.toLowerCase()) + '</b>.</p>' : '');
-      h += '<button class="btn outline" data-go="share">Share my progress</button>' +
-        '<div class="row" style="justify-content:center;flex-wrap:wrap;gap:4px 16px"><button class="link" data-words="tracker">My words</button><button class="link" data-go="wins">My past wins</button>' + (e ? '<button class="link" data-go="slipped">I’m struggling</button>' : '') + '' +
+      h += '<div class="row" style="justify-content:center;flex-wrap:wrap;gap:4px 16px"><button class="link" data-go="wins">My past wins</button>' + (e ? '<button class="link" data-go="slipped">I’m struggling</button>' : '') +
         '</div></section>';
       return h;
     },
@@ -364,6 +358,14 @@
     slipped: function () { return struggleScreen(); },
     find: function () { return findScreen(); },
     wins: function () { return winsScreen(false); },
+    viewpick: function () {
+      var v = S.settings.view;
+      var pic = function (simple) { return '<svg width="64" height="88" viewBox="0 0 64 88" aria-hidden="true"><rect x="1" y="1" width="62" height="86" rx="8" fill="#FFFFFF" stroke="#E5DDD1" stroke-width="2"/>' + (simple ? '<rect x="12" y="20" width="40" height="5" rx="2.5" fill="#888880"/><rect x="10" y="50" width="44" height="16" rx="3" fill="#0F1215"/>' : '<rect x="10" y="10" width="36" height="5" rx="2.5" fill="#888880"/><rect x="10" y="21" width="44" height="3" rx="1.5" fill="#E5DDD1"/><rect x="10" y="28" width="40" height="3" rx="1.5" fill="#E5DDD1"/><rect x="10" y="38" width="44" height="14" rx="3" fill="#EDE8DF"/><rect x="10" y="58" width="44" height="12" rx="3" fill="#0F1215"/><rect x="10" y="75" width="30" height="3" rx="1.5" fill="#E5DDD1"/>') + '</svg>'; };
+      return '<section class="screen"><div><div class="eyebrow">Before we start</div><h1>Choose your view</h1></div>' +
+        '<p class="lede" style="margin-top:-6px">Same app either way. Change it any time in Settings.</p><div class="viewpick">' +
+        '<button class="choice vp" data-view="full" aria-pressed="' + (v === 'full') + '">' + pic(false) + '<span><b>Detailed</b><small>Examples, tips and your full progress on show</small></span></button>' +
+        '<button class="choice vp" data-view="focus" aria-pressed="' + (v === 'focus') + '">' + pic(true) + '<span><b>Simple</b><small>Just the essentials, calmer screens</small></span></button></div></section>';
+    },
     name: function () {
       return '<section class="screen"><div><div class="eyebrow">Before we start</div><h1>What should we call you?</h1></div>' +
         '<p class="lede" style="margin-top:-6px">We’ll use it when we check in with you.</p>' +
@@ -371,22 +373,14 @@
         '<div class="spacer"></div><button class="btn" data-namego="go">Continue</button><button class="link center" data-namego="skip">Skip for now</button></section>';
     },
     share: function () {
-      var t = Math.min(todayNum(), S.habit.length), e = S.entries[todayNum()] || {};
-      return '<section class="screen"><h1>Share your progress</h1><p class="lede">People who share how they’re getting on tend to keep going. This is what others will see.</p>' +
-        '<div class="sharecard" id="sharecard"><div class="head"><span class="eyebrow" style="color:var(--cream-dark)">Day ' + t + ' of ' + S.habit.length + '</span><img src="logo-white.png" alt="The Living Room (TLR), Tools for life"></div>' +
-        '<h2>' + esc(habitName()) + '</h2>' + gridHTML(todayNum()) +
-        '<div style="display:flex;gap:16px;flex-wrap:wrap;color:var(--cream-dark);font-size:14px"><span>' + count(function () { return true; }) + ' show-ups</span><span>Feeling: ' + esc(words().slice(0, 2).join(', ').toLowerCase()) + '</span></div>' +
-        (e.note && ui.shareNote ? '<div class="note">“' + esc(e.note) + '”</div>' : '') + '</div>' +
-        (e.note ? '<button class="switch" role="switch" aria-checked="' + !!ui.shareNote + '" data-act="sharenote"><span><b>Include today’s note</b><span class="hint">Off unless you choose it.</span></span><span class="track"></span></button>' : '') +
+      var L = S.habit.length, days = Math.min(todayNum(), L), n = count(function (x, k) { return k <= L; }), pct = Math.round(n / Math.max(1, days) * 100);
+      var dots = '<div class="sharedots">'; for (var i = 1; i <= L; i++) dots += '<i class="' + (S.entries[i] ? 'on' : (i <= days ? 'off' : 'ahead')) + '"></i>'; dots += '</div>';
+      return '<section class="screen"><div><div class="eyebrow">Share that I did it</div><h1>Your progress</h1></div><p class="lede">Only your habit and the days you showed up. Never your notes.</p>' +
+        '<div class="sharecard" id="sharecard"><div class="head"><span class="eyebrow" style="color:var(--cream-dark)">' + L + '-day challenge</span><img src="logo-white.png" alt="The Living Room (TLR), Tools for life"></div>' +
+        '<h2>' + esc(habitName()) + '</h2>' + dots +
+        '<div class="sharestat"><b>' + pct + '%</b><span>Showed up ' + n + ' of ' + days + ' days</span></div></div>' +
         '<button class="btn" data-act="shareimg">Share my card</button>' +
-        '<button class="btn outline" data-act="whatsapp">Send on WhatsApp</button>' +
-        '<p class="hint">To post in the Members Lounge, tap Share my card, choose Facebook, then pick the group.</p></section>';
-    },
-    words: function () {
-      var w = words();
-      var h = '<section class="screen"><h1>Your words</h1><p class="lede">Spin it with your finger. Tap any word.</p><div class="sphere" id="sphere"><button class="core" data-act="whole">' + esc(habitName()) + '</button>';
-      w.forEach(function (x, i) { h += '<button class="w" data-word="' + i + '">' + esc(x.toLowerCase()) + '</button>'; });
-      return h + '</div><div id="wordcard"></div></section>';
+        '<button class="btn outline" data-act="whatsapp">Send on WhatsApp</button></section>';
     },
     reflect: function () {
       var L = S.habit.length, n = count(function () { return true; }), next = { 10: 30, 30: 60, 60: 90 }[L];
@@ -402,7 +396,7 @@
         ['Very disappointed', 'Somewhat disappointed', 'Not disappointed'].map(function (o) { return '<button class="chip" style="text-align:left" data-rpmf="' + o + '" aria-pressed="' + (q.pmf === o) + '">' + o + '</button>'; }).join('') + '</div>' +
         '<div class="field"><label class="label" for="quote">In a sentence, what would you tell a friend about it?</label><textarea id="quote" rows="1" data-rbind="quote">' + esc(q.quote) + '</textarea></div>' +
         '<button class="switch" role="switch" aria-checked="' + q.ok + '" data-act="quoteok"><span><b>Happy for Stuart to share that</b><span class="hint">With your first name only.</span></span><span class="track"></span></button></div>' +
-        '<div class="spacer"></div><button class="btn" data-act="savereflect" ' + (q.next ? '' : 'disabled') + '>Save my look back</button></section>';
+        '<div class="spacer"></div><button class="btn" data-act="savereflect" ' + (q.next ? '' : 'disabled') + '>Save my look back</button><button class="link center" data-go="share">Share that I did it</button></section>';
       return h;
     },
     science: function () {
@@ -429,10 +423,10 @@
       if (user) h += '<div class="card soft small"><b style="font-weight:600">You’re a founding tester.</b><span>Thank you for helping shape this. Anything confusing or brilliant, tell Stuart.</span></div>';
       // View
       h += '<div class="card"><span class="eyebrow">How it looks</span><div class="choices">' +
-        '<button class="choice" data-view="full" aria-pressed="' + (s.view === 'full') + '"><b>Full</b><small>Everything on one page</small></button>' +
-        '<button class="choice" data-view="focus" aria-pressed="' + (s.view === 'focus') + '"><b>Focus</b><small>Just today’s one thing</small></button></div>' +
+        '<button class="choice" data-view="full" aria-pressed="' + (s.view === 'full') + '"><b>Detailed</b><small>Examples, tips and your full progress on show</small></button>' +
+        '<button class="choice" data-view="focus" aria-pressed="' + (s.view === 'focus') + '"><b>Simple</b><small>Just the essentials, calmer screens</small></button></div>' +
         '<span class="label">Text size</span><div class="chips">' + [['standard', 'Standard'], ['large', 'Large'], ['larger', 'Larger']].map(function (o) { return '<button class="chip" data-text="' + o[0] + '" aria-pressed="' + (s.text === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>' +
-        (s.view === 'focus' ? '<p class="hint">Focus keeps screens still and calm.</p>' : '<button class="switch" role="switch" aria-checked="' + !!s.calm + '" data-toggle="calm"><span><b>Less movement</b><span class="hint">Calmer screens, no animation.</span></span><span class="track"></span></button>') +
+        (s.view === 'focus' ? '<p class="hint">Simple keeps screens still and calm.</p>' : '<button class="switch" role="switch" aria-checked="' + !!s.calm + '" data-toggle="calm"><span><b>Less movement</b><span class="hint">Calmer screens, no animation.</span></span><span class="track"></span></button>') +
         '<button class="switch" role="switch" aria-checked="' + !!s.buzz + '" data-toggle="buzz"><span><b>Buzz when I tick</b><span class="hint">On phones that support it.</span></span><span class="track"></span></button></div>';
       // Reminders
       h += '<div class="card" id="reminders"><span class="eyebrow">Morning nudge</span>' + (user || !sb || !authChecked ? '' : '<div class="card soft small" style="padding:12px 14px"><b style="font-weight:600">Sign in to get your nudge</b><span>Nudges come from your account, so they only reach you once you’re signed in.</span><button class="chip" data-account="settings" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Sign in</button></div>') +
@@ -448,8 +442,7 @@
       if (focusMode) h += '<details class="ask"><summary>More settings</summary><div style="display:flex;flex-direction:column;gap:22px">';
       // Habit
       if (S.habit) h += '<div class="card"><span class="eyebrow">My habit</span><b style="font-weight:600;font-size:18px">' + esc(habitName()) + '</b>' +
-        '<button class="btn outline" data-go="plan">See my plan</button>' +
-        '<button class="btn outline" data-edit="settings">Edit my habit and words</button>' +
+        '<button class="btn outline" data-go="plan">My plan</button>' +
         '<button class="btn outline" data-length="settings">Length: ' + S.habit.length + ' days</button>' +
         '<button class="link" data-act="newhabit">Start a new habit</button></div>';
       // Install
@@ -465,16 +458,17 @@
         '</div>' + (focusMode ? '</div></details>' : '') + '<button class="link center" data-go="science">The science behind it</button>' + '<a class="link center tlr-link" href="https://www.motivate-coaching.com/thelivingroom" target="_blank" rel="noopener">About The Living Room (TLR) <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a>' + '</section>';
       return h;
     },
-    edit: function () {
+    edit: function () { ui.planEdit = true; return planEditor(); },
+    _editform: function () {
       var h = S.habit;
-      var w = '<section class="screen"><h1>Edit my habit</h1>' +
+      var w = '<section class="screen"><div><div class="eyebrow">My plan</div><h1>Change your plan</h1></div>' +
         '<div class="field"><label class="label" for="ewhat">' + (h.mode === 'less' ? 'I’m cutting back on...' : 'I’m going to...') + '</label><textarea id="ewhat" rows="1" data-hbind="what">' + esc(h.what) + '</textarea></div>' +
         '<div class="field"><label class="label" for="edim">On a tough day, I’ll...</label><textarea id="edim" rows="1" data-hbind="dimmer">' + esc(h.dimmer) + '</textarea></div>' +
         (h.mode === 'less' ? '<div class="field"><label class="label" for="einst">When it pulls at me, I’ll...</label><textarea id="einst" rows="1" data-hbind="instead">' + esc(h.instead) + '</textarea></div>' : '') +
         '<span class="label">' + (h.mode === 'less' ? 'What I’m moving towards' : 'How I’ll feel') + '</span><div class="chips">';
       (h.mode === 'less' ? GAINS : FEELINGS).forEach(function (f) { w += '<button class="chip" data-hfeel="' + esc(f) + '" aria-pressed="' + (h.feel.indexOf(f) >= 0) + '">' + esc(f) + '</button>'; });
       return w + '</div><div class="field"><label class="label" for="eown">My own words</label><textarea id="eown" rows="1" data-hbind="ownFeel" placeholder="Separate with commas">' + esc(h.ownFeel) + '</textarea></div>' +
-        '<div class="spacer"></div><button class="btn" data-back="1">Done</button></section>';
+        '<div class="spacer"></div><button class="btn" data-act="planeditdone">Done</button></section>';
     },
     install: function () {
       var ios = isIOS(), android = /android/i.test(navigator.userAgent), phone = ios || android, after = ui.installFrom === 'tracker';
@@ -509,7 +503,7 @@
     var t = todayNum(), L = S.habit.length, e = S.entries[t], less = S.habit.mode === 'less';
     var h = '<section class="screen focus"><div class="row" style="justify-content:flex-end;margin-bottom:-12px"><button class="plan-link" data-go="plan">' + iconPlan() + 'My plan</button></div><h1 style="text-align:center">' + esc(habitName()) + '</h1>' + ring(t, L) +
       '<p class="hint" style="text-align:center;margin-top:-12px">' + (t > L ? 'All ' + L + ' days done' : 'Day ' + t + ' of ' + L) + '</p>';
-    if (t > L) h += '<div class="big"><button class="btn" data-go="reflect">Start my look back</button></div>';
+    if (t > L) h += '<div class="big"><button class="btn" data-go="reflect">Start my look back</button><button class="link center" data-go="share">Share that I did it</button></div>';
     else if (!e) h += '<div class="big">' + showUpButtons(true) + '</div>' +
       '<div class="plan">' + iconDown('#888880', 32) + '<div><small>Tough day? A lighter version counts</small><b>' + esc(S.habit.dimmer) + '</b></div></div>';
     else h += '<div class="done"><span class="bigstar"></span><span class="msg">' + esc(doneMsg(e)) + '</span><button data-go="note">' + (e.note ? 'Edit note' : 'Note') + '</button></div>' + nextNudge();
@@ -588,7 +582,7 @@
   // Ask their name once, right after they choose to begin (skipped if we already know it).
   function askNameThen(next) {
     ui.afterName = next;
-    if (firstName() || S.nameAsked) return go(next);
+    if (firstName() || S.nameAsked) return go(S.viewChosen ? next : 'viewpick');
     return go('name');
   }
   function nameDone(skip) {
@@ -596,6 +590,7 @@
     S.nameAsked = true;
     if (!skip && v) { saveName(v); toast('Lovely to meet you, ' + v + '.'); }
     else save(false);
+    if (!S.viewChosen) return go('viewpick');
     go(ui.afterName || 'what');
   }
   function firstName() { return (S.settings.name || '').trim() || guessName(); }
@@ -632,7 +627,7 @@
     if (s === 'tracker' && !S.habit) s = 'landing';
     var focus = S.settings.view === 'focus';
     document.documentElement.classList.toggle('focus-mode', focus);
-    document.querySelectorAll('#viewbar [data-view]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.view === S.settings.view)); });
+
     view.innerHTML = screens[s]();
     backBtn.classList.toggle('ghost', !BACK[s]);
     settingsBtn.classList.toggle('ghost', !S.habit || s === 'settings' || ['what', 'less', 'feel', 'dimmer'].indexOf(s) >= 0);
@@ -640,7 +635,7 @@
     if (s === 'words') startSphere();
     window.scrollTo(0, 0);
   }
-  function go(s) { S.screen = s; save(false); render(); }
+  function go(s) { if (s !== S.screen) ui.planEdit = false; S.screen = s; save(false); render(); }
   function goBack() { var b = BACK[S.screen]; if (typeof b === 'function') b = b(); go(b || (S.habit ? 'tracker' : 'landing')); }
   function grow(t) { t.style.height = 'auto'; t.style.height = Math.max(t.scrollHeight + 3, 58) + 'px'; }
 
@@ -1017,25 +1012,24 @@
     var g = c.getContext('2d'), t = todayNum(), L = S.habit.length;
     g.fillStyle = '#0F1215'; g.fillRect(0, 0, W, H);
     try { var logo = await loadImg('logo-white.png'); g.drawImage(logo, W - 80 - 160, 80, 160, 160 * logo.height / logo.width); } catch (e) {}
-    g.fillStyle = '#EDE8DF'; g.font = '600 34px Poppins, sans-serif'; g.fillText(('Day ' + Math.min(t, L) + ' of ' + L).toUpperCase(), 80, 140);
+    g.fillStyle = '#EDE8DF'; g.font = '600 34px Poppins, sans-serif'; g.fillText((L + '-day challenge').toUpperCase(), 80, 140);
     g.fillStyle = '#FFFFFF'; g.font = '400 88px "Playfair Display", Georgia, serif';
     var lines = wrap(g, habitName(), W - 160), y = 330; lines.slice(0, 3).forEach(function (l) { g.fillText(l, 80, y); y += 100; });
     var cols = 10, gap = 18, size = (W - 160 - gap * (cols - 1)) / cols; y += 20;
     for (var n = 1; n <= L; n++) {
       var col = (n - 1) % cols, row = Math.floor((n - 1) / cols), x = 80 + col * (size + gap), yy = y + row * (size + gap), e = S.entries[n];
       g.beginPath(); g.arc(x + size / 2, yy + size / 2, size / 2, 0, Math.PI * 2);
-      if (e) { g.fillStyle = '#F5F1EB'; g.fill(); if (e.comeback) { g.lineWidth = 6; g.strokeStyle = '#C9930A'; g.stroke(); } }
+      if (e) { g.fillStyle = '#C9930A'; g.fill(); }
       else if (n < t) { g.lineWidth = 2; g.strokeStyle = '#1C2B3A'; g.stroke(); }
       else { g.fillStyle = '#1C2B3A'; g.fill(); }
     }
     y += Math.ceil(L / cols) * (size + gap) + 60;
-    g.fillStyle = '#EDE8DF'; g.font = '500 38px Poppins, sans-serif';
-    g.fillText(count(function () { return true; }) + ' show-ups  ·  ' + count(function (x) { return x.comeback; }) + ' comebacks', 80, y);
-    var e = S.entries[t];
-    if (ui.shareNote && e && e.note) { g.fillStyle = '#FFFFFF'; g.font = '400 40px Poppins, sans-serif'; y += 80; wrap(g, '“' + e.note + '”', W - 160).slice(0, 4).forEach(function (l) { g.fillText(l, 80, y); y += 54; }); }
+    var days = Math.min(t, L), shown = count(function (x, k) { return k <= L; }), pct = Math.round(shown / Math.max(1, days) * 100);
+    g.fillStyle = '#FFFFFF'; g.font = '600 120px Poppins, sans-serif'; g.fillText(pct + '%', 80, y + 60);
+    g.fillStyle = '#EDE8DF'; g.font = '500 40px Poppins, sans-serif'; g.fillText('Showed up ' + shown + ' of ' + days + ' days', 80, y + 130);
     var blob = await new Promise(function (r) { c.toBlob(r, 'image/png'); });
     var file = new File([blob], 'my-progress.png', { type: 'image/png' });
-    var text = 'Day ' + Math.min(t, L) + ' of ' + L + ': ' + habitName();
+    var text = habitName() + ': showed up ' + count(function (x, k) { return k <= L; }) + ' of ' + Math.min(t, L) + ' days.';
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try { await navigator.share({ files: [file], text: text }); } catch (err) { /* cancelled */ }
     } else {
@@ -1155,12 +1149,12 @@
     if (d.hfeel) { var hf = S.habit.feel.indexOf(d.hfeel); hf >= 0 ? S.habit.feel.splice(hf, 1) : S.habit.feel.push(d.hfeel); save(); b.setAttribute('aria-pressed', hf < 0); return; }
     if (d.len) { if (S.habit) S.habit.length = +d.len; else S.draft.length = +d.len; save(); return render(); }
     if (d.length) { ui.returnTo = d.length; return go('length'); }
-    if (d.edit) { ui.returnTo = d.edit; return go('edit'); }
+    if (d.edit) { ui.planEdit = true; return go('plan'); }
     if (d.idea) { S.draft.what = IDEAS[+d.idea][0]; ui.ideasOpen = false; save(false); return render(); }
     if (d.words) { ui.wordsFrom = d.words; return go('words'); }
     if (d.account) { ui.returnTo = d.account; return go('account'); }
     if (d.tick) { var from = d.from || (S.screen === 'ready' ? 'ready' : 'tracker'); return tick(d.tick, from); }
-    if (d.view) { if (S.settings.view !== d.view) { S.settings.view = d.view; save(); toast(d.view === 'focus' ? 'Focus view: just the one thing.' : 'Full view: everything in one place.'); } return render(); }
+    if (d.view) { if (S.settings.view !== d.view) { S.settings.view = d.view; save(); toast(d.view === 'focus' ? 'Simple view on.' : 'Detailed view on.'); if (S.screen === 'viewpick') { S.viewChosen = true; save(false); return go(ui.afterName || 'what'); } } return render(); }
     if (d.text) { S.settings.text = d.text; applyComfort(); save(); return render(); }
     if (d.toggle) {
       if (d.toggle === 'email' && !user) { ui.returnTo = 'settings'; return go('account'); }
@@ -1186,7 +1180,7 @@
         var ex = extra(); ex.worked = (ex.worked || []).concat([{ q: ui.struggleQ || '', a: wv.trim(), at: new Date().toISOString() }]); save(); ui.struggleSaved = true; return render(); }
       case 'sharenote': ui.shareNote = !ui.shareNote; return render();
       case 'shareimg': return void shareImage();
-      case 'whatsapp': { var tt = Math.min(todayNum(), S.habit.length); window.open('https://wa.me/?text=' + encodeURIComponent('Day ' + tt + ' of ' + S.habit.length + ': ' + habitName() + '. ' + count(function () { return true; }) + ' show-ups so far.'), '_blank', 'noopener'); return; }
+      case 'whatsapp': { var tt = Math.min(todayNum(), S.habit.length); window.open('https://wa.me/?text=' + encodeURIComponent(habitName() + ': I showed up ' + count(function (x, k) { return k <= S.habit.length; }) + ' of ' + tt + ' days.'), '_blank', 'noopener'); return; }
       case 'fb3send': { var v3 = (document.getElementById('fb3') || {}).value || ''; void feedback('day3', v3.trim() || '(nothing)'); toast('Thank you. Stuart reads every one.'); return render(); }
       case 'fb3skip': S.fb.day3 = true; save(); return render();
       case 'installno': S.installDismissed = true; save(); return render();
@@ -1198,6 +1192,8 @@
       case 'push': return void togglePush();
       case 'quoteok': ui.reflect.ok = !ui.reflect.ok; return render();
       case 'savereflect': return void saveReflect();
+      case 'planedit': ui.planEditFrom = S.screen; ui.planEdit = true; if (S.screen !== 'ready') return go('plan'); return render();
+      case 'planeditdone': ui.planEdit = false; save(); toast('Plan updated.'); return render();
       case 'newhabit': return confirmSheet('Start a new habit?', 'Your current habit and its ticks are kept in your account, just put away.', 'Start a new habit', function () {
         if (S.habit) { S.habit.status = 'archived'; save(); if (user) void syncAll().then(function () { resetForNew(); }); else resetForNew(); } else resetForNew();
       });
@@ -1266,13 +1262,14 @@
     swap: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>',
     when: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>'
   };
+  function planEditor() { return screens._editform(); }
   // The plan: their own answers, laid out simply, each one editable.
   function planCard(from) {
     var h = S.habit, less = h.mode === 'less', s = S.settings;
     var row = function (icon, label, body, edit) {
       return '<div class="prow"><span class="pic">' + icon + '</span><div class="pbody"><small>' + label + '</small>' + body + '</div>' + edit + '</div>';
     };
-    var ed = '<button class="pedit" data-edit="' + from + '">Edit</button>';
+    var ed = '<button class="pedit" data-act="planedit">Edit</button>';
     var chips = '<div class="pchips">' + words().map(function (w, i) { return '<span' + (i === 0 ? ' class="first"' : '') + '>' + esc(w.toLowerCase()) + '</span>'; }).join('') + '</div>';
     var out = '<div class="plancard">' +
       row(PICON.what, less ? 'I’m cutting back on' : 'I’m going to', '<b>' + esc(h.what) + '</b>', ed) +
@@ -1374,7 +1371,7 @@
 
   // ── Boot ──────────────────────────────────────────────────────────────────
   applyComfort();
-  if (S.habit && ['landing', 'what', 'less', 'feel', 'dimmer', 'find', 'name'].indexOf(S.screen) >= 0) S.screen = 'tracker';
+  if (S.habit && ['landing', 'what', 'less', 'feel', 'dimmer', 'find', 'name', 'viewpick'].indexOf(S.screen) >= 0) S.screen = 'tracker';
   if (!S.habit && ['tracker', 'note', 'share', 'slipped', 'reflect', 'edit', 'settings'].indexOf(S.screen) >= 0) S.screen = 'landing';
   if (['account', 'install', 'length', 'words'].indexOf(S.screen) >= 0) S.screen = S.habit ? 'tracker' : 'landing';
   if (S.habit && ['ready', 'plan', 'settings', 'science', 'share', 'note', 'slipped'].indexOf(S.screen) >= 0) S.screen = 'tracker';
