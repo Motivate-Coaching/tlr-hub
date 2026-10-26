@@ -226,21 +226,16 @@
   var screens = {
     landing: function () {
       return '<section class="screen landing">' +
-        '<h1>Build a habit that sticks.</h1>' +
+        '<div class="hero"><h1>Build a habit that sticks.</h1>' +
         '<p class="sub">Or break one that doesn’t.</p>' +
-        '<p class="sub2">One minute to set up, one tap a day.</p>' +
-        '<div class="full-only">' + todayCard('Morning walk', 'Day 12 · Felt proud', true, true) + '</div>' +
-        '<ul class="points full-only">' +
-        '<li><b>Plan for the tough days</b><span>One bad day never ends it.</span></li>' +
-        '<li><b>Miss a day, lose nothing</b><span>Nothing resets. Comebacks count.</span></li>' +
-        '<li><b>See it working</b><span>A morning nudge, then one quick tick.</span></li>' +
-        '</ul>' +
-        '<div class="spacer"></div><div class="btns"><button class="btn" data-start="more">Build a habit</button>' +
+        '<p class="sub2">One minute to set up, one tap a day.</p></div>' +
+        '<div class="btns"><button class="btn" data-start="more">Build a habit</button>' +
         '<button class="btn outline" data-start="less">Break a habit</button>' +
-        '<button class="btn findbtn" data-find="start"><span>Not sure what to try? <b>Help me choose</b></span></button></div>' +
-        '<p class="byline">No sign-up to start. Created by Stuart Fairbairns PCC, using <button class="link inline" data-go="science">proven behaviour science</button>. <a class="link inline" href="privacy.html">Privacy</a></p>' +
-        (user ? '' : '<button class="link center" data-account="landing" style="margin-top:-12px">Already started? Sign in</button>') +
-        (isStandalone() ? '' : '<button class="link center getapp" data-act="install">' + phoneIcon() + 'Put the app on my phone</button>') + '</section>';
+        '<button class="link center" data-find="start">Not sure what to try? <b>Help me choose</b></button></div>' +
+        '<div class="spacer"></div>' +
+        '<p class="foot">' + (user ? '' : '<button class="link inline" data-account="landing">Sign in</button> · ') +
+        (isStandalone() ? '' : '<button class="link inline" data-act="install">Get the app</button> · ') +
+        '<button class="link inline" data-go="science">How it works</button> · <a class="link inline" href="privacy.html">Privacy</a></p></section>';
     },
     what: function () {
       var d = S.draft, more = d.mode === 'more';
