@@ -87,7 +87,7 @@ function emailHtml(o: { day: number; length: number; what: string; dimmer: strin
     <p style="margin:0;font-family:'Playfair Display',Georgia,serif;font-size:19px;line-height:1.4;color:#1A1A1A;text-align:center;">${esc(o.line)}</p>
   </td></tr>
   <tr><td style="background:#EDE8DF;border-radius:0 0 10px 10px;padding:18px 32px;text-align:center;">
-    <p style="margin:0;font-size:12px;color:#4A4A4A;line-height:1.7;">You chose this nudge. Change the time, pick quiet days or pause it any time in <a href="${APP_URL}" style="color:#0F1215;">Settings</a>.<br>© ${year} Motivate Coaching</p>
+    <p style="margin:0;font-size:12px;color:#4A4A4A;line-height:1.7;">You chose this nudge. Change the time, pick quiet days or pause it any time in <a href="${APP_URL}" style="color:#0F1215;">Settings</a>. <a href="${APP_URL}privacy.html" style="color:#0F1215;">Privacy</a><br>© ${year} Motivate Coaching</p>
   </td></tr>
 </table></td></tr></table></body></html>`
 }

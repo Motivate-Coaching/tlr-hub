@@ -1,14 +1,13 @@
 /* Show Up: habit tracker web app (pilot).
    Works signed out first (saved on this device), then saves to Supabase once signed in.
-   Same Supabase project as TLR Hub; the anon key is public by design. */
+   Its own Supabase project (Show Up, London), separate from the TLR Hub; the anon key is public by design. */
 (function () {
   'use strict';
 
   // ── Config ────────────────────────────────────────────────────────────────
-  var SUPABASE_URL = 'https://tsusrzkpzevpiuvsppls.supabase.co';
-  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzdXNyemtwemV2cGl1dnNwcGxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3NDAzMzUsImV4cCI6MjEwMTMxNjMzNX0.UQD9BaOjYWNOEVeV3QCF2sdlNc9SYJ2PrcZgpCtlQ8s';
-  // Public half of the phone-notification key pair (the private half lives only in Supabase secrets).
-  var VAPID_PUBLIC = 'BHJYn9pn53bnDmtHCvr-ysfBqueL-9zH4_0hvmPRvgpEBhfLeNxBeuBOSgCKiGzar2NOPyghfanKgdud1DbxjOk';
+  var SUPABASE_URL = 'https://ycxmhilwaixfwiedkkzj.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InljeG1oaWx3YWl4ZndpZWRra3pqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5ODY1MjUsImV4cCI6MjEwODU2MjUyNX0.XRe4jBt4RYwwnAxwnSmVVGf_DtEiHn7yasgk6Rfb3tU';
+  // The phone-notification key pair is made and kept by the server; the app asks for the public half when needed.
   var KEY = 'showup-v1';
   var ADMIN_EMAIL = 'stuart.fairbairns@gmail.com';
 
@@ -205,7 +204,7 @@
 
   // ── Screens ───────────────────────────────────────────────────────────────
   var BACK = {
-    what: function () { return S.draft.found ? 'find' : 'landing'; }, name: 'landing', wins: 'tracker', less: 'feel',
+    what: function () { return S.draft.found ? 'find' : 'landing'; }, name: 'landing', viewpick: function () { return S.nameAsked ? 'landing' : 'name'; }, wins: 'tracker', less: 'feel',
     find: function () { var f = S.find || {}; if (f.step > 0) { f.step--; save(false); return 'find'; } return 'landing'; }, feel: 'what', dimmer: function () { return S.draft.mode === 'less' ? 'less' : 'feel'; },
     length: function () { return ui.returnTo || 'ready'; }, note: 'tracker', slipped: 'tracker', share: 'tracker', science: function () { return S.habit ? 'settings' : 'landing'; },
     words: function () { return ui.wordsFrom || 'tracker'; }, settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', install: function () { return ui.installFrom || (S.habit ? 'settings' : 'landing'); }, account: function () { return ui.returnTo || 'tracker'; }
@@ -231,8 +230,8 @@
         '</ul>' +
         '<div class="spacer"></div><div class="btns"><button class="btn" data-start="more">Build a habit</button>' +
         '<button class="btn outline" data-start="less">Break a habit</button>' +
-        '<button class="btn findbtn" data-find="start"><span>Not sure what to focus on? <b>Find my focus</b></span></button></div>' +
-        '<p class="byline">No sign-up to start. Created by Stuart Fairbairns PCC, using <button class="link inline" data-go="science">proven behaviour science</button>.</p>' +
+        '<button class="btn findbtn" data-find="start"><span>Not sure what to try? <b>Help me choose</b></span></button></div>' +
+        '<p class="byline">No sign-up to start. Created by Stuart Fairbairns PCC, using <button class="link inline" data-go="science">proven behaviour science</button>. <a class="link inline" href="privacy.html">Privacy</a></p>' +
         (user ? '' : '<button class="link center" data-account="landing" style="margin-top:-12px">Already started? Sign in</button>') +
         (isStandalone() ? '' : '<button class="link center getapp" data-act="install">' + phoneIcon() + 'Put the app on my phone</button>') + '</section>';
     },
@@ -285,6 +284,7 @@
         '<div class="spacer"></div>' + stepButton('dimmer') + '</section>';
     },
     ready: function () {
+      if (ui.planEdit) return planEditor();
       var ticked = !!S.entries[1];
       var h = '<section class="screen"><div><div class="eyebrow">Your plan is ready</div><h1>Here’s your plan.</h1></div>' + planCard('ready');
       if (!ticked) {
@@ -297,18 +297,18 @@
           '<span><b>You showed up on day one' + (e.felt && e.felt !== 'Honestly, tough' ? '. ' + esc(e.felt) : '') + '.</b> You’ve started, and that’s the hardest bit.</span></div>';
       }
       if (!user && (ticked || S.later)) {
-        h += '<div class="card"><b style="font-size:18px;font-weight:600">Keep your progress safe</b><span style="color:var(--text-mid)">Sign in so nothing is lost, your morning nudge can find you, and you can use it on any device.</span>' +
-          '<button class="btn outline" data-account="ready">Save to my account</button></div>';
+        h += '<div class="card"><b style="font-size:18px;font-weight:600">Save your progress</b><span style="color:var(--text-mid)">Add your email so your morning nudge can find you and nothing gets lost. No password needed.</span>' +
+          '<button class="btn outline" data-account="ready">Save my progress</button></div>';
       }
       h += (firstName() ? '' : '<div class="field"><label class="label" for="pname">What should we call you?</label><textarea id="pname" rows="1" data-name="1" autocomplete="given-name" placeholder="Your first name"></textarea></div>') +
         nextNudge() +
-        '<div class="spacer"></div><button class="btn" data-act="readydone">Go to my tracker</button><button class="link center full-only" data-words="ready">See my words</button></section>';
+        '<div class="spacer"></div><button class="btn" data-act="readydone">Go to my tracker</button></section>';
       return h;
     },
     plan: function () {
       if (!S.habit) return screens.landing();
+      if (ui.planEdit) return planEditor();
       return '<section class="screen"><div><div class="eyebrow">My plan</div><h1>' + esc(habitName()) + '</h1></div>' + planCard('plan') +
-        '<p class="hint">Change anything, any time. Your ticks stay as they are.</p>' +
         '<div class="spacer"></div><button class="btn" data-go="tracker">Back to my tracker</button></section>';
     },
     length: function () {
@@ -333,7 +333,7 @@
       h += '<div class="card" style="padding:16px">' + gridHTML(t, true) + '<div class="legend"><span><i style="background:var(--navy)"></i>Showed up</span><span><span class="star"></span>Got back up</span></div><p class="hint" style="margin:0">Tap any day to fill it in or add a note.</p></div>';
       h += catchUpCard(t);
       if (t > L) {
-        h += '<div class="card"><b style="font-size:20px;font-weight:600">You gave it ' + L + ' days.</b><span style="color:var(--text-mid)">Time for your look back: what you noticed, and what’s next. Your call.</span><button class="btn" data-go="reflect">Start my look back</button></div>';
+        h += '<div class="card"><b style="font-size:20px;font-weight:600">You gave it ' + L + ' days.</b><span style="color:var(--text-mid)">Time for your look back: what you noticed, and what’s next. Your call.</span><button class="btn" data-go="reflect">Start my look back</button><button class="link center" data-go="share">Share that I did it</button></div>';
       } else if (!e) {
         h += showUpButtons();
       } else {
@@ -342,14 +342,7 @@
         if (t === L && !S.fb.reflect) h += '<div class="card soft"><b style="font-weight:600">That’s your last day.</b><button class="btn" data-go="reflect">Start my look back</button></div>';
       }
       h += extraCards(t);
-      var felt = {}; Object.keys(S.entries).forEach(function (k) { var f = S.entries[k].felt; if (f && f !== 'Honestly, tough') felt[f] = (felt[f] || 0) + 1; });
-      var top = Object.keys(felt).sort(function (a, b) { return felt[b] - felt[a]; })[0];
-      h += '<div class="statline"><div><b>' + count(function () { return true; }) + '</b><small>Show-ups</small></div>' +
-        '<div><b>' + count(function (x) { return x.comeback; }) + '</b><small>Comebacks</small></div>' +
-        '<div><b>' + Math.max(0, L - t) + '</b><small>Days to go</small></div></div>' +
-        (top ? '<p class="felt-line">Most often you’ve felt <b>' + esc(top.toLowerCase()) + '</b>.</p>' : '');
-      h += '<button class="btn outline" data-go="share">Share my progress</button>' +
-        '<div class="row" style="justify-content:center;flex-wrap:wrap;gap:4px 16px"><button class="link" data-words="tracker">My words</button><button class="link" data-go="wins">My past wins</button>' + (e ? '<button class="link" data-go="slipped">I’m struggling</button>' : '') + '' +
+      h += '<div class="row" style="justify-content:center;flex-wrap:wrap;gap:4px 16px"><button class="link" data-go="wins">My past wins</button>' + (e ? '<button class="link" data-go="slipped">I’m struggling</button>' : '') +
         '</div></section>';
       return h;
     },
@@ -364,6 +357,14 @@
     slipped: function () { return struggleScreen(); },
     find: function () { return findScreen(); },
     wins: function () { return winsScreen(false); },
+    viewpick: function () {
+      var v = S.settings.view;
+      var pic = function (simple) { return '<svg width="64" height="88" viewBox="0 0 64 88" aria-hidden="true"><rect x="1" y="1" width="62" height="86" rx="8" fill="#FFFFFF" stroke="#E5DDD1" stroke-width="2"/>' + (simple ? '<rect x="12" y="20" width="40" height="5" rx="2.5" fill="#888880"/><rect x="10" y="50" width="44" height="16" rx="3" fill="#0F1215"/>' : '<rect x="10" y="10" width="36" height="5" rx="2.5" fill="#888880"/><rect x="10" y="21" width="44" height="3" rx="1.5" fill="#E5DDD1"/><rect x="10" y="28" width="40" height="3" rx="1.5" fill="#E5DDD1"/><rect x="10" y="38" width="44" height="14" rx="3" fill="#EDE8DF"/><rect x="10" y="58" width="44" height="12" rx="3" fill="#0F1215"/><rect x="10" y="75" width="30" height="3" rx="1.5" fill="#E5DDD1"/>') + '</svg>'; };
+      return '<section class="screen"><div><div class="eyebrow">Before we start</div><h1>Choose your view</h1></div>' +
+        '<p class="lede" style="margin-top:-6px">Same app either way. Change it any time in Settings.</p><div class="viewpick">' +
+        '<button class="choice vp" data-view="full" aria-pressed="' + (v === 'full') + '">' + pic(false) + '<span><b>Detailed</b><small>Examples, tips and your full progress on show</small></span></button>' +
+        '<button class="choice vp" data-view="focus" aria-pressed="' + (v === 'focus') + '">' + pic(true) + '<span><b>Simple</b><small>Just the essentials, calmer screens</small></span></button></div></section>';
+    },
     name: function () {
       return '<section class="screen"><div><div class="eyebrow">Before we start</div><h1>What should we call you?</h1></div>' +
         '<p class="lede" style="margin-top:-6px">We’ll use it when we check in with you.</p>' +
@@ -371,22 +372,14 @@
         '<div class="spacer"></div><button class="btn" data-namego="go">Continue</button><button class="link center" data-namego="skip">Skip for now</button></section>';
     },
     share: function () {
-      var t = Math.min(todayNum(), S.habit.length), e = S.entries[todayNum()] || {};
-      return '<section class="screen"><h1>Share your progress</h1><p class="lede">People who share how they’re getting on tend to keep going. This is what others will see.</p>' +
-        '<div class="sharecard" id="sharecard"><div class="head"><span class="eyebrow" style="color:var(--cream-dark)">Day ' + t + ' of ' + S.habit.length + '</span><img src="logo-white.png" alt="The Living Room (TLR), Tools for life"></div>' +
-        '<h2>' + esc(habitName()) + '</h2>' + gridHTML(todayNum()) +
-        '<div style="display:flex;gap:16px;flex-wrap:wrap;color:var(--cream-dark);font-size:14px"><span>' + count(function () { return true; }) + ' show-ups</span><span>Feeling: ' + esc(words().slice(0, 2).join(', ').toLowerCase()) + '</span></div>' +
-        (e.note && ui.shareNote ? '<div class="note">“' + esc(e.note) + '”</div>' : '') + '</div>' +
-        (e.note ? '<button class="switch" role="switch" aria-checked="' + !!ui.shareNote + '" data-act="sharenote"><span><b>Include today’s note</b><span class="hint">Off unless you choose it.</span></span><span class="track"></span></button>' : '') +
+      var L = S.habit.length, days = Math.min(todayNum(), L), n = count(function (x, k) { return k <= L; }), pct = Math.round(n / Math.max(1, days) * 100);
+      var dots = '<div class="sharedots">'; for (var i = 1; i <= L; i++) dots += '<i class="' + (S.entries[i] ? 'on' : (i <= days ? 'off' : 'ahead')) + '"></i>'; dots += '</div>';
+      return '<section class="screen"><div><div class="eyebrow">Share that I did it</div><h1>Your progress</h1></div><p class="lede">Only your habit and the days you showed up. Never your notes.</p>' +
+        '<div class="sharecard" id="sharecard"><div class="head"><span class="eyebrow" style="color:var(--cream-dark)">' + L + '-day challenge</span><img src="logo-white.png" alt="The Living Room (TLR), Tools for life"></div>' +
+        '<h2>' + esc(habitName()) + '</h2>' + dots +
+        '<div class="sharestat"><b>' + pct + '%</b><span>Showed up ' + n + ' of ' + days + ' days</span></div></div>' +
         '<button class="btn" data-act="shareimg">Share my card</button>' +
-        '<button class="btn outline" data-act="whatsapp">Send on WhatsApp</button>' +
-        '<p class="hint">To post in the Members Lounge, tap Share my card, choose Facebook, then pick the group.</p></section>';
-    },
-    words: function () {
-      var w = words();
-      var h = '<section class="screen"><h1>Your words</h1><p class="lede">Spin it with your finger. Tap any word.</p><div class="sphere" id="sphere"><button class="core" data-act="whole">' + esc(habitName()) + '</button>';
-      w.forEach(function (x, i) { h += '<button class="w" data-word="' + i + '">' + esc(x.toLowerCase()) + '</button>'; });
-      return h + '</div><div id="wordcard"></div></section>';
+        '<button class="btn outline" data-act="whatsapp">Send on WhatsApp</button></section>';
     },
     reflect: function () {
       var L = S.habit.length, n = count(function () { return true; }), next = { 10: 30, 30: 60, 60: 90 }[L];
@@ -402,7 +395,7 @@
         ['Very disappointed', 'Somewhat disappointed', 'Not disappointed'].map(function (o) { return '<button class="chip" style="text-align:left" data-rpmf="' + o + '" aria-pressed="' + (q.pmf === o) + '">' + o + '</button>'; }).join('') + '</div>' +
         '<div class="field"><label class="label" for="quote">In a sentence, what would you tell a friend about it?</label><textarea id="quote" rows="1" data-rbind="quote">' + esc(q.quote) + '</textarea></div>' +
         '<button class="switch" role="switch" aria-checked="' + q.ok + '" data-act="quoteok"><span><b>Happy for Stuart to share that</b><span class="hint">With your first name only.</span></span><span class="track"></span></button></div>' +
-        '<div class="spacer"></div><button class="btn" data-act="savereflect" ' + (q.next ? '' : 'disabled') + '>Save my look back</button></section>';
+        '<div class="spacer"></div><button class="btn" data-act="savereflect" ' + (q.next ? '' : 'disabled') + '>Save my look back</button><button class="link center" data-go="share">Share that I did it</button></section>';
       return h;
     },
     science: function () {
@@ -429,13 +422,13 @@
       if (user) h += '<div class="card soft small"><b style="font-weight:600">You’re a founding tester.</b><span>Thank you for helping shape this. Anything confusing or brilliant, tell Stuart.</span></div>';
       // View
       h += '<div class="card"><span class="eyebrow">How it looks</span><div class="choices">' +
-        '<button class="choice" data-view="full" aria-pressed="' + (s.view === 'full') + '"><b>Full</b><small>Everything on one page</small></button>' +
-        '<button class="choice" data-view="focus" aria-pressed="' + (s.view === 'focus') + '"><b>Focus</b><small>Just today’s one thing</small></button></div>' +
+        '<button class="choice" data-view="full" aria-pressed="' + (s.view === 'full') + '"><b>Detailed</b><small>Examples, tips and your full progress on show</small></button>' +
+        '<button class="choice" data-view="focus" aria-pressed="' + (s.view === 'focus') + '"><b>Simple</b><small>Just the essentials, calmer screens</small></button></div>' +
         '<span class="label">Text size</span><div class="chips">' + [['standard', 'Standard'], ['large', 'Large'], ['larger', 'Larger']].map(function (o) { return '<button class="chip" data-text="' + o[0] + '" aria-pressed="' + (s.text === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>' +
-        (s.view === 'focus' ? '<p class="hint">Focus keeps screens still and calm.</p>' : '<button class="switch" role="switch" aria-checked="' + !!s.calm + '" data-toggle="calm"><span><b>Less movement</b><span class="hint">Calmer screens, no animation.</span></span><span class="track"></span></button>') +
+        (s.view === 'focus' ? '<p class="hint">Simple keeps screens still and calm.</p>' : '<button class="switch" role="switch" aria-checked="' + !!s.calm + '" data-toggle="calm"><span><b>Less movement</b><span class="hint">Calmer screens, no animation.</span></span><span class="track"></span></button>') +
         '<button class="switch" role="switch" aria-checked="' + !!s.buzz + '" data-toggle="buzz"><span><b>Buzz when I tick</b><span class="hint">On phones that support it.</span></span><span class="track"></span></button></div>';
       // Reminders
-      h += '<div class="card" id="reminders"><span class="eyebrow">Morning nudge</span>' + (user || !sb || !authChecked ? '' : '<div class="card soft small" style="padding:12px 14px"><b style="font-weight:600">Sign in to get your nudge</b><span>Nudges come from your account, so they only reach you once you’re signed in.</span><button class="chip" data-account="settings" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Sign in</button></div>') +
+      h += '<div class="card" id="reminders"><span class="eyebrow">Morning nudge</span>' + (user || !sb || !authChecked ? '' : '<div class="card soft small" style="padding:12px 14px"><b style="font-weight:600">Add your email to get your nudge</b><span>Nudges come from your account, so they reach you once your progress is saved.</span><button class="chip" data-account="settings" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Save my progress</button></div>') +
         '<div class="field"><label class="label" for="rtime">What time?</label><input class="input" id="rtime" type="time" step="900" value="' + esc(s.time) + '" style="max-width:200px"></div>' +
         '<span class="label full-only">Which days?</span><div class="days full-only">' + DAY_NAMES.map(function (n, i) { return '<button class="chip" data-rday="' + i + '" aria-pressed="' + (s.days.indexOf(i) >= 0) + '" aria-label="' + DAY_LABELS[i] + '">' + n + '</button>'; }).join('') + '</div>' +
         '<button class="switch" role="switch" aria-checked="' + !!s.email + '" data-toggle="email"><span><b>Email</b><span class="hint">' + (user ? 'To ' + esc(user.email) : 'Sign in to switch this on') + '</span></span><span class="track"></span></button>' +
@@ -448,8 +441,7 @@
       if (focusMode) h += '<details class="ask"><summary>More settings</summary><div style="display:flex;flex-direction:column;gap:22px">';
       // Habit
       if (S.habit) h += '<div class="card"><span class="eyebrow">My habit</span><b style="font-weight:600;font-size:18px">' + esc(habitName()) + '</b>' +
-        '<button class="btn outline" data-go="plan">See my plan</button>' +
-        '<button class="btn outline" data-edit="settings">Edit my habit and words</button>' +
+        '<button class="btn outline" data-go="plan">My plan</button>' +
         '<button class="btn outline" data-length="settings">Length: ' + S.habit.length + ' days</button>' +
         '<button class="link" data-act="newhabit">Start a new habit</button></div>';
       // Install
@@ -457,22 +449,25 @@
       // Account
       h += '<div class="card"><span class="eyebrow">Account and privacy</span>' +
         '<div class="field"><label class="label" for="sname">Your first name</label><textarea id="sname" rows="1" data-name="1" autocomplete="given-name" placeholder="So we can say hello">' + esc(firstName()) + '</textarea></div>' +
-        (user ? '<span>Signed in as <b>' + esc(user.email) + '</b></span>' : '<span>Not signed in. Your progress is saved on this device only.</span><button class="btn" data-account="settings">Sign in to save</button>') +
-        '<p class="hint">Your notes are only ever seen by you. During the pilot, Stuart sees how often people show up and any feedback you send, never your notes.</p>' +
+        (user ? '<span>Signed in as <b>' + esc(user.email) + '</b></span>' : '<span>Your progress is saved on this device only.</span><button class="btn" data-account="settings">Save my progress</button>') +
+        '<p class="hint">Your notes are only ever seen by you. During the pilot, Stuart sees your habit, how often people show up and any feedback you send, never your notes.</p>' +
+        '<div class="row" style="flex-wrap:wrap;gap:8px"><button class="chip" data-act="exportdata">Download my data</button><button class="chip" data-act="deletedata">Delete my Show Up data</button></div>' +
+        '<a class="link" href="privacy.html" style="align-self:flex-start">Privacy notice</a>' +
         (user ? '<button class="switch" role="switch" aria-checked="' + !!s.marketing + '" data-toggle="marketing"><span><b>Ideas and updates from Stuart</b><span class="hint">Occasional emails. Off unless you choose.</span></span><span class="track"></span></button><button class="link" data-act="signout">Sign out</button>' : '') +
         '</div>' + (focusMode ? '</div></details>' : '') + '<button class="link center" data-go="science">The science behind it</button>' + '<a class="link center tlr-link" href="https://www.motivate-coaching.com/thelivingroom" target="_blank" rel="noopener">About The Living Room (TLR) <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a>' + '</section>';
       return h;
     },
-    edit: function () {
+    edit: function () { ui.planEdit = true; return planEditor(); },
+    _editform: function () {
       var h = S.habit;
-      var w = '<section class="screen"><h1>Edit my habit</h1>' +
+      var w = '<section class="screen"><div><div class="eyebrow">My plan</div><h1>Change your plan</h1></div>' +
         '<div class="field"><label class="label" for="ewhat">' + (h.mode === 'less' ? 'I’m cutting back on...' : 'I’m going to...') + '</label><textarea id="ewhat" rows="1" data-hbind="what">' + esc(h.what) + '</textarea></div>' +
         '<div class="field"><label class="label" for="edim">On a tough day, I’ll...</label><textarea id="edim" rows="1" data-hbind="dimmer">' + esc(h.dimmer) + '</textarea></div>' +
         (h.mode === 'less' ? '<div class="field"><label class="label" for="einst">When it pulls at me, I’ll...</label><textarea id="einst" rows="1" data-hbind="instead">' + esc(h.instead) + '</textarea></div>' : '') +
         '<span class="label">' + (h.mode === 'less' ? 'What I’m moving towards' : 'How I’ll feel') + '</span><div class="chips">';
       (h.mode === 'less' ? GAINS : FEELINGS).forEach(function (f) { w += '<button class="chip" data-hfeel="' + esc(f) + '" aria-pressed="' + (h.feel.indexOf(f) >= 0) + '">' + esc(f) + '</button>'; });
       return w + '</div><div class="field"><label class="label" for="eown">My own words</label><textarea id="eown" rows="1" data-hbind="ownFeel" placeholder="Separate with commas">' + esc(h.ownFeel) + '</textarea></div>' +
-        '<div class="spacer"></div><button class="btn" data-back="1">Done</button></section>';
+        '<div class="spacer"></div><button class="btn" data-act="planeditdone">Done</button></section>';
     },
     install: function () {
       var ios = isIOS(), android = /android/i.test(navigator.userAgent), phone = ios || android, after = ui.installFrom === 'tracker';
@@ -491,15 +486,17 @@
         '<button class="btn outline" data-back="1">Back</button>') + '</section>';
     },
     account: function () {
-      var m = ui.authMode || 'signin';
-      return '<section class="screen"><h1>' + 'Save to my account' + '</h1>' +
-        '<p class="lede">During the pilot, sign in with the email and password you use for The Living Room (TLR) Hub. Anything you’ve done on this device comes with you.</p>' +
-        '<div class="field"><label class="label" for="aemail">Email</label><input class="input" id="aemail" type="email" autocomplete="email" inputmode="email"></div>' +
-        '<div class="field"><label class="label" for="apass">Password</label><input class="input" id="apass" type="password" autocomplete="current-password"></div>' +
-        '<p class="err" id="aerr" hidden></p>' +
-        '<button class="btn" data-act="signin">Sign in</button>' +
-        '<a class="link center" href="../login.html" style="display:flex;align-items:center">Forgotten your password?</a>' +
-        '<p class="hint">Not a member yet? The pilot is for members for now. You can still use it on this device without signing in.</p></section>';
+      var priv = '<p class="hint">Saving to an account backs up your progress and lets your nudges reach you. <a href="privacy.html">How we look after your data</a></p>';
+      if (ui.authStep === 'code') return '<section class="screen"><div><div class="eyebrow">Save my progress</div><h1>Check your email</h1></div>' +
+        '<p class="lede">We’ve sent a 6-digit code to <b>' + esc(ui.authEmail) + '</b>.</p>' +
+        '<div class="field"><label class="label" for="acode">Your code</label><input class="input code" id="acode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="······"></div>' +
+        '<p class="err" id="aerr" hidden></p><button class="btn" data-act="verifycode">Sign in</button>' +
+        '<div class="row" style="justify-content:center;gap:16px"><button class="link" data-act="sendcode">Send a new code</button><button class="link" data-act="authback">Use a different email</button></div>' +
+        '<p class="hint">Can’t see it? Check your spam or promotions folder.</p></section>';
+      return '<section class="screen"><div><div class="eyebrow">Save my progress</div><h1>Sign in or create your account</h1></div>' +
+        '<p class="lede">Just your email. We’ll send you a 6-digit code, so there’s no password to remember.</p>' +
+        '<div class="field"><label class="label" for="aemail">Email</label><input class="input" id="aemail" type="email" autocomplete="email" inputmode="email" value="' + esc(ui.authEmail || '') + '"></div>' +
+        '<p class="err" id="aerr" hidden></p><button class="btn" data-act="sendcode">Send my code</button>' + priv + '</section>';
     }
   };
 
@@ -507,7 +504,7 @@
     var t = todayNum(), L = S.habit.length, e = S.entries[t], less = S.habit.mode === 'less';
     var h = '<section class="screen focus"><div class="row" style="justify-content:flex-end;margin-bottom:-12px"><button class="plan-link" data-go="plan">' + iconPlan() + 'My plan</button></div><h1 style="text-align:center">' + esc(habitName()) + '</h1>' + ring(t, L) +
       '<p class="hint" style="text-align:center;margin-top:-12px">' + (t > L ? 'All ' + L + ' days done' : 'Day ' + t + ' of ' + L) + '</p>';
-    if (t > L) h += '<div class="big"><button class="btn" data-go="reflect">Start my look back</button></div>';
+    if (t > L) h += '<div class="big"><button class="btn" data-go="reflect">Start my look back</button><button class="link center" data-go="share">Share that I did it</button></div>';
     else if (!e) h += '<div class="big">' + showUpButtons(true) + '</div>' +
       '<div class="plan">' + iconDown('#888880', 32) + '<div><small>Tough day? A lighter version counts</small><b>' + esc(S.habit.dimmer) + '</b></div></div>';
     else h += '<div class="done"><span class="bigstar"></span><span class="msg">' + esc(doneMsg(e)) + '</span><button data-go="note">' + (e.note ? 'Edit note' : 'Note') + '</button></div>' + nextNudge();
@@ -586,7 +583,7 @@
   // Ask their name once, right after they choose to begin (skipped if we already know it).
   function askNameThen(next) {
     ui.afterName = next;
-    if (firstName() || S.nameAsked) return go(next);
+    if (firstName() || S.nameAsked) return go(S.viewChosen ? next : 'viewpick');
     return go('name');
   }
   function nameDone(skip) {
@@ -594,6 +591,7 @@
     S.nameAsked = true;
     if (!skip && v) { saveName(v); toast('Lovely to meet you, ' + v + '.'); }
     else save(false);
+    if (!S.viewChosen) return go('viewpick');
     go(ui.afterName || 'what');
   }
   function firstName() { return (S.settings.name || '').trim() || guessName(); }
@@ -630,7 +628,7 @@
     if (s === 'tracker' && !S.habit) s = 'landing';
     var focus = S.settings.view === 'focus';
     document.documentElement.classList.toggle('focus-mode', focus);
-    document.querySelectorAll('#viewbar [data-view]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.view === S.settings.view)); });
+
     view.innerHTML = screens[s]();
     backBtn.classList.toggle('ghost', !BACK[s]);
     settingsBtn.classList.toggle('ghost', !S.habit || s === 'settings' || ['what', 'less', 'feel', 'dimmer'].indexOf(s) >= 0);
@@ -638,7 +636,7 @@
     if (s === 'words') startSphere();
     window.scrollTo(0, 0);
   }
-  function go(s) { S.screen = s; save(false); render(); }
+  function go(s) { if (s !== S.screen) ui.planEdit = false; S.screen = s; save(false); render(); }
   function goBack() { var b = BACK[S.screen]; if (typeof b === 'function') b = b(); go(b || (S.habit ? 'tracker' : 'landing')); }
   function grow(t) { t.style.height = 'auto'; t.style.height = Math.max(t.scrollHeight + 3, 58) + 'px'; }
 
@@ -688,21 +686,12 @@
     var el = document.createElement('div');
     el.className = 'celebrate'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'You showed up today');
     el.innerHTML = confettiHTML(60) + '<div class="burst"><span class="ring"></span><div class="disc"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div></div>' +
-      '<div><div class="t">' + title + '</div><div class="s">' + sub + '</div></div><div id="ask"></div>';
+      '<div><div class="t">' + title + '</div><div class="s">' + sub + '</div></div><p class="tapon">Tap to carry on</p>';
     app.appendChild(el);
-    setTimeout(function () {
-      var ask = el.querySelector('#ask'); if (!ask) return;
-      var h = '<div class="ask"><span class="eyebrow">How did it feel?</span><div class="chips" style="justify-content:center">';
-      words().slice(0, 3).concat(['Honestly, tough']).forEach(function (w) { h += '<button class="chip" data-felt="' + esc(w) + '">' + esc(w) + '</button>'; });
-      ask.innerHTML = h + '</div><button class="skip" data-felt="">Skip</button></div>';
-      var first = ask.querySelector('button'); if (first) first.focus({ preventScroll: true });
-    }, isCalm() ? 300 : 1400);
-    el.addEventListener('click', function (ev) {
-      var b = ev.target.closest('[data-felt]'); if (!b) return;
-      if (b.dataset.felt) S.entries[t].felt = b.dataset.felt;
-      save(); el.remove();
-      if (from === 'slipped') go('tracker'); else render();
-    });
+    // Celebrate, then get out of the way: closes itself, or on a tap.
+    var closed = false, close = function () { if (closed) return; closed = true; el.remove(); if (from === 'slipped') go('tracker'); else render(); };
+    el.addEventListener('click', close);
+    setTimeout(close, isCalm() ? 2200 : 3200);
   }
 
   // ── One day, opened from the grid ─────────────────────────────────────────
@@ -786,12 +775,12 @@
 
   // ── Not signed in: nudges can't reach you ─────────────────────────────────
   function signInCard() {
-    if (user || !sb || !authChecked) return '';
-    return '<div class="card soft small"><b style="font-weight:600">Your morning nudge can’t reach you yet</b><span>Sign in with your TLR Hub email and password so it can find you, and so your progress is kept safe.</span>' +
-      '<button class="chip" data-account="tracker" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Sign in</button></div>';
+    if (user || !sb || !authChecked || S.signinLater === todayStr() || (S.habit && todayNum() < 2)) return '';
+    return '<div class="card soft small"><b style="font-weight:600">Save your progress?</b><span>Add your email and your nudges can reach you, and nothing gets lost.</span>' +
+      '<div class="row" style="gap:12px;justify-content:flex-start"><button class="chip" data-account="tracker" style="background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Save my progress</button><button class="link" data-act="signinlater" style="font-size:14px">Not now</button></div></div>';
   }
 
-  // ── Find my focus ─────────────────────────────────────────────────────────
+  // ── Help me choose ─────────────────────────────────────────────────────────
   // Open questions first (their words), then they choose one thing, then why one thing matters.
   var HORIZONS = [['30', '30 days'], ['90', 'three months'], ['365', 'a year']];
   function horizonLabel() { var f = S.find || {}, h = HORIZONS.filter(function (x) { return x[0] === f.horizon; })[0] || HORIZONS[1]; return h[1]; }
@@ -832,7 +821,7 @@
     var f = S.find || (S.find = { step: 0, answers: {} }), qs = FIND_QS();
     if (f.step < qs.length) {
       var q = qs[f.step], v = f.answers[q.key] || '';
-      return '<section class="screen"><div><div class="eyebrow">Find my focus · ' + (f.step + 1) + ' of ' + (qs.length + 1) + '</div><h1 class="findq">' + esc(q.q) + '</h1></div>' +
+      return '<section class="screen"><div><div class="eyebrow">Help me choose · ' + (f.step + 1) + ' of ' + (qs.length + 1) + '</div><h1 class="findq">' + esc(q.q) + '</h1></div>' +
         (f.step === 0 ? '<div class="chips" role="group" aria-label="How far ahead"><span class="label" style="width:100%">Looking back from</span>' + HORIZONS.map(function (x) { return '<button class="chip" data-horizon="' + x[0] + '" aria-pressed="' + ((f.horizon || '90') === x[0]) + '">' + (x[0] === '30' ? '30 days' : x[0] === '90' ? '3 months' : 'A year') + '</button>'; }).join('') + '</div>' : '') +
         '<p class="hint" style="margin-top:-8px">' + esc(q.hint) + '</p>' +
         '<div class="field"><textarea id="findans" rows="3" style="min-height:120px" placeholder="Write whatever comes. Only you see this.">' + esc(v) + '</textarea>' + micButton() + '</div>' +
@@ -842,8 +831,9 @@
     if (f.step === qs.length) return winsScreen(true);
     if (f.step === qs.length + 1) {
       var picks = qs.filter(function (q) { return (f.answers[q.key] || '').trim(); });
-      var h = '<section class="screen"><div><div class="eyebrow">Find my focus</div><h1>Here’s what you said.</h1></div>' +
-        '<p class="lede">Read it back. Which one gives you a little jolt? That’s usually the one. Try something again, or push yourself with something new.</p><div style="display:flex;flex-direction:column;gap:10px">';
+      var h = '<section class="screen"><div><div class="eyebrow">Help me choose</div><h1>Here’s what you said.</h1></div>' +
+        '<p class="lede">Read it back. Which one gives you a little jolt? That’s usually the one. Try something again, or push yourself with something new.</p>' + aiCard(f, picks.length + (S.wins || []).length) + '<div style="display:flex;flex-direction:column;gap:10px">';
+      if (f.ai && f.ai.options && f.ai.options.length) h += '<span class="eyebrow">In your own words</span>';
       picks.forEach(function (q) { h += '<button class="choice findpick" data-find="pick" data-key="' + q.key + '" aria-pressed="' + (f.pick === q.key) + '"><small>' + esc(q.q.replace(/^Imagine it’s [^.?]*? looking back\. /, '')) + '</small><b>' + esc(f.answers[q.key].trim()) + '</b></button>'; });
       var wins = S.wins || [];
       if (!picks.length && !wins.length) h += '<div class="card soft small"><span>Nothing written yet, and that’s fine. Go back and jot down a few words, or name your focus below.</span></div>';
@@ -852,23 +842,54 @@
         wins.forEach(function (w) { h += '<button class="choice findpick" data-find="pick" data-key="win:' + w.id + '" aria-pressed="' + (f.pick === 'win:' + w.id) + '"><small>' + esc(OUTCOME[w.outcome] || 'Done before') + '</small><b>' + esc(w.name) + '</b></button>'; });
       }
       h += '<button class="choice findpick" data-find="pick" data-key="own" aria-pressed="' + (f.pick === 'own') + '"><b>Something else</b><small>I know what it is now.</small></button></div>';
-      return h + '<div class="spacer"></div><button class="btn" data-find="chosen"' + (f.pick ? '' : ' disabled') + '>This is my focus</button></section>';
+      return h + '<div class="spacer"></div><button class="btn" data-find="chosen"' + (f.pick ? '' : ' disabled') + '>This is the one</button></section>';
     }
     if (f.step === qs.length + 2) {
       var big = f.pick === 'own' ? '' : pickText(f);
-      return '<section class="screen"><div><div class="eyebrow">Find my focus</div><h1>Make it something you can do most days.</h1></div>' +
-        (big ? '<div class="why"><span class="eyebrow">Your focus</span><span style="font-weight:600">' + esc(big) + '</span></div>' : '<div class="field"><label class="label" for="findbig">What’s your focus?</label><textarea id="findbig" rows="1" placeholder="In your words">' + esc(f.own || '') + '</textarea></div>') +
+      return '<section class="screen"><div><div class="eyebrow">Help me choose</div><h1>Make it something you can do most days.</h1></div>' +
+        (big ? '<div class="why"><span class="eyebrow">What you’re working towards</span><span style="font-weight:600">' + esc(big) + '</span></div>' : '<div class="field"><label class="label" for="findbig">What do you want to work on?</label><textarea id="findbig" rows="1" placeholder="In your words">' + esc(f.own || '') + '</textarea></div>') +
         '<div class="field"><label class="label" for="finddo">What could you do most days that moves you towards it?</label><textarea id="finddo" rows="1" placeholder="Something small enough to do on a busy day">' + esc(f.daily || '') + '</textarea></div>' +
         optional('Show me examples', '<div class="card small"><span>Speak better? <b>Read one page out loud a day.</b></span><span>Get fitter? <b>A 20-minute walk before work.</b></span><span>Calmer? <b>Five slow breaths before I open my phone.</b></span><span>Write the book? <b>200 words, first thing.</b></span></div>') +
         '<div class="spacer"></div><button class="btn" data-find="daily">Next</button></section>';
     }
-    return '<section class="screen"><div><div class="eyebrow">Find my focus</div><h1>One thing. On purpose.</h1></div>' +
+    return '<section class="screen"><div><div class="eyebrow">Help me choose</div><h1>One thing. On purpose.</h1></div>' +
       '<p class="lede">The word priority came into English in the 1400s, and for about 500 years it was singular. The one thing that came first. We only started saying priorities in the 1900s. If everything’s a priority, nothing is.</p>' +
       '<div class="why"><span class="eyebrow">Why one thing works</span><span>One focus, done most days, compounds. Small on its own, big over 30 days.</span><span>Some days will be tough. That’s part of it, and you’ve got a plan for those.</span><span>And underneath the habit, you’re building a skill: patience, focus, trusting yourself. Like wax on, wax off. It looks like painting the fence, and you’re learning karate.</span></div>' +
       '<div class="why"><span class="eyebrow">You chose</span><span style="font-weight:600">' + esc(f.daily || '') + '</span>' + (f.big ? '<span class="soft" style="font-size:14px">Towards: ' + esc(f.big) + '</span>' : '') + '</div>' +
       '<div class="spacer"></div><button class="btn" data-find="go">Let’s set it up</button></section>';
   }
+  // ── "What I'm hearing": an AI reflection of their own words (signed in, a few a day) ──
+  function aiCard(f, n) {
+    if (!n || !sb) return '';
+    if (f.ai && f.ai.care) return '<div class="why"><span class="eyebrow">Before anything else</span><span>' + esc(f.ai.care) + '</span></div>';
+    if (f.ai && f.ai.heard) {
+      var h = '<div class="card heard"><span class="eyebrow">What I’m hearing</span><p>' + esc(f.ai.heard) + '</p>' +
+        (f.ai.themes && f.ai.themes.length ? '<div class="chips">' + f.ai.themes.map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('') + '</div>' : '') + '</div>';
+      if (f.ai.options && f.ai.options.length) {
+        h += '<span class="eyebrow">Ideas from what you wrote</span><div style="display:flex;flex-direction:column;gap:10px">';
+        f.ai.options.forEach(function (o, i) { h += '<button class="choice findpick" data-find="pick" data-key="ai:' + i + '" aria-pressed="' + (f.pick === 'ai:' + i) + '"><b>' + esc(o.focus) + '</b><small>' + esc(o.why) + '</small></button>'; });
+        h += '</div>';
+      }
+      return h;
+    }
+    if (!user) return authChecked ? '<div class="card soft small"><b style="font-weight:600">Want a reflection on what you wrote?</b><span>Sign in and the app will read it back to you, picking out what seems to matter most.</span><button class="chip" data-account="find" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Sign in</button></div>' : '';
+    return '<div class="card soft"><b style="font-weight:600">Want a second pair of eyes?</b><span>Tap below and the app will read back what you wrote, spot what seems to matter most, and suggest a few things you could try for your next 30 days.</span><span class="hint">Private, and nothing is kept. <a href="privacy.html">How it works</a></span>' +
+      '<button class="btn outline" data-act="reflectai"' + (ui.aiBusy ? ' disabled' : '') + '>' + (ui.aiBusy ? 'Reading what you wrote…' : 'Reflect it back to me') + '</button></div>';
+  }
+  async function reflectAI() {
+    var f = S.find; if (!f || !sb || !user || ui.aiBusy) return;
+    ui.aiBusy = true; render();
+    try {
+      var r = await sb.functions.invoke('showup-reflect', { body: { answers: f.answers, wins: (S.wins || []).map(function (w) { return { name: w.name, outcome: w.outcome }; }), horizon: horizonLabel() } });
+      if (r.error) {
+        var st = r.error.context && r.error.context.status;
+        toast(st === 429 ? 'That’s today’s reflections used. Your own words below work just as well.' : 'Couldn’t reach it just now. Try again in a moment.');
+      } else if (r.data && (r.data.heard || r.data.care)) { f.ai = r.data; save(false); }
+    } catch (e) { toast('Couldn’t reach it just now. Try again in a moment.'); }
+    ui.aiBusy = false; render();
+  }
   function pickText(f) {
+    if (f.pick && f.pick.indexOf('ai:') === 0) { var o = f.ai && f.ai.options[+f.pick.slice(3)]; return o ? o.focus : ''; }
     if (f.pick && f.pick.indexOf('win:') === 0) { var w = (S.wins || []).filter(function (x) { return x.id === f.pick.slice(4); })[0]; return w ? w.name : ''; }
     return (f.answers[f.pick] || '').trim();
   }
@@ -880,7 +901,7 @@
   function syncWins() { if (S.habit) extra().wins = (S.wins || []).slice(); save(); }
   function winsScreen(inFind) {
     var wins = S.wins || [], did = wins.filter(function (w) { return w.outcome === 'did'; }).length, qs = FIND_QS();
-    var h = '<section class="screen"><div><div class="eyebrow">' + (inFind ? 'Find my focus · ' + (qs.length + 1) + ' of ' + (qs.length + 1) : 'My past wins') + '</div><h1 class="findq">' + (inFind ? 'What have you taken on before?' : 'Things you’ve taken on') + '</h1></div>' +
+    var h = '<section class="screen"><div><div class="eyebrow">' + (inFind ? 'Help me choose · ' + (qs.length + 1) + ' of ' + (qs.length + 1) : 'My past wins') + '</div><h1 class="findq">' + (inFind ? 'What have you taken on before?' : 'Things you’ve taken on') + '</h1></div>' +
       '<p class="hint" style="margin-top:-8px">A 30-day challenge, giving something up, learning a skill. Big or small, it all counts, even the ones that didn’t stick.</p>';
     if (wins.length) {
       h += '<div class="winlist">';
@@ -929,7 +950,7 @@
     if (a === 'next') { findSave(); f.step++; save(false); return go('find'); }
     if (a === 'skip') { f.step++; save(false); return go('find'); }
     if (a === 'pick') { f.pick = b.dataset.key; save(false); return render(); }
-    if (a === 'chosen') { if (!f.pick) return; f.step = qs.length + 2; save(false); return go('find'); }
+    if (a === 'chosen') { if (!f.pick) return; if (f.pick.indexOf('ai:') === 0 && f.ai && !f.daily) { var ao = f.ai.options[+f.pick.slice(3)]; if (ao && ao.daily) f.daily = ao.daily; } f.step = qs.length + 2; save(false); return go('find'); }
     if (a === 'daily') {
       var big = f.pick === 'own' ? ((document.getElementById('findbig') || {}).value || '').trim() : pickText(f);
       var daily = ((document.getElementById('finddo') || {}).value || '').trim();
@@ -992,25 +1013,24 @@
     var g = c.getContext('2d'), t = todayNum(), L = S.habit.length;
     g.fillStyle = '#0F1215'; g.fillRect(0, 0, W, H);
     try { var logo = await loadImg('logo-white.png'); g.drawImage(logo, W - 80 - 160, 80, 160, 160 * logo.height / logo.width); } catch (e) {}
-    g.fillStyle = '#EDE8DF'; g.font = '600 34px Poppins, sans-serif'; g.fillText(('Day ' + Math.min(t, L) + ' of ' + L).toUpperCase(), 80, 140);
+    g.fillStyle = '#EDE8DF'; g.font = '600 34px Poppins, sans-serif'; g.fillText((L + '-day challenge').toUpperCase(), 80, 140);
     g.fillStyle = '#FFFFFF'; g.font = '400 88px "Playfair Display", Georgia, serif';
     var lines = wrap(g, habitName(), W - 160), y = 330; lines.slice(0, 3).forEach(function (l) { g.fillText(l, 80, y); y += 100; });
     var cols = 10, gap = 18, size = (W - 160 - gap * (cols - 1)) / cols; y += 20;
     for (var n = 1; n <= L; n++) {
       var col = (n - 1) % cols, row = Math.floor((n - 1) / cols), x = 80 + col * (size + gap), yy = y + row * (size + gap), e = S.entries[n];
       g.beginPath(); g.arc(x + size / 2, yy + size / 2, size / 2, 0, Math.PI * 2);
-      if (e) { g.fillStyle = '#F5F1EB'; g.fill(); if (e.comeback) { g.lineWidth = 6; g.strokeStyle = '#C9930A'; g.stroke(); } }
+      if (e) { g.fillStyle = '#C9930A'; g.fill(); }
       else if (n < t) { g.lineWidth = 2; g.strokeStyle = '#1C2B3A'; g.stroke(); }
       else { g.fillStyle = '#1C2B3A'; g.fill(); }
     }
     y += Math.ceil(L / cols) * (size + gap) + 60;
-    g.fillStyle = '#EDE8DF'; g.font = '500 38px Poppins, sans-serif';
-    g.fillText(count(function () { return true; }) + ' show-ups  ·  ' + count(function (x) { return x.comeback; }) + ' comebacks', 80, y);
-    var e = S.entries[t];
-    if (ui.shareNote && e && e.note) { g.fillStyle = '#FFFFFF'; g.font = '400 40px Poppins, sans-serif'; y += 80; wrap(g, '“' + e.note + '”', W - 160).slice(0, 4).forEach(function (l) { g.fillText(l, 80, y); y += 54; }); }
+    var days = Math.min(t, L), shown = count(function (x, k) { return k <= L; }), pct = Math.round(shown / Math.max(1, days) * 100);
+    g.fillStyle = '#FFFFFF'; g.font = '600 120px Poppins, sans-serif'; g.fillText(pct + '%', 80, y + 60);
+    g.fillStyle = '#EDE8DF'; g.font = '500 40px Poppins, sans-serif'; g.fillText('Showed up ' + shown + ' of ' + days + ' days', 80, y + 130);
     var blob = await new Promise(function (r) { c.toBlob(r, 'image/png'); });
     var file = new File([blob], 'my-progress.png', { type: 'image/png' });
-    var text = 'Day ' + Math.min(t, L) + ' of ' + L + ': ' + habitName();
+    var text = habitName() + ': showed up ' + count(function (x, k) { return k <= L; }) + ' of ' + Math.min(t, L) + ' days.';
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try { await navigator.share({ files: [file], text: text }); } catch (err) { /* cancelled */ }
     } else {
@@ -1036,7 +1056,7 @@
       var perm = await Notification.requestPermission();
       if (perm !== 'granted') { toast('No problem. You can switch it on later in your browser settings.'); return render(); }
       var reg2 = swReg || await navigator.serviceWorker.ready;
-      var sub2 = await reg2.pushManager.getSubscription() || await reg2.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(VAPID_PUBLIC) });
+      var sub2 = await reg2.pushManager.getSubscription() || await reg2.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(await vapidKey()) });
       var j = sub2.toJSON();
       var r = await sb.from('showup_push_subscriptions').upsert({ endpoint: j.endpoint, user_id: user.id, p256dh: j.keys.p256dh, auth: j.keys.auth }, { onConflict: 'endpoint' });
       if (r.error) throw r.error;
@@ -1100,7 +1120,8 @@
     if (t.id === 'finddo' && S.find) { S.find.daily = t.value; save(false); }
     if (t.id === 'findbig' && S.find) { S.find.own = t.value; save(false); }
   });
-  view.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.id === 'firstname') { e.preventDefault(); nameDone(false); } });
+  view.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.id === 'firstname') { e.preventDefault(); nameDone(false); } if (e.key === 'Enter' && e.target.id === 'aemail') { e.preventDefault(); void sendCode(); } if (e.key === 'Enter' && e.target.id === 'acode') { e.preventDefault(); void verifyCode(); } });
+  view.addEventListener('input', function (e) { if (e.target.id === 'acode' && e.target.value.replace(/\D/g, '').length === 6) void verifyCode(); });
   view.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.dataset && e.target.dataset.name) { e.preventDefault(); e.target.blur(); } });
   view.addEventListener('change', function (e) {
     if (e.target.dataset && e.target.dataset.name) { e.target.value = e.target.value.replace(/\s+/g, ' ').trim(); saveName(e.target.value); if (e.target.value.trim()) toast('Lovely to meet you, ' + e.target.value.trim() + '.'); return; }
@@ -1130,12 +1151,16 @@
     if (d.hfeel) { var hf = S.habit.feel.indexOf(d.hfeel); hf >= 0 ? S.habit.feel.splice(hf, 1) : S.habit.feel.push(d.hfeel); save(); b.setAttribute('aria-pressed', hf < 0); return; }
     if (d.len) { if (S.habit) S.habit.length = +d.len; else S.draft.length = +d.len; save(); return render(); }
     if (d.length) { ui.returnTo = d.length; return go('length'); }
-    if (d.edit) { ui.returnTo = d.edit; return go('edit'); }
+    if (d.edit) { ui.planEdit = true; return go('plan'); }
     if (d.idea) { S.draft.what = IDEAS[+d.idea][0]; ui.ideasOpen = false; save(false); return render(); }
     if (d.words) { ui.wordsFrom = d.words; return go('words'); }
     if (d.account) { ui.returnTo = d.account; return go('account'); }
     if (d.tick) { var from = d.from || (S.screen === 'ready' ? 'ready' : 'tracker'); return tick(d.tick, from); }
-    if (d.view) { if (S.settings.view !== d.view) { S.settings.view = d.view; save(); toast(d.view === 'focus' ? 'Focus view: just the one thing.' : 'Full view: everything in one place.'); } return render(); }
+    if (d.view) {
+      if (S.screen === 'viewpick') { S.settings.view = d.view; S.viewChosen = true; save(); return go(ui.afterName || 'what'); }
+      if (S.settings.view !== d.view) { S.settings.view = d.view; save(); toast(d.view === 'focus' ? 'Simple view on.' : 'Detailed view on.'); }
+      return render();
+    }
     if (d.text) { S.settings.text = d.text; applyComfort(); save(); return render(); }
     if (d.toggle) {
       if (d.toggle === 'email' && !user) { ui.returnTo = 'settings'; return go('account'); }
@@ -1156,11 +1181,12 @@
       case 'morechips': ui.moreChips = true; return render();
       case 'undo': delete S.entries[todayNum()]; recomputeComebacks(); save(); toast('Undone.'); return render();
       case 'catchdone': { var cd = catchDays(todayNum()); S.catchup = (S.catchup || []).concat(cd); save(false); return render(); }
+      case 'reflectai': return void reflectAI();
       case 'saveworked': { var wv = (document.getElementById('worked') || {}).value || ''; if (!wv.trim()) { toast('Write a few words first, or skip it.'); return; }
         var ex = extra(); ex.worked = (ex.worked || []).concat([{ q: ui.struggleQ || '', a: wv.trim(), at: new Date().toISOString() }]); save(); ui.struggleSaved = true; return render(); }
       case 'sharenote': ui.shareNote = !ui.shareNote; return render();
       case 'shareimg': return void shareImage();
-      case 'whatsapp': { var tt = Math.min(todayNum(), S.habit.length); window.open('https://wa.me/?text=' + encodeURIComponent('Day ' + tt + ' of ' + S.habit.length + ': ' + habitName() + '. ' + count(function () { return true; }) + ' show-ups so far.'), '_blank', 'noopener'); return; }
+      case 'whatsapp': { var tt = Math.min(todayNum(), S.habit.length); window.open('https://wa.me/?text=' + encodeURIComponent(habitName() + ': I showed up ' + count(function (x, k) { return k <= S.habit.length; }) + ' of ' + tt + ' days.'), '_blank', 'noopener'); return; }
       case 'fb3send': { var v3 = (document.getElementById('fb3') || {}).value || ''; void feedback('day3', v3.trim() || '(nothing)'); toast('Thank you. Stuart reads every one.'); return render(); }
       case 'fb3skip': S.fb.day3 = true; save(); return render();
       case 'installno': S.installDismissed = true; save(); return render();
@@ -1172,10 +1198,18 @@
       case 'push': return void togglePush();
       case 'quoteok': ui.reflect.ok = !ui.reflect.ok; return render();
       case 'savereflect': return void saveReflect();
+      case 'planedit': ui.planEditFrom = S.screen; ui.planEdit = true; if (S.screen !== 'ready') return go('plan'); return render();
+      case 'planeditdone': ui.planEdit = false; save(); toast('Plan updated.'); return render();
       case 'newhabit': return confirmSheet('Start a new habit?', 'Your current habit and its ticks are kept in your account, just put away.', 'Start a new habit', function () {
         if (S.habit) { S.habit.status = 'archived'; save(); if (user) void syncAll().then(function () { resetForNew(); }); else resetForNew(); } else resetForNew();
       });
       case 'signin': return void doSignIn();
+      case 'sendcode': return void sendCode();
+      case 'verifycode': return void verifyCode();
+      case 'authback': ui.authStep = null; return render();
+      case 'signinlater': S.signinLater = todayStr(); save(false); return render();
+      case 'exportdata': return exportData();
+      case 'deletedata': return confirmSheet('Delete your Show Up data?', 'This deletes your habit, show-ups, notes, past wins and settings from this device' + (user ? ', and deletes your account' : '') + '. It can’t be undone.', 'Delete my data', function () { void deleteData(); });
       case 'signout': return void (async function () { await sb.auth.signOut(); user = null; S = fresh(); save(false); applyComfort(); go('landing'); })();
     }
   });
@@ -1197,7 +1231,7 @@
       '<div class="lbl"><b>' + n + '</b><small>show-up' + (n === 1 ? '' : 's') + '</small></div></div>';
   }
   function nextNudge() {
-    var s = S.settings; if (!user && sb && authChecked) return signInCard(); if (!(s.email || s.push)) return '';
+    var s = S.settings; if (!user && sb) return ''; if (!(s.email || s.push)) return '';
     return '<p class="next-up">' + iconClock('#888880') + '<span>What happens next: <b>your nudge arrives tomorrow at ' + esc(fmtTime(s.time)) + '</b>. Change it any time in Settings.</span></p>';
   }
 
@@ -1219,11 +1253,11 @@
     var st = kind === 'ios' ? [
       [visBar(IV.share), 'Tap Share', 'The square with an arrow. On newer iPhones, tap ··· first.'],
       [visMenu(IV.plus, 'Add to Home Screen'), 'Tap Add to Home Screen', 'Scroll down a little if you can’t see it.'],
-      [visHome(), 'Open it and sign in', 'Same email and password as the TLR Hub.']
+      [visHome(), 'Open it and sign in', 'Sign in with your email to bring your progress.']
     ] : [
       [visBar(IV.dots, true), 'Tap the three dots', 'Top right in Chrome.'],
       [visMenu(IV.down, 'Install app'), 'Tap Install app', 'Some phones say Add to Home screen.'],
-      [visHome(), 'Open it and sign in', 'Same email and password as the TLR Hub.']
+      [visHome(), 'Open it and sign in', 'Sign in with your email to bring your progress.']
     ];
     var h = '<ol class="isteps">';
     st.forEach(function (x, i) { h += '<li class="istep">' + x[0] + '<div class="itxt"><span class="inum">' + (i + 1) + '</span><b>' + x[1] + '</b><small class="full-only">' + x[2] + '</small></div></li>'; });
@@ -1238,13 +1272,14 @@
     swap: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>',
     when: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>'
   };
+  function planEditor() { return screens._editform(); }
   // The plan: their own answers, laid out simply, each one editable.
   function planCard(from) {
     var h = S.habit, less = h.mode === 'less', s = S.settings;
     var row = function (icon, label, body, edit) {
       return '<div class="prow"><span class="pic">' + icon + '</span><div class="pbody"><small>' + label + '</small>' + body + '</div>' + edit + '</div>';
     };
-    var ed = '<button class="pedit" data-edit="' + from + '">Edit</button>';
+    var ed = '<button class="pedit" data-act="planedit">Edit</button>';
     var chips = '<div class="pchips">' + words().map(function (w, i) { return '<span' + (i === 0 ? ' class="first"' : '') + '>' + esc(w.toLowerCase()) + '</span>'; }).join('') + '</div>';
     var out = '<div class="plancard">' +
       row(PICON.what, less ? 'I’m cutting back on' : 'I’m going to', '<b>' + esc(h.what) + '</b>', ed) +
@@ -1290,6 +1325,26 @@
   }
   function resetForNew() { S.habit = null; S.entries = {}; S.fb = {}; S.later = false; S.draft = fresh().draft; save(); go('landing'); }
 
+  // ── Your data: download and delete ────────────────────────────────────────
+  function exportData() {
+    var out = { exported: new Date().toISOString(), app: 'Show Up', account: user ? user.email : null, name: S.settings.name || '', habit: S.habit, entries: S.entries, pastWins: S.wins || [], settings: S.settings };
+    var blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'show-up-my-data.json';
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    toast('Downloaded.');
+  }
+  async function deleteData() {
+    try {
+      if (user && sb) {
+        var uid = user.id, r;
+        var d = await sb.functions.invoke('showup-code', { body: { action: 'delete' } });
+        if (d.error) throw d.error;
+        await sb.auth.signOut(); user = null;
+      }
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      S = fresh(); save(false); applyComfort(); go('landing'); toast('Deleted. Your Show Up data is gone.');
+    } catch (e) { toast('Couldn’t delete just now. Please try again, or email stuart@motivate-coaching.com.'); }
+  }
   function confirmSheet(title, body, yes, fn) {
     var el = document.createElement('div'); el.className = 'sheet-bg';
     el.innerHTML = '<div class="sheet" role="dialog" aria-label="' + esc(title) + '"><b style="font-size:20px;font-weight:600">' + esc(title) + '</b><p class="hint">' + esc(body) + '</p><button class="btn" data-c="yes">' + esc(yes) + '</button><button class="link center" data-c="no">Cancel</button></div>';
@@ -1310,6 +1365,44 @@
     toast('Saved. Well done for giving it a proper go.'); go('tracker');
   }
 
+  async function vapidKey() { var r = await sb.functions.invoke('showup-code', { body: { action: 'vapid' } }); if (r.error || !r.data || !r.data.key) throw new Error('no key'); return r.data.key; }
+  async function codeCall(body) {
+    var r = await sb.functions.invoke('showup-code', { body: body });
+    if (r.error) { var j = {}; try { j = await r.error.context.json(); } catch (e) {} return { error: j.error || 'network', left: j.left }; }
+    return r.data || {};
+  }
+  async function sendCode() {
+    var el = document.getElementById('aemail'), err = document.getElementById('aerr'), email = ((el && el.value) || ui.authEmail || '').trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { if (err) { err.textContent = 'That email doesn’t look quite right.'; err.hidden = false; } return; }
+    var btn = view.querySelector('[data-act="sendcode"]'); if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+    var r = await codeCall({ action: 'send', email: email });
+    if (r.error) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Send my code'; }
+      var msg = r.error === 'wait' ? 'Code just sent. Give it a moment, then check your inbox.' : r.error === 'too_many' ? 'That’s a few codes in a row. Try again in an hour.' : 'Couldn’t send just now. Please try again.';
+      if (ui.authStep === 'code') return toast(msg);
+      if (err) { err.textContent = msg; err.hidden = false; } return;
+    }
+    ui.authEmail = email; ui.authStep = 'code'; render(); toast('Code sent to ' + email + '.');
+    var c = document.getElementById('acode'); if (c) c.focus();
+  }
+  async function verifyCode() {
+    var c = document.getElementById('acode'), err = document.getElementById('aerr'), code = ((c && c.value) || '').replace(/\D/g, '');
+    if (code.length !== 6) { err.textContent = 'The code is 6 numbers.'; err.hidden = false; return; }
+    var btn = view.querySelector('[data-act="verifycode"]'); btn.disabled = true; btn.textContent = 'Checking…';
+    var r = await codeCall({ action: 'verify', email: ui.authEmail, code: code });
+    if (r.error || !r.token_hash) {
+      btn.disabled = false; btn.textContent = 'Sign in';
+      err.textContent = r.error === 'wrong' ? 'That code didn’t match.' + (r.left ? ' ' + r.left + ' tries left.' : '') : r.error === 'expired' ? 'That code has run out. Tap “Send a new code”.' : r.error === 'too_many' ? 'Too many tries. Tap “Send a new code”.' : 'Couldn’t sign in just now. Please try again.';
+      err.hidden = false; return;
+    }
+    var v = await sb.auth.verifyOtp({ token_hash: r.token_hash, type: 'email' });
+    if (v.error) { btn.disabled = false; btn.textContent = 'Sign in'; err.textContent = 'Couldn’t sign in just now. Please try again.'; err.hidden = false; return; }
+    user = v.data.user; ui.authStep = null; authChecked = true;
+    if (S.settings.name && !(user.user_metadata && user.user_metadata.first_name)) saveName(S.settings.name);
+    await pullRemote(); await syncAll();
+    toast(r.isNew ? 'You’re in. Your progress is saved.' : 'Welcome back. You’re signed in.');
+    go(S.habit ? (ui.returnTo && ui.returnTo !== 'landing' ? ui.returnTo : 'tracker') : 'landing');
+  }
   async function doSignIn() {
     var email = (document.getElementById('aemail').value || '').trim(), pass = document.getElementById('apass').value || '', err = document.getElementById('aerr');
     if (!email || !pass) { err.textContent = 'Pop in your email and password.'; err.hidden = false; return; }
@@ -1324,8 +1417,9 @@
 
   // ── Boot ──────────────────────────────────────────────────────────────────
   applyComfort();
-  if (S.habit && ['landing', 'what', 'less', 'feel', 'dimmer', 'find', 'name'].indexOf(S.screen) >= 0) S.screen = 'tracker';
+  if (S.habit && ['landing', 'what', 'less', 'feel', 'dimmer', 'find', 'name', 'viewpick'].indexOf(S.screen) >= 0) S.screen = 'tracker';
   if (!S.habit && ['tracker', 'note', 'share', 'slipped', 'reflect', 'edit', 'settings'].indexOf(S.screen) >= 0) S.screen = 'landing';
+  ui.authStep = null;
   if (['account', 'install', 'length', 'words'].indexOf(S.screen) >= 0) S.screen = S.habit ? 'tracker' : 'landing';
   if (S.habit && ['ready', 'plan', 'settings', 'science', 'share', 'note', 'slipped'].indexOf(S.screen) >= 0) S.screen = 'tracker';
   render();
