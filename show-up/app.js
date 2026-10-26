@@ -51,6 +51,13 @@
       fb: {}, later: false, installDismissed: false, updatedAt: 0
     };
   }
+  // Start fresh (for trying the app as a brand-new person): open the app with ?fresh in the link.
+  // Clears this device and signs out here. Nothing saved to an account is deleted.
+  var FRESH = /[?&]fresh\b/.test(location.search);
+  if (FRESH) {
+    try { Object.keys(localStorage).forEach(function (k) { if (k === KEY || k.indexOf('sb-') === 0) localStorage.removeItem(k); }); } catch (e) {}
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+  }
   var S = fresh();
   try { var saved = JSON.parse(localStorage.getItem(KEY) || 'null'); if (saved && typeof saved === 'object') { S = Object.assign(fresh(), saved); S.settings = Object.assign(fresh().settings, saved.settings || {}); S.draft = Object.assign(fresh().draft, saved.draft || {}); } } catch (e) {}
   var user = null; // signed-in Supabase user
