@@ -390,6 +390,14 @@ details.ask .isteps { margin-top: 10px; }
 .sharestat { display: flex; align-items: baseline; gap: 12px; color: var(--cream-dark); }
 .sharestat b { font-size: 44px; font-weight: 600; color: var(--white); line-height: 1; }
 .input.code { font-size: 28px; letter-spacing: 0.3em; font-weight: 600; max-width: 240px; }
+/* Landing: just the essentials */
+.landing { min-height: calc(100dvh - 72px - env(safe-area-inset-top, 0px)); }
+.landing .hero { margin-top: 10vh; display: flex; flex-direction: column; gap: 10px; }
+.landing .btns { margin-top: 28px; }
+.landing .btns .link { font-size: 15px; font-weight: 400; margin-top: 6px; }
+.landing .btns .link b { font-weight: 600; text-decoration: underline; }
+.landing .foot { margin: 0; text-align: center; font-size: 14px; color: var(--muted); }
+.landing .foot .link { font-size: 14px; font-weight: 500; color: var(--text-mid); }
 </style>
 </head>
 <body>
@@ -402,6 +410,6 @@ details.ask .isteps { margin-top: 10px; }
   <main id="view"></main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=20261026e"></script>
+<script src="app.js?v=20261026f"></script>
 </body>
 </html>
