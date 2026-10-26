@@ -13,7 +13,7 @@ const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const VAPID_PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY') || ''
 const VAPID_PUBLIC_KEY = 'BHJYn9pn53bnDmtHCvr-ysfBqueL-9zH4_0hvmPRvgpEBhfLeNxBeuBOSgCKiGzar2NOPyghfanKgdud1DbxjOk'
 
-const FROM = 'Stuart Fairbairns <stuart@motivate-coaching.com>'
+const FROM = 'TLR Show Up <stuart@motivate-coaching.com>'
 const APP_URL = 'https://motivate-coaching.github.io/tlr-hub/show-up/'
 const LOGO_URL = 'https://motivate-coaching.github.io/tlr-hub/email/tlr-logo-email.png'
 const WINDOW_MINS = 60 // send any time in the hour after their chosen time, once

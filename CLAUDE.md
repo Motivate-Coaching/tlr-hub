@@ -72,8 +72,8 @@ Tables created with raw SQL need explicit GRANTs, including for service_role whe
 ## Edge functions and schedules
 
 - session-reminders: TLR session reminder emails (1 hour and 24 hours before), run by pg_cron every 30 minutes.
-- showup-reminders: Show Up morning nudges by email (Resend, from stuart@motivate-coaching.com) and web push, run by pg_cron every 15 minutes. Sends once per person per day (showup_reminder_log), only to people with a profile row, so a person must be signed in inside Show Up to get nudges.
-- showup-reflect: the "What I'm hearing" reflection in Find my focus. Signed-in users only, 5 a day each (counted in app_metadata.showup_ai), Claude Haiku via forced tool output, nothing stored.
+- showup-reminders: Show Up morning nudges by email (Resend, from "TLR Show Up" <stuart@motivate-coaching.com>) and web push, run by pg_cron every 15 minutes. Sends once per person per day (showup_reminder_log), only to people with a profile row, so a person must be signed in inside Show Up to get nudges.
+- showup-reflect: the "What I'm hearing" reflection in Help me choose. Signed-in users only, 5 a day each (counted in app_metadata.showup_ai), Claude Haiku via forced tool output, nothing stored.
 - Secret names (values live only in Supabase secrets): RESEND_API_KEY, VAPID_PRIVATE_KEY, ANTHROPIC_API_KEY. The VAPID public key in show-up/app.js and the function is public by design.
 
 ## Show Up (habit app, show-up/)
