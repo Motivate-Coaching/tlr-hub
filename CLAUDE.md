@@ -66,7 +66,7 @@ Other pages: index.html (resource library), dashboard.html, login.html, reset-pa
 - tool_snapshots: named version history. RLS: own rows only, authenticated role.
 - activity_log: page views and events. RLS: own rows, plus Stuart's email can read all.
 - values_responses: public Values Discovery submissions. Anyone can insert; nobody can update; only Stuart's email can read. Email is not unique, so retakes add a new row.
-- showup_profiles, showup_habits, showup_entries, showup_push_subscriptions, showup_feedback, showup_reminder_log: see Show Up below.
+- Old showup_* tables in this project are from the first pilot week and are no longer used; Show Up now has its own project (see Show Up below).
 Tables created with raw SQL need explicit GRANTs, including for service_role when an Edge Function reads them.
 
 ## Edge functions and schedules
@@ -78,10 +78,10 @@ Tables created with raw SQL need explicit GRANTs, including for service_role whe
 
 ## Show Up (habit app, show-up/)
 
-A separate product from TLR, piloted with TLR members as founding testers. Planned price $9.99 a month or $59.99 a year. "Show Up" is a working name.
+A separate product from TLR, with its own Supabase project: Show Up, ref ycxmhilwaixfwiedkkzj (eu-west-2 London, free plan, same organisation). Its migrations live in show-up/supabase/migrations and its Edge Functions in show-up/supabase/functions (showup-code: email-code sign-in, account deletion, and the server-made phone-notification key; showup-reminders; showup-reflect). Secrets in that project: RESEND_API_KEY, ANTHROPIC_API_KEY. Anyone can sign up: email, then a 6-digit code, no password. Piloted with TLR members and a few others as founding testers. Planned price $9.99 a month or $59.99 a year. "Show Up" is a working name.
 
 - Files: show-up/index.html (shell and all CSS), app.js (all logic, one IIFE), sw.js (service worker, network-first cache), manifest.webmanifest, icons/, qr.svg, logo-white.png, stuart.jpg. When app.js changes, bump app.js?v= in index.html and the CACHE name and shell entry in sw.js together.
-- State lives in localStorage key showup-v1 and syncs to Supabase when signed in. Sign-in uses the TLR Hub email and password during the pilot. Extra per-habit data (noticed days, what's worked, past wins, chosen focus) lives in showup_habits.extra.
+- State lives in localStorage key showup-v1 and syncs to Supabase when signed in. Sign-in is Show Up's own (email code), not the TLR Hub account. Extra per-habit data (noticed days, what's worked, past wins, chosen focus) lives in showup_habits.extra.
 - Two views of the same data: Full (everything, examples shown) and Focus (for ADHD and anxiety: one thing per screen, extras behind one tap, calm motion). Use optional(label, html), .full-only and .focus-only. Check both views for every change.
 - Core flow: name ("What should we call you?", once) then Build, Break or Find my focus, then what, feel, (instead), tough-day plan, then a confetti finish, the plan, and once, install steps.
 - Daily: one "I showed up today" button (every show-up counts the same, lighter versions included) and an "I'm struggling" button (three situations, a rotating question, What's worked for me, one small step; video slots in STRUGGLE_VIDEO). Missed days stay plain and can be tapped later to count or to note what got in the way. Count show-ups and comebacks, never streaks.

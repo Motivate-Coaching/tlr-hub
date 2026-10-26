@@ -1,14 +1,13 @@
 /* Show Up: habit tracker web app (pilot).
    Works signed out first (saved on this device), then saves to Supabase once signed in.
-   Same Supabase project as TLR Hub; the anon key is public by design. */
+   Its own Supabase project (Show Up, London), separate from the TLR Hub; the anon key is public by design. */
 (function () {
   'use strict';
 
   // ── Config ────────────────────────────────────────────────────────────────
-  var SUPABASE_URL = 'https://tsusrzkpzevpiuvsppls.supabase.co';
-  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzdXNyemtwemV2cGl1dnNwcGxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3NDAzMzUsImV4cCI6MjEwMTMxNjMzNX0.UQD9BaOjYWNOEVeV3QCF2sdlNc9SYJ2PrcZgpCtlQ8s';
-  // Public half of the phone-notification key pair (the private half lives only in Supabase secrets).
-  var VAPID_PUBLIC = 'BHJYn9pn53bnDmtHCvr-ysfBqueL-9zH4_0hvmPRvgpEBhfLeNxBeuBOSgCKiGzar2NOPyghfanKgdud1DbxjOk';
+  var SUPABASE_URL = 'https://ycxmhilwaixfwiedkkzj.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InljeG1oaWx3YWl4ZndpZWRra3pqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5ODY1MjUsImV4cCI6MjEwODU2MjUyNX0.XRe4jBt4RYwwnAxwnSmVVGf_DtEiHn7yasgk6Rfb3tU';
+  // The phone-notification key pair is made and kept by the server; the app asks for the public half when needed.
   var KEY = 'showup-v1';
   var ADMIN_EMAIL = 'stuart.fairbairns@gmail.com';
 
@@ -298,8 +297,8 @@
           '<span><b>You showed up on day one' + (e.felt && e.felt !== 'Honestly, tough' ? '. ' + esc(e.felt) : '') + '.</b> You’ve started, and that’s the hardest bit.</span></div>';
       }
       if (!user && (ticked || S.later)) {
-        h += '<div class="card"><b style="font-size:18px;font-weight:600">Keep your progress safe</b><span style="color:var(--text-mid)">Sign in so nothing is lost, your morning nudge can find you, and you can use it on any device.</span>' +
-          '<button class="btn outline" data-account="ready">Save to my account</button></div>';
+        h += '<div class="card"><b style="font-size:18px;font-weight:600">Save your progress</b><span style="color:var(--text-mid)">Add your email so your morning nudge can find you and nothing gets lost. No password needed.</span>' +
+          '<button class="btn outline" data-account="ready">Save my progress</button></div>';
       }
       h += (firstName() ? '' : '<div class="field"><label class="label" for="pname">What should we call you?</label><textarea id="pname" rows="1" data-name="1" autocomplete="given-name" placeholder="Your first name"></textarea></div>') +
         nextNudge() +
@@ -429,7 +428,7 @@
         (s.view === 'focus' ? '<p class="hint">Simple keeps screens still and calm.</p>' : '<button class="switch" role="switch" aria-checked="' + !!s.calm + '" data-toggle="calm"><span><b>Less movement</b><span class="hint">Calmer screens, no animation.</span></span><span class="track"></span></button>') +
         '<button class="switch" role="switch" aria-checked="' + !!s.buzz + '" data-toggle="buzz"><span><b>Buzz when I tick</b><span class="hint">On phones that support it.</span></span><span class="track"></span></button></div>';
       // Reminders
-      h += '<div class="card" id="reminders"><span class="eyebrow">Morning nudge</span>' + (user || !sb || !authChecked ? '' : '<div class="card soft small" style="padding:12px 14px"><b style="font-weight:600">Sign in to get your nudge</b><span>Nudges come from your account, so they only reach you once you’re signed in.</span><button class="chip" data-account="settings" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Sign in</button></div>') +
+      h += '<div class="card" id="reminders"><span class="eyebrow">Morning nudge</span>' + (user || !sb || !authChecked ? '' : '<div class="card soft small" style="padding:12px 14px"><b style="font-weight:600">Add your email to get your nudge</b><span>Nudges come from your account, so they reach you once your progress is saved.</span><button class="chip" data-account="settings" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Save my progress</button></div>') +
         '<div class="field"><label class="label" for="rtime">What time?</label><input class="input" id="rtime" type="time" step="900" value="' + esc(s.time) + '" style="max-width:200px"></div>' +
         '<span class="label full-only">Which days?</span><div class="days full-only">' + DAY_NAMES.map(function (n, i) { return '<button class="chip" data-rday="' + i + '" aria-pressed="' + (s.days.indexOf(i) >= 0) + '" aria-label="' + DAY_LABELS[i] + '">' + n + '</button>'; }).join('') + '</div>' +
         '<button class="switch" role="switch" aria-checked="' + !!s.email + '" data-toggle="email"><span><b>Email</b><span class="hint">' + (user ? 'To ' + esc(user.email) : 'Sign in to switch this on') + '</span></span><span class="track"></span></button>' +
@@ -450,7 +449,7 @@
       // Account
       h += '<div class="card"><span class="eyebrow">Account and privacy</span>' +
         '<div class="field"><label class="label" for="sname">Your first name</label><textarea id="sname" rows="1" data-name="1" autocomplete="given-name" placeholder="So we can say hello">' + esc(firstName()) + '</textarea></div>' +
-        (user ? '<span>Signed in as <b>' + esc(user.email) + '</b></span>' : '<span>Not signed in. Your progress is saved on this device only.</span><button class="btn" data-account="settings">Sign in to save</button>') +
+        (user ? '<span>Signed in as <b>' + esc(user.email) + '</b></span>' : '<span>Your progress is saved on this device only.</span><button class="btn" data-account="settings">Save my progress</button>') +
         '<p class="hint">Your notes are only ever seen by you. During the pilot, Stuart sees your habit, how often people show up and any feedback you send, never your notes.</p>' +
         '<div class="row" style="flex-wrap:wrap;gap:8px"><button class="chip" data-act="exportdata">Download my data</button><button class="chip" data-act="deletedata">Delete my Show Up data</button></div>' +
         '<a class="link" href="privacy.html" style="align-self:flex-start">Privacy notice</a>' +
@@ -487,15 +486,17 @@
         '<button class="btn outline" data-back="1">Back</button>') + '</section>';
     },
     account: function () {
-      var m = ui.authMode || 'signin';
-      return '<section class="screen"><h1>' + 'Save to my account' + '</h1>' +
-        '<p class="lede">During the pilot, sign in with the email and password you use for The Living Room (TLR) Hub. Anything you’ve done on this device comes with you.</p>' +
-        '<div class="field"><label class="label" for="aemail">Email</label><input class="input" id="aemail" type="email" autocomplete="email" inputmode="email"></div>' +
-        '<div class="field"><label class="label" for="apass">Password</label><input class="input" id="apass" type="password" autocomplete="current-password"></div>' +
-        '<p class="err" id="aerr" hidden></p>' +
-        '<button class="btn" data-act="signin">Sign in</button>' +
-        '<a class="link center" href="../login.html" style="display:flex;align-items:center">Forgotten your password?</a>' +
-        '<p class="hint">Not a member yet? The pilot is for members for now. You can still use it on this device without signing in.</p><p class="hint">Signing in saves your progress securely so it’s backed up and your nudges can reach you. <a href="privacy.html">How we look after your data</a></p></section>';
+      var priv = '<p class="hint">Saving to an account backs up your progress and lets your nudges reach you. <a href="privacy.html">How we look after your data</a></p>';
+      if (ui.authStep === 'code') return '<section class="screen"><div><div class="eyebrow">Save my progress</div><h1>Check your email</h1></div>' +
+        '<p class="lede">We’ve sent a 6-digit code to <b>' + esc(ui.authEmail) + '</b>.</p>' +
+        '<div class="field"><label class="label" for="acode">Your code</label><input class="input code" id="acode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="······"></div>' +
+        '<p class="err" id="aerr" hidden></p><button class="btn" data-act="verifycode">Sign in</button>' +
+        '<div class="row" style="justify-content:center;gap:16px"><button class="link" data-act="sendcode">Send a new code</button><button class="link" data-act="authback">Use a different email</button></div>' +
+        '<p class="hint">Can’t see it? Check your spam or promotions folder.</p></section>';
+      return '<section class="screen"><div><div class="eyebrow">Save my progress</div><h1>Sign in or create your account</h1></div>' +
+        '<p class="lede">Just your email. We’ll send you a 6-digit code, so there’s no password to remember.</p>' +
+        '<div class="field"><label class="label" for="aemail">Email</label><input class="input" id="aemail" type="email" autocomplete="email" inputmode="email" value="' + esc(ui.authEmail || '') + '"></div>' +
+        '<p class="err" id="aerr" hidden></p><button class="btn" data-act="sendcode">Send my code</button>' + priv + '</section>';
     }
   };
 
@@ -774,9 +775,9 @@
 
   // ── Not signed in: nudges can't reach you ─────────────────────────────────
   function signInCard() {
-    if (user || !sb || !authChecked) return '';
-    return '<div class="card soft small"><b style="font-weight:600">Your morning nudge can’t reach you yet</b><span>Sign in with your TLR Hub email and password so it can find you, and so your progress is kept safe.</span>' +
-      '<button class="chip" data-account="tracker" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Sign in</button></div>';
+    if (user || !sb || !authChecked || S.signinLater === todayStr() || (S.habit && todayNum() < 2)) return '';
+    return '<div class="card soft small"><b style="font-weight:600">Save your progress?</b><span>Add your email and your nudges can reach you, and nothing gets lost.</span>' +
+      '<div class="row" style="gap:12px;justify-content:flex-start"><button class="chip" data-account="tracker" style="background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Save my progress</button><button class="link" data-act="signinlater" style="font-size:14px">Not now</button></div></div>';
   }
 
   // ── Help me choose ─────────────────────────────────────────────────────────
@@ -1055,7 +1056,7 @@
       var perm = await Notification.requestPermission();
       if (perm !== 'granted') { toast('No problem. You can switch it on later in your browser settings.'); return render(); }
       var reg2 = swReg || await navigator.serviceWorker.ready;
-      var sub2 = await reg2.pushManager.getSubscription() || await reg2.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(VAPID_PUBLIC) });
+      var sub2 = await reg2.pushManager.getSubscription() || await reg2.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(await vapidKey()) });
       var j = sub2.toJSON();
       var r = await sb.from('showup_push_subscriptions').upsert({ endpoint: j.endpoint, user_id: user.id, p256dh: j.keys.p256dh, auth: j.keys.auth }, { onConflict: 'endpoint' });
       if (r.error) throw r.error;
@@ -1119,7 +1120,8 @@
     if (t.id === 'finddo' && S.find) { S.find.daily = t.value; save(false); }
     if (t.id === 'findbig' && S.find) { S.find.own = t.value; save(false); }
   });
-  view.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.id === 'firstname') { e.preventDefault(); nameDone(false); } });
+  view.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.id === 'firstname') { e.preventDefault(); nameDone(false); } if (e.key === 'Enter' && e.target.id === 'aemail') { e.preventDefault(); void sendCode(); } if (e.key === 'Enter' && e.target.id === 'acode') { e.preventDefault(); void verifyCode(); } });
+  view.addEventListener('input', function (e) { if (e.target.id === 'acode' && e.target.value.replace(/\D/g, '').length === 6) void verifyCode(); });
   view.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.dataset && e.target.dataset.name) { e.preventDefault(); e.target.blur(); } });
   view.addEventListener('change', function (e) {
     if (e.target.dataset && e.target.dataset.name) { e.target.value = e.target.value.replace(/\s+/g, ' ').trim(); saveName(e.target.value); if (e.target.value.trim()) toast('Lovely to meet you, ' + e.target.value.trim() + '.'); return; }
@@ -1198,8 +1200,12 @@
         if (S.habit) { S.habit.status = 'archived'; save(); if (user) void syncAll().then(function () { resetForNew(); }); else resetForNew(); } else resetForNew();
       });
       case 'signin': return void doSignIn();
+      case 'sendcode': return void sendCode();
+      case 'verifycode': return void verifyCode();
+      case 'authback': ui.authStep = null; return render();
+      case 'signinlater': S.signinLater = todayStr(); save(false); return render();
       case 'exportdata': return exportData();
-      case 'deletedata': return confirmSheet('Delete your Show Up data?', 'This deletes your habit, show-ups, notes, past wins and settings from this device' + (user ? ' and your account' : '') + '. It can’t be undone. Your TLR Hub account stays as it is.', 'Delete my data', function () { void deleteData(); });
+      case 'deletedata': return confirmSheet('Delete your Show Up data?', 'This deletes your habit, show-ups, notes, past wins and settings from this device' + (user ? ', and deletes your account' : '') + '. It can’t be undone.', 'Delete my data', function () { void deleteData(); });
       case 'signout': return void (async function () { await sb.auth.signOut(); user = null; S = fresh(); save(false); applyComfort(); go('landing'); })();
     }
   });
@@ -1221,7 +1227,7 @@
       '<div class="lbl"><b>' + n + '</b><small>show-up' + (n === 1 ? '' : 's') + '</small></div></div>';
   }
   function nextNudge() {
-    var s = S.settings; if (!user && sb && authChecked) return signInCard(); if (!(s.email || s.push)) return '';
+    var s = S.settings; if (!user && sb) return ''; if (!(s.email || s.push)) return '';
     return '<p class="next-up">' + iconClock('#888880') + '<span>What happens next: <b>your nudge arrives tomorrow at ' + esc(fmtTime(s.time)) + '</b>. Change it any time in Settings.</span></p>';
   }
 
@@ -1243,11 +1249,11 @@
     var st = kind === 'ios' ? [
       [visBar(IV.share), 'Tap Share', 'The square with an arrow. On newer iPhones, tap ··· first.'],
       [visMenu(IV.plus, 'Add to Home Screen'), 'Tap Add to Home Screen', 'Scroll down a little if you can’t see it.'],
-      [visHome(), 'Open it and sign in', 'Same email and password as the TLR Hub.']
+      [visHome(), 'Open it and sign in', 'Sign in with your email to bring your progress.']
     ] : [
       [visBar(IV.dots, true), 'Tap the three dots', 'Top right in Chrome.'],
       [visMenu(IV.down, 'Install app'), 'Tap Install app', 'Some phones say Add to Home screen.'],
-      [visHome(), 'Open it and sign in', 'Same email and password as the TLR Hub.']
+      [visHome(), 'Open it and sign in', 'Sign in with your email to bring your progress.']
     ];
     var h = '<ol class="isteps">';
     st.forEach(function (x, i) { h += '<li class="istep">' + x[0] + '<div class="itxt"><span class="inum">' + (i + 1) + '</span><b>' + x[1] + '</b><small class="full-only">' + x[2] + '</small></div></li>'; });
@@ -1327,10 +1333,8 @@
     try {
       if (user && sb) {
         var uid = user.id, r;
-        r = await sb.from('showup_push_subscriptions').delete().eq('user_id', uid); if (r.error) throw r.error;
-        r = await sb.from('showup_habits').delete().eq('user_id', uid); if (r.error) throw r.error;
-        r = await sb.from('showup_profiles').delete().eq('user_id', uid); if (r.error) throw r.error;
-        try { await sb.auth.updateUser({ data: { first_name: null } }); } catch (e) {}
+        var d = await sb.functions.invoke('showup-code', { body: { action: 'delete' } });
+        if (d.error) throw d.error;
         await sb.auth.signOut(); user = null;
       }
       try { localStorage.removeItem(KEY); } catch (e) {}
@@ -1357,6 +1361,44 @@
     toast('Saved. Well done for giving it a proper go.'); go('tracker');
   }
 
+  async function vapidKey() { var r = await sb.functions.invoke('showup-code', { body: { action: 'vapid' } }); if (r.error || !r.data || !r.data.key) throw new Error('no key'); return r.data.key; }
+  async function codeCall(body) {
+    var r = await sb.functions.invoke('showup-code', { body: body });
+    if (r.error) { var j = {}; try { j = await r.error.context.json(); } catch (e) {} return { error: j.error || 'network', left: j.left }; }
+    return r.data || {};
+  }
+  async function sendCode() {
+    var el = document.getElementById('aemail'), err = document.getElementById('aerr'), email = ((el && el.value) || ui.authEmail || '').trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { if (err) { err.textContent = 'That email doesn’t look quite right.'; err.hidden = false; } return; }
+    var btn = view.querySelector('[data-act="sendcode"]'); if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+    var r = await codeCall({ action: 'send', email: email });
+    if (r.error) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Send my code'; }
+      var msg = r.error === 'wait' ? 'Code just sent. Give it a moment, then check your inbox.' : r.error === 'too_many' ? 'That’s a few codes in a row. Try again in an hour.' : 'Couldn’t send just now. Please try again.';
+      if (ui.authStep === 'code') return toast(msg);
+      if (err) { err.textContent = msg; err.hidden = false; } return;
+    }
+    ui.authEmail = email; ui.authStep = 'code'; render(); toast('Code sent to ' + email + '.');
+    var c = document.getElementById('acode'); if (c) c.focus();
+  }
+  async function verifyCode() {
+    var c = document.getElementById('acode'), err = document.getElementById('aerr'), code = ((c && c.value) || '').replace(/\D/g, '');
+    if (code.length !== 6) { err.textContent = 'The code is 6 numbers.'; err.hidden = false; return; }
+    var btn = view.querySelector('[data-act="verifycode"]'); btn.disabled = true; btn.textContent = 'Checking…';
+    var r = await codeCall({ action: 'verify', email: ui.authEmail, code: code });
+    if (r.error || !r.token_hash) {
+      btn.disabled = false; btn.textContent = 'Sign in';
+      err.textContent = r.error === 'wrong' ? 'That code didn’t match.' + (r.left ? ' ' + r.left + ' tries left.' : '') : r.error === 'expired' ? 'That code has run out. Tap “Send a new code”.' : r.error === 'too_many' ? 'Too many tries. Tap “Send a new code”.' : 'Couldn’t sign in just now. Please try again.';
+      err.hidden = false; return;
+    }
+    var v = await sb.auth.verifyOtp({ token_hash: r.token_hash, type: 'email' });
+    if (v.error) { btn.disabled = false; btn.textContent = 'Sign in'; err.textContent = 'Couldn’t sign in just now. Please try again.'; err.hidden = false; return; }
+    user = v.data.user; ui.authStep = null; authChecked = true;
+    if (S.settings.name && !(user.user_metadata && user.user_metadata.first_name)) saveName(S.settings.name);
+    await pullRemote(); await syncAll();
+    toast(r.isNew ? 'You’re in. Your progress is saved.' : 'Welcome back. You’re signed in.');
+    go(S.habit ? (ui.returnTo && ui.returnTo !== 'landing' ? ui.returnTo : 'tracker') : 'landing');
+  }
   async function doSignIn() {
     var email = (document.getElementById('aemail').value || '').trim(), pass = document.getElementById('apass').value || '', err = document.getElementById('aerr');
     if (!email || !pass) { err.textContent = 'Pop in your email and password.'; err.hidden = false; return; }
@@ -1373,6 +1415,7 @@
   applyComfort();
   if (S.habit && ['landing', 'what', 'less', 'feel', 'dimmer', 'find', 'name', 'viewpick'].indexOf(S.screen) >= 0) S.screen = 'tracker';
   if (!S.habit && ['tracker', 'note', 'share', 'slipped', 'reflect', 'edit', 'settings'].indexOf(S.screen) >= 0) S.screen = 'landing';
+  ui.authStep = null;
   if (['account', 'install', 'length', 'words'].indexOf(S.screen) >= 0) S.screen = S.habit ? 'tracker' : 'landing';
   if (S.habit && ['ready', 'plan', 'settings', 'science', 'share', 'note', 'slipped'].indexOf(S.screen) >= 0) S.screen = 'tracker';
   render();
