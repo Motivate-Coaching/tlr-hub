@@ -308,7 +308,6 @@
         '<div class="card"><div class="row"><label class="label" for="caltime" style="margin:0">Time</label><input class="input" id="caltime" type="time" step="300" value="' + esc(c.time) + '" style="max-width:160px"></div>' +
         '<div class="row"><label class="label" for="calstart" style="margin:0">Starting</label><input class="input" id="calstart" type="date" value="' + esc(c.start) + '" style="max-width:180px"></div>' +
         '<span class="hint">' + daysPhrase() + ' for ' + hb.length + ' days, with an alert at that time.</span></div>' +
-        tapToSee('See what it will say', '<div class="card small calprev">' + esc(calDescription()).replace(/\n/g, '<br>') + '</div>') +
         '<div class="spacer"></div>' + (android ? gcal + ics : ics + gcal) + '</section>';
     },
     ready: function () {
