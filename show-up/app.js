@@ -215,7 +215,7 @@
     what: function () { return S.draft.found ? 'find' : 'landing'; }, name: 'landing', viewpick: function () { return S.nameAsked ? 'landing' : 'name'; }, wins: 'tracker', less: 'feel',
     find: function () { var f = S.find || {}; if (f.step > 0) { f.step--; save(false); return 'find'; } return 'landing'; }, feel: 'what', dimmer: function () { return S.draft.mode === 'less' ? 'less' : 'feel'; }, hard: 'dimmer',
     length: function () { return ui.returnTo || 'ready'; }, note: 'tracker', slipped: 'tracker', share: 'tracker', science: function () { return S.habit ? 'settings' : 'landing'; },
-    words: function () { return ui.wordsFrom || 'tracker'; }, settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', install: function () { return ui.installFrom || (S.habit ? 'settings' : 'landing'); }, account: function () { return ui.returnTo || 'tracker'; }
+    words: function () { return ui.wordsFrom || 'tracker'; }, settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', calendar: function () { return ui.calFrom || 'tracker'; }, install: function () { return ui.installFrom || (S.habit ? 'settings' : 'landing'); }, account: function () { return ui.returnTo || 'tracker'; }
   };
 
   function todayCard(name, line, done, decorative, id) {
@@ -298,6 +298,19 @@
         f('hardSpark', 'hspark', 'When the spark goes', 'Picture finishing this. How does it feel, and what will remind you why it matters?', 'e.g. Feeling proud I kept a promise to myself') +
         '<div class="spacer"></div>' + stepButton('hard') + '<p class="hint c">Not sure yet? Skip it. You can add these later.</p></section>';
     },
+    calendar: function () {
+      var c = ui.cal || (ui.cal = { time: S.settings.time || '07:00', start: calDefaultStart() }), hb = S.habit;
+      var ios = isIOS(), android = /android/i.test(navigator.userAgent);
+      var ics = '<button class="btn' + (android ? ' outline' : '') + '" data-act="calics">' + iconCal() + (ios ? 'Add to my iPhone calendar' : android ? 'Other calendars (.ics file)' : 'Apple or Outlook calendar') + '</button>';
+      var gcal = '<button class="btn' + (android ? '' : ' outline') + '" data-act="calgoogle">' + iconCal() + 'Add to Google Calendar</button>';
+      return '<section class="screen"><div><div class="eyebrow">Your calendar</div><h1>Put it in your calendar</h1></div>' +
+        '<p class="lede">A daily reminder in the calendar you already use, with your own words in it.</p>' +
+        '<div class="card"><div class="row"><label class="label" for="caltime" style="margin:0">Time</label><input class="input" id="caltime" type="time" step="300" value="' + esc(c.time) + '" style="max-width:160px"></div>' +
+        '<div class="row"><label class="label" for="calstart" style="margin:0">Starting</label><input class="input" id="calstart" type="date" value="' + esc(c.start) + '" style="max-width:180px"></div>' +
+        '<span class="hint">' + daysPhrase() + ' for ' + hb.length + ' days, with an alert at that time.</span></div>' +
+        tapToSee('See what it will say', '<div class="card small calprev">' + esc(calDescription()).replace(/\n/g, '<br>') + '</div>') +
+        '<div class="spacer"></div>' + (android ? gcal + ics : ics + gcal) + '</section>';
+    },
     ready: function () {
       if (ui.planEdit) return planEditor();
       var ticked = !!S.entries[1];
@@ -316,7 +329,7 @@
           '<button class="btn outline" data-account="ready">Save my progress</button></div>';
       }
       h += (firstName() ? '' : '<div class="field"><label class="label" for="pname">What should we call you?</label><textarea id="pname" rows="1" data-name="1" autocomplete="given-name" placeholder="Your first name"></textarea></div>') +
-        nextNudge() +
+        nextNudge() + '<button class="btn outline" data-cal="ready">' + iconCal() + 'Add it to my calendar</button>' +
         '<div class="spacer"></div><button class="btn" data-act="readydone">Go to my tracker</button></section>';
       return h;
     },
@@ -441,7 +454,8 @@
       h += '<div class="card" id="reminders"><span class="eyebrow">Morning nudge</span>' + (user || !sb || !authChecked ? '' : '<div class="card soft small" style="padding:12px 14px"><b style="font-weight:600">Add your email to get your nudge</b><button class="chip" data-account="settings" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Save my progress</button></div>') +
         '<div class="row"><label class="label" for="rtime" style="margin:0">Time</label><input class="input" id="rtime" type="time" step="900" value="' + esc(s.time) + '" style="max-width:160px"></div>' +
         '<button class="switch" role="switch" aria-checked="' + !!s.email + '" data-toggle="email"><span><b>Email</b><span class="hint">' + (user ? esc(user.email) : 'Save your progress first') + '</span></span><span class="track"></span></button>' +
-        '<button class="switch" role="switch" aria-checked="' + !!s.push + '" data-act="push"><span><b>Phone notification</b><span class="hint" id="pushHint">' + pushHint() + '</span></span><span class="track"></span></button></div>';
+        '<button class="switch" role="switch" aria-checked="' + !!s.push + '" data-act="push"><span><b>Phone notification</b><span class="hint" id="pushHint">' + pushHint() + '</span></span><span class="track"></span></button>' +
+        '<button class="link" data-cal="settings" style="align-self:flex-start;margin-top:8px;display:inline-flex;gap:8px;align-items:center">' + iconCal() + 'Add it to my calendar</button></div>';
       // Everything else, one tap away
       h += '<div class="sects">';
       h += sect('Days and breaks', '<span class="label">Which days?</span><div class="days">' + DAY_NAMES.map(function (n, i) { return '<button class="chip" data-rday="' + i + '" aria-pressed="' + (s.days.indexOf(i) >= 0) + '" aria-label="' + DAY_LABELS[i] + '">' + n + '</button>'; }).join('') + '</div>' +
@@ -735,6 +749,8 @@
     var c = count(function () { return true; });
     toast('Day ' + n + ' counted. That’s ' + c + ' show-up' + (c === 1 ? '' : 's') + '.');
   }
+  function clearBadge() { try { if (navigator.clearAppBadge) navigator.clearAppBadge().catch(function () {}); } catch (e) {} }
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') clearBadge(); });
   function tick(kind, from) {
     if (notStarted()) { S.habit.start = todayStr(); S.later = false; }
     var t = todayNum();
@@ -1247,6 +1263,7 @@
     if (d.account) { ui.returnTo = d.account; return go('account'); }
     if (d.tick) { var from = d.from || (S.screen === 'ready' ? 'ready' : 'tracker'); return tick(d.tick, from); }
     if (d.vp) { ui.vp = d.vp; return render(); }
+    if (d.cal) { ui.calFrom = d.cal; ui.cal = null; return go('calendar'); }
     if (d.act === 'vpgo') { S.settings.view = ui.vp || S.settings.view || 'full'; S.viewChosen = true; ui.vp = null; save(); return go(ui.afterName || 'what'); }
     if (d.view) {
       if (S.settings.view !== d.view) { S.settings.view = d.view; save(); toast(d.view === 'focus' ? 'Focused view on.' : 'Detailed view on.'); }
@@ -1277,6 +1294,8 @@
       case 'saveworked': { var wv = (document.getElementById('worked') || {}).value || ''; if (!wv.trim()) { toast('Write a few words first, or skip it.'); return; }
         var ex = extra(); ex.worked = (ex.worked || []).concat([{ k: ui.struggle || '', q: ui.struggleQ || '', a: wv.trim(), at: new Date().toISOString() }]); save(); ui.struggleSaved = true; return render(); }
       case 'lifesave': { var lv = ((document.getElementById('lifenote') || {}).value || '').trim(), lx = extra(); lx.noticed = lx.noticed || {}; var cur = lx.noticed[todayNum()] || { why: [] }; cur.why = cur.why || []; if (cur.why.indexOf('Plans changed') < 0) cur.why.push('Plans changed'); if (lv) cur.note = lv; cur.at = new Date().toISOString(); lx.noticed[todayNum()] = cur; save(); ui.struggle = null; toast('Noted. See you tomorrow.'); return go('tracker'); }
+      case 'calics': calRead(); downloadICS(); return;
+      case 'calgoogle': calRead(); try { window.open(googleCalURL(), '_blank', 'noopener'); } catch (e) {} stat('calendar', 'google'); return;
       case 'sharenote': ui.shareNote = !ui.shareNote; return render();
       case 'shareimg': return void shareImage();
       case 'whatsapp': { var tt = Math.min(todayNum(), S.habit.length); window.open('https://wa.me/?text=' + encodeURIComponent(habitName() + ': I showed up ' + count(function (x, k) { return k <= S.habit.length; }) + ' of ' + tt + ' days.'), '_blank', 'noopener'); return; }
@@ -1369,6 +1388,67 @@
     when: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>'
   };
   function planEditor() { return screens._editform(); }
+  // ── Calendar: a repeating reminder in their own calendar, in their own words ──
+  var APPLINK = 'https://motivate-coaching.github.io/tlr-hub/show-up/';
+  function iconCal() { return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>'; }
+  function calDefaultStart() { var n = new Date(), hm = (S.settings.time || '07:00').split(':'); return n.getHours() * 60 + n.getMinutes() < (+hm[0]) * 60 + (+hm[1]) ? todayStr() : addDays(todayStr(), 1); }
+  function calRead() { var t = document.getElementById('caltime'), d = document.getElementById('calstart'); ui.cal = ui.cal || {}; if (t && t.value) ui.cal.time = t.value; if (d && d.value) ui.cal.start = d.value; }
+  function calDescription() {
+    var hb = S.habit, ex = extra(), hard = ex.hard || {}, w = words().map(function (x) { return x.toLowerCase(); }), L = [];
+    L.push('Today: ' + habitName() + '.');
+    if (hb.mode === 'less' && (hb.instead || '').trim()) L.push('When the urge hits: ' + hb.instead.trim() + '.');
+    L.push('Tough day? ' + (hb.dimmer || 'A lighter version') + '. That counts too.');
+    L.push('');
+    L.push('Why it matters to you: you want to feel ' + (w.length > 1 ? w.slice(0, -1).join(', ') + ' and ' + w[w.length - 1] : w[0]) + '.');
+    if ((hard.start || '').trim()) L.push('When you can’t get started, you said: “' + hard.start.trim() + '”');
+    if ((hard.spark || '').trim()) L.push('What reminds you why it matters: “' + hard.spark.trim() + '”');
+    L.push('');
+    L.push('It might be tempting to let today slide. Showing up is the whole point, at whatever size you’ve got. Each time you do, you prove to yourself that you keep your word. That’s how self-trust is built, one day at a time, and how you become the person you want to be.');
+    L.push('');
+    L.push('Tick it off when you’re done: ' + APPLINK);
+    return L.join('\n');
+  }
+  function calTimes() {
+    var c = ui.cal || {}, start = c.start || todayStr(), d = start.replace(/-/g, ''), t = (c.time || '07:00').split(':');
+    var st = d + 'T' + t[0].padStart(2, '0') + t[1].padStart(2, '0') + '00';
+    var endMin = (+t[0]) * 60 + (+t[1]) + 15, endD = endMin >= 1440 ? addDays(start, 1).replace(/-/g, '') : d; endMin %= 1440;
+    var en = endD + 'T' + String(Math.floor(endMin / 60)).padStart(2, '0') + String(endMin % 60).padStart(2, '0') + '00';
+    var until = addDays(start, S.habit.length - 1).replace(/-/g, '') + 'T235959';
+    var days = (S.settings.days || []).slice().sort(), BY = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+    var rule = days.length && days.length < 7 ? 'FREQ=WEEKLY;BYDAY=' + days.map(function (x) { return BY[x]; }).join(',') + ';UNTIL=' + until : 'FREQ=DAILY;UNTIL=' + until;
+    return { st: st, en: en, rule: rule };
+  }
+  function icsEsc(x) { return String(x).replace(/\\/g, '\\\\').replace(/;/g, '\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n'); }
+  // Calendar lines must stay under 75 bytes; long ones carry on after a space.
+  function icsFold(line) {
+    var out = [], cur = '', n = 0, enc = window.TextEncoder ? new TextEncoder() : null;
+    Array.from(line).forEach(function (ch) { var b = enc ? enc.encode(ch).length : 1; if (n + b > 73) { out.push(cur); cur = ' '; n = 1; } cur += ch; n += b; });
+    out.push(cur); return out.join('\r\n');
+  }
+  function buildICS() {
+    var t = calTimes(), now = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+    var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Motivate Coaching//Show Up//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
+      'UID:' + (S.habit.id || uuid()) + '@showup.motivate-coaching.com', 'DTSTAMP:' + now, 'DTSTART:' + t.st, 'DTEND:' + t.en, 'RRULE:' + t.rule,
+      'SUMMARY:' + icsEsc('Show up: ' + habitName()), 'DESCRIPTION:' + icsEsc(calDescription()), 'URL:' + APPLINK,
+      'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsEsc('Time to show up: ' + habitName()), 'TRIGGER:PT0M', 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'];
+    return lines.map(icsFold).join('\r\n') + '\r\n';
+  }
+  function downloadICS() {
+    var ics = buildICS(), name = 'show-up-' + habitName().toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 30) + '.ics';
+    stat('calendar', 'ics'); window.__lastICS = ics;
+    try {
+      var file = new File([ics], name, { type: 'text/calendar' });
+      if (/android/i.test(navigator.userAgent) && navigator.canShare && navigator.canShare({ files: [file] })) { navigator.share({ files: [file] }).catch(function () {}); return; }
+    } catch (e) {}
+    if (isIOS()) { window.location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics); return; }
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    toast('Calendar file downloaded. Open it to add the reminder.');
+  }
+  function googleCalURL() {
+    var t = calTimes();
+    return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('Show up: ' + habitName()) + '&dates=' + t.st + '/' + t.en +
+      '&details=' + encodeURIComponent(calDescription()) + '&recur=' + encodeURIComponent('RRULE:' + t.rule) + '&ctz=' + encodeURIComponent(S.settings.tz || 'UTC');
+  }
   function daysPhrase() {
     var d = (S.settings.days || []).slice().sort(), N = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     if (d.length === 7 || !d.length) return 'Each day';
@@ -1526,10 +1606,11 @@
   if (S.habit && ['landing', 'what', 'less', 'feel', 'dimmer', 'hard', 'find', 'name', 'viewpick'].indexOf(S.screen) >= 0) S.screen = 'tracker';
   if (!S.habit && ['tracker', 'note', 'share', 'slipped', 'reflect', 'edit', 'settings'].indexOf(S.screen) >= 0) S.screen = 'landing';
   ui.authStep = null;
-  if (['account', 'install', 'length', 'words'].indexOf(S.screen) >= 0) S.screen = S.habit ? 'tracker' : 'landing';
+  if (['account', 'install', 'length', 'words', 'calendar'].indexOf(S.screen) >= 0) S.screen = S.habit ? 'tracker' : 'landing';
   if (S.habit && ['ready', 'plan', 'settings', 'science', 'share', 'note', 'slipped'].indexOf(S.screen) >= 0) S.screen = 'tracker';
   render();
   stat('open', S.habit ? 'has_habit' : 'new');
+  clearBadge();
   (async function () {
     if (!sb) { greet(); return; }
     try {
