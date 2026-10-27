@@ -19,10 +19,10 @@
   var GIVES = ['A reward', 'Comfort', 'A break', 'Switching off', 'Energy', 'Something to do'];
   // For cutting back: what you're moving towards (outcomes and feelings together).
   var GAINS = ['Better sleep', 'More energy', 'Better health', 'Lighter', 'Clear-headed', 'In control', 'Proud', 'Calm', 'Money saved', 'Like me again', 'Free', 'More present'];
-  var STARTERS_MORE = ['A 10 minute walk', 'Read before bed', 'In bed by 10:30', 'Drink more water'];
+  var STARTERS_MORE = ['A 10 minute walk', 'Read before bed', 'In bed by 10:30pm', 'Drink more water'];
   var STARTERS_LESS = ['Phone in bed', 'Afternoon snacking', 'Wine on weeknights', 'Mindless scrolling'];
   var IDEAS = [
-    ['A 10 minute walk after lunch', 'Health'], ['In bed by 10:30 on work nights', 'Rest'],
+    ['A 10 minute walk after lunch', 'Health'], ['In bed by 10:30pm on work nights', 'Rest'],
     ['Phone off for the first hour', 'Me time'], ['20 minutes of reading before bed', 'Me time'],
     ['A cold shower each morning', 'Energy'], ['Five minutes of stillness before the day starts', 'Calm'],
     ['Message one friend a day', 'Connection'], ['Write tomorrow’s top three tonight', 'Clarity']
@@ -44,7 +44,7 @@
   function fresh() {
     return {
       screen: 'landing',
-      draft: { mode: 'more', what: '', gives: [], instead: '', feel: [], ownFeel: '', dimmer: '', length: 30 },
+      draft: { mode: 'more', what: '', gives: [], instead: '', feel: [], ownFeel: '', dimmer: '', hardStart: '', hardOff: '', hardSpark: '', length: 30 },
       habit: null, // { id, mode, what, gives, instead, feel, ownFeel, dimmer, length, start, status, createdAt }
       entries: {}, // day -> { kind, comeback, felt, note, at }
       settings: { tz: tzGuess(), time: '07:00', days: [0, 1, 2, 3, 4, 5, 6], email: true, push: false, pausedUntil: null, view: 'full', text: 'standard', calm: false, buzz: true, marketing: false, name: '' },
@@ -87,8 +87,8 @@
   function checkIcon(c) { return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'; }
   function pencil() { return '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>'; }
   // Setup steps: a numbered label, a bar that fills as you go, and the newest segment animates in.
-  function steps() { return S.draft.mode === 'less' ? ['what', 'feel', 'less', 'dimmer'] : ['what', 'feel', 'dimmer']; }
-  var STEP_LABEL = { what: 'Your habit', less: 'What you’ll do instead', feel: 'How it’ll feel', dimmer: 'Your tough-day plan' };
+  function steps() { return S.draft.mode === 'less' ? ['what', 'feel', 'less', 'dimmer', 'hard'] : ['what', 'feel', 'dimmer', 'hard']; }
+  var STEP_LABEL = { what: 'Your habit', less: 'What you’ll do instead', feel: 'How it’ll feel', dimmer: 'Your tough-day plan', hard: 'When it gets hard' };
   function stepLabel(k) { return k === 'feel' && S.draft.mode === 'less' ? 'What you’re moving towards' : STEP_LABEL[k]; }
   function nextStep(k) { var st = steps(); return st[st.indexOf(k) + 1]; }
   function stepValid(k) { var d = S.draft; return k === 'what' ? !!d.what.trim() : k === 'feel' ? !!(d.feel.length || d.ownFeel.trim()) : k === 'less' ? !!d.instead.trim() : k === 'dimmer' ? !!d.dimmer.trim() : true; }
@@ -213,7 +213,7 @@
   // ── Screens ───────────────────────────────────────────────────────────────
   var BACK = {
     what: function () { return S.draft.found ? 'find' : 'landing'; }, name: 'landing', viewpick: function () { return S.nameAsked ? 'landing' : 'name'; }, wins: 'tracker', less: 'feel',
-    find: function () { var f = S.find || {}; if (f.step > 0) { f.step--; save(false); return 'find'; } return 'landing'; }, feel: 'what', dimmer: function () { return S.draft.mode === 'less' ? 'less' : 'feel'; },
+    find: function () { var f = S.find || {}; if (f.step > 0) { f.step--; save(false); return 'find'; } return 'landing'; }, feel: 'what', dimmer: function () { return S.draft.mode === 'less' ? 'less' : 'feel'; }, hard: 'dimmer',
     length: function () { return ui.returnTo || 'ready'; }, note: 'tracker', slipped: 'tracker', share: 'tracker', science: function () { return S.habit ? 'settings' : 'landing'; },
     words: function () { return ui.wordsFrom || 'tracker'; }, settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', install: function () { return ui.installFrom || (S.habit ? 'settings' : 'landing'); }, account: function () { return ui.returnTo || 'tracker'; }
   };
@@ -254,7 +254,8 @@
       var d = S.draft;
       var gives = '<span class="label">It usually gives me...</span><div class="chips" style="margin-top:8px">' +
         GIVES.map(function (g) { return '<button class="chip" data-give="' + esc(g) + '" aria-pressed="' + (d.gives.indexOf(g) >= 0) + '">' + esc(g) + '</button>'; }).join('') + '</div>';
-      return '<section class="screen">' + progress('less') + '<h1>When it pulls at you, what will you do instead?</h1>' +
+      return '<section class="screen">' + progress('less') + '<h1>When the urge hits, what will you do instead?</h1>' +
+        (d.what.trim() ? '<p class="hint" style="margin-top:-8px">Instead of: <b>' + esc(d.what.trim()) + '</b></p>' : '') +
         '<p class="lede full-only">No judgement. It’s there for a reason.</p>' +
         optional('What does it usually give you?', gives) +
         '<div class="field"><label class="label" for="instead">Instead, I’ll...</label>' +
@@ -283,6 +284,19 @@
         (less ? '<span>Chocolate? <b>One block, not the whole bar.</b></span><span>Wine on weeknights? <b>One small glass, or something fizzy instead.</b></span><span>Your instead? <b>Five minutes of it, not the full twenty.</b></span>'
           : '<span>A gym session? <b>A shorter workout, a brisk walk, or kit on and a stretch.</b></span><span>Reading 10 pages? <b>Five pages, one page, or one paragraph.</b></span><span>A cold sea swim? <b>A quick dip, feet in, or a cold shower at home.</b></span>') + '</div>') +
         '<div class="spacer"></div>' + stepButton('dimmer') + '</section>';
+    },
+    hard: function () {
+      var d = S.draft, focus = S.settings.view === 'focus';
+      var f = function (key, id, label, q, ph) {
+        var field = '<div class="field"><label class="label" for="' + id + '">' + q + '</label><textarea id="' + id + '" rows="2" data-bind="' + key + '" placeholder="' + ph + '">' + esc(d[key] || '') + '</textarea></div>';
+        return focus ? '<details class="ask hardq"' + ((d[key] || '').trim() ? ' open' : '') + '><summary>' + label + '</summary>' + field + '</details>' : '<div class="hardblock"><span class="eyebrow">' + label + '</span>' + field + '</div>';
+      };
+      return '<section class="screen">' + progress('hard') + '<h1>When it gets hard, what gets you going again?</h1>' +
+        '<p class="lede">Be honest with yourself and cut through the excuses. When you need it most, we’ll show you what you wrote.' + (focus ? '' : ' Answer one, or all three.') + '</p>' +
+        f('hardStart', 'hstart', 'When I can’t get started', 'Think of a day you didn’t feel like it and did it anyway. What got you going?', 'e.g. I just put my shoes on and told myself five minutes') +
+        f('hardOff', 'hoff', 'When I fall off track', 'When you’ve fallen off something before and got back on, what did it?', 'e.g. I stopped waiting for Monday and started the next day') +
+        f('hardSpark', 'hspark', 'When the spark goes', 'Picture finishing this. How does it feel, and what will remind you why it matters?', 'e.g. Feeling proud I kept a promise to myself') +
+        '<div class="spacer"></div>' + stepButton('hard') + '<p class="hint c">Not sure yet? Skip it. You can add these later.</p></section>';
     },
     ready: function () {
       if (ui.planEdit) return planEditor();
@@ -359,14 +373,14 @@
     wins: function () { return winsScreen(false); },
     viewpick: function () {
       var v = ui.vp || S.settings.view || 'full', n = firstName(), simple = v === 'focus';
-      var seg = '<div class="seg2" role="group" aria-label="Try a view"><button data-vp="full" aria-pressed="' + !simple + '">Detailed</button><button data-vp="focus" aria-pressed="' + simple + '">Simple</button></div>';
-      var go = '<div class="spacer"></div><button class="btn" data-act="vpgo">Continue with ' + (simple ? 'Simple' : 'Detailed') + '</button>';
+      var seg = '<div class="seg2" role="group" aria-label="Try a view"><button data-vp="full" aria-pressed="' + !simple + '">Detailed</button><button data-vp="focus" aria-pressed="' + simple + '">Focused</button></div>';
+      var go = '<div class="spacer"></div><button class="btn" data-act="vpgo">Continue with ' + (simple ? 'Focused' : 'Detailed') + '</button>';
       var title = '<h1>' + (n ? 'Lovely to meet you, ' + esc(n) + '.' : 'Choose your view') + '</h1>';
       if (simple) return '<section class="screen vpage simple">' + title + seg + '<p class="lede c">Just what you need. Nothing else.</p>' + go + '</section>';
       return '<section class="screen vpage"><div><div class="eyebrow">Before we start</div>' + title + '</div>' +
         '<div class="vpintro">' + (n ? '<b>Choose your view</b>' : '') + '<p class="lede">Tap each one to try it. This page changes to show you. You can switch any time in Settings.</p></div>' + seg +
         '<ul class="vplist"><li><b>Examples and ideas</b><span>to help you get started</span></li><li><b>Tips and the science</b><span>behind each step</span></li><li><b>Your whole week</b><span>at a glance, plus your past wins</span></li></ul>' +
-        '<p class="hint">Good if you like to see the full picture. Prefer fewer words on screen? Try Simple.</p>' + go + '</section>';
+        '<p class="hint">Good if you like to see the full picture. Prefer fewer words on screen? Try Focused.</p>' + go + '</section>';
     },
     name: function () {
       return '<section class="screen"><div><div class="eyebrow">Before we start</div><h1>What should we call you?</h1></div>' +
@@ -437,7 +451,7 @@
         '<p class="hint">Pausing never touches your progress.</p>');
       h += sect('How it looks', '<div class="choices">' +
         '<button class="choice" data-view="full" aria-pressed="' + (s.view === 'full') + '"><b>Detailed</b><small>Examples, tips and your full progress</small></button>' +
-        '<button class="choice" data-view="focus" aria-pressed="' + (s.view === 'focus') + '"><b>Simple</b><small>Just the essentials, calmer screens</small></button></div>' +
+        '<button class="choice" data-view="focus" aria-pressed="' + (s.view === 'focus') + '"><b>Focused</b><small>Just the essentials, calmer screens</small></button></div>' +
         '<span class="label">Text size</span><div class="chips">' + [['standard', 'Standard'], ['large', 'Large'], ['larger', 'Larger']].map(function (o) { return '<button class="chip" data-text="' + o[0] + '" aria-pressed="' + (s.text === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>' +
         (s.view === 'focus' ? '' : '<button class="switch" role="switch" aria-checked="' + !!s.calm + '" data-toggle="calm"><span><b>Less movement</b></span><span class="track"></span></button>') +
         '<button class="switch" role="switch" aria-checked="' + !!s.buzz + '" data-toggle="buzz"><span><b>Buzz when I tick</b></span><span class="track"></span></button>');
@@ -470,9 +484,14 @@
     install: function () {
       var ios = isIOS(), android = /android/i.test(navigator.userAgent), phone = ios || android, after = ui.installFrom === 'tracker';
       var h = '<section class="screen"><div><div class="eyebrow">' + (after ? 'One last thing' : 'Get the app') + '</div><h1>Put it on your phone</h1></div>' +
-        '<p class="lede"><span class="full-only">Three taps and it’s on your home screen, like any other app. No app store needed.</span><span class="focus-only">Three taps. That’s it.</span></p>';
+        (android && deferredInstall ? '<p class="lede">One tap and it’s on your home screen, like any other app.</p>' : '<p class="lede"><span class="full-only">A few taps and it’s on your home screen, like any other app. No app store needed.</span><span class="focus-only">A few taps. That’s it.</span></p>');
       if (isStandalone()) h += '<div class="card soft"><b style="font-weight:600">You’re all set.</b><span>It’s already on this device as an app.</span></div>';
+      else if (android && deferredInstall) {
+        h += '<button class="btn" data-act="doinstall">' + iconDownload() + 'Add to my phone</button>' +
+          '<details class="ask"><summary>Button not working?</summary>' + installSteps('android') + '</details>';
+      }
       else if (phone) {
+        if (ios) h += '<p class="hint" style="margin-top:-8px">iPhones don’t allow a one-tap button, so it’s two quick taps in Safari.</p>';
         h += installSteps(ios ? 'ios' : 'android');
         h += '<details class="ask"><summary>' + (ios ? 'On Android instead?' : 'On an iPhone instead?') + '</summary>' + installSteps(ios ? 'android' : 'ios') + '</details>';
       } else {
@@ -487,7 +506,7 @@
       var priv = '<p class="hint">Saving to an account backs up your progress and lets your nudges reach you. <a href="privacy.html">How we look after your data</a></p>';
       if (ui.authStep === 'code') return '<section class="screen"><div><div class="eyebrow">Save my progress</div><h1>Check your email</h1></div>' +
         '<p class="lede">We’ve sent a 6-digit code to <b>' + esc(ui.authEmail) + '</b>.</p>' +
-        '<div class="field"><label class="label" for="acode">Your code</label><input class="input code" id="acode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="······"></div>' +
+        '<div class="field"><label class="label" for="acode">Your code</label><div class="otp"><input id="acode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" aria-describedby="aerr"><div class="otp-boxes" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div></div></div>' +
         '<p class="err" id="aerr" hidden></p><button class="btn" data-act="verifycode">Sign in</button>' +
         '<div class="row" style="justify-content:center;gap:16px"><button class="link" data-act="sendcode">Send a new code</button><button class="link" data-act="authback">Use a different email</button></div>' +
         '<p class="hint">Can’t see it? Check your spam or promotions folder.</p></section>';
@@ -632,7 +651,7 @@
     view.innerHTML = screens[s]();
     backBtn.classList.toggle('ghost', !BACK[s] && !ui.hist.length);
     fwdBtn.classList.toggle('ghost', !ui.fwd.length);
-    settingsBtn.classList.toggle('ghost', !S.habit || s === 'settings' || ['what', 'less', 'feel', 'dimmer'].indexOf(s) >= 0);
+    settingsBtn.classList.toggle('ghost', !S.habit || s === 'settings' || ['what', 'less', 'feel', 'dimmer', 'hard'].indexOf(s) >= 0);
     view.querySelectorAll('textarea').forEach(grow);
     if (s === 'words') startSphere();
     window.scrollTo(0, 0);
@@ -718,7 +737,7 @@
   }
 
   // ── One day, opened from the grid ─────────────────────────────────────────
-  var GOT_IN_WAY = ['I just forgot', 'Ran out of time', 'Too tired', 'Plans changed', 'Wasn’t feeling it', 'Something else'];
+  var GOT_IN_WAY = ['I just forgot', 'Ran out of time', 'Too tired', 'Plans changed', 'Wasn’t feeling it'];
   function openDay(n) {
     if (!S.habit) return;
     var t = todayNum(); if (n > t) return;
@@ -739,7 +758,7 @@
         '<b style="font-weight:600">Looking back, what do you notice about this day?</b>' +
         '<span class="hint" style="margin-top:-6px">Spotting what gets in the way is useful. It’s how you learn to work around it.</span>' +
         '<div class="chips">' + GOT_IN_WAY.map(function (w) { return '<button class="chip" data-why="' + esc(w) + '" aria-pressed="' + (nt.why.indexOf(w) >= 0) + '">' + esc(w) + '</button>'; }).join('') + '</div>' +
-        '<textarea id="dwhy" rows="1" placeholder="Anything else you noticed (just for you)">' + esc(nt.note || '') + '</textarea>' +
+        '<textarea id="dwhy" rows="1" placeholder="Something else? Say what it was (just for you)">' + esc(nt.note || '') + '</textarea>' +
         '<button class="btn outline" data-x="savewhy">Save what I noticed</button>' +
         '<p class="hint" style="text-align:center;margin:0">Totally optional. Some days you’d rather leave be, and that’s fine.</p>';
     }
@@ -905,7 +924,7 @@
       }
       return h;
     }
-    if (!user) return authChecked ? '<div class="card soft small"><b style="font-weight:600">Want a reflection on what you wrote?</b><span>Sign in and the app will read it back to you, picking out what seems to matter most.</span><button class="chip" data-account="find" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Sign in</button></div>' : '';
+    if (!user) return authChecked ? '<div class="card soft small"><b style="font-weight:600">Want a reflection on what you wrote?</b><span>Add your email and the app will read it back to you, picking out what seems to matter most. It also saves your progress.</span><button class="chip" data-account="find" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Add my email</button></div>' : '';
     return '<div class="card soft"><b style="font-weight:600">Want a second pair of eyes?</b><span>Tap below and the app will read back what you wrote, spot what seems to matter most, and suggest a few things you could try for your next 30 days.</span><span class="hint">Private, and nothing is kept. <a href="privacy.html">How it works</a></span>' +
       '<button class="btn outline" data-act="reflectai"' + (ui.aiBusy ? ' disabled' : '') + '>' + (ui.aiBusy ? 'Reading what you wrote…' : 'Reflect it back to me') + '</button></div>';
   }
@@ -1002,38 +1021,44 @@
     off: { label: 'I’ve fallen off track', qs: ['What helped you get back on last time?', 'What would make tomorrow easier to show up for?', 'Who or what could help you get going again?'] },
     spark: { label: 'I’ve lost the spark', qs: ['What made you want this in the first place?', 'What would make it feel fresh again?', 'What could you change so it feels more like you?'] }
   };
+  var PAST_YOU = ['Past you left you a note.', 'You told us this would help.', 'Here’s what you said, in your own words.'];
   function struggleScreen() {
-    var hb = S.habit, k = ui.struggle, ex = extra(), worked = ex.worked || [];
-    var h = '<section class="screen"><div><div class="eyebrow">I’m struggling</div><h1>' + (k ? esc(STRUGGLE[k].label) + '.' : 'Thanks for being honest.') + '</h1></div>';
+    var hb = S.habit, k = ui.struggle, ex = extra(), worked = ex.worked || [], hard = ex.hard || {};
+    var h = '<section class="screen"><div><div class="eyebrow">I’m struggling</div><h1>' + (k === 'life' ? 'Life happens.' : k ? esc(STRUGGLE[k].label) + '.' : 'Thanks for being honest.') + '</h1></div>';
     if (!k) {
       h += '<p class="lede">Struggling doesn’t mean you’ve failed. It means it matters. Which feels closest?</p><div style="display:flex;flex-direction:column;gap:10px">';
       Object.keys(STRUGGLE).forEach(function (key) { h += '<button class="choice" style="min-height:62px" data-struggle="' + key + '"><b>' + esc(STRUGGLE[key].label) + '</b></button>'; });
-      h += '</div>';
-      if (worked.length) {
-        h += '<div class="card"><span class="eyebrow">What’s worked for me</span>';
-        worked.slice(-4).reverse().forEach(function (w) { h += '<span>“' + esc(w.a) + '”</span>'; });
-        h += '</div>';
-      }
+      h += '<button class="choice" style="min-height:62px" data-struggle="life"><b>Something came up</b></button></div>';
       return h + '</section>';
+    }
+    var t = todayNum(), canTick = !S.entries[t] && t <= hb.length;
+    if (k === 'life') {
+      var nt = (ex.noticed || {})[t] || {};
+      h += '<p class="lede">Give yourself a break. This isn’t about a perfect run. It’s about showing up again.</p>' +
+        '<div class="why"><span class="eyebrow">If you can</span><span>Do the tiniest version: <b>' + esc(hb.dimmer || 'a lighter version') + '</b>. That still counts.</span></div>' +
+        '<div class="field"><label class="label" for="lifenote">What came up? (just for you)</label><textarea id="lifenote" rows="1" placeholder="e.g. Kids were ill, long day at work">' + esc(nt.note || '') + '</textarea></div>' +
+        '<div class="spacer"></div>' + (canTick ? '<button class="btn" data-tick="dimmer" data-from="slipped">' + checkIcon('#FFFFFF') + 'I did the tiny version</button>' : '') +
+        '<button class="btn outline" data-act="lifesave">Note it and come back tomorrow</button>';
+      return h + '<button class="link center" data-struggle-back="1">Something else</button></section>';
     }
     if (STRUGGLE_VIDEO[k]) h += '<video controls playsinline preload="metadata" src="' + esc(STRUGGLE_VIDEO[k]) + '" style="width:100%;border-radius:10px;background:#0F1215"></video>';
     ex.sq = ex.sq || {};
-    if (!ui.struggleQ || ui.struggleKey !== k) { var i = ex.sq[k] || 0; ui.struggleQ = STRUGGLE[k].qs[i % STRUGGLE[k].qs.length]; ex.sq[k] = i + 1; ui.struggleKey = k; ui.struggleSaved = false; save(false); }
-    if (worked.length) {
-      h += '<div class="card soft small"><span class="eyebrow">What’s worked for you before</span>';
-      worked.slice(-3).reverse().forEach(function (w) { h += '<span>“' + esc(w.a) + '”</span>'; });
-      h += '</div>';
+    if (!ui.struggleQ || ui.struggleKey !== k) { var i = ex.sq[k] || 0; ui.struggleQ = STRUGGLE[k].qs[i % STRUGGLE[k].qs.length]; ui.pastYou = PAST_YOU[i % PAST_YOU.length]; ex.sq[k] = i + 1; ui.struggleKey = k; ui.struggleSaved = false; save(false); }
+    var mine = (hard[k] || '').trim(), before = worked.filter(function (w) { return !w.k || w.k === k; }).slice(-2).reverse();
+    if (mine || before.length) {
+      h += '<div class="card heard"><span class="eyebrow">' + esc(ui.pastYou || PAST_YOU[0]) + '</span>' + (mine ? '<p class="quote">“' + esc(mine) + '”</p>' : '') +
+        before.map(function (w) { return '<span>“' + esc(w.a) + '”</span>'; }).join('') + '</div>';
     }
-    if (ui.struggleSaved) h += '<div class="card small"><b style="font-weight:600">Saved to What’s worked for me.</b><span>It’ll be here next time you need it.</span></div>';
-    else h += '<div class="field"><label class="label" for="worked">' + esc(ui.struggleQ) + '</label><textarea id="worked" rows="2" placeholder="A few words is plenty"></textarea></div>' +
-      '<button class="btn outline" data-act="saveworked">Save to What’s worked for me</button>';
+    if (ui.struggleSaved) h += '<div class="card small"><b style="font-weight:600">Saved.</b><span>It’ll be here next time you need it.</span></div>';
+    else h += '<div class="field"><label class="label" for="worked">' + (mine || before.length ? 'What will you try this time?' : esc(ui.struggleQ)) + '</label><textarea id="worked" rows="1" placeholder="A few words is plenty"></textarea></div>' +
+      '<button class="btn outline" data-act="saveworked">Save it</button>';
     var step = k === 'start' ? 'Do your tough-day version: <b>' + esc(hb.dimmer || 'a lighter version') + '</b>. That counts as showing up.' :
-      k === 'off' ? 'Show up once today, any size. That’s you back on. If you did show up on days you didn’t log, tap them on your tracker.' :
+      k === 'off' ? 'Show up once today, any size. That’s you back on.' :
       'Make it yours again. If your plan doesn’t fit any more, change it. Do it your way.';
     h += '<div class="why"><span class="eyebrow">One small step</span><span>' + step + '</span></div>';
     h += '<div class="spacer"></div>';
     if (k === 'spark') h += '<button class="btn" data-go="plan">Change my plan</button>';
-    if (!S.entries[todayNum()] && todayNum() <= hb.length) h += '<button class="btn' + (k === 'spark' ? ' outline' : '') + '" data-tick="full" data-from="slipped">' + checkIcon(k === 'spark' ? '#0F1215' : '#FFFFFF') + 'I showed up today</button>';
+    if (canTick) h += '<button class="btn' + (k === 'spark' ? ' outline' : '') + '" data-tick="full" data-from="slipped">' + checkIcon(k === 'spark' ? '#0F1215' : '#FFFFFF') + 'I showed up today</button>';
     else h += '<button class="btn outline" data-go="tracker">Back to my tracker</button>';
     return h + '<button class="link center" data-struggle-back="1">Something else</button></section>';
   }
@@ -1099,7 +1124,9 @@
 
   // ── Install prompt ────────────────────────────────────────────────────────
   var deferredInstall = null;
-  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferredInstall = e; });
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferredInstall = e; if (S.screen === 'install') render(); });
+  window.addEventListener('appinstalled', function () { deferredInstall = null; toast('Added to your phone.'); if (S.screen === 'install') render(); });
+  function iconDownload() { return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>'; }
 
   // ── Word sphere ───────────────────────────────────────────────────────────
   var sphereRAF = null;
@@ -1154,7 +1181,15 @@
     if (t.id === 'findbig' && S.find) { S.find.own = t.value; save(false); }
   });
   view.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.id === 'firstname') { e.preventDefault(); nameDone(false); } if (e.key === 'Enter' && e.target.id === 'aemail') { e.preventDefault(); void sendCode(); } if (e.key === 'Enter' && e.target.id === 'acode') { e.preventDefault(); void verifyCode(); } });
-  view.addEventListener('input', function (e) { if (e.target.id === 'acode' && e.target.value.replace(/\D/g, '').length === 6) void verifyCode(); });
+  function paintOtp() {
+    var c = document.getElementById('acode'); if (!c) return;
+    var v = c.value.replace(/\D/g, '').slice(0, 6); if (c.value !== v) c.value = v;
+    var bx = view.querySelectorAll('.otp-boxes span');
+    bx.forEach(function (b, i) { b.textContent = v[i] || ''; b.classList.toggle('on', i === Math.min(v.length, 5) && document.activeElement === c); });
+  }
+  view.addEventListener('input', function (e) { if (e.target.id === 'acode') { paintOtp(); var er = document.getElementById('aerr'); if (er) er.hidden = true; if (e.target.value.length === 6) void verifyCode(); } });
+  view.addEventListener('focusin', function (e) { if (e.target.id === 'acode') paintOtp(); });
+  view.addEventListener('focusout', function (e) { if (e.target.id === 'acode') paintOtp(); });
   view.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.dataset && e.target.dataset.name) { e.preventDefault(); e.target.blur(); } });
   view.addEventListener('change', function (e) {
     if (e.target.dataset && e.target.dataset.name) { e.target.value = e.target.value.replace(/\s+/g, ' ').trim(); saveName(e.target.value); if (e.target.value.trim()) toast('Lovely to meet you, ' + e.target.value.trim() + '.'); return; }
@@ -1192,7 +1227,7 @@
     if (d.vp) { ui.vp = d.vp; return render(); }
     if (d.act === 'vpgo') { S.settings.view = ui.vp || S.settings.view || 'full'; S.viewChosen = true; ui.vp = null; save(); return go(ui.afterName || 'what'); }
     if (d.view) {
-      if (S.settings.view !== d.view) { S.settings.view = d.view; save(); toast(d.view === 'focus' ? 'Simple view on.' : 'Detailed view on.'); }
+      if (S.settings.view !== d.view) { S.settings.view = d.view; save(); toast(d.view === 'focus' ? 'Focused view on.' : 'Detailed view on.'); }
       return render();
     }
     if (d.text) { S.settings.text = d.text; applyComfort(); save(); return render(); }
@@ -1217,7 +1252,8 @@
       case 'catchdone': { var cd = catchDays(todayNum()); S.catchup = (S.catchup || []).concat(cd); save(false); return render(); }
       case 'reflectai': return void reflectAI();
       case 'saveworked': { var wv = (document.getElementById('worked') || {}).value || ''; if (!wv.trim()) { toast('Write a few words first, or skip it.'); return; }
-        var ex = extra(); ex.worked = (ex.worked || []).concat([{ q: ui.struggleQ || '', a: wv.trim(), at: new Date().toISOString() }]); save(); ui.struggleSaved = true; return render(); }
+        var ex = extra(); ex.worked = (ex.worked || []).concat([{ k: ui.struggle || '', q: ui.struggleQ || '', a: wv.trim(), at: new Date().toISOString() }]); save(); ui.struggleSaved = true; return render(); }
+      case 'lifesave': { var lv = ((document.getElementById('lifenote') || {}).value || '').trim(), lx = extra(); lx.noticed = lx.noticed || {}; var cur = lx.noticed[todayNum()] || { why: [] }; cur.why = cur.why || []; if (cur.why.indexOf('Plans changed') < 0) cur.why.push('Plans changed'); if (lv) cur.note = lv; cur.at = new Date().toISOString(); lx.noticed[todayNum()] = cur; save(); ui.struggle = null; toast('Noted. See you tomorrow.'); return go('tracker'); }
       case 'sharenote': ui.shareNote = !ui.shareNote; return render();
       case 'shareimg': return void shareImage();
       case 'whatsapp': { var tt = Math.min(todayNum(), S.habit.length); window.open('https://wa.me/?text=' + encodeURIComponent(habitName() + ': I showed up ' + count(function (x, k) { return k <= S.habit.length; }) + ' of ' + tt + ' days.'), '_blank', 'noopener'); return; }
@@ -1228,7 +1264,7 @@
       case 'readydone': if (!isStandalone() && !S.installShown) { S.installShown = true; save(false); ui.installFrom = 'tracker'; return go('install'); } return go('tracker');
       case 'installdone': ui.installFrom = null; S.installDismissed = true; save(false); return go('tracker');
       case 'copylink': try { navigator.clipboard.writeText(location.origin + location.pathname); toast('Link copied. Open it on your phone.'); } catch (e) { toast(location.origin + location.pathname); } return;
-      case 'doinstall': if (deferredInstall) { deferredInstall.prompt(); deferredInstall = null; } return;
+      case 'doinstall': if (deferredInstall) { var dp = deferredInstall; dp.prompt(); (dp.userChoice || Promise.resolve({})).then(function (c) { if (c && c.outcome === 'accepted') { deferredInstall = null; render(); } }); } return;
       case 'push': return void togglePush();
       case 'quoteok': ui.reflect.ok = !ui.reflect.ok; return render();
       case 'savereflect': return void saveReflect();
@@ -1310,6 +1346,13 @@
     when: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>'
   };
   function planEditor() { return screens._editform(); }
+  function daysPhrase() {
+    var d = (S.settings.days || []).slice().sort(), N = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    if (d.length === 7 || !d.length) return 'Each day';
+    if (d.join() === '1,2,3,4,5') return 'Each weekday';
+    if (d.join() === '0,6') return 'Each weekend day';
+    return 'On ' + d.map(function (x) { return N[x]; }).join(', ');
+  }
   // The plan: their own answers, laid out simply, each one editable.
   function planCard(from) {
     var h = S.habit, less = h.mode === 'less', s = S.settings;
@@ -1319,9 +1362,9 @@
     var ed = '<button class="pedit" data-act="planedit">Edit</button>';
     var chips = '<div class="pchips">' + words().map(function (w, i) { return '<span' + (i === 0 ? ' class="first"' : '') + '>' + esc(w.toLowerCase()) + '</span>'; }).join('') + '</div>';
     var out = '<div class="plancard">' +
-      row(PICON.what, less ? 'I’m cutting back on' : 'I’m going to', '<b>' + esc(h.what) + '</b>', ed) +
+      row(PICON.what, less ? 'I’m cutting back on' : 'I’m going to', '<b>' + esc(h.what) + '</b><span class="psub">' + daysPhrase() + '</span>', ed) +
       row(PICON.why, less ? 'What I’m moving towards' : 'How I’ll feel', chips, ed);
-    if (less && (h.instead || '').trim()) out += row(PICON.swap, 'When it pulls at me, I’ll', '<b>' + esc(h.instead) + '</b>', ed);
+    if (less && (h.instead || '').trim()) out += row(PICON.swap, 'When the urge hits, I’ll', '<b>' + esc(h.instead) + '</b>', ed);
     out += row(iconDown('#0F1215', 22), 'On a tough day, I’ll turn it down to', '<b>' + esc(h.dimmer) + '</b>', ed) +
       row(PICON.when, 'For how long', '<b>' + h.length + ' days</b><span class="psub">Morning nudge at ' + esc(fmtTime(s.time)) + '</span>', '<button class="pedit" data-length="' + from + '">Change</button>') +
       '</div>';
@@ -1342,7 +1385,7 @@
   }
   function finishSetup() {
     var dr = S.draft;
-    S.habit = { id: uuid(), mode: dr.mode, what: dr.what.trim(), gives: dr.gives.slice(), instead: dr.instead, feel: dr.feel.slice(), ownFeel: dr.ownFeel, dimmer: dr.dimmer.trim(), length: dr.length, start: todayStr(), status: 'active', extra: Object.assign(dr.found ? { found: dr.found } : {}, S.wins && S.wins.length ? { wins: S.wins.slice() } : {}), createdAt: new Date().toISOString() };
+    S.habit = { id: uuid(), mode: dr.mode, what: dr.what.trim(), gives: dr.gives.slice(), instead: dr.instead, feel: dr.feel.slice(), ownFeel: dr.ownFeel, dimmer: dr.dimmer.trim(), length: dr.length, start: todayStr(), status: 'active', extra: Object.assign({ hard: { start: (dr.hardStart || '').trim(), off: (dr.hardOff || '').trim(), spark: (dr.hardSpark || '').trim() } }, dr.found ? { found: dr.found } : {}, S.wins && S.wins.length ? { wins: S.wins.slice() } : {}), createdAt: new Date().toISOString() };
     S.entries = {}; S.later = false; S.fb = {}; save();
     finishMoment();
   }
@@ -1430,7 +1473,7 @@
     if (r.error || !r.token_hash) {
       btn.disabled = false; btn.textContent = 'Sign in';
       err.textContent = r.error === 'wrong' ? 'That code didn’t match.' + (r.left ? ' ' + r.left + ' tries left.' : '') : r.error === 'expired' ? 'That code has run out. Tap “Send a new code”.' : r.error === 'too_many' ? 'Too many tries. Tap “Send a new code”.' : 'Couldn’t sign in just now. Please try again.';
-      err.hidden = false; return;
+      err.hidden = false; c.value = ''; paintOtp(); c.focus(); var ob = view.querySelector('.otp'); if (ob) { ob.classList.remove('shake'); void ob.offsetWidth; ob.classList.add('shake'); } return;
     }
     var v = await sb.auth.verifyOtp({ token_hash: r.token_hash, type: 'email' });
     if (v.error) { btn.disabled = false; btn.textContent = 'Sign in'; err.textContent = 'Couldn’t sign in just now. Please try again.'; err.hidden = false; return; }
@@ -1454,7 +1497,7 @@
 
   // ── Boot ──────────────────────────────────────────────────────────────────
   applyComfort();
-  if (S.habit && ['landing', 'what', 'less', 'feel', 'dimmer', 'find', 'name', 'viewpick'].indexOf(S.screen) >= 0) S.screen = 'tracker';
+  if (S.habit && ['landing', 'what', 'less', 'feel', 'dimmer', 'hard', 'find', 'name', 'viewpick'].indexOf(S.screen) >= 0) S.screen = 'tracker';
   if (!S.habit && ['tracker', 'note', 'share', 'slipped', 'reflect', 'edit', 'settings'].indexOf(S.screen) >= 0) S.screen = 'landing';
   ui.authStep = null;
   if (['account', 'install', 'length', 'words'].indexOf(S.screen) >= 0) S.screen = S.habit ? 'tracker' : 'landing';
