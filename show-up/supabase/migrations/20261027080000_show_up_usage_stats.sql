@@ -1,4 +1,5 @@
 -- Show Up: usage stats. Which screens people visit and which buttons they tap,
+-- how long on each screen, device type, time of day and day of the challenge,
 -- never anything they write. Kept 12 months. Only Stuart can read it.
 -- People can switch it off in Settings ("Help improve Show Up").
 
@@ -10,6 +11,11 @@ create table if not exists public.showup_events (
   screen text check (char_length(screen) <= 30),
   detail text check (char_length(detail) <= 60),
   view_mode text check (view_mode in ('full', 'focus')),
+  platform text check (platform in ('ios', 'android', 'desktop', 'other')),
+  installed boolean,
+  local_hour smallint check (local_hour between 0 and 23),
+  day_num smallint,
+  ms integer check (ms >= 0),
   created_at timestamptz not null default now()
 );
 create index if not exists idx_showup_events_time on public.showup_events (created_at);

@@ -514,6 +514,7 @@
       return '<section class="screen"><div><div class="eyebrow">Save my progress</div><h1>Sign in or create your account</h1></div>' +
         '<p class="lede">Just your email. We’ll send you a 6-digit code, so there’s no password to remember.</p>' +
         '<div class="field"><label class="label" for="aemail">Email</label><input class="input" id="aemail" type="email" autocomplete="email" inputmode="email" value="' + esc(ui.authEmail || '') + '"></div>' +
+        (S.consentAt ? '' : '<label class="consent"><input type="checkbox" id="aconsent"><span>I agree to Show Up storing my habit, progress and notes so it can run for me. <a href="privacy.html">Privacy</a></span></label>') +
         '<p class="err" id="aerr" hidden></p><button class="btn" data-act="sendcode">Send my code</button>' + priv + '</section>';
     }
   };
@@ -659,10 +660,14 @@
   }
   // Back goes to the screen they were just on; forward returns them to where they were. What they typed is kept.
   // ── Usage stats (which buttons and screens, never anything written). Off via Settings. ──
-  var statQ = [], statSid = (window.crypto && crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2)).slice(0, 36), statTimer = null;
+  var statQ = [], statSid = (window.crypto && crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2)).slice(0, 36), statTimer = null, statShown = Date.now();
   function stat(event, detail) {
     if (S.settings.analytics === false || !sb) return;
-    statQ.push({ user_id: user ? user.id : null, session_id: statSid, event: String(event).slice(0, 40), screen: String(S.screen || '').slice(0, 30), detail: detail == null ? null : String(detail).slice(0, 60), view_mode: S.settings.view === 'focus' ? 'focus' : 'full' });
+    var now = Date.now(), ms = event === 'screen' ? Math.min(now - statShown, 86400000) : null;
+    var ua = navigator.userAgent, plat = isIOS() ? 'ios' : /android/i.test(ua) ? 'android' : /mobile/i.test(ua) ? 'other' : 'desktop';
+    statQ.push({ user_id: user ? user.id : null, session_id: statSid, event: String(event).slice(0, 40), screen: String(S.screen || '').slice(0, 30), detail: detail == null ? null : String(detail).slice(0, 60),
+      view_mode: S.settings.view === 'focus' ? 'focus' : 'full', platform: plat, installed: isStandalone(), local_hour: new Date().getHours(), day_num: S.habit ? Math.min(todayNum(), 999) : null, ms: ms });
+    if (event === 'screen') statShown = now;
     if (!statTimer) statTimer = setTimeout(flushStats, 5000);
   }
   function flushStats() {
@@ -1472,6 +1477,9 @@
   async function sendCode() {
     var el = document.getElementById('aemail'), err = document.getElementById('aerr'), email = ((el && el.value) || ui.authEmail || '').trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { if (err) { err.textContent = 'That email doesn’t look quite right.'; err.hidden = false; } return; }
+    var ck = document.getElementById('aconsent');
+    if (ck && !ck.checked) { if (err) { err.textContent = 'Tick the box to agree, so we can save your progress.'; err.hidden = false; } return; }
+    if (ck) { S.consentAt = new Date().toISOString(); save(false); }
     var btn = view.querySelector('[data-act="sendcode"]'); if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
     var r = await codeCall({ action: 'send', email: email });
     if (r.error) {
@@ -1521,6 +1529,7 @@
   if (['account', 'install', 'length', 'words'].indexOf(S.screen) >= 0) S.screen = S.habit ? 'tracker' : 'landing';
   if (S.habit && ['ready', 'plan', 'settings', 'science', 'share', 'note', 'slipped'].indexOf(S.screen) >= 0) S.screen = 'tracker';
   render();
+  stat('open', S.habit ? 'has_habit' : 'new');
   (async function () {
     if (!sb) { greet(); return; }
     try {
