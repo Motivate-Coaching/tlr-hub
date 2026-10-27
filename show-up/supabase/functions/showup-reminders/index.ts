@@ -31,7 +31,7 @@ type Profile = {
   user_id: string; timezone: string; reminder_time: string; reminder_days: number[]
   remind_email: boolean; remind_push: boolean; paused_until: string | null
 }
-type Habit = { id: string; user_id: string; what: string; dimmer: string; length_days: number; start_date: string; mode: string }
+type Habit = { id: string; user_id: string; what: string; dimmer: string; length_days: number; start_date: string; mode: string; extra?: { anchor?: string } }
 
 function localParts(now: Date, tz: string) {
   let parts: Intl.DateTimeFormatPart[]
@@ -51,12 +51,12 @@ function esc(s: string) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!))
 }
 
-function emailHtml(o: { day: number; length: number; what: string; dimmer: string; line: string; comeback: boolean; less: boolean; noticed: boolean }) {
+function emailHtml(o: { day: number; length: number; what: string; dimmer: string; line: string; comeback: boolean; less: boolean; noticed: boolean; anchor?: string }) {
   const year = new Date().getUTCFullYear()
   const headline = o.comeback ? `Day ${o.day}. A comeback day.` : `Day ${o.day}. Today counts.`
   const intro = o.comeback
     ? 'Missed a day, or just didn’t log it? Either way, today is the one that matters. If you did show up, you can fill it in on your tracker.'
-    : 'Showed up already, or about to? One tap and it counts.'
+    : (o.anchor ? `${esc(o.anchor)}: ${esc(o.what)}. ` : '') + 'Showed up already, or about to? One tap and it counts.'
   const noticed = o.noticed
     ? `<p style="margin:0 0 22px;font-size:15px;line-height:1.6;color:#1A1A1A;background:#F5F1EB;border-left:3px solid #C9930A;padding:12px 16px;border-radius:4px;">Thank you for looking back at the days that didn’t go to plan. Noticing what gets in the way is how you learn to work around it. That’s you still showing up, even when it’s tough. Let’s go again today.</p>`
     : ''
@@ -132,6 +132,8 @@ Deno.serve(async () => {
     if (ticked.has(day)) continue
     const comeback = day > 1 && !ticked.has(day - 1) && ticked.size > 0
     const line = LINES[(day - 1) % LINES.length]
+    const a = String(habit.extra?.anchor || '').trim()
+    const anchor = a ? (habit.mode === 'less' ? `Usually ${a}` : `After I ${a}`) : ''
     // Recognise anyone who looked back at a missed day since yesterday's nudge.
     const noticedMap = ((habit as unknown as { extra?: { noticed?: Record<string, { at?: string }> } }).extra?.noticed) || {}
     const noticed = Object.values(noticedMap).some((n) => n?.at && now.getTime() - Date.parse(n.at) < 24 * 3600_000)
@@ -142,7 +144,7 @@ Deno.serve(async () => {
         const res = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ from: FROM, to: [emailById.get(p.user_id)], subject: `Day ${day}: ${habit.what}`, html: emailHtml({ day, length: habit.length_days, what: habit.what, dimmer: habit.dimmer, line, comeback, less: habit.mode === 'less', noticed }) }),
+          body: JSON.stringify({ from: FROM, to: [emailById.get(p.user_id)], subject: `Day ${day}: ${habit.what}`, html: emailHtml({ anchor, day, length: habit.length_days, what: habit.what, dimmer: habit.dimmer, line, comeback, less: habit.mode === 'less', noticed }) }),
         })
         if (res.ok) emails++
         else { console.error('[showup-reminders] Resend error', await res.text()); await admin.from('showup_reminder_log').delete().match({ user_id: p.user_id, local_date: local.date, channel: 'email' }) }
@@ -153,7 +155,7 @@ Deno.serve(async () => {
       const { error: logErr } = await admin.from('showup_reminder_log').insert({ user_id: p.user_id, local_date: local.date, channel: 'push' })
       if (!logErr) {
         const { data: subs } = await admin.from('showup_push_subscriptions').select('*').eq('user_id', p.user_id)
-        const payload = JSON.stringify({ title: comeback ? `Day ${day}: a comeback day` : `Day ${day}: ${habit.what}`, body: `Showed up? One tap. Tough day? ${habit.dimmer}`, url: APP_URL + '?from=push' })
+        const payload = JSON.stringify({ title: comeback ? `Day ${day}: a comeback day` : `Day ${day}: ${habit.what}`, body: (anchor && habit.mode !== 'less' ? `${anchor}. ` : '') + `Showed up? One tap. Tough day? ${habit.dimmer}`, url: APP_URL + '?from=push' })
         for (const s of subs || []) {
           try {
             await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload, { TTL: 3 * 3600 })
