@@ -252,7 +252,7 @@
         '<span class="hint">In your own words.' + (more ? ' Small enough to do on a rubbish day.' : '') + '</span></div>' +
         optional('Show me some ideas', '<div class="starters">' + (more ? STARTERS_MORE : STARTERS_LESS).map(function (s) { return '<button class="chip" data-starter="' + esc(s) + '">' + esc(s) + '</button>'; }).join('') + '</div>' +
           (more ? '<button class="link" data-act="ideas">More ideas</button>' : '')) +
-        '<button class="card soft askhelp" data-find="start" data-mode="' + d.mode + '"><b>Not sure yet? Let’s work it out together.</b><span>Answer three or four questions and we’ll suggest a few challenges that fit you.</span></button>' +
+        '<button class="card soft askhelp" data-find="start" data-mode="' + d.mode + '"><b>Not sure yet? Let’s work it out together.</b><span>Two questions, then we’ll suggest where to focus.</span></button>' +
         '<div class="spacer"></div>' + stepButton('what') + '</section>' +
         (ui.ideasOpen ? ideasSheet() : '');
     },
@@ -710,6 +710,7 @@
     S.screen = s; save(false); render();
   }
   function goBack() {
+    if (S.screen === 'find' && S.find && S.find.ai && S.find.r && S.find.r !== 'areas') { S.find.r = S.find.r === 'ideas' ? 'insight' : 'areas'; save(false); return render(); }
     if (S.screen === 'find' && S.find && S.find.step > 0) { S.find.step--; save(false); return render(); }
     var prev = ui.hist.pop();
     if (prev && screens[prev]) { ui.fwd.push(S.screen); return go(prev, true); }
@@ -880,16 +881,14 @@
   var HORIZONS = [['30', '30 days'], ['90', 'three months'], ['365', 'a year']];
   function horizonLabel() { var f = S.find || {}, h = HORIZONS.filter(function (x) { return x[0] === f.horizon; })[0] || HORIZONS[1]; return h[1]; }
   function FIND_QS() {
+    var proud = { key: 'proud', q: 'Picture yourself a year from now, looking back. What would you have done that makes you incredibly proud of yourself?', hint: 'Picture how life feels, not just the thing you did.', ph: 'e.g. I’d love to be able to say I sleep properly and my evenings are mine again' };
     if (S.find && S.find.mode === 'less') return [
-      { key: 'drain', q: 'What’s one thing you do that costs you more than it gives you?', hint: 'The thing you already know about. No judgement, just honesty.', ph: 'e.g. Scrolling in bed until midnight' },
-      { key: 'lighter', future: true, q: 'Picture yourself ' + horizonLabel() + ' from now, looking back. What would you love to be able to say you cut back on?', hint: 'Picture how life feels, not just the thing you stopped.', ph: 'I’d love to be able to say I...' },
-      { key: 'tried', q: 'What have you tried to cut back on before? What got in the way?', hint: 'What got in the way is useful. It helps you plan for it this time.', ph: 'e.g. Deleted the app, then put it back a week later' }
+      { key: 'drain', q: 'What do you do regularly that costs you more than it gives you?', hint: 'Jot down whatever comes. We’ll narrow it down together.', ph: 'e.g. Scrolling in bed at night, too much chocolate, not being present with family' },
+      proud
     ];
     return [
-      { key: 'proud', future: true, q: 'Picture yourself ' + horizonLabel() + ' from now, looking back. What would you love to be able to say you did?', hint: 'The one that would make you really proud of yourself.', ph: 'I’d love to be able to say I...' },
-      { key: 'years', q: 'What have you wanted to do for years, and never quite got round to?', hint: 'Big or small. It still counts if it’s been on the list forever.', ph: 'e.g. Learn to play the guitar' },
-      { key: 'new', q: 'Is there something new you’re curious to explore?', hint: 'Something you keep noticing, or wondering about.', ph: 'e.g. Cold water swimming' },
-      { key: 'admire', q: 'Think of someone you admire. What do they do that you’d love to get better at?', hint: 'Speaking well. Being fit and strong. Staying calm. These are all skills, and skills can be built.', ph: 'e.g. My friend stays so calm under pressure' }
+      { key: 'years', q: 'What have you wanted to do for years, or keep thinking about trying?', hint: 'Jot down whatever comes. We’ll narrow it down together.', ph: 'e.g. Get fit again, learn the guitar, write more, be calmer' },
+      proud
     ];
   }
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition, rec = null;
@@ -921,46 +920,49 @@
     var f = S.find || (S.find = { step: 0, answers: {} }), qs = FIND_QS();
     if (f.step < qs.length) {
       var q = qs[f.step], v = f.answers[q.key] || '';
-      return '<section class="screen"><div><div class="eyebrow">Let’s work it out · ' + (f.step + 1) + ' of ' + (qs.length + 1) + '</div>' +
-        (f.step === 0 ? '<p class="lede workintro">Answer a few questions, typed or spoken, and skip any you like. Then we’ll read back what you said and suggest a few challenges that fit you.</p>' : '') +
+      var bar = '<div class="progress" style="grid-template-columns:repeat(' + qs.length + ',1fr)" aria-hidden="true">' + qs.map(function (x, i) { return '<span' + (i <= f.step ? ' class="on"' : '') + '></span>'; }).join('') + '</div>';
+      return '<section class="screen"><div class="stepper">' + bar + '<div class="eyebrow" style="margin-top:12px">Challenge ideas · ' + (f.step + 1) + ' of ' + qs.length + '</div>' +
+        (f.step === 0 ? '<p class="lede workintro">Take your time. Write or speak whatever comes up, ums and all, as much as you like. The more you share, the better we can help you find a challenge that genuinely matters to you.</p>' : '') +
         '<h1 class="findq">' + esc(q.q) + '</h1></div>' +
-        (q.future ? '<div class="chips" role="group" aria-label="How far ahead"><span class="label" style="width:100%">How far ahead?</span>' + HORIZONS.map(function (x) { return '<button class="chip" data-horizon="' + x[0] + '" aria-pressed="' + ((f.horizon || '90') === x[0]) + '">' + (x[0] === '30' ? '30 days' : x[0] === '90' ? '3 months' : 'A year') + '</button>'; }).join('') + '</div>' : '') +
         '<p class="hint" style="margin-top:-8px">' + esc(q.hint) + '</p>' +
-        '<div class="field"><textarea id="findans" rows="3" style="min-height:120px" placeholder="' + esc(q.ph) + '">' + esc(v) + '</textarea>' + micButton() + '<span class="hint">Only you see this.</span></div>' +
-        '<div class="spacer"></div><button class="btn" data-find="next">' + 'Next' + '</button>' +
+        '<div class="field"><textarea id="findans" rows="5" style="min-height:180px" placeholder="' + esc(q.ph) + '">' + esc(v) + '</textarea>' + micButton() + '<span class="hint">Only you see this.</span></div>' +
+        '<div class="spacer"></div><button class="btn" data-find="next">' + (f.step === qs.length - 1 ? 'Show me ideas' : 'Next') + '</button>' +
         '<button class="link center" data-find="skip">Skip this one</button></section>';
     }
-    if (f.step === qs.length) return winsScreen(true);
-    if (f.step === qs.length + 1) {
-      var picks = qs.filter(function (q) { return (f.answers[q.key] || '').trim(); });
-      var h = '<section class="screen"><div><div class="eyebrow">Let’s work it out</div><h1>Here’s what you said.</h1></div>' +
-        '<p class="lede">Read it back. Which one gives you a little jolt? That’s usually the one. Try something again, or push yourself with something new.</p>' + aiCard(f, picks.length + (S.wins || []).length) + '<div style="display:flex;flex-direction:column;gap:10px">';
-      if (f.ai && f.ai.options && f.ai.options.length) h += '<span class="eyebrow">In your own words</span>';
-      picks.forEach(function (q) { h += '<button class="choice findpick" data-find="pick" data-key="' + q.key + '" aria-pressed="' + (f.pick === q.key) + '"><small>' + esc(q.q.replace(/^Picture yourself [^,]*, looking back\. /, '')) + '</small><b>' + esc(f.answers[q.key].trim()) + '</b></button>'; });
-      var wins = S.wins || [];
-      if (!picks.length && !wins.length) h += '<div class="card soft small"><span>Nothing written yet, and that’s fine. Go back and jot down a few words, or name your focus below.</span></div>';
-      if (wins.length) {
-        h += '<span class="eyebrow" style="margin-top:6px">Or try one again</span>';
-        wins.forEach(function (w) { h += '<button class="choice findpick" data-find="pick" data-key="win:' + w.id + '" aria-pressed="' + (f.pick === 'win:' + w.id) + '"><small>' + esc(OUTCOME[w.outcome] || 'Done before') + '</small><b>' + esc(w.name) + '</b></button>'; });
-      }
-      h += '<button class="choice findpick" data-find="pick" data-key="own" aria-pressed="' + (f.pick === 'own') + '"><b>Something else</b><small>I know what it is now.</small></button></div>';
-      return h + '<div class="spacer"></div><button class="btn" data-find="chosen"' + (f.pick ? '' : ' disabled') + '>This is the one</button></section>';
-    }
-    if (f.step === qs.length + 2) {
-      var big = f.pick === 'own' ? '' : pickText(f);
-      return '<section class="screen"><div><div class="eyebrow">Let’s work it out</div><h1>' + (f.mode === 'less' ? 'Make it clear and doable.' : 'Make it something you can do most days.') + '</h1></div>' +
-        (big ? '<div class="why"><span class="eyebrow">What you’re working towards</span><span style="font-weight:600">' + esc(big) + '</span></div>' : '<div class="field"><label class="label" for="findbig">What do you want to work on?</label><textarea id="findbig" rows="1" placeholder="In your words">' + esc(f.own || '') + '</textarea></div>') +
-        '<div class="field"><label class="label" for="finddo">' + (f.mode === 'less' ? 'What exactly will you cut back on, most days?' : 'What could you do most days that moves you towards it?') + '</label><textarea id="finddo" rows="1" placeholder="' + (f.mode === 'less' ? 'e.g. No phone in bed, or chocolate only at weekends' : 'Something small enough to do on a busy day') + '">' + esc(f.daily || '') + '</textarea></div>' +
-        optional('Show me examples', '<div class="card small"><span>Speak better? <b>Read one page out loud a day.</b></span><span>Get fitter? <b>A 20-minute walk before work.</b></span><span>Calmer? <b>Five slow breaths before I open my phone.</b></span><span>Write the book? <b>200 words, first thing.</b></span></div>') +
-        '<div class="spacer"></div><button class="btn" data-find="daily">Next</button></section>';
-    }
-    return '<section class="screen"><div><div class="eyebrow">Let’s work it out</div><h1>One thing. On purpose.</h1></div>' +
-      '<p class="lede">The word priority came into English in the 1400s, and for about 500 years it was singular. The one thing that came first. We only started saying priorities in the 1900s. If everything’s a priority, nothing is.</p>' +
-      '<div class="why"><span class="eyebrow">Why one thing works</span><span>One focus, done most days, compounds. Small on its own, big over 30 days.</span><span>Some days will be tough. That’s part of it, and you’ve got a plan for those.</span><span>And underneath the habit, you’re building a skill: patience, focus, trusting yourself. Like wax on, wax off. It looks like painting the fence, and you’re learning karate.</span></div>' +
-      '<div class="why"><span class="eyebrow">You chose</span><span style="font-weight:600">' + esc(f.daily || '') + '</span>' + (f.big ? '<span class="soft" style="font-size:14px">Towards: ' + esc(f.big) + '</span>' : '') + '</div>' +
-      '<div class="spacer"></div><button class="btn" data-find="go">Let’s set it up</button></section>';
+    return ideasScreen(f);
   }
-  // ── "What I'm hearing": an AI reflection of their own words (signed in, a few a day) ──
+  // After the questions: the AI pulls out the areas, they pick one, check it rings true, then choose a challenge.
+  function ideasScreen(f) {
+    var top = '<section class="screen"><div><div class="eyebrow">Challenge ideas</div>';
+    var own = '<div class="field"><label class="label" for="ownch">Or write my own</label><textarea id="ownch" rows="1" placeholder="' + (f.mode === 'less' ? 'e.g. No phone in bed' : 'e.g. A 20 minute walk each day') + '">' + esc(f.own || '') + '</textarea></div><button class="btn outline" data-find="own">Use mine</button>';
+    var ai = f.ai || {}, areas = ai.areas || [];
+    if (ai.care) return top + '<h1>Before anything else.</h1></div><div class="why"><span>' + esc(ai.care) + '</span></div><div class="spacer"></div>' + own + '</section>';
+    if (!areas.length) {
+      if (!user) return top + '<h1>Your challenge ideas are ready to make.</h1></div><p class="lede">Add your email and we’ll read what you shared and suggest where to focus. It also saves your progress.</p>' +
+        (authChecked ? '<button class="btn" data-account="find">Add my email</button>' : '') + '<div class="spacer"></div>' + own + '</section>';
+      if (!f.aiTried && !ui.aiBusy) setTimeout(reflectAI, 0);
+      if (ui.aiBusy || !f.aiTried) return top + '<h1>Reading what you shared…</h1></div><p class="lede">Looking for what matters most to you. This takes a few seconds.</p><div class="dotpulse" aria-hidden="true"><span></span><span></span><span></span></div></section>';
+      return top + '<h1>We couldn’t reach it just now.</h1></div><button class="btn" data-act="reflectai">Try again</button><div class="spacer"></div>' + own + '</section>';
+    }
+    var r = f.r || 'areas', ar = areas[f.area || 0] || areas[0];
+    if (r === 'areas') {
+      var h = top + '<h1>Here’s what stood out.</h1></div><p class="lede">From what you shared, this sounds like the area that most needs your focus right now.</p>';
+      h += '<button class="choice area main" data-find="area" data-i="0"><small>Most prominent</small><b>' + esc(areas[0].name) + '</b><span>' + esc(areas[0].noticed) + '</span></button>';
+      if (areas.length > 1) {
+        h += '<span class="eyebrow" style="margin-top:4px">Or explore</span><div class="chips">';
+        areas.slice(1).forEach(function (x, i) { h += '<button class="chip" data-find="area" data-i="' + (i + 1) + '">' + esc(x.name) + '</button>'; });
+        h += '</div>';
+      }
+      return h + '<p class="hint">Choose one thing. You can always come back for more later.</p><div class="spacer"></div><button class="link center" data-find="ownonly">I know what I want to do</button></section>';
+    }
+    if (r === 'insight') {
+      return top + '<h1>' + esc(ar.name) + '</h1></div><div class="why"><span class="eyebrow">What we noticed</span><span>' + esc(ar.noticed) + '</span><span style="font-weight:600">' + esc(ar.insight) + '</span></div>' +
+        '<p class="lede">Does this ring true?</p><div class="spacer"></div><button class="btn" data-find="resonates">Yes, that’s it</button><button class="btn outline" data-find="toareas">Not quite. Show me the other areas</button></section>';
+    }
+    var h2 = top + '<h1>A few challenges to try.</h1></div><p class="lede">Within ' + esc(ar.name.toLowerCase()) + ', pick the one that gives you a little jolt.</p><div style="display:flex;flex-direction:column;gap:10px">';
+    (ar.challenges || []).forEach(function (c, i) { h2 += '<button class="choice" data-find="take" data-i="' + i + '"><b>' + esc(c.title) + '</b><small>' + esc(c.daily) + '</small></button>'; });
+    return h2 + '</div>' + own + '<div class="spacer"></div><button class="link center" data-find="toareas">Not convinced? Back to the areas</button></section>';
+  }
   function aiCard(f, n) {
     if (!n || !sb) return '';
     if (f.ai && f.ai.care) return '<div class="why"><span class="eyebrow">Before anything else</span><span>' + esc(f.ai.care) + '</span></div>';
@@ -974,19 +976,20 @@
       }
       return h;
     }
-    if (!user) return authChecked ? '<div class="card soft small"><b style="font-weight:600">Want a reflection on what you wrote?</b><span>Add your email and the app will read it back to you, picking out what seems to matter most. It also saves your progress.</span><button class="chip" data-account="find" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Add my email</button></div>' : '';
-    return '<div class="card soft"><b style="font-weight:600">Want a second pair of eyes?</b><span>Tap below and the app will read back what you wrote, spot what seems to matter most, and suggest a few things you could try for your next 30 days.</span><span class="hint">Private, and nothing is kept. <a href="privacy.html">How it works</a></span>' +
-      '<button class="btn outline" data-act="reflectai"' + (ui.aiBusy ? ' disabled' : '') + '>' + (ui.aiBusy ? 'Reading what you wrote…' : 'Reflect it back to me') + '</button></div>';
+    if (!user) return authChecked ? '<div class="card soft small"><b style="font-weight:600">Want challenges made for you?</b><span>Add your email and we’ll suggest a few, based on what you wrote. It also saves your progress.</span><button class="chip" data-account="find" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Add my email</button></div>' : '';
+    if (!f.aiTried && !ui.aiBusy) setTimeout(reflectAI, 0);
+    return '<div class="card soft"><b style="font-weight:600">Want challenges made for you?</b><span>We’ll read what you wrote and suggest a few that fit.</span>' +
+      '<button class="btn outline" data-act="reflectai"' + (ui.aiBusy ? ' disabled' : '') + '>' + (ui.aiBusy ? 'Finding challenges for you…' : 'Suggest challenges for me') + '</button></div>';
   }
   async function reflectAI() {
     var f = S.find; if (!f || !sb || !user || ui.aiBusy) return;
-    ui.aiBusy = true; render();
+    f.aiTried = true; ui.aiBusy = true; render();
     try {
       var r = await sb.functions.invoke('showup-reflect', { body: { mode: f.mode || 'more', answers: f.answers, wins: (S.wins || []).map(function (w) { return { name: w.name, outcome: w.outcome }; }), horizon: horizonLabel() } });
       if (r.error) {
         var st = r.error.context && r.error.context.status;
-        toast(st === 429 ? 'That’s today’s reflections used. Your own words below work just as well.' : 'Couldn’t reach it just now. Try again in a moment.');
-      } else if (r.data && (r.data.heard || r.data.care)) { f.ai = r.data; save(false); }
+        toast(st === 429 ? 'That’s today’s ideas used. Write your own below, or come back tomorrow.' : 'Couldn’t reach it just now. Try again in a moment.');
+      } else if (r.data && ((r.data.areas && r.data.areas.length) || r.data.care)) { f.ai = r.data; f.r = 'areas'; f.area = 0; save(false); }
     } catch (e) { toast('Couldn’t reach it just now. Try again in a moment.'); }
     ui.aiBusy = false; render();
   }
@@ -1048,17 +1051,28 @@
   function findAct(a, b) {
     var f = S.find || (S.find = { step: 0, answers: {} }), qs = FIND_QS();
     if (rec) { try { rec.stop(); } catch (e) {} }
-    if (a === 'start') { var md = (b && b.dataset.mode) || 'more', keep = S.find && S.find.mode === md ? S.find.answers : {}; S.find = { step: 0, mode: md, answers: keep || {} }; save(false); return askNameThen('find'); }
-    if (a === 'next') { findSave(); f.step++; save(false); return go('find'); }
-    if (a === 'skip') { f.step++; save(false); return go('find'); }
+    if (a === 'start') { var md = (b && b.dataset.mode) || 'more', keep = S.find && S.find.mode === md ? S.find.answers : {}; S.find = { step: 0, mode: md, answers: keep || {}, horizon: '365' }; save(false); return askNameThen('find'); }
+    if (a === 'next' || a === 'skip') { if (a === 'next') findSave(); f.step++; f.ai = null; f.aiTried = false; f.r = 'areas'; f.area = 0; f.pick = null; save(false); return go('find'); }
+    if (a === 'area') { f.area = +b.dataset.i; f.r = 'insight'; save(false); return render(); }
+    if (a === 'resonates') { f.r = 'ideas'; save(false); return render(); }
+    if (a === 'toareas') { f.r = 'areas'; save(false); return render(); }
+    if (a === 'ownonly') { f.r = 'ideas'; f.ownOnly = true; save(false); return render(); }
+    if (a === 'take' || a === 'own') {
+      var ar = ((f.ai || {}).areas || [])[f.area || 0] || {}, c = a === 'take' ? (ar.challenges || [])[+b.dataset.i] : null;
+      var txt = c ? ((f.mode === 'less' ? c.title : c.daily) || c.title) : ((document.getElementById('ownch') || {}).value || '').trim();
+      if (!txt) { toast('Write a few words first.'); return; }
+      if (a === 'own') f.own = txt;
+      S.draft.mode = f.mode || 'more'; S.draft.what = txt; S.draft.found = c ? c.title : txt; f.chosen = txt; save(false);
+      stat('ideas', a === 'take' ? 'took:' + (ar.name || '') : 'own'); return go('what');
+    }
     if (a === 'pick') { f.pick = b.dataset.key; save(false); return render(); }
-    if (a === 'chosen') { if (!f.pick) return; if (f.pick.indexOf('ai:') === 0 && f.ai && !f.daily) { var ao = f.ai.options[+f.pick.slice(3)]; if (ao && ao.daily) f.daily = ao.daily; } f.step = qs.length + 2; save(false); return go('find'); }
+    if (a === 'chosen') { if (!f.pick) return; if (f.pick.indexOf('ai:') === 0 && f.ai && !f.daily) { var ao = f.ai.options[+f.pick.slice(3)]; if (ao && ao.daily) f.daily = ao.daily; } f.step = qs.length + 1; save(false); return go('find'); }
     if (a === 'daily') {
       var big = f.pick === 'own' ? ((document.getElementById('findbig') || {}).value || '').trim() : pickText(f);
       var daily = ((document.getElementById('finddo') || {}).value || '').trim();
       if (f.pick === 'own') f.own = big;
       if (!daily) { toast('Write one small thing you could do most days.'); return; }
-      f.big = big; f.daily = daily; f.step = qs.length + 3; save(false); return go('find');
+      f.big = big; f.daily = daily; f.step = qs.length + 2; save(false); return go('find');
     }
     if (a === 'go') { S.draft.mode = f.mode || 'more'; S.draft.what = f.daily; S.draft.found = f.big || f.daily; save(false); return go('what'); }
   }
