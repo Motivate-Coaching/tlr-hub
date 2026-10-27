@@ -16,7 +16,7 @@
 
   // ── Content ───────────────────────────────────────────────────────────────
   var FEELINGS = ['Proud', 'Strong', 'Calm', 'Alive', 'Like I trust myself', 'Free', 'Clear-headed', 'Like me again', 'Lighter', 'In control', 'Grounded', 'Brave'];
-  var GIVES = ['A reward', 'Comfort', 'A break', 'Switching off', 'Energy', 'Something to do'];
+  var GIVES = ['Autopilot', 'Tired', 'Stressed', 'Bored', 'Comfort', 'A reward', 'A break', 'Not sure'];
   // For cutting back: what you're moving towards (outcomes and feelings together).
   var GAINS = ['Better sleep', 'More energy', 'Better health', 'Lighter', 'Clear-headed', 'In control', 'Proud', 'Calm', 'Money saved', 'Like me again', 'Free', 'More present'];
   var STARTERS_MORE = ['A 10 minute walk', 'Read before bed', 'In bed by 10:30pm', 'Drink more water'];
@@ -44,7 +44,7 @@
   function fresh() {
     return {
       screen: 'landing',
-      draft: { mode: 'more', what: '', gives: [], instead: '', feel: [], ownFeel: '', dimmer: '', hardStart: '', hardOff: '', hardSpark: '', length: 30 },
+      draft: { mode: 'more', what: '', gives: [], instead: '', feel: [], ownFeel: '', dimmer: '', driveOwn: '', hardStart: '', hardOff: '', hardSpark: '', length: 30 },
       habit: null, // { id, mode, what, gives, instead, feel, ownFeel, dimmer, length, start, status, createdAt }
       entries: {}, // day -> { kind, comeback, felt, note, at }
       settings: { tz: tzGuess(), time: '07:00', days: [0, 1, 2, 3, 4, 5, 6], email: true, push: false, pausedUntil: null, view: 'full', text: 'standard', calm: false, buzz: true, marketing: false, name: '' },
@@ -258,16 +258,15 @@
     },
     less: function () {
       var d = S.draft;
-      var gives = '<span class="label">It usually gives me...</span><div class="chips" style="margin-top:8px">' +
-        GIVES.map(function (g) { return '<button class="chip" data-give="' + esc(g) + '" aria-pressed="' + (d.gives.indexOf(g) >= 0) + '">' + esc(g) + '</button>'; }).join('') + '</div>';
+      var drives = '<div class="field"><span class="label">First, what usually drives it?</span><span class="hint">Tap any that fit. Not sure is fine too.</span><div class="chips" style="margin-top:8px">' +
+        GIVES.map(function (g) { return '<button class="chip" data-give="' + esc(g) + '" aria-pressed="' + (d.gives.indexOf(g) >= 0) + '">' + esc(g) + '</button>'; }).join('') + '</div>' +
+        '<textarea id="driveown" rows="1" data-bind="driveOwn" placeholder="Or in your own words" style="margin-top:8px">' + esc(d.driveOwn || '') + '</textarea></div>';
       return '<section class="screen">' + progress('less') + '<h1>When the urge hits, what will you do instead?</h1>' +
         (d.what.trim() ? '<p class="hint" style="margin-top:-8px">Instead of: <b>' + esc(d.what.trim()) + '</b></p>' : '') +
-        '<p class="lede full-only">No judgement. It’s there for a reason.</p>' +
-        optional('What does it usually give you?', gives) +
-        '<div class="field"><label class="label" for="instead">Instead, I’ll...</label>' +
-        '<textarea id="instead" rows="1" data-bind="instead" placeholder="Go for a 20 minute walk and make a proper cup of tea">' + esc(d.instead) + '</textarea>' +
+        (S.settings.view === 'focus' ? tapToSee('What usually drives it?', drives) : drives) +
+        '<div class="field"><label class="label" for="instead">' + (S.settings.view === 'focus' ? 'Instead, I’ll...' : 'Then, instead, I’ll...') + '</label>' +
+        '<textarea id="instead" rows="1" data-bind="instead" placeholder="e.g. Stand up, stretch and roll my shoulders">' + esc(d.instead) + '</textarea>' +
         '<span class="hint full-only">Something that gives you some of the same, and moves you towards what you want.</span></div>' +
-        tapToSee('See how the swap works', loopCard()) +
         '<div class="spacer"></div>' + stepButton('less') + '</section>';
     },
     feel: function () {
@@ -881,9 +880,9 @@
   var HORIZONS = [['30', '30 days'], ['90', 'three months'], ['365', 'a year']];
   function horizonLabel() { var f = S.find || {}, h = HORIZONS.filter(function (x) { return x[0] === f.horizon; })[0] || HORIZONS[1]; return h[1]; }
   function FIND_QS() {
-    var proud = { key: 'proud', q: 'Picture yourself a year from now, looking back. What would you have done that makes you incredibly proud of yourself?', hint: 'Picture how life feels, not just the thing you did.', ph: 'e.g. I’d love to be able to say I sleep properly and my evenings are mine again' };
+    var proud = { key: 'proud', q: 'Picture yourself a year from now, looking back. What would you have done that makes you insanely proud of yourself?', hint: 'Picture how life feels, not just the thing you did.', ph: 'e.g. I’d love to be able to say I sleep properly and my evenings are mine again' };
     if (S.find && S.find.mode === 'less') return [
-      { key: 'drain', q: 'What do you do regularly that costs you more than it gives you?', hint: 'Jot down whatever comes. We’ll narrow it down together.', ph: 'e.g. Scrolling in bed at night, too much chocolate, not being present with family' },
+      { key: 'drain', q: 'What do you notice you do regularly that costs you more than it gives you?', hint: 'Jot down whatever comes. We’ll narrow it down together.', ph: 'e.g. Scrolling in bed at night, too much chocolate, not being present with family' },
       proud
     ];
     return [
@@ -949,11 +948,11 @@
       var h = top + '<h1>Here’s what stood out.</h1></div><p class="lede">From what you shared, this sounds like the area that most needs your focus right now.</p>';
       h += '<button class="choice area main" data-find="area" data-i="0"><small>Most prominent</small><b>' + esc(areas[0].name) + '</b><span>' + esc(areas[0].noticed) + '</span></button>';
       if (areas.length > 1) {
-        h += '<span class="eyebrow" style="margin-top:4px">Or explore</span><div class="chips">';
-        areas.slice(1).forEach(function (x, i) { h += '<button class="chip" data-find="area" data-i="' + (i + 1) + '">' + esc(x.name) + '</button>'; });
-        h += '</div>';
+        h += '<span class="eyebrow" style="margin-top:4px">What else stood out for you</span>';
+        areas.slice(1).forEach(function (x, i) { h += '<button class="choice area minor" data-find="area" data-i="' + (i + 1) + '"><b>' + esc(x.name) + '</b></button>'; });
       }
-      return h + '<p class="hint">Choose one thing. You can always come back for more later.</p><div class="spacer"></div><button class="link center" data-find="ownonly">I know what I want to do</button></section>';
+      h += '<div class="why"><span class="eyebrow">Why one thing</span><span>Split your focus and each thing gets less of you. Real traction comes from one thing you commit to and show up for. Pick one now. You can always come back for another.</span></div>';
+      return h + '<div class="spacer"></div>' + own.replace('Or write my own', 'Already know what you want to do?').replace(/placeholder="[^"]*"/, 'placeholder="Actually, I’ve worked out what I want to do..."') + '</section>';
     }
     if (r === 'insight') {
       return top + '<h1>' + esc(ar.name) + '</h1></div><div class="why"><span class="eyebrow">What we noticed</span><span>' + esc(ar.noticed) + '</span><span style="font-weight:600">' + esc(ar.insight) + '</span></div>' +
@@ -1060,6 +1059,7 @@
     if (a === 'take' || a === 'own') {
       var ar = ((f.ai || {}).areas || [])[f.area || 0] || {}, c = a === 'take' ? (ar.challenges || [])[+b.dataset.i] : null;
       var txt = c ? ((f.mode === 'less' ? c.title : c.daily) || c.title) : ((document.getElementById('ownch') || {}).value || '').trim();
+      if (c && f.mode === 'less' && c.daily && !(S.draft.instead || '').trim()) S.draft.instead = c.daily;
       if (!txt) { toast('Write a few words first.'); return; }
       if (a === 'own') f.own = txt;
       S.draft.mode = f.mode || 'more'; S.draft.what = txt; S.draft.found = c ? c.title : txt; f.chosen = txt; save(false);
@@ -1516,7 +1516,7 @@
   }
   function finishSetup() {
     var dr = S.draft;
-    S.habit = { id: uuid(), mode: dr.mode, what: dr.what.trim(), gives: dr.gives.slice(), instead: dr.instead, feel: dr.feel.slice(), ownFeel: dr.ownFeel, dimmer: dr.dimmer.trim(), length: dr.length, start: todayStr(), status: 'active', extra: Object.assign({ hard: { start: (dr.hardStart || '').trim(), off: (dr.hardOff || '').trim(), spark: (dr.hardSpark || '').trim() } }, dr.found ? { found: dr.found } : {}, S.wins && S.wins.length ? { wins: S.wins.slice() } : {}), createdAt: new Date().toISOString() };
+    S.habit = { id: uuid(), mode: dr.mode, what: dr.what.trim(), gives: dr.gives.concat((dr.driveOwn || '').trim() ? [dr.driveOwn.trim()] : []), instead: dr.instead, feel: dr.feel.slice(), ownFeel: dr.ownFeel, dimmer: dr.dimmer.trim(), length: dr.length, start: todayStr(), status: 'active', extra: Object.assign({ hard: { start: (dr.hardStart || '').trim(), off: (dr.hardOff || '').trim(), spark: (dr.hardSpark || '').trim() } }, dr.found ? { found: dr.found } : {}, S.wins && S.wins.length ? { wins: S.wins.slice() } : {}), createdAt: new Date().toISOString() };
     S.entries = {}; S.later = false; S.fb = {}; save();
     finishMoment();
   }
