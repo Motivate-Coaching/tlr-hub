@@ -240,7 +240,8 @@
         '<div class="spacer"></div>' +
         '<p class="foot">' + (user ? '' : '<button class="link inline" data-account="landing">Sign in</button> · ') +
         (isStandalone() ? '' : '<button class="link inline" data-act="install">Get the app</button> · ') +
-        '<button class="link inline" data-go="science">How it works</button> · <a class="link inline" href="privacy.html">Privacy</a></p></section>';
+        '<button class="link inline" data-go="science">How it works</button> · <a class="link inline" href="privacy.html">Privacy</a></p>' +
+        (isTester() ? '<button class="link center" data-act="testerreset" style="font-size:13px;color:var(--muted)">Testing: start again from scratch</button>' : '') + '</section>';
     },
     what: function () {
       var d = S.draft, more = d.mode === 'more';
