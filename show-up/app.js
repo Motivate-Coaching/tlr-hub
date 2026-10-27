@@ -53,6 +53,10 @@
   }
   // Start fresh (for trying the app as a brand-new person): open the app with ?fresh in the link.
   // Clears this device and signs out here. Nothing saved to an account is deleted.
+  // Stuart's test devices: open the app once with ?tester to show "Start again" in Settings.
+  var TESTER_EMAILS = ['stuart.fairbairns@gmail.com', 'stuart@motivate-coaching.com'];
+  if (/[?&]tester\b/.test(location.search)) { try { localStorage.setItem('showup-tester', '1'); history.replaceState(null, '', location.pathname); } catch (e) {} }
+  function isTester() { var f = false; try { f = localStorage.getItem('showup-tester') === '1'; } catch (e) {} return f || !!(user && TESTER_EMAILS.indexOf((user.email || '').toLowerCase()) >= 0); }
   var FRESH = /[?&]fresh\b/.test(location.search);
   if (FRESH) {
     try { Object.keys(localStorage).forEach(function (k) { if (k === KEY || k.indexOf('sb-') === 0) localStorage.removeItem(k); }); } catch (e) {}
@@ -480,6 +484,7 @@
         '<div class="row" style="flex-wrap:wrap;gap:8px;justify-content:flex-start"><button class="chip" data-act="exportdata">Download my data</button><button class="chip" data-act="deletedata">Delete my Show Up data</button></div>' +
         '<a class="link" href="privacy.html" style="align-self:flex-start">Privacy notice</a>' + (user ? '<button class="link" data-act="signout" style="align-self:flex-start">Sign out</button>' : ''));
       if (!isStandalone()) h += sect('Get the app', '<span>Put it on your home screen so it opens like an app.</span><button class="btn outline" data-act="install">Show me how</button>');
+      if (isTester()) h += '<div class="card soft small"><span class="eyebrow">For testing (only you see this)</span><span>Wipes everything, including your account, so you can go through it all again as a new person. Sign in again with the same email and you start blank.</span><button class="btn outline" data-act="testerreset">Start again from scratch</button></div>';
       h += sect('About', '<button class="link" data-go="science" style="align-self:flex-start">The science behind it</button><a class="link tlr-link" href="https://www.motivate-coaching.com/thelivingroom" target="_blank" rel="noopener" style="align-self:flex-start">About The Living Room (TLR) <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a>');
       return h + '</div></section>';
     },
@@ -1295,6 +1300,7 @@
       case 'lifesave': { var lv = ((document.getElementById('lifenote') || {}).value || '').trim(), lx = extra(); lx.noticed = lx.noticed || {}; var cur = lx.noticed[todayNum()] || { why: [] }; cur.why = cur.why || []; if (cur.why.indexOf('Plans changed') < 0) cur.why.push('Plans changed'); if (lv) cur.note = lv; cur.at = new Date().toISOString(); lx.noticed[todayNum()] = cur; save(); ui.struggle = null; toast('Noted. See you tomorrow.'); return go('tracker'); }
       case 'calics': calRead(); downloadICS(); return;
       case 'calgoogle': calRead(); try { window.open(googleCalURL(), '_blank', 'noopener'); } catch (e) {} stat('calendar', 'google'); return;
+      case 'testerreset': return confirmSheet('Start again from scratch?', 'Everything on this phone and in your account goes, so you start as a new person.', 'Start again', testerReset);
       case 'sharenote': ui.shareNote = !ui.shareNote; return render();
       case 'shareimg': return void shareImage();
       case 'whatsapp': { var tt = Math.min(todayNum(), S.habit.length); window.open('https://wa.me/?text=' + encodeURIComponent(habitName() + ': I showed up ' + count(function (x, k) { return k <= S.habit.length; }) + ' of ' + tt + ' days.'), '_blank', 'noopener'); return; }
@@ -1514,6 +1520,11 @@
     var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'show-up-my-data.json';
     document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
     toast('Downloaded.');
+  }
+  async function testerReset() {
+    try { if (user && sb) { await sb.functions.invoke('showup-code', { body: { action: 'delete' } }); await sb.auth.signOut(); user = null; } } catch (e) {}
+    try { Object.keys(localStorage).forEach(function (k) { if (k === KEY || k.indexOf('sb-') === 0) localStorage.removeItem(k); }); localStorage.setItem('showup-tester', '1'); } catch (e) {}
+    ui.hist = []; ui.fwd = []; S = fresh(); save(false); applyComfort(); go('landing'); toast('Fresh start. Over to you.');
   }
   async function deleteData() {
     try {
