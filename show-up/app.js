@@ -62,7 +62,7 @@
   try { var saved = JSON.parse(localStorage.getItem(KEY) || 'null'); if (saved && typeof saved === 'object') { S = Object.assign(fresh(), saved); S.settings = Object.assign(fresh().settings, saved.settings || {}); S.draft = Object.assign(fresh().draft, saved.draft || {}); } } catch (e) {}
   var user = null; // signed-in Supabase user
   var syncState = 'local'; // local | saving | saved | error
-  var ui = { ideasOpen: false, wordsFrom: null, returnTo: null, authMode: null, moreChips: false };
+  var ui = { hist: [], fwd: [], vp: null, ideasOpen: false, wordsFrom: null, returnTo: null, authMode: null, moreChips: false };
 
   function save(touch) { if (touch !== false) S.updatedAt = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} if (user) queueSync(); }
 
@@ -70,6 +70,7 @@
   var view = document.getElementById('view');
   var app = document.getElementById('app');
   var backBtn = document.getElementById('back');
+  var fwdBtn = document.getElementById('fwd');
   var settingsBtn = document.getElementById('settingsBtn');
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function uuid() { if (window.crypto && crypto.randomUUID) return crypto.randomUUID(); return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) { var r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }); }
@@ -357,12 +358,17 @@
     find: function () { return findScreen(); },
     wins: function () { return winsScreen(false); },
     viewpick: function () {
-      var v = S.settings.view;
-      var pic = function (simple) { return '<svg width="64" height="88" viewBox="0 0 64 88" aria-hidden="true"><rect x="1" y="1" width="62" height="86" rx="8" fill="#FFFFFF" stroke="#E5DDD1" stroke-width="2"/>' + (simple ? '<rect x="12" y="20" width="40" height="5" rx="2.5" fill="#888880"/><rect x="10" y="50" width="44" height="16" rx="3" fill="#0F1215"/>' : '<rect x="10" y="10" width="36" height="5" rx="2.5" fill="#888880"/><rect x="10" y="21" width="44" height="3" rx="1.5" fill="#E5DDD1"/><rect x="10" y="28" width="40" height="3" rx="1.5" fill="#E5DDD1"/><rect x="10" y="38" width="44" height="14" rx="3" fill="#EDE8DF"/><rect x="10" y="58" width="44" height="12" rx="3" fill="#0F1215"/><rect x="10" y="75" width="30" height="3" rx="1.5" fill="#E5DDD1"/>') + '</svg>'; };
-      return '<section class="screen"><div><div class="eyebrow">Before we start</div><h1>Choose your view</h1></div>' +
-        '<p class="lede" style="margin-top:-6px">Same app either way. Change it any time in Settings.</p><div class="viewpick">' +
-        '<button class="choice vp" data-view="full" aria-pressed="' + (v === 'full') + '">' + pic(false) + '<span><b>Detailed</b><small>Examples, tips and your full progress on show</small></span></button>' +
-        '<button class="choice vp" data-view="focus" aria-pressed="' + (v === 'focus') + '">' + pic(true) + '<span><b>Simple</b><small>Just the essentials, calmer screens</small></span></button></div></section>';
+      var v = ui.vp || S.settings.view || 'full', n = firstName(), simple = v === 'focus';
+      var dots = '<span class="on"></span><span class="on"></span><span></span><span class="on"></span><span class="on"></span><span class="today"></span>';
+      var prev = simple
+        ? '<div class="vph c">Walk 20 minutes</div><div class="vpring"><b>5</b><small>show-ups</small></div><div class="vpsub c">Day 6 of 30</div><div class="vpbtn">I showed up today</div><div class="vpcard row"><span class="vpdim"></span><span><small>Tough day? A lighter version counts</small><b>A 5 minute walk</b></span></div><div class="vplink">See all my days</div>'
+        : '<div class="vph">Walk 20 minutes</div><div class="vpsub">Day 6 of 30<span class="vppill">My plan</span></div><div class="vpbtn">I showed up today</div><div class="vphint">A lighter version on a tough day counts too.</div><div class="vplink">I’m struggling</div><div class="vpcard"><small>This week</small><div class="vpdots">' + dots + '</div><span class="vplink l">See all 30 days</span></div><div class="vplink">My past wins</div>';
+      return '<section class="screen"><div><div class="eyebrow">Before we start</div><h1>' + (n ? 'Lovely to meet you, ' + esc(n) + '.' : 'Choose your view') + '</h1></div>' +
+        '<div class="vpintro">' + (n ? '<b>Choose your view</b>' : '') + '<p class="lede">Tap each one to see it. Change it any time in Settings.</p></div>' +
+        '<div class="seg2" role="group" aria-label="Preview a view"><button data-vp="full" aria-pressed="' + !simple + '">Detailed</button><button data-vp="focus" aria-pressed="' + simple + '">Simple</button></div>' +
+        '<div class="vprev" aria-label="Preview of the ' + (simple ? 'Simple' : 'Detailed') + ' view"><div class="vpbar"><img src="logo-white.png" alt="" width="29" height="24"></div><div class="vpbody">' + prev + '</div></div>' +
+        '<p class="hint c">' + (simple ? 'One thing at a time. Extras sit one tap away, with calmer motion.' : 'Examples, tips and your whole week on show.') + '</p>' +
+        '<button class="btn" data-act="vpgo">Continue with ' + (simple ? 'Simple' : 'Detailed') + '</button></section>';
     },
     name: function () {
       return '<section class="screen"><div><div class="eyebrow">Before we start</div><h1>What should we call you?</h1></div>' +
@@ -583,7 +589,7 @@
   function nameDone(skip) {
     var el = document.getElementById('firstname'), v = el ? el.value.replace(/\s+/g, ' ').trim() : '';
     S.nameAsked = true;
-    if (!skip && v) { saveName(v); toast('Lovely to meet you, ' + v + '.'); }
+    if (!skip && v) { saveName(v); if (S.viewChosen) toast('Lovely to meet you, ' + v + '.'); }
     else save(false);
     if (!S.viewChosen) return go('viewpick');
     go(ui.afterName || 'what');
@@ -624,14 +630,37 @@
     document.documentElement.classList.toggle('focus-mode', focus);
 
     view.innerHTML = screens[s]();
-    backBtn.classList.toggle('ghost', !BACK[s]);
+    backBtn.classList.toggle('ghost', !BACK[s] && !ui.hist.length);
+    fwdBtn.classList.toggle('ghost', !ui.fwd.length);
     settingsBtn.classList.toggle('ghost', !S.habit || s === 'settings' || ['what', 'less', 'feel', 'dimmer'].indexOf(s) >= 0);
     view.querySelectorAll('textarea').forEach(grow);
     if (s === 'words') startSphere();
     window.scrollTo(0, 0);
   }
-  function go(s) { if (s !== S.screen) ui.planEdit = false; S.screen = s; save(false); render(); }
-  function goBack() { var b = BACK[S.screen]; if (typeof b === 'function') b = b(); go(b || (S.habit ? 'tracker' : 'landing')); }
+  // Back goes to the screen they were just on; forward returns them to where they were. What they typed is kept.
+  function go(s, nav) {
+    if (s !== S.screen) {
+      ui.planEdit = false;
+      if (!nav) {
+        if (s === 'tracker' || s === 'landing' || s === 'ready') ui.hist = [];
+        else if (S.screen && S.screen !== s) ui.hist.push(S.screen);
+        ui.fwd = [];
+      }
+    }
+    S.screen = s; save(false); render();
+  }
+  function goBack() {
+    if (S.screen === 'find' && S.find && S.find.step > 0) { S.find.step--; save(false); return render(); }
+    var prev = ui.hist.pop();
+    if (prev && screens[prev]) { ui.fwd.push(S.screen); return go(prev, true); }
+    var b = BACK[S.screen]; if (typeof b === 'function') b = b(); go(b || (S.habit ? 'tracker' : 'landing'));
+  }
+  function goForward() {
+    var next = ui.fwd[ui.fwd.length - 1]; if (!next) return;
+    var nb = view.querySelector('[data-step-next]');
+    if (nb && nb.disabled) return toast('Fill this one in first.');
+    ui.fwd.pop(); ui.hist.push(S.screen); go(next, true);
+  }
   function grow(t) { t.style.height = 'auto'; t.style.height = Math.max(t.scrollHeight + 3, 58) + 'px'; }
 
   // ── The tick ──────────────────────────────────────────────────────────────
@@ -1159,8 +1188,9 @@
     if (d.words) { ui.wordsFrom = d.words; return go('words'); }
     if (d.account) { ui.returnTo = d.account; return go('account'); }
     if (d.tick) { var from = d.from || (S.screen === 'ready' ? 'ready' : 'tracker'); return tick(d.tick, from); }
+    if (d.vp) { ui.vp = d.vp; return render(); }
+    if (d.act === 'vpgo') { S.settings.view = ui.vp || S.settings.view || 'full'; S.viewChosen = true; ui.vp = null; save(); return go(ui.afterName || 'what'); }
     if (d.view) {
-      if (S.screen === 'viewpick') { S.settings.view = d.view; S.viewChosen = true; save(); return go(ui.afterName || 'what'); }
       if (S.settings.view !== d.view) { S.settings.view = d.view; save(); toast(d.view === 'focus' ? 'Simple view on.' : 'Detailed view on.'); }
       return render();
     }
@@ -1217,6 +1247,7 @@
     }
   });
   backBtn.addEventListener('click', goBack);
+  fwdBtn.addEventListener('click', goForward);
   settingsBtn.addEventListener('click', function () { go('settings'); });
   document.getElementById('homeBtn').addEventListener('click', function () { ui.ideasOpen = false; go(S.habit ? 'tracker' : 'landing'); });
 

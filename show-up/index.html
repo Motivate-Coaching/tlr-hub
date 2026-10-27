@@ -40,13 +40,13 @@ button { cursor: pointer; }
 .app { position: relative; max-width: 520px; min-height: 100vh; min-height: 100dvh; margin: 0 auto; background: var(--cream); display: flex; flex-direction: column; }
 html.size-large .app { zoom: 1.12; }
 html.size-larger .app { zoom: 1.25; }
-.bar { position: sticky; top: 0; z-index: 20; height: calc(64px + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); display: grid; grid-template-columns: 56px 1fr 56px; align-items: center; justify-items: center; background: var(--navy); padding-left: max(6px, env(safe-area-inset-left, 0px)); padding-right: max(6px, env(safe-area-inset-right, 0px)); }
+.bar { position: sticky; top: 0; z-index: 20; height: calc(64px + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); display: grid; grid-template-columns: 96px 1fr 96px; align-items: center; justify-items: center; background: var(--navy); padding-left: max(6px, env(safe-area-inset-left, 0px)); padding-right: max(6px, env(safe-area-inset-right, 0px)); }
 .bar img { height: 40px; width: auto; display: block; }
 .home-btn { min-height: 48px; padding: 4px 10px; border: 0; border-radius: 4px; background: transparent; display: flex; align-items: center; justify-content: center; }
 .tlr-link { display: inline-flex; align-items: center; gap: 6px; }
 .icon-btn { width: 44px; height: 44px; border: 0; border-radius: 4px; background: transparent; display: flex; align-items: center; justify-content: center; color: var(--white); }
 .icon-btn.ghost { visibility: hidden; }
-#back { justify-self: start; }
+.bar .nav { justify-self: start; display: flex; }
 #settingsBtn { justify-self: end; }
 
 .screen { flex: 1; display: flex; flex-direction: column; gap: 22px; padding-block: 22px 32px; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
@@ -379,6 +379,38 @@ details.ask .isteps { margin-top: 10px; }
 
 /* Choose your view, once */
 .viewpick { display: flex; flex-direction: column; gap: 12px; }
+.vpintro { display: flex; flex-direction: column; gap: 4px; margin-top: -8px; }
+.vpintro b { font-size: 18px; font-weight: 600; }
+.vpintro .lede { margin: 0; }
+.seg2 { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--navy); border-radius: 4px; overflow: hidden; }
+.seg2 button { min-height: 48px; border: 0; background: var(--white); color: var(--navy); font: inherit; font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
+.seg2 button[aria-pressed="true"] { background: var(--navy); color: var(--white); }
+.vprev { align-self: center; width: min(260px, 100%); border: 6px solid var(--navy); border-radius: 22px; overflow: hidden; background: var(--cream); pointer-events: none; user-select: none; }
+.vpbar { background: var(--navy); height: 34px; display: flex; align-items: center; justify-content: center; }
+.vpbody { display: flex; flex-direction: column; gap: 9px; padding: 12px 14px 16px; min-height: 300px; }
+.vph { font-family: var(--display); font-size: 20px; line-height: 1.15; }
+.vpsub { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-mid); }
+.vppill { border: 1px solid var(--cream-deep); background: var(--white); border-radius: 4px; padding: 3px 7px; font-weight: 600; font-size: 10px; color: var(--navy); }
+.vpbtn { background: var(--navy); color: var(--white); border-radius: 4px; text-align: center; padding: 10px 6px; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.vphint { font-size: 10px; color: var(--text-mid); text-align: center; }
+.vplink { font-size: 11px; font-weight: 600; text-decoration: underline; text-align: center; }
+.vplink.l { text-align: left; }
+.vpcard { background: var(--white); border-radius: 6px; padding: 9px 10px; display: flex; flex-direction: column; gap: 6px; }
+.vpcard small { font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-mid); }
+.vpcard.row { flex-direction: row; align-items: center; gap: 8px; }
+.vpcard.row span:last-child { display: flex; flex-direction: column; gap: 2px; }
+.vpcard.row small { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 9px; }
+.vpcard.row b { font-size: 11px; font-weight: 600; }
+.vpdim { flex: 0 0 auto; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--navy); background: linear-gradient(90deg, var(--navy) 50%, transparent 50%); }
+.vpdots { display: flex; gap: 6px; }
+.vpdots span { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--cream-deep); }
+.vpdots span.on { background: var(--navy); border-color: var(--navy); }
+.vpdots span.today { border: 1.5px dashed var(--navy); }
+.vpring { align-self: center; width: 86px; height: 86px; border-radius: 50%; border: 6px solid var(--cream-deep); border-top-color: var(--navy); border-right-color: var(--navy); display: flex; flex-direction: column; align-items: center; justify-content: center; margin-block: 4px; }
+.vpring b { font-size: 22px; font-weight: 600; line-height: 1; }
+.vpring small { font-size: 9px; color: var(--text-mid); }
+.c { text-align: center; justify-content: center; }
+.hint.c { margin: -8px 0 0; }
 .choice.vp { flex-direction: row; align-items: center; gap: 16px; padding: 14px 16px; }
 .choice.vp span { display: flex; flex-direction: column; gap: 2px; }
 .choice.vp b { font-size: 18px; }
@@ -426,13 +458,16 @@ details.alldays[open] summary { margin-bottom: 12px; }
 <body>
 <div class="app" id="app">
   <header class="bar">
-    <button class="icon-btn ghost" id="back" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="nav">
+      <button class="icon-btn ghost" id="back" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <button class="icon-btn ghost" id="fwd" aria-label="Forward"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+    </div>
     <button class="home-btn" id="homeBtn" aria-label="Home"><img src="logo-white.png" alt="The Living Room (TLR), Tools for life" width="49" height="40"></button>
     <button class="icon-btn ghost" id="settingsBtn" aria-label="Settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </header>
   <main id="view"></main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=20261026g"></script>
+<script src="app.js?v=20261027a"></script>
 </body>
 </html>
