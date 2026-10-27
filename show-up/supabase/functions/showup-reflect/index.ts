@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-    body: JSON.stringify({ model: MODEL, max_tokens: 1400, system: SYSTEM, tools: [TOOL], tool_choice: { type: 'tool', name: 'ideas' }, messages: [{ role: 'user', content: (less ? 'They want to cut back on or stop something. Each challenge should be something specific to cut back on, and "daily" should be the cut-back rule for most days, such as "No phone in bed".\n\n' : '') + lines.join('\n') }] }),
+    body: JSON.stringify({ model: MODEL, max_tokens: 1400, system: SYSTEM, tools: [TOOL], tool_choice: { type: 'tool', name: 'ideas' }, messages: [{ role: 'user', content: (less ? 'They want to cut back on or stop something. For each challenge, "title" is the behaviour to cut back on, in plain words, such as "Scrolling in bed late at night". "daily" is the simple rule or swap for most days, such as "Phone charges outside the bedroom".\n\n' : '') + lines.join('\n') }] }),
   })
   if (!res.ok) { console.error('[showup-reflect] anthropic', res.status, (await res.text()).slice(0, 300)); return json({ error: 'ai_unavailable' }, 502) }
   const data = await res.json()
