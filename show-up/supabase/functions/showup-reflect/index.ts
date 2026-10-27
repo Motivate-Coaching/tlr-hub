@@ -1,5 +1,5 @@
 // showup-reflect/index.ts
-// Find my focus: reads back what someone wrote and reflects it in their own words ("What I'm hearing").
+// Challenge ideas: reads what someone wrote or said, pulls out the main life areas, and suggests a few challenges for each.
 // Signed-in users only, a few times a day each. Nothing they write is stored here.
 // Secret: ANTHROPIC_API_KEY lives in Supabase secrets, never in this file.
 
@@ -17,33 +17,50 @@ const CORS = {
 }
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...CORS, 'Content-Type': 'application/json' } })
 
-const SYSTEM = `You help someone choose one focus for a 30-day habit, inside an app made by Stuart Fairbairns, an ICF PCC coach.
-They have answered a few open questions. Reflect back what you hear, using their own words as much as possible.
-Speak to them directly as "you", never "they" or "someone". Don't add numbers or details they didn't give, such as minutes, unless they wrote them.
+const SYSTEM = `You help someone find one focus for a habit challenge, inside an app made by Stuart Fairbairns, an ICF PCC coach.
+They have written or spoken freely, so it may be long, messy and full of ums. Read all of it and find the life areas that come up most, such as fitness and health, sleep, relationships, work, confidence, money, creativity or calm.
+Speak to them directly as "you", never "they" or "someone". Use their own words where you can. Don't add numbers or details they didn't give unless they are part of a simple daily action.
 
-Voice: warm, direct, grounded, a little playful. British English. Short sentences. Never generic self-help, never gushing, no clichés.
-Never use em dashes or en dashes. Never use exclamation marks. Never diagnose, judge or give advice beyond the focus itself.
+Voice: warm, direct, grounded. British English. Short sentences. Never generic self-help, never gushing, no clichés.
+Never use em dashes or en dashes. Never use exclamation marks. Never diagnose or judge.
 Only use what they wrote. Do not invent facts about them.
 
-If anything they wrote suggests they may be at risk of harming themselves or are in crisis, do not suggest a focus.
-Instead set "care" to a short, kind message encouraging them to talk to someone they trust or a local helpline, and leave the other fields empty.
+Less is more. Give up to 3 areas, the most prominent first, and only include an area if it genuinely comes up.
+For each area give 2 or 3 challenges for the next 30 days. Each should be one small, specific thing they could do most days.
 
-Use the reflect tool to give your answer.
-Give 2 or 3 options, the strongest first. Options can include trying a past challenge again.`
+If anything they wrote suggests they may be at risk of harming themselves or are in crisis, do not suggest challenges.
+Instead set "care" to a short, kind message encouraging them to talk to someone they trust or a local helpline, and leave areas empty.
+
+Use the ideas tool to give your answer.`
 
 // Forces a well-formed answer every time.
 const TOOL = {
-  name: 'reflect',
-  description: 'Give the reflection back to the person.',
+  name: 'ideas',
+  description: 'Give the areas and challenge ideas back to the person.',
   input_schema: {
     type: 'object',
     properties: {
-      heard: { type: 'string', description: "2 or 3 sentences to them, starting with 'What I'm hearing is'. Empty if care is set." },
-      themes: { type: 'array', items: { type: 'string' }, description: 'Up to 3 short themes, 1 to 3 words each.' },
-      options: { type: 'array', items: { type: 'object', properties: { focus: { type: 'string', description: 'A focus in their words, under 8 words.' }, why: { type: 'string', description: 'One short sentence on why it might matter to them.' }, daily: { type: 'string', description: 'One small thing they could do most days, under 10 words.' } }, required: ['focus', 'why', 'daily'] }, description: '2 or 3 options, strongest first. Empty if care is set.' },
+      areas: {
+        type: 'array',
+        description: 'Up to 3 life areas, most prominent first. Empty if care is set.',
+        items: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', description: 'The area, 1 to 3 words, e.g. Fitness and health.' },
+            noticed: { type: 'string', description: "One sentence to them about what came up, starting 'You mentioned'." },
+            insight: { type: 'string', description: "One sentence on what they seem to want here, starting 'It sounds like you want to'." },
+            challenges: {
+              type: 'array',
+              description: '2 or 3 challenges for the next 30 days.',
+              items: { type: 'object', properties: { title: { type: 'string', description: 'A short name, under 7 words.' }, daily: { type: 'string', description: 'The small thing to do most days, under 10 words.' } }, required: ['title', 'daily'] },
+            },
+          },
+          required: ['name', 'noticed', 'insight', 'challenges'],
+        },
+      },
       care: { type: 'string', description: 'Only if they may be at risk or in crisis: a short, kind message. Otherwise empty.' },
     },
-    required: ['heard', 'themes', 'options', 'care'],
+    required: ['areas', 'care'],
   },
 }
 
@@ -79,7 +96,7 @@ Deno.serve(async (req) => {
   const less = body.mode === 'less'
   const lines: string[] = []
   for (const [k, v] of Object.entries(body.answers || {})) {
-    const t = String(v || '').trim().slice(0, 800)
+    const t = String(v || '').trim().slice(0, 4000)
     if (t && labels[k]) lines.push(`${labels[k]}: ${t}`)
   }
   const out: Record<string, string> = { did: 'did it', partly: 'partly', not: "didn't stick" }
@@ -90,18 +107,21 @@ Deno.serve(async (req) => {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-    body: JSON.stringify({ model: MODEL, max_tokens: 900, system: SYSTEM, tools: [TOOL], tool_choice: { type: 'tool', name: 'reflect' }, messages: [{ role: 'user', content: (less ? 'They want to cut back on or stop something. Each option should be something specific to cut back on, and "daily" should be the cut-back rule for most days, such as "No phone in bed".\n\n' : '') + lines.join('\n') }] }),
+    body: JSON.stringify({ model: MODEL, max_tokens: 1400, system: SYSTEM, tools: [TOOL], tool_choice: { type: 'tool', name: 'ideas' }, messages: [{ role: 'user', content: (less ? 'They want to cut back on or stop something. Each challenge should be something specific to cut back on, and "daily" should be the cut-back rule for most days, such as "No phone in bed".\n\n' : '') + lines.join('\n') }] }),
   })
   if (!res.ok) { console.error('[showup-reflect] anthropic', res.status, (await res.text()).slice(0, 300)); return json({ error: 'ai_unavailable' }, 502) }
   const data = await res.json()
-  const call = (data.content || []).find((c: { type?: string; name?: string }) => c.type === 'tool_use' && c.name === 'reflect')
+  const call = (data.content || []).find((c: { type?: string; name?: string }) => c.type === 'tool_use' && c.name === 'ideas')
   if (!call) { console.error('[showup-reflect] no tool result', data.stop_reason); return json({ error: 'ai_unavailable' }, 502) }
   const parsed = call.input || {}
-  const clean = (s: unknown) => String(s || '').replace(/\s*[\u2013\u2014]\s*/g, ', ').replace(/!/g, '.').trim()
+  const clean = (s: unknown) => String(s || '').replace(/\s*[–—]\s*/g, ', ').replace(/!/g, '.').trim()
+  type Ch = { title?: string; daily?: string }
+  type Ar = { name?: string; noticed?: string; insight?: string; challenges?: Ch[] }
   const result = {
-    heard: clean(parsed.heard),
-    themes: (parsed.themes || []).slice(0, 3).map(clean),
-    options: (parsed.options || []).slice(0, 3).map((o: { focus?: string; why?: string; daily?: string }) => ({ focus: clean(o.focus), why: clean(o.why), daily: clean(o.daily) })).filter((o: { focus: string }) => o.focus),
+    areas: (parsed.areas || []).slice(0, 3).map((a: Ar) => ({
+      name: clean(a.name), noticed: clean(a.noticed), insight: clean(a.insight),
+      challenges: (a.challenges || []).slice(0, 3).map((c: Ch) => ({ title: clean(c.title), daily: clean(c.daily) })).filter((c: Ch) => c.title),
+    })).filter((a: Ar) => a.name && a.challenges && a.challenges.length),
     care: clean(parsed.care),
   }
 

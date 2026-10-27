@@ -424,6 +424,15 @@ details.ask .isteps { margin-top: 10px; }
 .calprev { font-size: 14px; line-height: 1.55; color: var(--text-mid); }
 .btn svg { flex-shrink: 0; }
 .workintro { margin: 6px 0 14px; font-size: 16px; }
+.choice.area { text-align: left; display: flex; flex-direction: column; gap: 4px; }
+.choice.area.main { border: 2px solid var(--navy); }
+.choice.area small { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--amber); }
+.choice.area span { color: var(--text-mid); font-size: 15px; }
+.dotpulse { display: flex; gap: 8px; justify-content: center; margin-top: 12px; }
+.dotpulse span { width: 10px; height: 10px; border-radius: 50%; background: var(--navy); animation: dp 1.2s infinite ease-in-out; }
+.dotpulse span:nth-child(2) { animation-delay: 0.2s; } .dotpulse span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dp { 0%, 80%, 100% { opacity: 0.2; } 40% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .dotpulse span { animation: none; opacity: 0.6; } }
 .askhelp { text-align: left; border: 1px dashed var(--muted); display: flex; flex-direction: column; gap: 4px; cursor: pointer; font: inherit; color: inherit; }
 .askhelp b { font-weight: 600; }
 .askhelp span { color: var(--text-mid); font-size: 15px; }
@@ -478,6 +487,6 @@ details.alldays[open] summary { margin-bottom: 12px; }
   <main id="view"></main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=20261027m"></script>
+<script src="app.js?v=20261027o"></script>
 </body>
 </html>
