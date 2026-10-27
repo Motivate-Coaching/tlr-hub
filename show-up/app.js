@@ -461,6 +461,7 @@
         '<button class="link" data-act="newhabit" style="align-self:flex-start">Start a new habit</button>');
       h += sect('You and your data', '<div class="field"><label class="label" for="sname">Your first name</label><textarea id="sname" rows="1" data-name="1" autocomplete="given-name" placeholder="So we can say hello">' + esc(firstName()) + '</textarea></div>' +
         (user ? '<span>Signed in as <b>' + esc(user.email) + '</b></span>' : '<span>Saved on this device only.</span><button class="btn" data-account="settings">Save my progress</button>') +
+        '<button class="switch" role="switch" aria-checked="' + (s.analytics !== false) + '" data-toggle="analytics"><span><b>Help improve Show Up</b><span class="hint">Shares which buttons you tap, never what you write.</span></span><span class="track"></span></button>' +
         (user ? '<button class="switch" role="switch" aria-checked="' + !!s.marketing + '" data-toggle="marketing"><span><b>Ideas and updates from Stuart</b><span class="hint">Occasional emails. Off unless you choose.</span></span><span class="track"></span></button>' : '') +
         '<p class="hint">Your notes are only ever seen by you. During the pilot, Stuart sees your habit and how often you show up, never your notes.</p>' +
         '<div class="row" style="flex-wrap:wrap;gap:8px;justify-content:flex-start"><button class="chip" data-act="exportdata">Download my data</button><button class="chip" data-act="deletedata">Delete my Show Up data</button></div>' +
@@ -657,7 +658,22 @@
     window.scrollTo(0, 0);
   }
   // Back goes to the screen they were just on; forward returns them to where they were. What they typed is kept.
+  // ── Usage stats (which buttons and screens, never anything written). Off via Settings. ──
+  var statQ = [], statSid = (window.crypto && crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2)).slice(0, 36), statTimer = null;
+  function stat(event, detail) {
+    if (S.settings.analytics === false || !sb) return;
+    statQ.push({ user_id: user ? user.id : null, session_id: statSid, event: String(event).slice(0, 40), screen: String(S.screen || '').slice(0, 30), detail: detail == null ? null : String(detail).slice(0, 60), view_mode: S.settings.view === 'focus' ? 'focus' : 'full' });
+    if (!statTimer) statTimer = setTimeout(flushStats, 5000);
+  }
+  function flushStats() {
+    clearTimeout(statTimer); statTimer = null;
+    if (!statQ.length || !sb || S.settings.analytics === false) { statQ = []; return; }
+    var rows = statQ.splice(0, 50);
+    try { sb.from('showup_events').insert(rows).then(function () {}, function () {}); } catch (e) {}
+  }
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flushStats(); });
   function go(s, nav) {
+    if (s !== S.screen) stat('screen', s);
     if (s !== S.screen) {
       ui.planEdit = false;
       if (!nav) {
@@ -1198,6 +1214,7 @@
   app.addEventListener('click', function (e) {
     var b = e.target.closest('button, [data-act="closeideas"]'); if (!b || b.closest('.celebrate')) return;
     var d = b.dataset;
+    var dk = Object.keys(d)[0]; if (dk) stat('tap', dk + ':' + d[dk]); else if (b.id) stat('tap', b.id);
     if (d.go) { if (d.go === 'reflect') ui.reflect = null; if (d.go === 'note') ui.noteDay = null; if (d.go === 'install') ui.installFrom = null; if (d.go === 'slipped') ui.struggle = null; return go(d.go); }
     if (d.day) return openDay(+d.day);
     if (d.catch) { markDay(+d.catch); return render(); }
@@ -1233,6 +1250,7 @@
     if (d.text) { S.settings.text = d.text; applyComfort(); save(); return render(); }
     if (d.toggle) {
       if (d.toggle === 'email' && !user) { ui.returnTo = 'settings'; return go('account'); }
+      if (d.toggle === 'analytics') { S.settings.analytics = S.settings.analytics === false; if (!S.settings.analytics) statQ = []; save(); return render(); }
       S.settings[d.toggle] = !S.settings[d.toggle]; applyComfort(); save(); return render();
     }
     if (d.rday) { var di = S.settings.days.indexOf(+d.rday); di >= 0 ? S.settings.days.splice(di, 1) : S.settings.days.push(+d.rday); S.settings.days.sort(); save(); b.setAttribute('aria-pressed', di < 0); return; }
