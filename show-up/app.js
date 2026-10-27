@@ -252,6 +252,7 @@
         '<span class="hint">In your own words.' + (more ? ' Small enough to do on a rubbish day.' : '') + '</span></div>' +
         optional('Show me some ideas', '<div class="starters">' + (more ? STARTERS_MORE : STARTERS_LESS).map(function (s) { return '<button class="chip" data-starter="' + esc(s) + '">' + esc(s) + '</button>'; }).join('') + '</div>' +
           (more ? '<button class="link" data-act="ideas">More ideas</button>' : '')) +
+        '<button class="card soft askhelp" data-find="start" data-mode="' + d.mode + '"><b>Not sure yet? Let’s work it out together.</b><span>A few quick questions, and we’ll help you spot what fits.</span></button>' +
         '<div class="spacer"></div>' + stepButton('what') + '</section>' +
         (ui.ideasOpen ? ideasSheet() : '');
     },
@@ -879,6 +880,11 @@
   var HORIZONS = [['30', '30 days'], ['90', 'three months'], ['365', 'a year']];
   function horizonLabel() { var f = S.find || {}, h = HORIZONS.filter(function (x) { return x[0] === f.horizon; })[0] || HORIZONS[1]; return h[1]; }
   function FIND_QS() {
+    if (S.find && S.find.mode === 'less') return [
+      { key: 'drain', q: 'What’s one thing you do that costs you more than it gives you?', hint: 'The thing you already know about. No judgement, just honesty.' },
+      { key: 'lighter', q: 'Imagine it’s ' + horizonLabel() + ' from now. What did you cut back on that made life feel lighter?', hint: 'Picture the difference it made, not just the thing you stopped.' },
+      { key: 'tried', q: 'What have you tried to cut back on before? What got in the way?', hint: 'What got in the way is useful. It helps you plan for it this time.' }
+    ];
     return [
       { key: 'proud', q: 'Imagine it’s ' + horizonLabel() + ' from now and you’re looking back. What did you do that made you insanely proud of yourself?', hint: 'Not a whole list. The one that would really mean something.' },
       { key: 'years', q: 'What have you wanted to do for years, and never quite got round to?', hint: 'Big or small. It still counts if it’s been on the list forever.' },
@@ -916,7 +922,7 @@
     if (f.step < qs.length) {
       var q = qs[f.step], v = f.answers[q.key] || '';
       return '<section class="screen"><div><div class="eyebrow">Help me choose · ' + (f.step + 1) + ' of ' + (qs.length + 1) + '</div><h1 class="findq">' + esc(q.q) + '</h1></div>' +
-        (f.step === 0 ? '<div class="chips" role="group" aria-label="How far ahead"><span class="label" style="width:100%">Looking back from</span>' + HORIZONS.map(function (x) { return '<button class="chip" data-horizon="' + x[0] + '" aria-pressed="' + ((f.horizon || '90') === x[0]) + '">' + (x[0] === '30' ? '30 days' : x[0] === '90' ? '3 months' : 'A year') + '</button>'; }).join('') + '</div>' : '') +
+        (q.key === 'proud' || q.key === 'lighter' ? '<div class="chips" role="group" aria-label="How far ahead"><span class="label" style="width:100%">Looking back from</span>' + HORIZONS.map(function (x) { return '<button class="chip" data-horizon="' + x[0] + '" aria-pressed="' + ((f.horizon || '90') === x[0]) + '">' + (x[0] === '30' ? '30 days' : x[0] === '90' ? '3 months' : 'A year') + '</button>'; }).join('') + '</div>' : '') +
         '<p class="hint" style="margin-top:-8px">' + esc(q.hint) + '</p>' +
         '<div class="field"><textarea id="findans" rows="3" style="min-height:120px" placeholder="Write whatever comes. Only you see this.">' + esc(v) + '</textarea>' + micButton() + '</div>' +
         '<div class="spacer"></div><button class="btn" data-find="next">' + 'Next' + '</button>' +
@@ -940,9 +946,9 @@
     }
     if (f.step === qs.length + 2) {
       var big = f.pick === 'own' ? '' : pickText(f);
-      return '<section class="screen"><div><div class="eyebrow">Help me choose</div><h1>Make it something you can do most days.</h1></div>' +
+      return '<section class="screen"><div><div class="eyebrow">Help me choose</div><h1>' + (f.mode === 'less' ? 'Make it clear and doable.' : 'Make it something you can do most days.') + '</h1></div>' +
         (big ? '<div class="why"><span class="eyebrow">What you’re working towards</span><span style="font-weight:600">' + esc(big) + '</span></div>' : '<div class="field"><label class="label" for="findbig">What do you want to work on?</label><textarea id="findbig" rows="1" placeholder="In your words">' + esc(f.own || '') + '</textarea></div>') +
-        '<div class="field"><label class="label" for="finddo">What could you do most days that moves you towards it?</label><textarea id="finddo" rows="1" placeholder="Something small enough to do on a busy day">' + esc(f.daily || '') + '</textarea></div>' +
+        '<div class="field"><label class="label" for="finddo">' + (f.mode === 'less' ? 'What exactly will you cut back on, most days?' : 'What could you do most days that moves you towards it?') + '</label><textarea id="finddo" rows="1" placeholder="' + (f.mode === 'less' ? 'e.g. No phone in bed, or chocolate only at weekends' : 'Something small enough to do on a busy day') + '">' + esc(f.daily || '') + '</textarea></div>' +
         optional('Show me examples', '<div class="card small"><span>Speak better? <b>Read one page out loud a day.</b></span><span>Get fitter? <b>A 20-minute walk before work.</b></span><span>Calmer? <b>Five slow breaths before I open my phone.</b></span><span>Write the book? <b>200 words, first thing.</b></span></div>') +
         '<div class="spacer"></div><button class="btn" data-find="daily">Next</button></section>';
     }
@@ -974,7 +980,7 @@
     var f = S.find; if (!f || !sb || !user || ui.aiBusy) return;
     ui.aiBusy = true; render();
     try {
-      var r = await sb.functions.invoke('showup-reflect', { body: { answers: f.answers, wins: (S.wins || []).map(function (w) { return { name: w.name, outcome: w.outcome }; }), horizon: horizonLabel() } });
+      var r = await sb.functions.invoke('showup-reflect', { body: { mode: f.mode || 'more', answers: f.answers, wins: (S.wins || []).map(function (w) { return { name: w.name, outcome: w.outcome }; }), horizon: horizonLabel() } });
       if (r.error) {
         var st = r.error.context && r.error.context.status;
         toast(st === 429 ? 'That’s today’s reflections used. Your own words below work just as well.' : 'Couldn’t reach it just now. Try again in a moment.');
@@ -1040,7 +1046,7 @@
   function findAct(a, b) {
     var f = S.find || (S.find = { step: 0, answers: {} }), qs = FIND_QS();
     if (rec) { try { rec.stop(); } catch (e) {} }
-    if (a === 'start') { S.find = { step: 0, answers: (S.find && S.find.answers) || {} }; save(false); return askNameThen('find'); }
+    if (a === 'start') { var md = (b && b.dataset.mode) || 'more', keep = S.find && S.find.mode === md ? S.find.answers : {}; S.find = { step: 0, mode: md, answers: keep || {} }; save(false); return askNameThen('find'); }
     if (a === 'next') { findSave(); f.step++; save(false); return go('find'); }
     if (a === 'skip') { f.step++; save(false); return go('find'); }
     if (a === 'pick') { f.pick = b.dataset.key; save(false); return render(); }
@@ -1052,7 +1058,7 @@
       if (!daily) { toast('Write one small thing you could do most days.'); return; }
       f.big = big; f.daily = daily; f.step = qs.length + 3; save(false); return go('find');
     }
-    if (a === 'go') { S.draft.mode = 'more'; S.draft.what = f.daily; S.draft.found = f.big || f.daily; save(false); return go('what'); }
+    if (a === 'go') { S.draft.mode = f.mode || 'more'; S.draft.what = f.daily; S.draft.found = f.big || f.daily; save(false); return go('what'); }
   }
 
   // ── I'm struggling ────────────────────────────────────────────────────────

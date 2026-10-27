@@ -65,14 +65,18 @@ Deno.serve(async (req) => {
   const used = usage.day === today ? usage.n || 0 : 0
   if (used >= DAILY_LIMIT) return json({ error: 'limit' }, 429)
 
-  let body: { answers?: Record<string, string>; wins?: { name: string; outcome: string }[]; horizon?: string }
+  let body: { mode?: string; answers?: Record<string, string>; wins?: { name: string; outcome: string }[]; horizon?: string }
   try { body = await req.json() } catch { return json({ error: 'bad_request' }, 400) }
   const labels: Record<string, string> = {
     proud: `Looking back from ${body.horizon || 'three months'} from now, what would make you insanely proud`,
     years: 'Something wanted for years and never got round to',
     new: 'Something new to explore',
     admire: 'Someone admired, and what they would love to get better at',
+    drain: 'Something they do that costs them more than it gives',
+    lighter: `Looking back from ${body.horizon || 'three months'} from now, what they cut back on that made life feel lighter`,
+    tried: 'What they have tried to cut back on before, and what got in the way',
   }
+  const less = body.mode === 'less'
   const lines: string[] = []
   for (const [k, v] of Object.entries(body.answers || {})) {
     const t = String(v || '').trim().slice(0, 800)
@@ -86,7 +90,7 @@ Deno.serve(async (req) => {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-    body: JSON.stringify({ model: MODEL, max_tokens: 900, system: SYSTEM, tools: [TOOL], tool_choice: { type: 'tool', name: 'reflect' }, messages: [{ role: 'user', content: lines.join('\n') }] }),
+    body: JSON.stringify({ model: MODEL, max_tokens: 900, system: SYSTEM, tools: [TOOL], tool_choice: { type: 'tool', name: 'reflect' }, messages: [{ role: 'user', content: (less ? 'They want to cut back on or stop something. Each option should be something specific to cut back on, and "daily" should be the cut-back rule for most days, such as "No phone in bed".\n\n' : '') + lines.join('\n') }] }),
   })
   if (!res.ok) { console.error('[showup-reflect] anthropic', res.status, (await res.text()).slice(0, 300)); return json({ error: 'ai_unavailable' }, 502) }
   const data = await res.json()
