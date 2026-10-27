@@ -385,30 +385,22 @@ details.ask .isteps { margin-top: 10px; }
 .seg2 { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--navy); border-radius: 4px; overflow: hidden; }
 .seg2 button { min-height: 48px; border: 0; background: var(--white); color: var(--navy); font: inherit; font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
 .seg2 button[aria-pressed="true"] { background: var(--navy); color: var(--white); }
-.vprev { align-self: center; width: min(260px, 100%); border: 6px solid var(--navy); border-radius: 22px; overflow: hidden; background: var(--cream); pointer-events: none; user-select: none; }
-.vpbar { background: var(--navy); height: 34px; display: flex; align-items: center; justify-content: center; }
-.vpbody { display: flex; flex-direction: column; gap: 9px; padding: 12px 14px 16px; min-height: 300px; }
-.vph { font-family: var(--display); font-size: 20px; line-height: 1.15; }
-.vpsub { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-mid); }
-.vppill { border: 1px solid var(--cream-deep); background: var(--white); border-radius: 4px; padding: 3px 7px; font-weight: 600; font-size: 10px; color: var(--navy); }
-.vpbtn { background: var(--navy); color: var(--white); border-radius: 4px; text-align: center; padding: 10px 6px; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
-.vphint { font-size: 10px; color: var(--text-mid); text-align: center; }
-.vplink { font-size: 11px; font-weight: 600; text-decoration: underline; text-align: center; }
-.vplink.l { text-align: left; }
-.vpcard { background: var(--white); border-radius: 6px; padding: 9px 10px; display: flex; flex-direction: column; gap: 6px; }
-.vpcard small { font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-mid); }
-.vpcard.row { flex-direction: row; align-items: center; gap: 8px; }
-.vpcard.row span:last-child { display: flex; flex-direction: column; gap: 2px; }
-.vpcard.row small { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 9px; }
-.vpcard.row b { font-size: 11px; font-weight: 600; }
-.vpdim { flex: 0 0 auto; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--navy); background: linear-gradient(90deg, var(--navy) 50%, transparent 50%); }
-.vpdots { display: flex; gap: 6px; }
-.vpdots span { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--cream-deep); }
-.vpdots span.on { background: var(--navy); border-color: var(--navy); }
-.vpdots span.today { border: 1.5px dashed var(--navy); }
-.vpring { align-self: center; width: 86px; height: 86px; border-radius: 50%; border: 6px solid var(--cream-deep); border-top-color: var(--navy); border-right-color: var(--navy); display: flex; flex-direction: column; align-items: center; justify-content: center; margin-block: 4px; }
-.vpring b { font-size: 22px; font-weight: 600; line-height: 1; }
-.vpring small { font-size: 9px; color: var(--text-mid); }
+.vplist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.vplist li { background: var(--white); border-radius: 6px; padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; }
+.vplist b { font-weight: 600; }
+.vplist span { color: var(--text-mid); font-size: 15px; }
+.vpage.simple { gap: 28px; }
+.vpage.simple h1 { margin-top: 24px; text-align: center; }
+.fmin { gap: 18px; }
+.fmin h1 { text-align: center; margin-top: 24px; margin-bottom: -10px; }
+.fmin .hint.c { margin: 0; }
+.fmin .big { margin-top: 28px; }
+.donemin { margin-top: 28px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.donemin p { margin: 0; font-size: 18px; font-weight: 500; }
+.fminfoot { display: flex; justify-content: center; align-items: flex-start; gap: 24px; flex-wrap: wrap; }
+.fminfoot details[open] { flex-basis: 100%; }
+.fminfoot details.ask > summary { border: 0; padding: 0; background: none; text-decoration: underline; text-underline-offset: 3px; }
+.fminfoot .link, .fminfoot details.ask > summary { min-height: 44px; font-size: 15px; font-weight: 600; color: var(--navy); }
 .c { text-align: center; justify-content: center; }
 .hint.c { margin: -8px 0 0; }
 .choice.vp { flex-direction: row; align-items: center; gap: 16px; padding: 14px 16px; }
@@ -468,6 +460,6 @@ details.alldays[open] summary { margin-bottom: 12px; }
   <main id="view"></main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=20261027a"></script>
+<script src="app.js?v=20261027b"></script>
 </body>
 </html>
