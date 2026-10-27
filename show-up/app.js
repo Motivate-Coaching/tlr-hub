@@ -373,7 +373,7 @@
       h += catchUpCard(t);
       h += '<div class="card weekcard"><span class="eyebrow">This week</span>' + weekHTML(t) +
         '<details class="alldays"><summary>See all ' + L + ' days</summary>' + gridHTML(t, true) + '<p class="hint" style="margin:8px 0 0">Tap any day to fill it in or add a note.</p></details></div>';
-      h += signInCard() + extraCards(t);
+      var na = nudgeAsk(t); h += na || (signInCard() + extraCards(t));
       h += '<div class="row" style="justify-content:center;flex-wrap:wrap;gap:4px 16px">' + (e ? '<button class="link" data-go="slipped">I’m struggling</button>' : '') + '<button class="link" data-go="wins">My past wins</button></div></section>';
       return h;
     },
@@ -545,7 +545,7 @@
     else if (!e) h += '<div class="big">' + showUpButtons(true) + '</div>';
     else {
       h += '<div class="donemin"><span class="bigstar"></span><p>' + esc(doneMsg(e)) + '</p><button class="link center" data-go="note">' + (e.note ? 'Edit my note' : 'Add a note') + '</button></div>';
-      h += signInCard() || extraCards(t);
+      h += nudgeAsk(t) || signInCard() || extraCards(t);
     }
     var catchUp = t <= L + 1 && catchDays(t).length;
     h += '<div class="spacer"></div><div class="fminfoot"><details class="ask"><summary>' + (catchUp ? 'Fill in a past day' : 'My days') + '</summary><div class="card" style="padding:16px">' + (catchUp ? catchUpCard(t) : '') + gridHTML(t, true) + '<p class="hint" style="margin:0">Tap any day to fill it in.</p></div></details>' +
@@ -869,6 +869,17 @@
   }
 
   // ── Not signed in: nudges can't reach you ─────────────────────────────────
+  function nudgeAsk(t) {
+    var e = S.entries[t], a = S.pushAsk || {};
+    if (!e || S.settings.push || !sb) return '';
+    if (!pushSupported() || (window.Notification && Notification.permission === 'denied')) return '';
+    if (isIOS() && !isStandalone()) return '';
+    if (a.n >= 2 || (a.n === 1 && daysBetween(a.at, todayStr()) < 3) || a.at === todayStr()) return '';
+    return '<div class="card soft nudgeask"><b style="font-weight:600">Want a gentle nudge on your phone each morning?</b>' +
+      '<span>At ' + esc(fmtTime(S.settings.time)) + ', your time, wherever you are. Change it any time in Settings.</span>' +
+      (user ? '' : '<span class="hint">First we’ll ask for your email, so the nudge knows where to find you.</span>') +
+      '<div class="row" style="gap:12px;justify-content:flex-start"><button class="chip" data-act="nudgeyes" style="background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">' + (user ? 'Turn on' : 'Add my email') + '</button><button class="link" data-act="nudgeno">Not now</button></div></div>';
+  }
   function signInCard() {
     if (user || !sb || !authChecked || S.signinLater === todayStr() || (S.habit && todayNum() < 2)) return '';
     return '<div class="card soft small"><b style="font-weight:600">Save your progress?</b><span>Add your email and your nudges can reach you, and nothing gets lost.</span>' +
@@ -1347,6 +1358,8 @@
       case 'sendcode': return void sendCode();
       case 'verifycode': return void verifyCode();
       case 'authback': ui.authStep = null; return render();
+      case 'nudgeyes': stat('nudgeask', user ? 'yes' : 'email'); if (!user) { ui.returnTo = 'tracker'; return go('account'); } var pa2 = S.pushAsk || { n: 0 }; S.pushAsk = { n: (pa2.n || 0) + 1, at: todayStr() }; save(false); return void togglePush();
+      case 'nudgeno': var pa = S.pushAsk || { n: 0 }; S.pushAsk = { n: (pa.n || 0) + 1, at: todayStr() }; save(false); stat('nudgeask', 'not now'); return render();
       case 'signinlater': S.signinLater = todayStr(); save(false); return render();
       case 'exportdata': return exportData();
       case 'deletedata': return confirmSheet('Delete your Show Up data?', 'This deletes your habit, show-ups, notes, past wins and settings from this device' + (user ? ', and deletes your account' : '') + '. It can’t be undone.', 'Delete my data', function () { void deleteData(); });
@@ -1641,6 +1654,7 @@
   ui.authStep = null;
   if (['account', 'install', 'length', 'words', 'calendar'].indexOf(S.screen) >= 0) S.screen = S.habit ? 'tracker' : 'landing';
   if (S.habit && ['ready', 'plan', 'settings', 'science', 'share', 'note', 'slipped'].indexOf(S.screen) >= 0) S.screen = 'tracker';
+  if (S.settings.tz !== tzGuess()) { S.settings.tz = tzGuess(); save(); }
   render();
   stat('open', S.habit ? 'has_habit' : 'new');
   clearBadge();
