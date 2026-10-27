@@ -1428,7 +1428,7 @@
     var t = calTimes(), now = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
     var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Motivate Coaching//Show Up//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
       'UID:' + (S.habit.id || uuid()) + '@showup.motivate-coaching.com', 'DTSTAMP:' + now, 'DTSTART:' + t.st, 'DTEND:' + t.en, 'RRULE:' + t.rule,
-      'SUMMARY:' + icsEsc('Show up: ' + habitName()), 'DESCRIPTION:' + icsEsc(calDescription()), 'URL:' + APPLINK,
+      'SUMMARY:' + icsEsc('Show Up: ' + habitName()), 'DESCRIPTION:' + icsEsc(calDescription()), 'URL:' + APPLINK,
       'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsEsc('Time to show up: ' + habitName()), 'TRIGGER:PT0M', 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'];
     return lines.map(icsFold).join('\r\n') + '\r\n';
   }
@@ -1445,7 +1445,7 @@
   }
   function googleCalURL() {
     var t = calTimes();
-    return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('Show up: ' + habitName()) + '&dates=' + t.st + '/' + t.en +
+    return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('Show Up: ' + habitName()) + '&dates=' + t.st + '/' + t.en +
       '&details=' + encodeURIComponent(calDescription()) + '&recur=' + encodeURIComponent('RRULE:' + t.rule) + '&ctz=' + encodeURIComponent(S.settings.tz || 'UTC');
   }
   function daysPhrase() {
