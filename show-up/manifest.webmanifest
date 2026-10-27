@@ -1,6 +1,6 @@
 {
-  "name": "Show Up",
-  "short_name": "Show Up",
+  "name": "Let’s Go",
+  "short_name": "Let’s Go",
   "description": "Build a habit that sticks, or break one that doesn't. One minute to set up, one tap a day.",
   "id": "./",
   "start_url": "./?source=app",
