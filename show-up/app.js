@@ -359,16 +359,14 @@
     wins: function () { return winsScreen(false); },
     viewpick: function () {
       var v = ui.vp || S.settings.view || 'full', n = firstName(), simple = v === 'focus';
-      var dots = '<span class="on"></span><span class="on"></span><span></span><span class="on"></span><span class="on"></span><span class="today"></span>';
-      var prev = simple
-        ? '<div class="vph c">Walk 20 minutes</div><div class="vpring"><b>5</b><small>show-ups</small></div><div class="vpsub c">Day 6 of 30</div><div class="vpbtn">I showed up today</div><div class="vpcard row"><span class="vpdim"></span><span><small>Tough day? A lighter version counts</small><b>A 5 minute walk</b></span></div><div class="vplink">See all my days</div>'
-        : '<div class="vph">Walk 20 minutes</div><div class="vpsub">Day 6 of 30<span class="vppill">My plan</span></div><div class="vpbtn">I showed up today</div><div class="vphint">A lighter version on a tough day counts too.</div><div class="vplink">I’m struggling</div><div class="vpcard"><small>This week</small><div class="vpdots">' + dots + '</div><span class="vplink l">See all 30 days</span></div><div class="vplink">My past wins</div>';
-      return '<section class="screen"><div><div class="eyebrow">Before we start</div><h1>' + (n ? 'Lovely to meet you, ' + esc(n) + '.' : 'Choose your view') + '</h1></div>' +
-        '<div class="vpintro">' + (n ? '<b>Choose your view</b>' : '') + '<p class="lede">Tap each one to see it. Change it any time in Settings.</p></div>' +
-        '<div class="seg2" role="group" aria-label="Preview a view"><button data-vp="full" aria-pressed="' + !simple + '">Detailed</button><button data-vp="focus" aria-pressed="' + simple + '">Simple</button></div>' +
-        '<div class="vprev" aria-label="Preview of the ' + (simple ? 'Simple' : 'Detailed') + ' view"><div class="vpbar"><img src="logo-white.png" alt="" width="29" height="24"></div><div class="vpbody">' + prev + '</div></div>' +
-        '<p class="hint c">' + (simple ? 'One thing at a time. Extras sit one tap away, with calmer motion.' : 'Examples, tips and your whole week on show.') + '</p>' +
-        '<button class="btn" data-act="vpgo">Continue with ' + (simple ? 'Simple' : 'Detailed') + '</button></section>';
+      var seg = '<div class="seg2" role="group" aria-label="Try a view"><button data-vp="full" aria-pressed="' + !simple + '">Detailed</button><button data-vp="focus" aria-pressed="' + simple + '">Simple</button></div>';
+      var go = '<div class="spacer"></div><button class="btn" data-act="vpgo">Continue with ' + (simple ? 'Simple' : 'Detailed') + '</button>';
+      var title = '<h1>' + (n ? 'Lovely to meet you, ' + esc(n) + '.' : 'Choose your view') + '</h1>';
+      if (simple) return '<section class="screen vpage simple">' + title + seg + '<p class="lede c">Just what you need. Nothing else.</p>' + go + '</section>';
+      return '<section class="screen vpage"><div><div class="eyebrow">Before we start</div>' + title + '</div>' +
+        '<div class="vpintro">' + (n ? '<b>Choose your view</b>' : '') + '<p class="lede">Tap each one to try it. This page changes to show you. You can switch any time in Settings.</p></div>' + seg +
+        '<ul class="vplist"><li><b>Examples and ideas</b><span>to help you get started</span></li><li><b>Tips and the science</b><span>behind each step</span></li><li><b>Your whole week</b><span>at a glance, plus your past wins</span></li></ul>' +
+        '<p class="hint">Good if you like to see the full picture. Prefer fewer words on screen? Try Simple.</p>' + go + '</section>';
     },
     name: function () {
       return '<section class="screen"><div><div class="eyebrow">Before we start</div><h1>What should we call you?</h1></div>' +
@@ -501,16 +499,18 @@
   };
 
   function focusTracker() {
-    var t = todayNum(), L = S.habit.length, e = S.entries[t], less = S.habit.mode === 'less';
-    var h = '<section class="screen focus"><div class="row" style="justify-content:flex-end;margin-bottom:-12px"><button class="plan-link" data-go="plan">' + iconPlan() + 'My plan</button></div><h1 style="text-align:center">' + esc(habitName()) + '</h1>' + ring(t, L) +
-      '<p class="hint" style="text-align:center;margin-top:-12px">' + (t > L ? 'All ' + L + ' days done' : 'Day ' + t + ' of ' + L) + '</p>';
+    var t = todayNum(), L = S.habit.length, e = S.entries[t];
+    var h = '<section class="screen focus fmin"><h1>' + esc(habitName()) + '</h1><p class="hint c">' + (t > L ? 'All ' + L + ' days done' : 'Day ' + t + ' of ' + L) + '</p>';
     if (t > L) h += '<div class="big"><button class="btn" data-go="reflect">Start my look back</button><button class="link center" data-go="share">Share that I did it</button></div>';
-    else if (!e) h += '<div class="big">' + showUpButtons(true) + '</div>' +
-      '<div class="plan">' + iconDown('#888880', 32) + '<div><small>Tough day? A lighter version counts</small><b>' + esc(S.habit.dimmer) + '</b></div></div>';
-    else h += '<div class="done"><span class="bigstar"></span><span class="msg">' + esc(doneMsg(e)) + '</span><button data-go="note">' + (e.note ? 'Edit note' : 'Note') + '</button></div>' + nextNudge();
-    h += catchUpCard(t) + signInCard();
-    h += '<details class="ask" style="align-self:center"><summary>See all my days</summary><div class="card" style="padding:16px">' + gridHTML(t, true) + '<p class="hint" style="margin:0">Tap any day to fill it in or add a note.</p></div></details>';
-    return h + '<div class="spacer"></div></section>';
+    else if (!e) h += '<div class="big">' + showUpButtons(true) + '</div>';
+    else {
+      h += '<div class="donemin"><span class="bigstar"></span><p>' + esc(doneMsg(e)) + '</p><button class="link center" data-go="note">' + (e.note ? 'Edit my note' : 'Add a note') + '</button></div>';
+      h += signInCard() || extraCards(t);
+    }
+    var catchUp = t <= L + 1 && catchDays(t).length;
+    h += '<div class="spacer"></div><div class="fminfoot"><details class="ask"><summary>' + (catchUp ? 'Fill in a past day' : 'My days') + '</summary><div class="card" style="padding:16px">' + (catchUp ? catchUpCard(t) : '') + gridHTML(t, true) + '<p class="hint" style="margin:0">Tap any day to fill it in.</p></div></details>' +
+      '<button class="link" data-go="plan">My plan</button></div>';
+    return h + '</section>';
   }
 
   function extraCards(t) {
@@ -776,9 +776,10 @@
   function catchUpCard(t) {
     if (!S.habit || t > S.habit.length + 1) return '';
     var days = catchDays(t); if (!days.length) return '';
-    var gap = days.length > 1;
-    var h = '<div class="card soft"><span class="eyebrow">' + (gap ? 'Welcome back' : 'Yesterday') + '</span>' +
-      '<b style="font-weight:600">' + (gap ? 'Did you show up on any of these days?' : 'Did you show up yesterday?') + '</b>' +
+    var gap = days.length > 1, yest = !gap && days[0] === t - 1;
+    var dayName = new Date(addDays(S.habit.start, days[0] - 1) + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long' });
+    var h = '<div class="card soft"><span class="eyebrow">' + (gap ? 'Welcome back' : yest ? 'Yesterday' : 'Catching up') + '</span>' +
+      '<b style="font-weight:600">' + (gap ? 'Did you show up on any of these days?' : yest ? 'Did you show up yesterday?' : 'Did you show up on ' + dayName + '?') + '</b>' +
       '<span class="hint" style="margin-top:-6px">Life gets busy. Tap any you did, and they’ll count.</span><div class="chips">';
     days.forEach(function (n) {
       var d = new Date(addDays(S.habit.start, n - 1) + 'T12:00:00');
