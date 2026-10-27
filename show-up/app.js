@@ -236,7 +236,7 @@
         '<p class="sub2">One minute to set up, one tap a day.</p></div>' +
         '<div class="btns"><button class="btn" data-start="more">Build a habit</button>' +
         '<button class="btn outline" data-start="less">Break a habit</button>' +
-        '<button class="link center" data-find="start">Not sure what to try? <b>Help me choose</b></button></div>' +
+        '<button class="link center" data-find="start">Not sure what to try? <b>Let’s work it out</b></button></div>' +
         '<div class="spacer"></div>' +
         '<p class="foot">' + (user ? '' : '<button class="link inline" data-account="landing">Sign in</button> · ') +
         (isStandalone() ? '' : '<button class="link inline" data-act="install">Get the app</button> · ') +
@@ -252,7 +252,7 @@
         '<span class="hint">In your own words.' + (more ? ' Small enough to do on a rubbish day.' : '') + '</span></div>' +
         optional('Show me some ideas', '<div class="starters">' + (more ? STARTERS_MORE : STARTERS_LESS).map(function (s) { return '<button class="chip" data-starter="' + esc(s) + '">' + esc(s) + '</button>'; }).join('') + '</div>' +
           (more ? '<button class="link" data-act="ideas">More ideas</button>' : '')) +
-        '<button class="card soft askhelp" data-find="start" data-mode="' + d.mode + '"><b>Not sure yet? Let’s work it out together.</b><span>A few quick questions, and we’ll help you spot what fits.</span></button>' +
+        '<button class="card soft askhelp" data-find="start" data-mode="' + d.mode + '"><b>Not sure yet? Let’s work it out together.</b><span>Answer three or four questions and we’ll suggest a few challenges that fit you.</span></button>' +
         '<div class="spacer"></div>' + stepButton('what') + '</section>' +
         (ui.ideasOpen ? ideasSheet() : '');
     },
@@ -881,15 +881,15 @@
   function horizonLabel() { var f = S.find || {}, h = HORIZONS.filter(function (x) { return x[0] === f.horizon; })[0] || HORIZONS[1]; return h[1]; }
   function FIND_QS() {
     if (S.find && S.find.mode === 'less') return [
-      { key: 'drain', q: 'What’s one thing you do that costs you more than it gives you?', hint: 'The thing you already know about. No judgement, just honesty.' },
-      { key: 'lighter', q: 'Imagine it’s ' + horizonLabel() + ' from now. What did you cut back on that made life feel lighter?', hint: 'Picture the difference it made, not just the thing you stopped.' },
-      { key: 'tried', q: 'What have you tried to cut back on before? What got in the way?', hint: 'What got in the way is useful. It helps you plan for it this time.' }
+      { key: 'drain', q: 'What’s one thing you do that costs you more than it gives you?', hint: 'The thing you already know about. No judgement, just honesty.', ph: 'e.g. Scrolling in bed until midnight' },
+      { key: 'lighter', future: true, q: 'Picture yourself ' + horizonLabel() + ' from now, looking back. What would you love to be able to say you cut back on?', hint: 'Picture how life feels, not just the thing you stopped.', ph: 'I’d love to be able to say I...' },
+      { key: 'tried', q: 'What have you tried to cut back on before? What got in the way?', hint: 'What got in the way is useful. It helps you plan for it this time.', ph: 'e.g. Deleted the app, then put it back a week later' }
     ];
     return [
-      { key: 'proud', q: 'Imagine it’s ' + horizonLabel() + ' from now and you’re looking back. What did you do that made you insanely proud of yourself?', hint: 'Not a whole list. The one that would really mean something.' },
-      { key: 'years', q: 'What have you wanted to do for years, and never quite got round to?', hint: 'Big or small. It still counts if it’s been on the list forever.' },
-      { key: 'new', q: 'Is there something new you’re curious to explore?', hint: 'Something you keep noticing, or wondering about.' },
-      { key: 'admire', q: 'Think of someone you admire. What is it about them? Is there something they do that you’d love to get better at?', hint: 'Speaking well. Being fit and strong. Staying calm and patient. These are all skills, and skills can be built.' }
+      { key: 'proud', future: true, q: 'Picture yourself ' + horizonLabel() + ' from now, looking back. What would you love to be able to say you did?', hint: 'The one that would make you really proud of yourself.', ph: 'I’d love to be able to say I...' },
+      { key: 'years', q: 'What have you wanted to do for years, and never quite got round to?', hint: 'Big or small. It still counts if it’s been on the list forever.', ph: 'e.g. Learn to play the guitar' },
+      { key: 'new', q: 'Is there something new you’re curious to explore?', hint: 'Something you keep noticing, or wondering about.', ph: 'e.g. Cold water swimming' },
+      { key: 'admire', q: 'Think of someone you admire. What do they do that you’d love to get better at?', hint: 'Speaking well. Being fit and strong. Staying calm. These are all skills, and skills can be built.', ph: 'e.g. My friend stays so calm under pressure' }
     ];
   }
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition, rec = null;
@@ -921,20 +921,22 @@
     var f = S.find || (S.find = { step: 0, answers: {} }), qs = FIND_QS();
     if (f.step < qs.length) {
       var q = qs[f.step], v = f.answers[q.key] || '';
-      return '<section class="screen"><div><div class="eyebrow">Help me choose · ' + (f.step + 1) + ' of ' + (qs.length + 1) + '</div><h1 class="findq">' + esc(q.q) + '</h1></div>' +
-        (q.key === 'proud' || q.key === 'lighter' ? '<div class="chips" role="group" aria-label="How far ahead"><span class="label" style="width:100%">Looking back from</span>' + HORIZONS.map(function (x) { return '<button class="chip" data-horizon="' + x[0] + '" aria-pressed="' + ((f.horizon || '90') === x[0]) + '">' + (x[0] === '30' ? '30 days' : x[0] === '90' ? '3 months' : 'A year') + '</button>'; }).join('') + '</div>' : '') +
+      return '<section class="screen"><div><div class="eyebrow">Let’s work it out · ' + (f.step + 1) + ' of ' + (qs.length + 1) + '</div>' +
+        (f.step === 0 ? '<p class="lede workintro">Answer a few questions, typed or spoken, and skip any you like. Then we’ll read back what you said and suggest a few challenges that fit you.</p>' : '') +
+        '<h1 class="findq">' + esc(q.q) + '</h1></div>' +
+        (q.future ? '<div class="chips" role="group" aria-label="How far ahead"><span class="label" style="width:100%">How far ahead?</span>' + HORIZONS.map(function (x) { return '<button class="chip" data-horizon="' + x[0] + '" aria-pressed="' + ((f.horizon || '90') === x[0]) + '">' + (x[0] === '30' ? '30 days' : x[0] === '90' ? '3 months' : 'A year') + '</button>'; }).join('') + '</div>' : '') +
         '<p class="hint" style="margin-top:-8px">' + esc(q.hint) + '</p>' +
-        '<div class="field"><textarea id="findans" rows="3" style="min-height:120px" placeholder="Write whatever comes. Only you see this.">' + esc(v) + '</textarea>' + micButton() + '</div>' +
+        '<div class="field"><textarea id="findans" rows="3" style="min-height:120px" placeholder="' + esc(q.ph) + '">' + esc(v) + '</textarea>' + micButton() + '<span class="hint">Only you see this.</span></div>' +
         '<div class="spacer"></div><button class="btn" data-find="next">' + 'Next' + '</button>' +
         '<button class="link center" data-find="skip">Skip this one</button></section>';
     }
     if (f.step === qs.length) return winsScreen(true);
     if (f.step === qs.length + 1) {
       var picks = qs.filter(function (q) { return (f.answers[q.key] || '').trim(); });
-      var h = '<section class="screen"><div><div class="eyebrow">Help me choose</div><h1>Here’s what you said.</h1></div>' +
+      var h = '<section class="screen"><div><div class="eyebrow">Let’s work it out</div><h1>Here’s what you said.</h1></div>' +
         '<p class="lede">Read it back. Which one gives you a little jolt? That’s usually the one. Try something again, or push yourself with something new.</p>' + aiCard(f, picks.length + (S.wins || []).length) + '<div style="display:flex;flex-direction:column;gap:10px">';
       if (f.ai && f.ai.options && f.ai.options.length) h += '<span class="eyebrow">In your own words</span>';
-      picks.forEach(function (q) { h += '<button class="choice findpick" data-find="pick" data-key="' + q.key + '" aria-pressed="' + (f.pick === q.key) + '"><small>' + esc(q.q.replace(/^Imagine it’s [^.?]*? looking back\. /, '')) + '</small><b>' + esc(f.answers[q.key].trim()) + '</b></button>'; });
+      picks.forEach(function (q) { h += '<button class="choice findpick" data-find="pick" data-key="' + q.key + '" aria-pressed="' + (f.pick === q.key) + '"><small>' + esc(q.q.replace(/^Picture yourself [^,]*, looking back\. /, '')) + '</small><b>' + esc(f.answers[q.key].trim()) + '</b></button>'; });
       var wins = S.wins || [];
       if (!picks.length && !wins.length) h += '<div class="card soft small"><span>Nothing written yet, and that’s fine. Go back and jot down a few words, or name your focus below.</span></div>';
       if (wins.length) {
@@ -946,13 +948,13 @@
     }
     if (f.step === qs.length + 2) {
       var big = f.pick === 'own' ? '' : pickText(f);
-      return '<section class="screen"><div><div class="eyebrow">Help me choose</div><h1>' + (f.mode === 'less' ? 'Make it clear and doable.' : 'Make it something you can do most days.') + '</h1></div>' +
+      return '<section class="screen"><div><div class="eyebrow">Let’s work it out</div><h1>' + (f.mode === 'less' ? 'Make it clear and doable.' : 'Make it something you can do most days.') + '</h1></div>' +
         (big ? '<div class="why"><span class="eyebrow">What you’re working towards</span><span style="font-weight:600">' + esc(big) + '</span></div>' : '<div class="field"><label class="label" for="findbig">What do you want to work on?</label><textarea id="findbig" rows="1" placeholder="In your words">' + esc(f.own || '') + '</textarea></div>') +
         '<div class="field"><label class="label" for="finddo">' + (f.mode === 'less' ? 'What exactly will you cut back on, most days?' : 'What could you do most days that moves you towards it?') + '</label><textarea id="finddo" rows="1" placeholder="' + (f.mode === 'less' ? 'e.g. No phone in bed, or chocolate only at weekends' : 'Something small enough to do on a busy day') + '">' + esc(f.daily || '') + '</textarea></div>' +
         optional('Show me examples', '<div class="card small"><span>Speak better? <b>Read one page out loud a day.</b></span><span>Get fitter? <b>A 20-minute walk before work.</b></span><span>Calmer? <b>Five slow breaths before I open my phone.</b></span><span>Write the book? <b>200 words, first thing.</b></span></div>') +
         '<div class="spacer"></div><button class="btn" data-find="daily">Next</button></section>';
     }
-    return '<section class="screen"><div><div class="eyebrow">Help me choose</div><h1>One thing. On purpose.</h1></div>' +
+    return '<section class="screen"><div><div class="eyebrow">Let’s work it out</div><h1>One thing. On purpose.</h1></div>' +
       '<p class="lede">The word priority came into English in the 1400s, and for about 500 years it was singular. The one thing that came first. We only started saying priorities in the 1900s. If everything’s a priority, nothing is.</p>' +
       '<div class="why"><span class="eyebrow">Why one thing works</span><span>One focus, done most days, compounds. Small on its own, big over 30 days.</span><span>Some days will be tough. That’s part of it, and you’ve got a plan for those.</span><span>And underneath the habit, you’re building a skill: patience, focus, trusting yourself. Like wax on, wax off. It looks like painting the fence, and you’re learning karate.</span></div>' +
       '<div class="why"><span class="eyebrow">You chose</span><span style="font-weight:600">' + esc(f.daily || '') + '</span>' + (f.big ? '<span class="soft" style="font-size:14px">Towards: ' + esc(f.big) + '</span>' : '') + '</div>' +
@@ -1001,7 +1003,7 @@
   function syncWins() { if (S.habit) extra().wins = (S.wins || []).slice(); save(); }
   function winsScreen(inFind) {
     var wins = S.wins || [], did = wins.filter(function (w) { return w.outcome === 'did'; }).length, qs = FIND_QS();
-    var h = '<section class="screen"><div><div class="eyebrow">' + (inFind ? 'Help me choose · ' + (qs.length + 1) + ' of ' + (qs.length + 1) : 'My past wins') + '</div><h1 class="findq">' + (inFind ? 'What have you taken on before?' : 'Things you’ve taken on') + '</h1></div>' +
+    var h = '<section class="screen"><div><div class="eyebrow">' + (inFind ? 'Let’s work it out · ' + (qs.length + 1) + ' of ' + (qs.length + 1) : 'My past wins') + '</div><h1 class="findq">' + (inFind ? 'What have you taken on before?' : 'Things you’ve taken on') + '</h1></div>' +
       '<p class="hint" style="margin-top:-8px">A 30-day challenge, giving something up, learning a skill. Big or small, it all counts, even the ones that didn’t stick.</p>';
     if (wins.length) {
       h += '<div class="winlist">';
