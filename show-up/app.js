@@ -500,7 +500,8 @@
         (user ? '<button class="switch" role="switch" aria-checked="' + !!s.marketing + '" data-toggle="marketing"><span><b>Ideas and updates from Stuart</b><span class="hint">Occasional emails. Off unless you choose.</span></span><span class="track"></span></button>' : '') +
         '<p class="hint">Your notes are only ever seen by you. During the pilot, Stuart sees your habit and how often you show up, never your notes.</p>' +
         '<div class="row" style="flex-wrap:wrap;gap:8px;justify-content:flex-start"><button class="chip" data-act="exportdata">Download my data</button><button class="chip" data-act="deletedata">Delete my Show Up data</button></div>' +
-        '<a class="link" href="privacy.html" style="align-self:flex-start">Privacy notice</a>' + '<a class="link" href="terms.html" style="align-self:flex-start">Terms of use</a>' + (user ? '<button class="link" data-act="signout" style="align-self:flex-start">Sign out</button>' : ''));
+        '<a class="link" href="privacy.html" style="align-self:flex-start">Privacy notice</a>' + '<a class="link" href="terms.html" style="align-self:flex-start">Terms of use</a>' +
+        '<button class="switch" role="switch" aria-checked="' + !!s.tlrMember + '" data-act="tlrtoggle"><span><b>I’m in The Living Room</b><span class="hint">Shows member prices for booster calls.</span></span><span class="track"></span></button>' + (user ? '<button class="link" data-act="signout" style="align-self:flex-start">Sign out</button>' : ''));
       if (!isStandalone()) h += sect('Get the app', '<span>Put it on your home screen so it opens like an app.</span><button class="btn outline" data-act="install">Show me how</button>');
       if (isTester()) h += '<div class="card soft small"><span class="eyebrow">Only you see this</span><a class="btn" href="admin.html">How it’s going: your view</a></div>';
       if (isTester()) h += '<div class="card soft small"><span class="eyebrow">For testing (only you see this)</span><span>Wipes everything, including your account, so you can go through it all again as a new person. Sign in again with the same email and you start blank.</span><button class="btn outline" data-act="testerreset">Start again from scratch</button></div>';
@@ -1173,6 +1174,7 @@
       k === 'off' ? 'Show up once today, any size. That’s you back on.' :
       'Make it yours again. If your plan doesn’t fit any more, change it. Do it your way.';
     h += '<div class="why"><span class="eyebrow">One small step</span><span>' + step + '</span></div>';
+    h += supportCard();
     h += '<div class="spacer"></div>';
     if (k === 'spark') h += '<button class="btn" data-go="plan">Change my plan</button>';
     if (canTick) h += '<button class="btn' + (k === 'spark' ? ' outline' : '') + '" data-tick="full" data-from="slipped">' + checkIcon(k === 'spark' ? '#0F1215' : '#FFFFFF') + 'I showed up today</button>';
@@ -1406,6 +1408,10 @@
       case 'nudgeno': var pa = S.pushAsk || { n: 0 }; S.pushAsk = { n: (pa.n || 0) + 1, at: todayStr() }; save(false); stat('nudgeask', 'not now'); return render();
       case 'stuok': S.stuSeen = S.stuSeen || {}; S.stuSeen[todayNum()] = true; save(false); return render();
       case 'stucheck': S.stuSeen = S.stuSeen || {}; S.stuSeen[todayNum()] = true; feedback('checkin-day' + todayNum(), b.dataset.v); stat('checkin', b.dataset.v); toast('Thanks. Stu reads these.'); return render();
+      case 'tlrmember': S.settings.tlrMember = b.dataset.v === 'yes'; save(); stat('support', 'member:' + b.dataset.v); return render();
+      case 'booster': return openLink(S.settings.tlrMember ? SUPPORT.boosterMember : SUPPORT.boosterStandard, S.settings.tlrMember ? 'booster-member' : 'booster');
+      case 'tlrbridge': return tlrBridge();
+      case 'tlrtoggle': S.settings.tlrMember = !S.settings.tlrMember; save(); return render();
       case 'signinlater': S.signinLater = todayStr(); save(false); return render();
       case 'exportdata': return exportData();
       case 'deletedata': return confirmSheet('Delete your Show Up data?', 'This deletes your habit, show-ups, notes, past wins and settings from this device' + (user ? ', and deletes your account' : '') + '. It can’t be undone.', 'Delete my data', function () { void deleteData(); });
@@ -1627,6 +1633,50 @@
       try { localStorage.removeItem(KEY); } catch (e) {}
       S = fresh(); save(false); applyComfort(); go('landing'); toast('Deleted. Your Show Up data is gone.');
     } catch (e) { toast('Couldn’t delete just now. Please try again, or email stuart@motivate-coaching.com.'); }
+  }
+  // ── More support: a booster call with Stu, or joining The Living Room. ──
+  // Paste the links in when they exist. Until then only Stuart sees this (so he can check it).
+  var SUPPORT = {
+    boosterMember: '',   // Calendly link for the 30-minute booster call, member price
+    boosterStandard: '', // Calendly link for the 30-minute booster call, standard price
+    priceMember: '£45', priceStandard: '£75',
+    tlrJoin: '',         // The Living Room payment page
+    tlrInfo: '',         // The Living Room landing page
+    tlrPrice: ''         // e.g. '£XX a month'
+  };
+  function supportLive() { return !!(SUPPORT.boosterMember || SUPPORT.boosterStandard || SUPPORT.tlrJoin); }
+  function supportCard() {
+    if (!supportLive() && !isTester()) return '';
+    var m = S.settings.tlrMember, h = '<div class="card soft supportcard"><span class="eyebrow">Want more support?</span>';
+    if (m === undefined || m === null) {
+      return h + '<span>Are you part of The Living Room?</span><div class="row" style="gap:10px;justify-content:flex-start"><button class="chip" data-act="tlrmember" data-v="yes">Yes</button><button class="chip" data-act="tlrmember" data-v="no">Not yet</button></div></div>';
+    }
+    h += '<button class="choice" data-act="booster"><b>Book a 30-minute booster call with Stu</b><small>Get back on track, one to one. ' + esc(m ? SUPPORT.priceMember + ' for members' : SUPPORT.priceStandard) + '</small></button>';
+    if (!m) h += '<button class="choice" data-act="tlrbridge"><b>Join The Living Room</b><small>Ongoing support from Stu and people doing the same work.</small></button>';
+    if (!supportLive()) h += '<span class="hint">Only you can see this until the links are added.</span>';
+    return h + '</div>';
+  }
+  function openLink(url, what) {
+    if (!url) return toast('Link coming soon.');
+    stat('support', what); try { window.open(url, '_blank', 'noopener'); } catch (e) { location.href = url; }
+  }
+  function tlrBridge() {
+    stat('support', 'tlr-bridge');
+    var el = document.createElement('div'); el.className = 'sheet-bg';
+    el.innerHTML = '<div class="sheet" role="dialog" aria-label="The Living Room"><div class="row" style="justify-content:space-between"><span class="eyebrow">Ongoing support</span><button class="link" data-c="close">Close</button></div>' +
+      '<b style="font-family:var(--display);font-weight:400;font-size:28px;line-height:1.15">The Living Room (TLR)</b>' +
+      '<p class="hint" style="margin:0">Stu’s coaching community, for people whose life works on paper but doesn’t quite feel like theirs.</p>' +
+      '<ul class="tlrlist"><li>Regular live group sessions with Stu</li><li>A practical new tool for each theme</li><li>People doing the same work, so you’re not doing it alone</li></ul>' +
+      (SUPPORT.tlrPrice ? '<p style="margin:0;font-weight:600">' + esc(SUPPORT.tlrPrice) + '</p>' : '') +
+      '<p class="hint" style="margin:0">Try it for 30 days. If it’s not for you, email Stu and get every penny back.</p>' +
+      '<button class="btn" data-c="join">Join now</button><button class="link center" data-c="info">Find out more first</button></div>';
+    app.appendChild(el);
+    el.addEventListener('click', function (ev) {
+      var b = ev.target.closest('[data-c]'); if (!b && ev.target !== el) return;
+      el.remove(); if (!b) return;
+      if (b.dataset.c === 'join') openLink(SUPPORT.tlrJoin, 'tlr-join');
+      if (b.dataset.c === 'info') openLink(SUPPORT.tlrInfo, 'tlr-info');
+    });
   }
   function confirmSheet(title, body, yes, fn) {
     var el = document.createElement('div'); el.className = 'sheet-bg';
