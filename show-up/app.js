@@ -243,7 +243,7 @@
         '<div class="spacer"></div>' +
         '<p class="foot">' + (user ? '' : '<button class="link inline" data-account="landing">Sign in</button> · ') +
         (isStandalone() ? '' : '<button class="link inline" data-act="install">Get the app</button> · ') +
-        '<button class="link inline" data-go="science">How it works</button> · <a class="link inline" href="privacy.html">Privacy</a></p>' +
+        '<button class="link inline" data-go="science">How it works</button> · <a class="link inline" href="privacy.html">Privacy</a> · <a class="link inline" href="terms.html">Terms</a></p>' +
         (isTester() ? '<button class="link center" data-act="testerreset" style="font-size:13px;color:var(--muted)">Testing: start again from scratch</button>' : '') + '</section>';
     },
     what: function () {
@@ -500,8 +500,9 @@
         (user ? '<button class="switch" role="switch" aria-checked="' + !!s.marketing + '" data-toggle="marketing"><span><b>Ideas and updates from Stuart</b><span class="hint">Occasional emails. Off unless you choose.</span></span><span class="track"></span></button>' : '') +
         '<p class="hint">Your notes are only ever seen by you. During the pilot, Stuart sees your habit and how often you show up, never your notes.</p>' +
         '<div class="row" style="flex-wrap:wrap;gap:8px;justify-content:flex-start"><button class="chip" data-act="exportdata">Download my data</button><button class="chip" data-act="deletedata">Delete my Show Up data</button></div>' +
-        '<a class="link" href="privacy.html" style="align-self:flex-start">Privacy notice</a>' + (user ? '<button class="link" data-act="signout" style="align-self:flex-start">Sign out</button>' : ''));
+        '<a class="link" href="privacy.html" style="align-self:flex-start">Privacy notice</a>' + '<a class="link" href="terms.html" style="align-self:flex-start">Terms of use</a>' + (user ? '<button class="link" data-act="signout" style="align-self:flex-start">Sign out</button>' : ''));
       if (!isStandalone()) h += sect('Get the app', '<span>Put it on your home screen so it opens like an app.</span><button class="btn outline" data-act="install">Show me how</button>');
+      if (isTester()) h += '<div class="card soft small"><span class="eyebrow">Only you see this</span><a class="btn" href="admin.html">How it’s going: your view</a></div>';
       if (isTester()) h += '<div class="card soft small"><span class="eyebrow">For testing (only you see this)</span><span>Wipes everything, including your account, so you can go through it all again as a new person. Sign in again with the same email and you start blank.</span><button class="btn outline" data-act="testerreset">Start again from scratch</button></div>';
       h += sect('About', '<button class="link" data-go="science" style="align-self:flex-start">The science behind it</button><a class="link tlr-link" href="https://www.motivate-coaching.com/thelivingroom" target="_blank" rel="noopener" style="align-self:flex-start">About The Living Room (TLR) <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a>');
       return h + '</div></section>';
