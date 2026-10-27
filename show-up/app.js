@@ -1,6 +1,6 @@
-/* Show Up: habit tracker web app (pilot).
+/* Let’s Go: habit tracker web app (pilot).
    Works signed out first (saved on this device), then saves to Supabase once signed in.
-   Its own Supabase project (Show Up, London), separate from the TLR Hub; the anon key is public by design. */
+   Its own Supabase project (Let’s Go, London), separate from the TLR Hub; the anon key is public by design. */
 (function () {
   'use strict';
 
@@ -496,10 +496,10 @@
         '<button class="link" data-act="newhabit" style="align-self:flex-start">Start a new habit</button>');
       h += sect('You and your data', '<div class="field"><label class="label" for="sname">Your first name</label><textarea id="sname" rows="1" data-name="1" autocomplete="given-name" placeholder="So we can say hello">' + esc(firstName()) + '</textarea></div>' +
         (user ? '<span>Signed in as <b>' + esc(user.email) + '</b></span>' : '<span>Saved on this device only.</span><button class="btn" data-account="settings">Save my progress</button>') +
-        '<button class="switch" role="switch" aria-checked="' + (s.analytics !== false) + '" data-toggle="analytics"><span><b>Help improve Show Up</b><span class="hint">Shares which buttons you tap, never what you write.</span></span><span class="track"></span></button>' +
+        '<button class="switch" role="switch" aria-checked="' + (s.analytics !== false) + '" data-toggle="analytics"><span><b>Help improve Let’s Go</b><span class="hint">Shares which buttons you tap, never what you write.</span></span><span class="track"></span></button>' +
         (user ? '<button class="switch" role="switch" aria-checked="' + !!s.marketing + '" data-toggle="marketing"><span><b>Ideas and updates from Stuart</b><span class="hint">Occasional emails. Off unless you choose.</span></span><span class="track"></span></button>' : '') +
         '<p class="hint">Your notes are only ever seen by you. During the pilot, Stuart sees your habit and how often you show up, never your notes.</p>' +
-        '<div class="row" style="flex-wrap:wrap;gap:8px;justify-content:flex-start"><button class="chip" data-act="exportdata">Download my data</button><button class="chip" data-act="deletedata">Delete my Show Up data</button></div>' +
+        '<div class="row" style="flex-wrap:wrap;gap:8px;justify-content:flex-start"><button class="chip" data-act="exportdata">Download my data</button><button class="chip" data-act="deletedata">Delete my Let’s Go data</button></div>' +
         '<a class="link" href="privacy.html" style="align-self:flex-start">Privacy notice</a>' + '<a class="link" href="terms.html" style="align-self:flex-start">Terms of use</a>' +
         '<button class="switch" role="switch" aria-checked="' + !!s.tlrMember + '" data-act="tlrtoggle"><span><b>I’m in The Living Room</b><span class="hint">Shows member prices for booster calls.</span></span><span class="track"></span></button>' + (user ? '<button class="link" data-act="signout" style="align-self:flex-start">Sign out</button>' : ''));
       if (!isStandalone()) h += sect('Get the app', '<span>Put it on your home screen so it opens like an app.</span><button class="btn outline" data-act="install">Show me how</button>');
@@ -535,7 +535,7 @@
         h += installSteps(ios ? 'ios' : 'android');
         h += '<details class="ask"><summary>' + (ios ? 'On Android instead?' : 'On an iPhone instead?') + '</summary>' + installSteps(ios ? 'android' : 'ios') + '</details>';
       } else {
-        h += '<div class="card qrcard"><img src="qr.svg" width="132" height="132" alt="QR code for the Show Up app"><div><b>Point your phone’s camera here</b><span class="hint">Then tap the link that pops up.</span><button class="chip" data-act="copylink">Or copy the link</button></div></div>' +
+        h += '<div class="card qrcard"><img src="qr.svg" width="132" height="132" alt="QR code for the Let’s Go app"><div><b>Point your phone’s camera here</b><span class="hint">Then tap the link that pops up.</span><button class="chip" data-act="copylink">Or copy the link</button></div></div>' +
           '<details class="ask"><summary>Then what?</summary><span class="eyebrow" style="display:block;margin:10px 0 6px">iPhone</span>' + installSteps('ios') + '<span class="eyebrow" style="display:block;margin:16px 0 6px">Android</span>' + installSteps('android') + '</details>' +
           (deferredInstall ? '<button class="btn outline" data-act="doinstall">Or install it on this computer</button>' : '');
       }
@@ -554,7 +554,7 @@
       return '<section class="screen"><div><div class="eyebrow">Save my progress</div><h1>Sign in or create your account</h1></div>' +
         '<p class="lede">Just your email. We’ll send you a 6-digit code, so there’s no password to remember.</p>' +
         '<div class="field"><label class="label" for="aemail">Email</label><input class="input" id="aemail" type="email" autocomplete="email" inputmode="email" value="' + esc(ui.authEmail || '') + '"></div>' +
-        (S.consentAt ? '' : '<label class="consent"><input type="checkbox" id="aconsent"><span>I agree to Show Up storing my habit, progress and notes so it can run for me. <a href="privacy.html">Privacy</a></span></label>') +
+        (S.consentAt ? '' : '<label class="consent"><input type="checkbox" id="aconsent"><span>I agree to Let’s Go storing my habit, progress and notes so it can run for me. <a href="privacy.html">Privacy</a></span></label>') +
         '<p class="err" id="aerr" hidden></p><button class="btn" data-act="sendcode">Send my code</button>' + priv + '</section>';
     }
   };
@@ -1414,7 +1414,7 @@
       case 'tlrtoggle': S.settings.tlrMember = !S.settings.tlrMember; save(); return render();
       case 'signinlater': S.signinLater = todayStr(); save(false); return render();
       case 'exportdata': return exportData();
-      case 'deletedata': return confirmSheet('Delete your Show Up data?', 'This deletes your habit, show-ups, notes, past wins and settings from this device' + (user ? ', and deletes your account' : '') + '. It can’t be undone.', 'Delete my data', function () { void deleteData(); });
+      case 'deletedata': return confirmSheet('Delete your Let’s Go data?', 'This deletes your habit, show-ups, notes, past wins and settings from this device' + (user ? ', and deletes your account' : '') + '. It can’t be undone.', 'Delete my data', function () { void deleteData(); });
       case 'signout': return void (async function () { await sb.auth.signOut(); user = null; S = fresh(); save(false); applyComfort(); go('landing'); })();
     }
   });
@@ -1521,9 +1521,9 @@
   }
   function buildICS() {
     var t = calTimes(), now = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
-    var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Motivate Coaching//Show Up//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
+    var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Motivate Coaching//Lets Go//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
       'UID:' + (S.habit.id || uuid()) + '@showup.motivate-coaching.com', 'DTSTAMP:' + now, 'DTSTART:' + t.st, 'DTEND:' + t.en, 'RRULE:' + t.rule,
-      'SUMMARY:' + icsEsc('Show Up: ' + habitName()), 'DESCRIPTION:' + icsEsc(calDescription()), 'URL:' + APPLINK,
+      'SUMMARY:' + icsEsc('Let’s Go: ' + habitName()), 'DESCRIPTION:' + icsEsc(calDescription()), 'URL:' + APPLINK,
       'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsEsc('Time to show up: ' + habitName()), 'TRIGGER:PT0M', 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'];
     return lines.map(icsFold).join('\r\n') + '\r\n';
   }
@@ -1540,7 +1540,7 @@
   }
   function googleCalURL() {
     var t = calTimes();
-    return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('Show Up: ' + habitName()) + '&dates=' + t.st + '/' + t.en +
+    return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('Let’s Go: ' + habitName()) + '&dates=' + t.st + '/' + t.en +
       '&details=' + encodeURIComponent(calDescription()) + '&recur=' + encodeURIComponent('RRULE:' + t.rule) + '&ctz=' + encodeURIComponent(S.settings.tz || 'UTC');
   }
   function daysPhrase() {
@@ -1611,7 +1611,7 @@
 
   // ── Your data: download and delete ────────────────────────────────────────
   function exportData() {
-    var out = { exported: new Date().toISOString(), app: 'Show Up', account: user ? user.email : null, name: S.settings.name || '', habit: S.habit, entries: S.entries, pastWins: S.wins || [], settings: S.settings };
+    var out = { exported: new Date().toISOString(), app: 'Let’s Go', account: user ? user.email : null, name: S.settings.name || '', habit: S.habit, entries: S.entries, pastWins: S.wins || [], settings: S.settings };
     var blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
     var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'show-up-my-data.json';
     document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
@@ -1631,7 +1631,7 @@
         await sb.auth.signOut(); user = null;
       }
       try { localStorage.removeItem(KEY); } catch (e) {}
-      S = fresh(); save(false); applyComfort(); go('landing'); toast('Deleted. Your Show Up data is gone.');
+      S = fresh(); save(false); applyComfort(); go('landing'); toast('Deleted. Your Let’s Go data is gone.');
     } catch (e) { toast('Couldn’t delete just now. Please try again, or email stuart@motivate-coaching.com.'); }
   }
   // ── More support: a booster call with Stu, or joining The Living Room. ──

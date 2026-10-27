@@ -1,6 +1,6 @@
 // showup-reminders/index.ts
 // Supabase Edge Function, run every 15 minutes by pg_cron.
-// Sends each Show Up user their morning nudge at the time they chose, in their own time zone,
+// Sends each Let’s Go user their morning nudge at the time they chose, in their own time zone,
 // by email and/or phone notification. Skips quiet days, paused nudges and days already ticked.
 // Secret: RESEND_API_KEY lives in Supabase secrets. The phone-notification key pair lives in showup_server_keys (server-made).
 
@@ -11,7 +11,7 @@ const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-const FROM = 'TLR Show Up <stuart@motivate-coaching.com>'
+const FROM = '"Let\'s Go" <stuart@motivate-coaching.com>'
 const APP_URL = 'https://motivate-coaching.github.io/tlr-hub/show-up/'
 const LOGO_URL = 'https://motivate-coaching.github.io/tlr-hub/email/tlr-logo-email.png'
 const WINDOW_MINS = 60 // send any time in the hour after their chosen time, once
