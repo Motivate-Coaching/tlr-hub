@@ -951,7 +951,7 @@
         h += '<span class="eyebrow" style="margin-top:4px">What else stood out for you</span>';
         areas.slice(1).forEach(function (x, i) { h += '<button class="choice area minor" data-find="area" data-i="' + (i + 1) + '"><b>' + esc(x.name) + '</b></button>'; });
       }
-      h += '<div class="why"><span class="eyebrow">Why one thing</span><span>Split your focus and each thing gets less of you. Real traction comes from one thing you commit to and show up for. Pick one now. You can always come back for another.</span></div>';
+      h += '<div class="why"><span class="eyebrow">Why one thing</span><span>Studies at UCLA and the Hong Kong University of Science and Technology found that a clear plan helps people follow through on one goal, but stops helping once they take on several. Real traction comes from one thing you commit to and show up for.</span><span>Pick one now. You can always come back for another.</span></div>';
       return h + '<div class="spacer"></div>' + own.replace('Or write my own', 'Already know what you want to do?').replace(/placeholder="[^"]*"/, 'placeholder="Actually, I’ve worked out what I want to do..."') + '</section>';
     }
     if (r === 'insight') {
