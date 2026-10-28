@@ -475,6 +475,10 @@
       var s = S.settings;
       var sect = function (title, body, open) { return '<details class="sect"' + (open ? ' open' : '') + '><summary>' + title + '</summary><div class="sbody">' + body + '</div></details>'; };
       var h = '<section class="screen settings"><div><h1>Settings</h1><p class="hint" id="syncStatus" style="margin:4px 0 0">' + syncLabel() + '</p></div>';
+      // Stuart's own tools sit at the top so they're one tap away.
+      if (isTester()) h += '<div class="card soft small"><span class="eyebrow">Your tools (only you see this)</span><a class="btn" href="admin.html">Analytics</a><a class="btn outline" href="admin.html#feedback">Feedback responses</a>' +
+        '<button class="btn outline" data-act="copyfeedback">Copy the feedback link</button></div>';
+      if (isTester()) h += '<div class="card soft small"><span class="eyebrow">For testing</span><span>Wipes everything, including your account, so you can go through it all again as a new person. Sign in again with the same email and you start blank.</span><button class="btn outline" data-act="testerreset">Start again from scratch</button><button class="btn outline" data-act="testerreload">Reload the latest version</button></div>';
       // The essentials: your nudge
       h += '<div class="card" id="reminders"><span class="eyebrow">Morning nudge</span>' + (user || !sb || !authChecked ? '' : '<div class="card soft small" style="padding:12px 14px"><b style="font-weight:600">Add your email to get your nudge</b><button class="chip" data-account="settings" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Save my progress</button></div>') +
         '<div class="row"><label class="label" for="rtime" style="margin:0">Time</label><input class="input" id="rtime" type="time" step="900" value="' + esc(s.time) + '" style="max-width:160px"></div>' +
@@ -507,8 +511,6 @@
         '<a class="link" href="privacy.html" style="align-self:flex-start">Privacy notice</a>' + '<a class="link" href="terms.html" style="align-self:flex-start">Terms of use</a>' +
         '<button class="switch" role="switch" aria-checked="' + !!s.tlrMember + '" data-act="tlrtoggle"><span><b>I’m in The Living Room</b><span class="hint">Shows member prices for booster calls.</span></span><span class="track"></span></button>' + (user ? '<button class="link" data-act="signout" style="align-self:flex-start">Sign out</button>' : ''));
       if (!isStandalone()) h += sect('Get the app', '<span>Put it on your home screen so it opens like an app.</span><button class="btn outline" data-act="install">Show me how</button>');
-      if (isTester()) h += '<div class="card soft small"><span class="eyebrow">Only you see this</span><a class="btn" href="admin.html">How it’s going: your view</a></div>';
-      if (isTester()) h += '<div class="card soft small"><span class="eyebrow">For testing (only you see this)</span><span>Wipes everything, including your account, so you can go through it all again as a new person. Sign in again with the same email and you start blank.</span><button class="btn outline" data-act="testerreset">Start again from scratch</button><button class="btn outline" data-act="testerreload">Reload the latest version</button></div>';
       h += sect('About', '<button class="link" data-go="science" style="align-self:flex-start">The science behind it</button><a class="link tlr-link" href="https://www.motivate-coaching.com/thelivingroom" target="_blank" rel="noopener" style="align-self:flex-start">About The Living Room (TLR) <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a>');
       return h + '</div></section>';
     },
@@ -1441,6 +1443,7 @@
       case 'calics': calRead(); downloadICS(); return;
       case 'calgoogle': calRead(); try { window.open(googleCalURL(), '_blank', 'noopener'); } catch (e) {} stat('calendar', 'google'); return;
       case 'testerreload': return void (async function () { try { if (window.caches) { var ks = await caches.keys(); await Promise.all(ks.map(function (k) { return caches.delete(k); })); } } catch (e) {} location.reload(); })();
+      case 'copyfeedback': { var fl = location.origin + location.pathname.replace(/[^/]*$/, '') + 'feedback.html'; try { navigator.clipboard.writeText(fl).then(function () { toast('Copied. Paste it anywhere to share.'); }, function () { toast(fl); }); } catch (e) { toast(fl); } return; }
       case 'testerreset': return confirmSheet('Start again from scratch?', 'Everything on this phone and in your account goes, so you start as a new person.', 'Start again', testerReset);
       case 'sharenote': ui.shareNote = !ui.shareNote; return render();
       case 'shareimg': return void shareImage();

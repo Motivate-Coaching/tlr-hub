@@ -311,6 +311,8 @@ textarea:focus, .opt:focus-visible, button:focus-visible { outline: 3px solid va
       if (!sess) { var r = await sb.auth.signInAnonymously(); if (r.error) throw r.error; sess = r.data.session; }
       var ins = await sb.from('showup_feedback').insert({ user_id: sess.user.id, question: 'tester-feedback', answer: JSON.stringify(out) });
       if (ins.error) throw ins.error;
+      // Let Stuart know by email. Best effort: if it fails, the feedback is still saved.
+      try { sb.functions.invoke('showup-notify', { body: {} }).catch(function () {}); } catch (e) {}
       try { localStorage.removeItem(DRAFT); } catch (e) {}
       bar.style.width = '100%'; backBtn.hidden = true;
       var el = document.createElement('div'); el.className = 'celebrate'; el.setAttribute('role', 'status');
