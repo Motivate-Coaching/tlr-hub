@@ -1,6 +1,6 @@
 /* Let’s Go service worker: works offline and shows the morning nudge. */
-const CACHE = 'showup-20261028e';
-const SHELL = ['./', './index.html', './app.js?v=20261028e', './manifest.webmanifest', './logo-white.png', './stuart.jpg',
+const CACHE = 'showup-20261028f';
+const SHELL = ['./', './index.html', './app.js?v=20261028f', './manifest.webmanifest', './logo-white.png', './stuart.jpg',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png'];
 
 self.addEventListener('install', (e) => {
@@ -10,11 +10,13 @@ self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
 });
 // Our own files: try the network first so updates land, fall back to the saved copy when offline.
+// Pages ask the server for the newest copy every time (GitHub Pages otherwise lets phones reuse a copy for 10 minutes).
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== self.location.origin) return;
+  const fresh = e.request.mode === 'navigate' || /\.(html|webmanifest)$|\/$/.test(url.pathname) || url.pathname.endsWith('sw.js');
   e.respondWith(
-    fetch(e.request).then((res) => {
+    fetch(e.request, fresh ? { cache: 'no-cache' } : undefined).then((res) => {
       if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(e.request, copy)); }
       return res;
     }).catch(() => caches.match(e.request).then((r) => r || caches.match('./index.html')))
