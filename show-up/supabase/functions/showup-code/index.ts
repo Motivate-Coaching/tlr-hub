@@ -29,15 +29,30 @@ function sixDigits() {
   const a = new Uint32Array(1); crypto.getRandomValues(a)
   return String(a[0] % 1_000_000).padStart(6, '0')
 }
-function emailHtml(code: string) {
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your Let’s Go code</title></head>
+type Plan = { what?: string; anchor?: string; dimmer?: string; length?: number; mode?: string; name?: string }
+function esc(s: unknown) {
+  return String(s ?? '').slice(0, 300).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!))
+}
+function planBlock(p: Plan) {
+  const row = (label: string, value: string) => value ? `<p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#4A4A4A;">${label}</p><p style="margin:0 0 14px;font-size:16px;line-height:1.5;color:#1A1A1A;">${value}</p>` : ''
+  return `<table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F1EB;border-radius:6px;margin:0 0 24px;"><tr><td style="padding:18px 20px 6px;">
+${row('My habit', `<b>${esc(p.what)}</b>${p.length ? `, for ${Number(p.length) || 30} days` : ''}`)}
+${row('When', esc(p.anchor))}
+${row(p.mode === 'less' ? 'Tough day? My smaller version' : 'Tough day? My lighter version', esc(p.dimmer))}
+</td></tr></table>`
+}
+function emailHtml(code: string, plan?: Plan) {
+  const hasPlan = !!(plan && plan.what)
+  const hi = hasPlan && plan!.name ? `${esc(plan!.name)}, your plan is ready.` : 'Your plan is ready.'
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${hasPlan ? 'Activate your plan' : 'Your Let’s Go code'}</title></head>
 <body style="margin:0;padding:0;background:#F5F1EB;font-family:Poppins,'Helvetica Neue',Helvetica,Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F1EB;padding:28px 16px;"><tr><td align="center">
 <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#FFFFFF;border-radius:10px;"><tr><td style="padding:32px;">
 <p style="margin:0 0 6px;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#4A4A4A;">Let’s Go</p>
-<h1 style="margin:0 0 14px;font-family:'Playfair Display',Georgia,serif;font-weight:400;font-size:28px;color:#1A1A1A;">Your sign-in code</h1>
+<h1 style="margin:0 0 14px;font-family:'Playfair Display',Georgia,serif;font-weight:400;font-size:28px;color:#1A1A1A;">${hasPlan ? hi : 'Your sign-in code'}</h1>
+${hasPlan ? planBlock(plan!) + '<p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#4A4A4A;">Your code to activate it:</p>' : ''}
 <p style="margin:0 0 18px;font-size:42px;font-weight:600;letter-spacing:0.18em;color:#0F1215;">${code}</p>
-<p style="margin:0;font-size:14px;line-height:1.6;color:#4A4A4A;">Type it into the app to sign in. It works for ${CODE_MINUTES} minutes. If you didn't ask for this, you can ignore this email.</p>
+<p style="margin:0;font-size:14px;line-height:1.6;color:#4A4A4A;">${hasPlan ? 'Type it into the app to activate your plan and get started today.' : 'Type it into the app to sign in.'} It works for ${CODE_MINUTES} minutes. If you didn't ask for this, you can ignore this email.</p>
 </td></tr></table></td></tr></table></body></html>`
 }
 async function vapidPublic() {
@@ -53,7 +68,7 @@ async function vapidPublic() {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
   if (req.method !== 'POST') return json({ error: 'method' }, 405)
-  let body: { action?: string; email?: string; code?: string }
+  let body: { action?: string; email?: string; code?: string; plan?: Plan }
   try { body = await req.json() } catch { return json({ error: 'bad_request' }, 400) }
 
   if (body.action === 'vapid') return json({ key: await vapidPublic() })
@@ -87,7 +102,7 @@ Deno.serve(async (req) => {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: FROM, to: [email], subject: `Your Let’s Go code: ${code}`, html: emailHtml(code), text: `Your Let’s Go code is ${code}. It works for ${CODE_MINUTES} minutes.` }),
+      body: JSON.stringify({ from: FROM, to: [email], subject: body.plan?.what ? `Activate your plan: ${code}` : `Your Let’s Go code: ${code}`, html: emailHtml(code, body.plan), text: body.plan?.what ? `Your plan: ${String(body.plan.what).slice(0, 300)}. Your code to activate it is ${code}. It works for ${CODE_MINUTES} minutes.` : `Your Let’s Go code is ${code}. It works for ${CODE_MINUTES} minutes.` }),
     })
     if (!res.ok) { console.error('[showup-code] Resend', res.status, (await res.text()).slice(0, 200)); return json({ error: 'email_failed' }, 502) }
     return json({ ok: true })
@@ -109,6 +124,12 @@ Deno.serve(async (req) => {
     const link = await admin.auth.admin.generateLink({ type: 'magiclink', email })
     const token_hash = link.data?.properties?.hashed_token
     if (!token_hash) { console.error('[showup-code] link', link.error?.message); return json({ error: 'account' }, 500) }
+    // Tidy up: if they were using a guest session for challenge ideas, remove that guest account now they have a real one.
+    try {
+      const bearer = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '')
+      const { data: g } = await admin.auth.getUser(bearer)
+      if (g?.user?.is_anonymous) await admin.auth.admin.deleteUser(g.user.id)
+    } catch { /* not a guest, nothing to tidy */ }
     return json({ token_hash, isNew: !created.error })
   }
   return json({ error: 'action' }, 400)
