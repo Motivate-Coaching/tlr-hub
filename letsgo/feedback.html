@@ -111,7 +111,7 @@ textarea:focus, .opt:focus-visible, button:focus-visible { outline: 3px solid va
   function used() { return [R.few, R.most, R.stopped].indexOf(route()) >= 0; }
   function stopped() { return route() === R.stopped; }
   var ALL = [
-    { k: 'ellis', part: 0, req: true, show: used, q: 'Imagine you could no longer use Let’s Go. How would you feel?', opts: ['Very disappointed', 'Somewhat disappointed', 'Not disappointed'], more: 'Why do you say that?' },
+    { k: 'ellis', part: 0, req: true, show: used, q: 'If Let’s Go disappeared tomorrow, how would you feel?', opts: ['Very disappointed', 'Somewhat disappointed', 'Not disappointed'], more: 'Why do you say that?' },
     { k: 'purpose', part: 1, text: true, q: 'In your own words, what is Let’s Go for?' },
     { k: 'ease', part: 1, req: function () { return route() !== R.look; }, q: 'How easy was it to set up?', scale: 7, ends: ['Very hard', 'Very easy'], extra: NA, moreIf: function () { var p = Number(pick('ease')); return p > 0 && p <= 4; }, more: 'What made it harder?' },
     { k: 'hesitate', part: 1, req: true, multi: true, q: 'Where did you hesitate, feel unsure or get annoyed?', opts: ['Setting up', 'Idea generator', 'Daily check-in', '“I’m struggling”', 'Reminders', 'Saving progress', SMOOTH], more: 'Tell me more' },
