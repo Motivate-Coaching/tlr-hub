@@ -235,8 +235,8 @@
   var screens = {
     landing: function () {
       return '<section class="screen landing">' +
-        '<div class="hero"><h1>Build a habit that sticks.</h1>' +
-        '<p class="sub">Or break one that doesn’t.</p>' +
+        '<div class="hero"><h1>Build a habit you want.</h1>' +
+        '<p class="sub">Or break one you don’t.</p>' +
         '<p class="sub2">One minute to set up, one tap a day.</p></div>' +
         '<div class="btns"><button class="btn" data-start="more">Build a habit</button>' +
         '<button class="btn outline" data-start="less">Break a habit</button>' +
@@ -956,26 +956,51 @@
       proud
     ];
   }
-  var SR = window.SpeechRecognition || window.webkitSpeechRecognition, rec = null;
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   function micButton() {
     if (!SR) return '';
     return '<button class="mic" data-mic="1" aria-pressed="false" aria-label="Speak instead of typing"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Speak</span></button>';
   }
-  function toggleMic(btn) {
-    var ta = document.getElementById('findans'); if (!SR || !ta) return;
-    if (rec) { rec.stop(); return; }
-    try {
-      rec = new SR(); rec.lang = 'en-GB'; rec.continuous = true; rec.interimResults = true;
-      var base = ta.value ? ta.value.replace(/\s*$/, ' ') : '';
-      rec.onresult = function (ev) {
-        var fin = '', tmp = '';
-        for (var i = 0; i < ev.results.length; i++) { if (ev.results[i].isFinal) fin += ev.results[i][0].transcript; else tmp += ev.results[i][0].transcript; }
-        ta.value = base + fin + tmp; grow(ta); findSave();
-      };
-      rec.onend = function () { rec = null; btn.setAttribute('aria-pressed', 'false'); btn.querySelector('span').textContent = 'Speak'; };
-      rec.onerror = function (e) { if (e.error === 'not-allowed') toast('Microphone blocked. You can allow it in your browser settings.'); };
-      rec.start(); btn.setAttribute('aria-pressed', 'true'); btn.querySelector('span').textContent = 'Listening… tap to stop';
-    } catch (e) { rec = null; toast('Speaking isn’t available here. Typing works just as well.'); }
+  // Dictation: transcribes exactly what's said, keeps listening through pauses (up to 10 minutes) until they tap stop.
+  // Android Chrome repeats earlier words if left in "continuous" mode, so there we listen one phrase at a time and restart.
+  var IS_ANDROID = /android/i.test(navigator.userAgent), MIC_MAX_MS = 10 * 60 * 1000, mic = null;
+  function stopMic() { if (!mic) return; var m = mic; mic = null; m.wanted = false; try { m.rec && m.rec.stop(); } catch (e) {} micIdle(m.btn); }
+  function micIdle(btn) { if (btn && btn.isConnected) { btn.setAttribute('aria-pressed', 'false'); var sp = btn.querySelector('span'); if (sp) sp.textContent = 'Speak'; } }
+  function addHeard(m, text) {
+    text = (text || '').replace(/\s+/g, ' ').trim(); if (!text) return;
+    var prev = m.lastFinal, add = text;
+    if (prev && text === prev) return; // the same phrase sent twice
+    if (prev && text.indexOf(prev) === 0) add = text.slice(prev.length).trim(); // a longer copy of the last phrase
+    m.lastFinal = text;
+    if (add) m.done = (m.done ? m.done.replace(/\s*$/, ' ') : '') + add;
+  }
+  function micListen(m) {
+    var r = new SR(); m.rec = r;
+    r.lang = navigator.language && /^en/i.test(navigator.language) ? navigator.language : 'en-GB';
+    r.continuous = !IS_ANDROID; r.interimResults = true; r.maxAlternatives = 1;
+    r.onresult = function (ev) {
+      var tmp = '';
+      for (var i = ev.resultIndex; i < ev.results.length; i++) {
+        if (ev.results[i].isFinal) addHeard(m, ev.results[i][0].transcript); else tmp += ev.results[i][0].transcript;
+      }
+      m.ta.value = (m.done || '') + (tmp ? (m.done ? ' ' : '') + tmp.trim() : ''); grow(m.ta); if (m.onchange) m.onchange();
+    };
+    r.onerror = function (e) { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { m.wanted = false; toast('Microphone blocked. You can allow it in your browser settings.'); } };
+    r.onend = function () {
+      m.ta.value = m.done || ''; grow(m.ta); if (m.onchange) m.onchange();
+      if (m.wanted && mic === m && Date.now() - m.started < MIC_MAX_MS && m.ta.isConnected) { setTimeout(function () { if (m.wanted && mic === m) { try { micListen(m); } catch (e) { stopMic(); } } }, 120); return; }
+      if (mic === m && m.wanted && Date.now() - m.started >= MIC_MAX_MS) toast('Stopped listening after 10 minutes. Tap Speak to carry on.');
+      if (mic === m) { mic = null; micIdle(m.btn); }
+    };
+    r.start();
+  }
+  function toggleMic(btn, ta, onchange) {
+    ta = ta || document.getElementById('findans'); if (!SR || !ta) return;
+    if (mic) return stopMic();
+    var m = { btn: btn, ta: ta, onchange: onchange || findSave, wanted: true, started: Date.now(), done: ta.value.replace(/\s+$/, ''), lastFinal: '' };
+    mic = m;
+    try { micListen(m); btn.setAttribute('aria-pressed', 'true'); btn.querySelector('span').textContent = 'Listening… tap to stop'; }
+    catch (e) { mic = null; toast('Speaking isn’t available here. Typing works just as well.'); }
   }
   function findSave() {
     var ta = document.getElementById('findans'), f = S.find; if (!ta || !f) return;
@@ -1120,7 +1145,7 @@
   }
   function findAct(a, b) {
     var f = S.find || (S.find = { step: 0, answers: {} }), qs = FIND_QS();
-    if (rec) { try { rec.stop(); } catch (e) {} }
+    stopMic();
     if (a === 'start') { var md = (b && b.dataset.mode) || 'more', keep = S.find && S.find.mode === md ? S.find.answers : {}; S.find = { step: 0, mode: md, answers: keep || {}, horizon: '365' }; save(false); return askNameThen('find'); }
     if (a === 'next' || a === 'skip') { if (a === 'next') findSave(); f.step++; f.ai = null; f.aiTried = false; f.r = 'areas'; f.area = 0; f.pick = null; save(false); return go('find'); }
     if (a === 'area') { f.area = +b.dataset.i; f.r = 'insight'; save(false); return render(); }
