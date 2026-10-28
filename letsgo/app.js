@@ -1662,6 +1662,9 @@
     var dr = S.draft;
     S.habit = { id: uuid(), mode: dr.mode, what: dr.what.trim(), gives: dr.gives.concat((dr.driveOwn || '').trim() ? [dr.driveOwn.trim()] : []), instead: dr.instead, feel: dr.feel.slice(), ownFeel: dr.ownFeel, dimmer: dr.dimmer.trim(), length: dr.length, start: todayStr(), status: 'active', extra: Object.assign({ anchor: (dr.anchor || '').trim(), hard: { start: (dr.hardStart || '').trim(), off: (dr.hardOff || '').trim(), spark: (dr.hardSpark || '').trim() } }, dr.found ? { found: dr.found } : {}, S.wins && S.wins.length ? { wins: S.wins.slice() } : {}), createdAt: new Date().toISOString() };
     S.entries = {}; S.later = false; S.fb = {}; save();
+    // Let Stuart know someone new has started (no words they wrote, and only if usage stats are on). Not for his own test runs.
+    stat('setup_done', S.habit.mode === 'less' ? 'less' : 'more'); flushStats();
+    if (sb && !isTester() && S.settings.analytics !== false) setTimeout(function () { try { sb.functions.invoke('showup-notify', { body: { kind: 'started', sid: statSid } }).catch(function () {}); } catch (e) {} }, 2500);
     finishMoment();
   }
   // The end of setup: a proper moment, then their plan (peak-end rule).
