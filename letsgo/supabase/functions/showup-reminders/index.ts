@@ -13,7 +13,6 @@ const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const FROM = '"Let\'s Go!" <stuart@motivate-coaching.com>'
 const APP_URL = 'https://motivate-coaching.github.io/tlr-hub/letsgo/'
-const LOGO_URL = 'https://motivate-coaching.github.io/tlr-hub/email/tlr-logo-email.png'
 const WINDOW_MINS = 60 // send any time in the hour after their chosen time, once
 
 const LINES = [
@@ -67,7 +66,7 @@ function emailHtml(o: { day: number; length: number; what: string; dimmer: strin
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F1EB;padding:28px 16px;"><tr><td align="center">
 <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
   <tr><td bgcolor="#0F1215" align="center" style="background:#0F1215;border-radius:10px 10px 0 0;padding:22px 32px 18px;">
-    <a href="${APP_URL}" style="text-decoration:none;"><img src="${LOGO_URL}" width="96" height="78" alt="The Living Room" style="display:block;margin:0 auto;width:96px;height:78px;border:0;color:#FFFFFF;font-size:16px;font-weight:700;"></a>
+    <a href="${APP_URL}" style="text-decoration:none;font-family:Poppins,'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:26px;font-weight:700;letter-spacing:-0.01em;color:#FFFFFF;">Let’s Go<span style="color:#C9930A;">!</span></a>
   </td></tr>
   <tr><td style="background:#FFFFFF;padding:34px 32px 30px;">
     <p style="margin:0 0 6px;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#4A4A4A;">Day ${o.day} of ${o.length}</p>
