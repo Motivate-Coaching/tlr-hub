@@ -84,7 +84,7 @@ select { font: inherit; padding: 8px 10px; border-radius: 6px; border: 1px solid
   function avg(list, k) { var v = list.map(function (t) { return Number(((t.answers || {})[k] || {}).pick); }).filter(function (x) { return x > 0; }); return v.length ? (v.reduce(function (a, b) { return a + b; }, 0) / v.length).toFixed(1) : '–'; }
   function testerSection(list) {
     list = list.map(norm);
-    var h = '<section class="card"><h2>Tester feedback</h2>';
+    var h = '<section class="card" id="feedback"><h2>Tester feedback</h2>';
     if (!list.length) return h + '<p class="hint">No feedback yet. Send testers the link: motivate-coaching.github.io/tlr-hub/letsgo/feedback.html</p></section>';
     var d = tally(list, 'ellis'), answered = Object.keys(d).reduce(function (a, k) { return a + d[k]; }, 0), very = d['Very disappointed'] || 0;
     h += '<div class="tiles"><div class="tile"><b>' + list.length + '</b><span>people sent feedback</span></div>' +
@@ -168,6 +168,7 @@ select { font: inherit; padding: 8px 10px; border-radius: 6px; border: 1px solid
     h += '<section class="card"><h2>Key moments</h2><div class="scroll"><table>' + km.map(function (k) { return '<tr><td>' + k[0] + '</td><td class="n">' + k[1] + '</td></tr>'; }).join('') + '</table></div></section>';
     h += '<p class="note hint">Usage counts come from people who haven’t switched off “Help improve <span class="brand">Let’s Go<span class="bang">!</span></span>”. Nothing anyone writes is collected.</p>';
     main.innerHTML = h;
+    if (location.hash === '#feedback') { var fbEl = document.getElementById('feedback'); if (fbEl) fbEl.scrollIntoView(); }
     var sel = document.getElementById('days'); sel.value = String(days); sel.onchange = function () { main.innerHTML = '<p class="hint">Loading…</p>'; load(+sel.value); };
   }
   load(30).catch(function (e) { status.textContent = 'Couldn’t load just now: ' + (e && e.message || e); });
