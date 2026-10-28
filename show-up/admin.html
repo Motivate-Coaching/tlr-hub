@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400&family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400&family=Poppins:wght@400;500;600;700&display=swap">
 <style>
 /* TLR Design System v1.0 */
 :root { --navy: #0F1215; --cream: #F5F1EB; --cream-dark: #EDE8DF; --cream-deep: #E5DDD1; --white: #FFFFFF; --text: #1A1A1A; --text-mid: #4A4A4A; --muted: #888880; --amber: #C9930A; --green: #3B6D11;
@@ -40,11 +40,13 @@ td.n { font-variant-numeric: tabular-nums; text-align: right; }
 select { font: inherit; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--muted); background: var(--white); min-height: 44px; }
 .bar { height: 8px; border-radius: 4px; background: var(--cream-deep); overflow: hidden; } .bar i { display: block; height: 100%; background: var(--amber); }
 .row { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.wordmark { font-family: Poppins, sans-serif; font-weight: 700; font-size: 24px; line-height: 1; letter-spacing: -0.01em; color: #FFFFFF; white-space: nowrap; }
+.wordmark .bang { color: #C9930A; }
 </style>
 </head>
 <body>
 <header>
-  <img src="logo-white.png" alt="The Living Room (TLR), Tools for life">
+  <span class="wordmark">Let’s Go<span class="bang">!</span></span>
   <button type="button" onclick="history.back()">Back</button>
 </header>
 <main id="main">
