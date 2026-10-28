@@ -67,7 +67,8 @@
   }
   var S = fresh();
   try { var saved = JSON.parse(localStorage.getItem(KEY) || 'null'); if (saved && typeof saved === 'object') { S = Object.assign(fresh(), saved); S.settings = Object.assign(fresh().settings, saved.settings || {}); S.draft = Object.assign(fresh().draft, saved.draft || {}); } } catch (e) {}
-  var user = null; // signed-in Supabase user
+  var user = null; // signed-in Supabase user (with an email)
+  var guest = null; // a quiet guest session, so challenge ideas work before anyone adds an email
   var syncState = 'local'; // local | saving | saved | error
   var ui = { hist: [], fwd: [], vp: null, ideasOpen: false, wordsFrom: null, returnTo: null, authMode: null, moreChips: false };
 
@@ -222,7 +223,7 @@
     what: function () { return S.draft.found ? 'find' : 'landing'; }, name: 'landing', viewpick: function () { return S.nameAsked ? 'landing' : 'name'; }, wins: 'tracker', less: 'feel',
     find: function () { var f = S.find || {}; if (f.step > 0) { f.step--; save(false); return 'find'; } return 'landing'; }, feel: 'when', when: 'what', dimmer: function () { return S.draft.mode === 'less' ? 'less' : 'feel'; }, hard: 'dimmer',
     length: function () { return ui.returnTo || 'ready'; }, note: 'tracker', slipped: 'tracker', share: 'tracker', science: function () { return S.habit ? 'settings' : 'landing'; },
-    words: function () { return ui.wordsFrom || 'tracker'; }, settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', calendar: function () { return ui.calFrom === 'install' ? 'install' : ui.calFrom || 'tracker'; }, install: function () { return ui.installFrom || (S.habit ? 'settings' : 'landing'); }, account: function () { return ui.returnTo || 'tracker'; }
+    words: function () { return ui.wordsFrom || 'tracker'; }, sendplan: 'ready', settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', calendar: function () { return ui.calFrom === 'install' ? 'install' : ui.calFrom || 'tracker'; }, install: function () { return ui.installFrom || (S.habit ? 'settings' : 'landing'); }, account: function () { return ui.returnTo || 'tracker'; }
   };
 
   function todayCard(name, line, done, decorative, id) {
@@ -544,12 +545,23 @@
       return h + '<div class="spacer"></div>' + (after ? '<button class="btn' + (isStandalone() ? '' : ' outline') + '" data-act="installdone">' + (isStandalone() ? 'Go to my tracker' : 'Done, take me to my tracker') + '</button>' :
         '<button class="btn outline" data-back="1">Back</button>') + '</section>';
     },
+    sendplan: function () {
+      if (ui.authStep === 'code') return screens.account();
+      return '<section class="screen"><div><div class="eyebrow">Your plan is ready</div><h1>Who should we send your plan to?</h1></div>' +
+        '<p class="lede">We’ll email you your plan and a 6-digit code to activate it. No password needed.</p>' +
+        '<div class="field"><label class="label" for="aemail">Email</label><input class="input" id="aemail" type="email" autocomplete="email" inputmode="email" value="' + esc(ui.authEmail || '') + '"></div>' +
+        (S.consentAt ? '' : '<label class="consent"><input type="checkbox" id="aconsent"><span>I agree to Let’s Go storing my habit, progress and notes so it can run for me. <a href="privacy.html">Privacy</a></span></label>') +
+        '<p class="err" id="aerr" hidden></p><button class="btn" data-act="sendcode">Send my plan</button>' +
+        '<button class="link center" data-act="plannotnow">Not now</button>' +
+        '<p class="hint">Your plan is saved to your account, so it’s backed up and your morning nudge can reach you. <a href="privacy.html">How we look after your data</a></p></section>';
+    },
     account: function () {
       var priv = '<p class="hint">Saving to an account backs up your progress and lets your nudges reach you. <a href="privacy.html">How we look after your data</a></p>';
-      if (ui.authStep === 'code') return '<section class="screen"><div><div class="eyebrow">Save my progress</div><h1>Check your email</h1></div>' +
-        '<p class="lede">We’ve sent a 6-digit code to <b>' + esc(ui.authEmail) + '</b>.</p>' +
+      var pl = ui.authFrom === 'plan';
+      if (ui.authStep === 'code') return '<section class="screen"><div><div class="eyebrow">' + (pl ? 'Activate your plan' : 'Save my progress') + '</div><h1>Check your email</h1></div>' +
+        '<p class="lede">' + (pl ? 'We’ve sent your plan and a 6-digit code to <b>' + esc(ui.authEmail) + '</b>. Pop the code in below to activate your plan and get started today.' : 'We’ve sent a 6-digit code to <b>' + esc(ui.authEmail) + '</b>.') + '</p>' +
         '<div class="field"><label class="label" for="acode">Your code</label><div class="otp"><input id="acode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" aria-describedby="aerr"><div class="otp-boxes" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div></div></div>' +
-        '<p class="err" id="aerr" hidden></p><button class="btn" data-act="verifycode">Sign in</button>' +
+        '<p class="err" id="aerr" hidden></p><button class="btn" data-act="verifycode">' + (pl ? 'Activate my plan' : 'Sign in') + '</button>' +
         '<div class="row" style="justify-content:center;gap:16px"><button class="link" data-act="sendcode">Send a new code</button><button class="link" data-act="authback">Use a different email</button></div>' +
         '<p class="hint">Can’t see it? Check your spam or promotions folder.</p></section>';
       return '<section class="screen"><div><div class="eyebrow">Save my progress</div><h1>Sign in or create your account</h1></div>' +
@@ -934,7 +946,7 @@
   var HORIZONS = [['30', '30 days'], ['90', 'three months'], ['365', 'a year']];
   function horizonLabel() { var f = S.find || {}, h = HORIZONS.filter(function (x) { return x[0] === f.horizon; })[0] || HORIZONS[1]; return h[1]; }
   function FIND_QS() {
-    var proud = { key: 'proud', q: 'Picture yourself a year from now, feeling insanely proud of yourself. What did you do to make you feel this way?', hint: 'Picture how life feels, not just the thing you did.', ph: 'e.g. I finally sorted my sleep, and my evenings are mine again' };
+    var proud = { key: 'proud', q: 'Picture yourself a year from now. You’re feeling insanely proud of yourself. What did you do to feel this way?', hint: 'Picture how life feels, not just the thing you did.', ph: 'e.g. I finally sorted my sleep, and my evenings are mine again' };
     if (S.find && S.find.mode === 'less') return [
       { key: 'drain', q: 'What do you notice you do regularly that costs you more than it gives you?', hint: 'Jot down whatever comes. We’ll narrow it down together.', ph: 'e.g. Scrolling in bed at night, too much chocolate, not being present with family' },
       proud
@@ -991,15 +1003,19 @@
     var ai = f.ai || {}, areas = ai.areas || [];
     if (ai.care) return top + '<h1>Before anything else.</h1></div><div class="why"><span>' + esc(ai.care) + '</span></div><div class="spacer"></div>' + own + '</section>';
     if (!areas.length) {
-      if (!user) return top + '<h1>Your challenge ideas are ready to make.</h1></div><p class="lede">Add your email and we’ll read what you shared and suggest where to focus. It also saves your progress.</p>' +
-        (authChecked ? '<button class="btn" data-account="find">Add my email</button>' : '') + '<div class="spacer"></div>' + own + '</section>';
+      if (!user && !guest) {
+        if (authChecked && !ui.guestFailed && !ui.guestTrying) { ui.guestTrying = true; ensureGuest().then(function (ok) { ui.guestTrying = false; if (!ok) ui.guestFailed = true; render(); }); }
+        if (!ui.guestFailed) return top + '<h1>Reading what you shared…</h1></div><p class="lede">Looking for what matters most to you. This takes a few seconds.</p><div class="dotpulse" aria-hidden="true"><span></span><span></span><span></span></div></section>';
+        return top + '<h1>Add your email to see your ideas.</h1></div><p class="lede">We’ll read what you shared and suggest where to focus. It also saves your progress.</p>' +
+          '<button class="btn" data-account="find">Add my email</button><div class="spacer"></div>' + own + '</section>';
+      }
       if (!f.aiTried && !ui.aiBusy) setTimeout(reflectAI, 0);
       if (ui.aiBusy || !f.aiTried) return top + '<h1>Reading what you shared…</h1></div><p class="lede">Looking for what matters most to you. This takes a few seconds.</p><div class="dotpulse" aria-hidden="true"><span></span><span></span><span></span></div></section>';
       return top + '<h1>We couldn’t reach it just now.</h1></div><button class="btn" data-act="reflectai">Try again</button><div class="spacer"></div>' + own + '</section>';
     }
     var r = f.r || 'areas', ar = areas[f.area || 0] || areas[0];
     if (r === 'areas') {
-      var h = top + '<h1>Here’s what stood out.</h1></div><p class="lede">' + (S.settings.view === 'focus' ? 'This sounds like where to focus right now.' : 'From what you shared, this sounds like the area that most needs your focus right now.') + '</p>';
+      var h = top + '<h1>Your habit challenge ideas are ready.</h1></div><p class="lede">' + (S.settings.view === 'focus' ? 'Here’s what stood out. This sounds like where to focus right now.' : 'Here’s what stood out. From what you shared, this sounds like the area that most needs your focus right now.') + '</p>';
       h += '<button class="choice area main" data-find="area" data-i="0"><small>Most prominent</small><b>' + esc(areas[0].name) + '</b><span>' + esc(areas[0].noticed) + '</span></button>';
       if (areas.length > 1) {
         h += '<span class="eyebrow" style="margin-top:4px">What else stood out for you</span>';
@@ -1030,13 +1046,13 @@
       }
       return h;
     }
-    if (!user) return authChecked ? '<div class="card soft small"><b style="font-weight:600">Want challenges made for you?</b><span>Add your email and we’ll suggest a few, based on what you wrote. It also saves your progress.</span><button class="chip" data-account="find" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Add my email</button></div>' : '';
+    if (!user && !guest) return authChecked ? '<div class="card soft small"><b style="font-weight:600">Want challenges made for you?</b><span>Add your email and we’ll suggest a few, based on what you wrote. It also saves your progress.</span><button class="chip" data-account="find" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Add my email</button></div>' : '';
     if (!f.aiTried && !ui.aiBusy) setTimeout(reflectAI, 0);
     return '<div class="card soft"><b style="font-weight:600">Want challenges made for you?</b><span>We’ll read what you wrote and suggest a few that fit.</span>' +
       '<button class="btn outline" data-act="reflectai"' + (ui.aiBusy ? ' disabled' : '') + '>' + (ui.aiBusy ? 'Finding challenges for you…' : 'Suggest challenges for me') + '</button></div>';
   }
   async function reflectAI() {
-    var f = S.find; if (!f || !sb || !user || ui.aiBusy) return;
+    var f = S.find; if (!f || !sb || (!user && !guest) || ui.aiBusy) return;
     f.aiTried = true; ui.aiBusy = true; render();
     try {
       var r = await sb.functions.invoke('showup-reflect', { body: { mode: f.mode || 'more', answers: f.answers, wins: (S.wins || []).map(function (w) { return { name: w.name, outcome: w.outcome }; }), horizon: horizonLabel() } });
@@ -1347,7 +1363,7 @@
     if (d.edit) { ui.planEdit = true; return go('plan'); }
     if (d.idea) { S.draft.what = IDEAS[+d.idea][0]; ui.ideasOpen = false; save(false); return render(); }
     if (d.words) { ui.wordsFrom = d.words; return go('words'); }
-    if (d.account) { ui.returnTo = d.account; return go('account'); }
+    if (d.account) { ui.returnTo = d.account; ui.authFrom = null; return go('account'); }
     if (d.tick) { var from = d.from || (S.screen === 'ready' ? 'ready' : 'tracker'); return tick(d.tick, from); }
     if (d.anchor !== undefined && S.screen === 'when') { S.draft.anchor = d.anchor; save(false); return render(); }
     if (d.vp) { ui.vp = d.vp; return render(); }
@@ -1408,6 +1424,7 @@
       case 'sendcode': return void sendCode();
       case 'verifycode': return void verifyCode();
       case 'authback': ui.authStep = null; return render();
+      case 'plannotnow': ui.authFrom = null; ui.authStep = null; stat('sendplan', 'later'); return go('ready');
       case 'nudgeyes': stat('nudgeask', user ? 'yes' : 'email'); if (!user) { ui.returnTo = 'tracker'; return go('account'); } var pa2 = S.pushAsk || { n: 0 }; S.pushAsk = { n: (pa2.n || 0) + 1, at: todayStr() }; save(false); return void togglePush();
       case 'nudgeno': var pa = S.pushAsk || { n: 0 }; S.pushAsk = { n: (pa.n || 0) + 1, at: todayStr() }; save(false); stat('nudgeask', 'not now'); return render();
       case 'stuok': S.stuSeen = S.stuSeen || {}; S.stuSeen[todayNum()] = true; save(false); return render();
@@ -1419,7 +1436,7 @@
       case 'signinlater': S.signinLater = todayStr(); save(false); return render();
       case 'exportdata': return exportData();
       case 'deletedata': return confirmSheet('Delete your Let’s Go data?', 'This deletes your habit, show-ups, notes, past wins and settings from this device' + (user ? ', and deletes your account' : '') + '. It can’t be undone.', 'Delete my data', function () { void deleteData(); });
-      case 'signout': return void (async function () { await sb.auth.signOut(); user = null; S = fresh(); save(false); applyComfort(); go('landing'); })();
+      case 'signout': return void (async function () { await sb.auth.signOut(); user = null; guest = null; S = fresh(); save(false); applyComfort(); go('landing'); })();
     }
   });
   backBtn.addEventListener('click', goBack);
@@ -1607,7 +1624,7 @@
       '<button class="btn" style="max-width:320px;background:var(--amber);color:var(--navy)" data-finish="1">See my plan</button>';
     buzz();
     app.appendChild(el);
-    var done = function () { if (el.parentNode) { el.remove(); go('ready'); } };
+    var done = function () { if (el.parentNode) { el.remove(); if (!user && sb) { ui.authFrom = 'plan'; ui.authStep = null; ui.returnTo = 'ready'; return go('sendplan'); } go('ready'); } };
     el.addEventListener('click', function (ev) { if (ev.target.closest('[data-finish]')) done(); });
     var b = el.querySelector('[data-finish]'); if (b) b.focus({ preventScroll: true });
   }
@@ -1702,6 +1719,14 @@
     toast('Saved. Well done for giving it a proper go.'); go('tracker');
   }
 
+  // Guest sign-in: lets the AI ideas run (and stay rate-limited per person) without asking for an email yet.
+  async function ensureGuest() {
+    if (user || guest) return true;
+    if (!sb || !sb.auth || !sb.auth.signInAnonymously) return false;
+    try { var r = await sb.auth.signInAnonymously(); if (r.error || !r.data || !r.data.user) return false; guest = r.data.user; return true; } catch (e) { return false; }
+  }
+  function sessionUser(session) { var u = session && session.user; if (!u) { user = null; guest = null; return; } if (u.is_anonymous) { guest = u; user = null; } else { user = u; guest = null; } }
+
   async function vapidKey() { var r = await sb.functions.invoke('showup-code', { body: { action: 'vapid' } }); if (r.error || !r.data || !r.data.key) throw new Error('no key'); return r.data.key; }
   async function codeCall(body) {
     var r = await sb.functions.invoke('showup-code', { body: body });
@@ -1715,14 +1740,16 @@
     if (ck && !ck.checked) { if (err) { err.textContent = 'Tick the box to agree, so we can save your progress.'; err.hidden = false; } return; }
     if (ck) { S.consentAt = new Date().toISOString(); save(false); }
     var btn = view.querySelector('[data-act="sendcode"]'); if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
-    var r = await codeCall({ action: 'send', email: email });
+    var body = { action: 'send', email: email };
+    if (S.habit && ui.authFrom === 'plan') body.plan = { what: habitName(), anchor: anchorLine(), dimmer: S.habit.dimmer || '', length: S.habit.length, mode: S.habit.mode, name: firstName() || '' };
+    var r = await codeCall(body);
     if (r.error) {
-      if (btn) { btn.disabled = false; btn.textContent = 'Send my code'; }
+      if (btn) { btn.disabled = false; btn.textContent = ui.authFrom === 'plan' ? 'Send my plan' : 'Send my code'; }
       var msg = r.error === 'wait' ? 'Code just sent. Give it a moment, then check your inbox.' : r.error === 'too_many' ? 'That’s a few codes in a row. Try again in an hour.' : 'Couldn’t send just now. Please try again.';
       if (ui.authStep === 'code') return toast(msg);
       if (err) { err.textContent = msg; err.hidden = false; } return;
     }
-    ui.authEmail = email; ui.authStep = 'code'; render(); toast('Code sent to ' + email + '.');
+    ui.authEmail = email; ui.authStep = 'code'; render(); toast(ui.authFrom === 'plan' ? 'Your plan is on its way to ' + email + '.' : 'Code sent to ' + email + '.');
     var c = document.getElementById('acode'); if (c) c.focus();
   }
   async function verifyCode() {
@@ -1730,17 +1757,18 @@
     if (code.length !== 6) { err.textContent = 'The code is 6 numbers.'; err.hidden = false; return; }
     var btn = view.querySelector('[data-act="verifycode"]'); btn.disabled = true; btn.textContent = 'Checking…';
     var r = await codeCall({ action: 'verify', email: ui.authEmail, code: code });
+    var signLabel = ui.authFrom === 'plan' ? 'Activate my plan' : 'Sign in';
     if (r.error || !r.token_hash) {
-      btn.disabled = false; btn.textContent = 'Sign in';
+      btn.disabled = false; btn.textContent = signLabel;
       err.textContent = r.error === 'wrong' ? 'That code didn’t match.' + (r.left ? ' ' + r.left + ' tries left.' : '') : r.error === 'expired' ? 'That code has run out. Tap “Send a new code”.' : r.error === 'too_many' ? 'Too many tries. Tap “Send a new code”.' : 'Couldn’t sign in just now. Please try again.';
       err.hidden = false; c.value = ''; paintOtp(); c.focus(); var ob = view.querySelector('.otp'); if (ob) { ob.classList.remove('shake'); void ob.offsetWidth; ob.classList.add('shake'); } return;
     }
     var v = await sb.auth.verifyOtp({ token_hash: r.token_hash, type: 'email' });
-    if (v.error) { btn.disabled = false; btn.textContent = 'Sign in'; err.textContent = 'Couldn’t sign in just now. Please try again.'; err.hidden = false; return; }
-    user = v.data.user; ui.authStep = null; authChecked = true;
+    if (v.error) { btn.disabled = false; btn.textContent = signLabel; err.textContent = 'Couldn’t sign in just now. Please try again.'; err.hidden = false; return; }
+    user = v.data.user; guest = null; ui.authStep = null; authChecked = true; var fromPlan = ui.authFrom === 'plan'; ui.authFrom = null;
     if (S.settings.name && !(user.user_metadata && user.user_metadata.first_name)) saveName(S.settings.name);
     await pullRemote(); await syncAll();
-    toast(r.isNew ? 'You’re in. Your progress is saved.' : 'Welcome back. You’re signed in.');
+    toast(fromPlan ? 'Your plan is activated. Let’s go!' : r.isNew ? 'You’re in. Your progress is saved.' : 'Welcome back. You’re signed in.');
     go(S.habit ? (ui.returnTo && ui.returnTo !== 'landing' ? ui.returnTo : 'tracker') : 'landing');
   }
   async function doSignIn() {
@@ -1761,7 +1789,7 @@
   if (!S.habit && ['tracker', 'note', 'share', 'slipped', 'reflect', 'edit', 'settings'].indexOf(S.screen) >= 0) S.screen = 'landing';
   ui.authStep = null;
   if (['account', 'install', 'length', 'words', 'calendar'].indexOf(S.screen) >= 0) S.screen = S.habit ? 'tracker' : 'landing';
-  if (S.habit && ['ready', 'plan', 'settings', 'science', 'share', 'note', 'slipped'].indexOf(S.screen) >= 0) S.screen = 'tracker';
+  if (S.habit && ['ready', 'plan', 'settings', 'science', 'share', 'note', 'slipped', 'sendplan'].indexOf(S.screen) >= 0) S.screen = 'tracker';
   if (S.settings.tz !== tzGuess()) { S.settings.tz = tzGuess(); save(); }
   render();
   stat('open', S.habit ? 'has_habit' : 'new');
@@ -1770,13 +1798,13 @@
     if (!sb) { greet(); return; }
     try {
       var sres = await sb.auth.getSession();
-      user = sres.data.session ? sres.data.session.user : null;
+      sessionUser(sres.data.session);
       authChecked = true; if (!user) render();
       if (user && user.user_metadata && user.user_metadata.first_name && !S.settings.name) { S.settings.name = user.user_metadata.first_name; save(false); }
       greet(); // after sign-in is known, so the greeting can use their name
       if (user) { await pullRemote(); await syncAll(); render(); }
     } catch (e) { authChecked = true; greet(); }
-    sb.auth.onAuthStateChange(function (ev, session) { if (ev === 'SIGNED_OUT') user = null; else if (session) user = session.user; });
+    sb.auth.onAuthStateChange(function (ev, session) { if (ev === 'SIGNED_OUT') { user = null; guest = null; } else if (session) sessionUser(session); });
   })();
   window.addEventListener('online', function () { if (user) queueSync(); });
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && S.habit && S.screen === 'tracker') render(); });
