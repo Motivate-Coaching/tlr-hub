@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Let’s Go · Your feedback</title>
+<meta name="description" content="Tell Stuart how Let’s Go is really working for you.">
+<meta name="theme-color" content="#0F1215">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400&family=Poppins:wght@400;500;600;700&display=swap">
+<style>
+/* TLR Design System v1.0, Let's Go branding. Cream page, navy shell, amber for small accents. */
+:root { --navy: #0F1215; --navy-mid: #1C2B3A; --cream: #F5F1EB; --cream-dark: #EDE8DF; --cream-deep: #E5DDD1; --white: #FFFFFF; --text: #1A1A1A; --text-mid: #4A4A4A; --muted: #888880; --amber: #C9930A; --green: #3B6D11; --border: rgba(0,0,0,0.1);
+  --display: 'Playfair Display', Georgia, serif; --body: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--cream); color: var(--text); font-family: var(--body); font-size: 16px; line-height: 1.5; -webkit-tap-highlight-color: transparent; }
+header { position: sticky; top: 0; z-index: 5; background: var(--navy); padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 14px; display: flex; align-items: center; justify-content: center; }
+.wordmark { font-weight: 700; font-size: 24px; line-height: 1; letter-spacing: -0.01em; color: var(--white); white-space: nowrap; }
+.wordmark .bang { color: var(--amber); }
+main { max-width: 620px; margin: 0 auto; padding: 24px 16px calc(64px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 18px; }
+.eyebrow { font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-mid); }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(32px, 9vw, 40px); line-height: 1.08; margin: 4px 0 0; text-wrap: balance; }
+.lede { font-size: 17px; color: var(--text-mid); margin: 0; }
+.hint { font-size: 14px; color: var(--muted); margin: 0; }
+.q { background: var(--white); border-radius: 10px; padding: 20px 18px; display: flex; flex-direction: column; gap: 14px; }
+.q[hidden] { display: none; }
+.q h2 { font-size: 19px; font-weight: 600; line-height: 1.35; margin: 0; }
+.q .num { color: var(--amber); font-weight: 700; margin-right: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font: inherit; font-size: 15px; min-height: 44px; padding: 9px 14px; border-radius: 4px; border: 1.5px solid var(--cream-deep); background: var(--cream); color: var(--text); cursor: pointer; text-align: left; }
+.chip[aria-pressed="true"] { background: var(--navy); color: var(--white); border-color: var(--navy); }
+.scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.scale .chip { text-align: center; padding: 9px 4px; font-size: 14px; }
+.scale-ends { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-top: -6px; }
+label.more { font-size: 14px; font-weight: 600; color: var(--text-mid); }
+textarea { font: inherit; font-size: 16px; width: 100%; min-height: 52px; padding: 12px 14px; border-radius: 6px; border: 1.5px solid var(--cream-deep); background: var(--white); color: var(--text); resize: none; overflow: hidden; line-height: 1.5; }
+textarea:focus, .chip:focus-visible, button:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.mic { align-self: flex-start; font: inherit; font-size: 15px; font-weight: 600; min-height: 44px; padding: 8px 14px; border-radius: 4px; border: 1.5px solid var(--cream-deep); background: var(--white); color: var(--text); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.mic[aria-pressed="true"] { border-color: var(--amber); background: #FBF4E4; }
+.mic[aria-pressed="true"] svg { color: var(--amber); }
+.btn { font: inherit; font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; min-height: 56px; width: 100%; border: 0; border-radius: 4px; background: var(--navy); color: var(--white); cursor: pointer; }
+.btn[disabled] { opacity: 0.6; }
+.must { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--amber); }
+.err { color: #8C4A2F; font-size: 14px; margin: 0; }
+.done { background: var(--white); border-radius: 10px; padding: 28px 20px; display: flex; flex-direction: column; gap: 12px; text-align: center; align-items: center; }
+.stu { display: flex; gap: 14px; align-items: center; background: var(--cream-dark); border-radius: 10px; padding: 14px 16px; }
+.stu img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; }
+.stu p { margin: 0; font-size: 15px; color: var(--text-mid); }
+.privacy a { color: var(--text-mid); }
+</style>
+</head>
+<body>
+<header><span class="wordmark">Let’s Go<span class="bang">!</span></span></header>
+<main id="main">
+  <div><div class="eyebrow">Founding tester feedback</div><h1>How’s it really going?</h1></div>
+  <div class="stu"><img src="stuart.jpg" alt="" width="56" height="56"><p>Honest beats nice. The bits that annoyed you, confused you or didn’t work help me most. Tap an answer, then type or speak more if you like. About 3 minutes. <b>Stu</b></p></div>
+  <form id="fb" novalidate></form>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function () {
+  'use strict';
+  var SUPABASE_URL = 'https://ycxmhilwaixfwiedkkzj.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InljeG1oaWx3YWl4ZndpZWRra3pqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5ODY1MjUsImV4cCI6MjEwODU2MjUyNX0.XRe4jBt4RYwwnAxwnSmVVGf_DtEiHn7yasgk6Rfb3tU';
+  var sb = null; try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch (e) {}
+  var DRAFT = 'letsgo-feedback-draft';
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+
+  // Questions: built from the Sean Ellis / Superhuman questions and The Mom Test (real moments, not opinions).
+  // Every question starts with a quick tap; typing or speaking is optional.
+  var QS = [
+    { k: 'disappointed', must: true, q: 'How would you feel if you could no longer use Let’s Go?', chips: ['Very disappointed', 'Somewhat disappointed', 'Not disappointed', 'I’d already stopped using it'], more: 'Why do you say that?' },
+    { k: 'toughday', q: 'Think about your last tough day. What did you do?', chips: ['Did a lighter version', 'Used “I’m struggling”', 'Came back the next day', 'Didn’t come back', 'Haven’t had one yet'], more: 'What happened?' },
+    { k: 'nearlystopped', must: true, q: 'Was there a moment you nearly stopped, or did stop?', chips: ['Yes, I nearly stopped', 'Yes, I stopped', 'No'], more: 'What was going on, and what brought you back (if anything)?' },
+    { k: 'stuck', multi: true, q: 'Where did you get stuck, confused or annoyed?', chips: ['Setting up', 'Challenge ideas', 'Daily check-in', '“I’m struggling”', 'Reminders', 'Saving my progress', 'Nowhere, it was smooth'], more: 'Tell me more' },
+    { k: 'automatic', scale: true, q: 'My habit is something I now do without having to think about it.', chips: ['1', '2', '3', '4', '5'], ends: ['Not at all', 'Completely'] },
+    { k: 'friend', q: 'If a friend asked what Let’s Go is like, what would you honestly tell them?', more: '' },
+    { k: 'change', q: 'What’s the one thing you’d change?', more: '' },
+    { k: 'paid', multi: true, q: 'What have you paid for before to help with a habit or goal?', chips: ['Nothing yet', 'An app', 'A coach or course', 'A gym or class', 'Something else'], more: 'What was it, and was it worth it?' },
+    { k: 'missed', q: 'Anything I should have asked?', more: '' }
+  ];
+  var ONLY_IF_STOPPED = ['nearlystopped', 'change', 'missed'];
+
+  var A = {}; try { A = JSON.parse(localStorage.getItem(DRAFT) || '{}') || {}; } catch (e) { A = {}; }
+  function saveDraft() { try { localStorage.setItem(DRAFT, JSON.stringify(A)); } catch (e) {} }
+  var form = document.getElementById('fb');
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var micSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+
+  function build() {
+    var n = 0, h = '';
+    QS.forEach(function (x) {
+      var a = A[x.k] || {}, sel = a.pick || (x.multi ? [] : '');
+      h += '<section class="q" data-q="' + x.k + '"><h2><span class="num"></span>' + esc(x.q) + '</h2>' + (x.must ? '<span class="must">The most useful one</span>' : '');
+      if (x.chips) {
+        h += '<div class="' + (x.scale ? 'chips scale' : 'chips') + '" role="group" aria-label="' + esc(x.q) + '">';
+        x.chips.forEach(function (c) { var on = x.multi ? sel.indexOf(c) >= 0 : sel === c; h += '<button type="button" class="chip" data-k="' + x.k + '" data-v="' + esc(c) + '" aria-pressed="' + on + '">' + esc(c) + '</button>'; });
+        h += '</div>' + (x.scale ? '<div class="scale-ends"><span>' + esc(x.ends[0]) + '</span><span>' + esc(x.ends[1]) + '</span></div>' : '');
+      }
+      if (x.more !== undefined && !x.scale) {
+        var id = 't-' + x.k;
+        h += (x.more ? '<label class="more" for="' + id + '">' + esc(x.more) + '</label>' : '') +
+          '<textarea id="' + id + '" rows="1" data-t="' + x.k + '" placeholder="Type, or tap Speak">' + esc(a.text || '') + '</textarea>' +
+          (SR ? '<button type="button" class="mic" data-mic="' + id + '" aria-pressed="false">' + micSvg + '<span>Speak</span></button>' : '');
+      }
+      h += '</section>';
+    });
+    h += '<section class="q"><label class="more" for="t-name">Your first name (optional)</label><textarea id="t-name" rows="1" data-t="name" placeholder="So I know who to thank">' + esc((A.name || {}).text || '') + '</textarea></section>';
+    h += '<p class="err" id="err" hidden></p><button type="submit" class="btn" id="send">Send my feedback</button>' +
+      '<p class="hint privacy">Your answers go only to Stuart, to improve the app. If you use Let’s Go on this phone, your show-up count is added too, never your notes. <a href="privacy.html">Privacy</a></p>';
+    form.innerHTML = h;
+    form.querySelectorAll('textarea').forEach(grow);
+    applyBranch();
+  }
+  function applyBranch() {
+    var stopped = (A.disappointed || {}).pick === 'I’d already stopped using it', n = 0;
+    form.querySelectorAll('section.q[data-q]').forEach(function (s) {
+      var k = s.dataset.q, hide = stopped && k !== 'disappointed' && ONLY_IF_STOPPED.indexOf(k) < 0;
+      s.hidden = hide; if (!hide) { n++; s.querySelector('.num').textContent = n + '.'; }
+    });
+  }
+  function grow(t) { t.style.height = 'auto'; t.style.height = Math.max(52, t.scrollHeight + 2) + 'px'; }
+
+  form.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.mic) return toggleMic(b, document.getElementById(b.dataset.mic));
+    if (!b.dataset.k) return;
+    var k = b.dataset.k, v = b.dataset.v, x = QS.filter(function (q) { return q.k === k; })[0], a = A[k] || (A[k] = {});
+    if (x.multi) {
+      a.pick = a.pick || [];
+      var i = a.pick.indexOf(v);
+      if (i >= 0) a.pick.splice(i, 1); else {
+        if (/^Nowhere|^Nothing/.test(v)) a.pick = []; else a.pick = a.pick.filter(function (p) { return !/^Nowhere|^Nothing/.test(p); });
+        a.pick.push(v);
+      }
+      b.parentNode.querySelectorAll('.chip').forEach(function (c) { c.setAttribute('aria-pressed', a.pick.indexOf(c.dataset.v) >= 0); });
+    } else {
+      a.pick = a.pick === v ? '' : v;
+      b.parentNode.querySelectorAll('.chip').forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.v === a.pick); });
+    }
+    saveDraft(); if (k === 'disappointed') applyBranch();
+  });
+  form.addEventListener('input', function (e) {
+    var t = e.target; if (!t.dataset || !t.dataset.t) return;
+    (A[t.dataset.t] || (A[t.dataset.t] = {})).text = t.value; grow(t); saveDraft();
+  });
+
+  // Dictation: transcribes exactly what's said, keeps listening through pauses (up to 10 minutes) until they tap stop.
+  // Android Chrome repeats earlier words in "continuous" mode, so there we listen one phrase at a time and restart.
+  var IS_ANDROID = /android/i.test(navigator.userAgent), MIC_MAX_MS = 10 * 60 * 1000, mic = null;
+  function micIdle(btn) { if (btn) { btn.setAttribute('aria-pressed', 'false'); btn.querySelector('span').textContent = 'Speak'; } }
+  function stopMic() { if (!mic) return; var m = mic; mic = null; m.wanted = false; try { m.rec && m.rec.stop(); } catch (e) {} micIdle(m.btn); }
+  function addHeard(m, text) {
+    text = (text || '').replace(/\s+/g, ' ').trim(); if (!text) return;
+    var prev = m.lastFinal, add = text;
+    if (prev && text === prev) return;
+    if (prev && text.indexOf(prev) === 0) add = text.slice(prev.length).trim();
+    m.lastFinal = text;
+    if (add) m.done = (m.done ? m.done.replace(/\s*$/, ' ') : '') + add;
+  }
+  function show(m, tmp) { m.ta.value = (m.done || '') + (tmp ? (m.done ? ' ' : '') + tmp.trim() : ''); grow(m.ta); (A[m.ta.dataset.t] || (A[m.ta.dataset.t] = {})).text = m.ta.value; saveDraft(); }
+  function micListen(m) {
+    var r = new SR(); m.rec = r;
+    r.lang = navigator.language && /^en/i.test(navigator.language) ? navigator.language : 'en-GB';
+    r.continuous = !IS_ANDROID; r.interimResults = true; r.maxAlternatives = 1;
+    r.onresult = function (ev) {
+      var tmp = '';
+      for (var i = ev.resultIndex; i < ev.results.length; i++) { if (ev.results[i].isFinal) addHeard(m, ev.results[i][0].transcript); else tmp += ev.results[i][0].transcript; }
+      show(m, tmp);
+    };
+    r.onerror = function (e) { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { m.wanted = false; alertErr('Your microphone is blocked. You can allow it in your browser settings, or type instead.'); } };
+    r.onend = function () {
+      show(m, '');
+      if (m.wanted && mic === m && Date.now() - m.started < MIC_MAX_MS) { setTimeout(function () { if (m.wanted && mic === m) { try { micListen(m); } catch (e) { stopMic(); } } }, 120); return; }
+      if (mic === m) { mic = null; micIdle(m.btn); }
+    };
+    r.start();
+  }
+  function toggleMic(btn, ta) {
+    if (!SR || !ta) return;
+    var same = mic && mic.btn === btn; stopMic(); if (same) return;
+    var m = { btn: btn, ta: ta, wanted: true, started: Date.now(), done: ta.value.replace(/\s+$/, ''), lastFinal: '' };
+    mic = m;
+    try { micListen(m); btn.setAttribute('aria-pressed', 'true'); btn.querySelector('span').textContent = 'Listening… tap to stop'; }
+    catch (e) { mic = null; alertErr('Speaking isn’t available on this browser. Typing works just as well.'); }
+  }
+  function alertErr(msg) { var e = document.getElementById('err'); e.textContent = msg; e.hidden = false; }
+
+  // What the app on this phone knows (counts only, never notes), so answers can be compared with what people actually did.
+  function usage() {
+    try {
+      var s = JSON.parse(localStorage.getItem('showup-v1') || 'null'); if (!s || !s.habit) return null;
+      var e = s.entries || {}, days = Object.keys(e).map(Number).sort(function (a, b) { return a - b; });
+      var day = Math.floor((Date.now() - new Date(s.habit.start + 'T12:00:00').getTime()) / 864e5) + 1;
+      return { habit: s.habit.what, mode: s.habit.mode, length: s.habit.length, day: day, showups: days.length,
+        lighter: days.filter(function (d) { return e[d].kind === 'dimmer'; }).length, comebacks: days.filter(function (d) { return e[d].comeback; }).length,
+        view: (s.settings || {}).view };
+    } catch (err) { return null; }
+  }
+
+  form.addEventListener('submit', async function (ev) {
+    ev.preventDefault(); stopMic();
+    var err = document.getElementById('err'), btn = document.getElementById('send'); err.hidden = true;
+    var stopped = (A.disappointed || {}).pick === 'I’d already stopped using it';
+    var out = { v: 1, answers: {}, usage: usage(), name: ((A.name || {}).text || '').trim().slice(0, 80), view: window.innerWidth < 600 ? 'phone' : 'desktop' };
+    var any = false;
+    QS.forEach(function (x) {
+      if (stopped && x.k !== 'disappointed' && ONLY_IF_STOPPED.indexOf(x.k) < 0) return;
+      var a = A[x.k] || {}, pick = a.pick && (x.multi ? a.pick.slice() : a.pick), text = (a.text || '').trim().slice(0, 4000);
+      if ((pick && pick.length) || text) { any = true; out.answers[x.k] = { pick: pick || null, text: text }; }
+    });
+    if (!any) { err.textContent = 'Answer at least one question, then send.'; err.hidden = false; return; }
+    if (!sb) { err.textContent = 'Couldn’t connect just now. Your answers are saved on this page, so try again in a moment.'; err.hidden = false; return; }
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      var sess = (await sb.auth.getSession()).data.session;
+      if (!sess) { var r = await sb.auth.signInAnonymously(); if (r.error) throw r.error; sess = r.data.session; }
+      var ins = await sb.from('showup_feedback').insert({ user_id: sess.user.id, question: 'tester-feedback', answer: JSON.stringify(out) });
+      if (ins.error) throw ins.error;
+      try { localStorage.removeItem(DRAFT); } catch (e) {}
+      document.getElementById('main').innerHTML = '<div class="done"><div class="eyebrow">Sent</div><h1>Thank you' + (out.name ? ', ' + esc(out.name) : '') + '.</h1>' +
+        '<p class="lede">This is exactly what makes Let’s Go better. I read every answer.</p><p class="hint">Stu</p></div>';
+      window.scrollTo(0, 0);
+    } catch (e2) {
+      btn.disabled = false; btn.textContent = 'Send my feedback';
+      err.textContent = 'Couldn’t send just now. Your answers are saved on this page, so try again in a moment.'; err.hidden = false;
+    }
+  });
+
+  build();
+})();
+</script>
+</body>
+</html>
