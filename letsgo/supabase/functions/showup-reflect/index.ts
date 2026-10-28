@@ -32,6 +32,11 @@ Frame challenges as bringing something good in where you can (for example "A 10 
 Less is more. Give up to 3 areas, the most prominent first, and only include an area if it genuinely comes up.
 For each area give 2 or 3 challenges for the next 30 days. Each should be one small, specific thing they could do most days, small enough to still do on a tough day.
 
+Some challenges only work once the person has decided the actual content: the words they will say or write, the question they will ask themselves, who they will message, what they will practise. A vague version ("say the dream in your own words") gets forgotten or changes every day, and repeating the same clear thing is what builds the habit.
+For those challenges, add "personal_question": one short, direct question that gets them to decide it once now, for example "What's the one sentence you'll say out loud each morning?".
+Also add "personal_draft": a first draft of their answer, written in the first person and built only from their own words and what they said they want. Keep it to one or two short sentences they could say or use daily. Never invent facts.
+Leave both out when the challenge is already concrete enough to do as written (for example "A 10 minute walk after lunch").
+
 If anything they wrote suggests they may be at risk of harming themselves or are in crisis, do not suggest challenges.
 Instead set "at_risk" to true, set "care" to a short, kind message encouraging them to talk to someone they trust or a local helpline, and leave areas empty.
 Otherwise set "at_risk" to false and leave "care" out.
@@ -58,7 +63,7 @@ const TOOL = {
             challenges: {
               type: 'array',
               description: '2 or 3 challenges for the next 30 days.',
-              items: { type: 'object', properties: { title: { type: 'string', description: 'A short name, under 7 words.' }, daily: { type: 'string', description: 'The small thing to do most days, under 10 words.' } }, required: ['title', 'daily'] },
+              items: { type: 'object', properties: { title: { type: 'string', description: 'A short name, under 7 words.' }, daily: { type: 'string', description: 'The small thing to do most days, under 10 words.' }, personal_question: { type: 'string', description: 'Only if they must decide the actual content first: one short question so they decide it once now.' }, personal_draft: { type: 'string', description: 'Only with personal_question: a first-person draft answer from their own words, one or two short sentences.' } }, required: ['title', 'daily'] },
             },
           },
           required: ['name', 'noticed', 'insight', 'challenges'],
@@ -128,12 +133,12 @@ Deno.serve(async (req) => {
     return v && typeof v === 'object' ? [v] : []
   }
   const clean = (s: unknown) => String(s || '').replace(/\s*[–—]\s*/g, ', ').replace(/!/g, '.').trim()
-  type Ch = { title?: string; daily?: string }
+  type Ch = { title?: string; daily?: string; personal_question?: string; personal_draft?: string }
   type Ar = { name?: string; noticed?: string; insight?: string; challenges?: Ch[] }
   const result = {
     areas: (list(parsed.areas) as Ar[]).slice(0, 3).map((a: Ar) => ({
       name: clean(a.name), noticed: clean(a.noticed), insight: clean(a.insight),
-      challenges: (list(a.challenges) as Ch[]).slice(0, 3).map((c: Ch) => ({ title: clean(c.title), daily: clean(c.daily) })).filter((c: Ch) => c.title),
+      challenges: (list(a.challenges) as Ch[]).slice(0, 3).map((c: Ch) => { const q = clean(c.personal_question); return q ? { title: clean(c.title), daily: clean(c.daily), personal_question: q, personal_draft: clean(c.personal_draft).replace(/^["“]|["”]$/g, '') } : { title: clean(c.title), daily: clean(c.daily) } }).filter((c: Ch) => c.title),
     })).filter((a: Ar) => a.name && a.challenges && a.challenges.length),
     care: '',
   }

@@ -29,7 +29,7 @@ function sixDigits() {
   const a = new Uint32Array(1); crypto.getRandomValues(a)
   return String(a[0] % 1_000_000).padStart(6, '0')
 }
-type Plan = { what?: string; anchor?: string; dimmer?: string; length?: number; mode?: string; name?: string }
+type Plan = { what?: string; mine?: string; anchor?: string; dimmer?: string; length?: number; mode?: string; name?: string }
 function esc(s: unknown) {
   return String(s ?? '').slice(0, 300).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!))
 }
@@ -37,6 +37,7 @@ function planBlock(p: Plan) {
   const row = (label: string, value: string) => value ? `<p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#4A4A4A;">${label}</p><p style="margin:0 0 14px;font-size:16px;line-height:1.5;color:#1A1A1A;">${value}</p>` : ''
   return `<table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F1EB;border-radius:6px;margin:0 0 24px;"><tr><td style="padding:18px 20px 6px;">
 ${row('My habit', `<b>${esc(p.what)}</b>${p.length ? `, for ${Number(p.length) || 30} days` : ''}`)}
+${row('My words', p.mine ? `“${esc(p.mine)}”` : '')}
 ${row('When', esc(p.anchor))}
 ${row(p.mode === 'less' ? 'Tough day? My smaller version' : 'Tough day? My lighter version', esc(p.dimmer))}
 </td></tr></table>`

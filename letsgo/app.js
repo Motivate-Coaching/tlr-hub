@@ -18,6 +18,8 @@
   var FEELINGS = ['Proud', 'Strong', 'Calm', 'Alive', 'Like I trust myself', 'Free', 'Clear-headed', 'Like me again', 'Lighter', 'In control', 'Grounded', 'Brave'];
   var ANCHORS_MORE = ['make my morning coffee', 'brush my teeth', 'get home', 'have lunch', 'close my laptop', 'put the kids to bed'];
   var ANCHORS_LESS = ['in bed at night', 'after dinner', 'when I get home', 'when I’m bored at work', 'when I’m stressed', 'at the weekend'];
+  // Their own words for a habit that needs them (for example the sentence they say each morning).
+  function mineLine(h) { h = h || S.habit; return h && h.extra && h.extra.mine ? String(h.extra.mine).trim() : ''; }
   function anchorLine(h) { h = h || S.habit || S.draft; var a = ((h.extra && h.extra.anchor) || h.anchor || '').trim(); if (!a) return ''; return h.mode === 'less' ? 'Usually ' + a : 'After I ' + a; }
   var GIVES = ['Autopilot', 'Tired', 'Stressed', 'Bored', 'Comfort', 'A reward', 'A break', 'Not sure'];
   // For cutting back: what you're moving towards (outcomes and feelings together).
@@ -47,7 +49,7 @@
   function fresh() {
     return {
       screen: 'landing',
-      draft: { mode: 'more', what: '', gives: [], instead: '', feel: [], ownFeel: '', dimmer: '', driveOwn: '', anchor: '', hardStart: '', hardOff: '', hardSpark: '', length: 30 },
+      draft: { mode: 'more', what: '', gives: [], instead: '', feel: [], ownFeel: '', dimmer: '', driveOwn: '', anchor: '', mine: '', mineQ: '', hardStart: '', hardOff: '', hardSpark: '', length: 30 },
       habit: null, // { id, mode, what, gives, instead, feel, ownFeel, dimmer, length, start, status, createdAt }
       entries: {}, // day -> { kind, comeback, felt, note, at }
       settings: { tz: tzGuess(), time: '07:00', days: [0, 1, 2, 3, 4, 5, 6], email: true, push: false, pausedUntil: null, view: 'full', text: 'standard', calm: false, buzz: true, marketing: false, name: '' },
@@ -222,7 +224,7 @@
 
   // ── Screens ───────────────────────────────────────────────────────────────
   var BACK = {
-    what: function () { return S.draft.found ? 'find' : 'landing'; }, name: 'landing', viewpick: function () { return S.nameAsked ? 'landing' : 'name'; }, wins: 'tracker', less: 'feel',
+    what: function () { return S.draft.mineQ ? 'mine' : S.draft.found ? 'find' : 'landing'; }, mine: 'find', name: 'landing', viewpick: function () { return S.nameAsked ? 'landing' : 'name'; }, wins: 'tracker', less: 'feel',
     find: function () { var f = S.find || {}; if (f.step > 0) { f.step--; save(false); return 'find'; } return 'landing'; }, feel: 'when', when: 'what', dimmer: function () { return S.draft.mode === 'less' ? 'less' : 'feel'; }, hard: 'dimmer',
     length: function () { return ui.returnTo || 'ready'; }, note: 'tracker', slipped: 'tracker', share: 'tracker', science: function () { return S.habit ? 'settings' : 'landing'; },
     words: function () { return ui.wordsFrom || 'tracker'; }, sendplan: 'ready', settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', calendar: function () { return ui.calFrom === 'install' ? 'install' : ui.calFrom || 'tracker'; }, install: function () { return ui.installFrom || (S.habit ? 'settings' : 'landing'); }, account: function () { return ui.returnTo || 'tracker'; }
@@ -256,11 +258,21 @@
         '<div class="field"><label class="label" for="what">' + (more ? 'I’m going to...' : 'I’m cutting back on...') + '</label>' +
         '<textarea id="what" rows="1" data-bind="what" placeholder="' + (more ? 'Have a cold sea swim every morning' : 'Chocolate in the afternoons') + '">' + esc(d.what) + '</textarea>' +
         '<span class="hint">In your own words.' + (more ? ' Small enough to do on a rubbish day.' : '') + '</span></div>' +
+        ((d.mineQ && (d.mine || '').trim()) ? '<div class="card soft small"><span class="eyebrow">Your words</span><span>“' + esc(d.mine.trim()) + '”</span><button class="link" data-go="mine" style="align-self:flex-start">Change my words</button></div>' : '') +
         optional('Show me some ideas', '<div class="starters">' + (more ? STARTERS_MORE : STARTERS_LESS).map(function (s) { return '<button class="chip" data-starter="' + esc(s) + '">' + esc(s) + '</button>'; }).join('') + '</div>' +
           (more ? '<button class="link" data-act="ideas">More ideas</button>' : '')) +
         '<button class="card askhelp" data-find="start" data-mode="' + d.mode + '"><span class="ahtxt"><b><span class="spark" aria-hidden="true">✦</span> Challenge idea generator</b><span>Not sure what to pick? Answer two questions and we’ll suggest a few.</span></span><span class="chev" aria-hidden="true">›</span></button>' +
         '<div class="spacer"></div>' + stepButton('what') + '</section>' +
         (ui.ideasOpen ? ideasSheet() : '');
+    },
+    // Make it yours: for ideas that only work once they've decided the actual content (what to say, write, who to message).
+    mine: function () {
+      var d = S.draft;
+      return '<section class="screen"><div><div class="eyebrow">Make it yours</div><h1>' + esc(d.mineQ || 'Make it yours') + '</h1></div>' +
+        '<div class="card soft small"><span class="eyebrow">Your challenge</span><b style="font-weight:600">' + esc(d.what) + '</b>' + (d.mineWhy ? '<span style="color:var(--text-mid)">' + esc(d.mineWhy) + '</span>' : '') + '</div>' +
+        '<div class="field"><label class="label" for="mine">In your own words</label><textarea id="mine" rows="3" data-bind="mine" style="min-height:120px" placeholder="Type, or tap Speak">' + esc(d.mine || '') + '</textarea>' + micButton() +
+        '<span class="hint">' + (d.mine ? 'We’ve started it from what you shared. Change anything that doesn’t sound like you. ' : '') + 'Take a few minutes. This is what you’ll come back to every day.</span></div>' +
+        '<div class="spacer"></div><button class="btn" data-act="minedone"' + ((d.mine || '').trim() ? '' : ' disabled') + '>This is mine</button></section>';
     },
     when: function () {
       var d = S.draft, more = d.mode === 'more', opts = more ? ANCHORS_MORE : ANCHORS_LESS;
@@ -379,6 +391,7 @@
       var t = todayNum(), L = S.habit.length, e = S.entries[t];
       var h = '<section class="screen home"><div><h1>' + esc(habitName()) + '</h1>' +
         (anchorLine() ? '<p class="anchorline">' + esc(anchorLine()) + '</p>' : '') +
+        (mineLine() ? '<p class="mineline">“' + esc(mineLine()) + '”</p>' : '') +
         '<div class="row homesub"><span>' + (t > L ? 'All ' + L + ' days · complete' : 'Day ' + t + ' of ' + L) + '</span><button class="plan-link" data-go="plan">' + iconPlan() + 'My plan</button></div></div>';
       if (t > L) {
         h += '<div class="card"><b style="font-size:20px;font-weight:600">You gave it ' + L + ' days.</b><span style="color:var(--text-mid)">Time for your look back: what you noticed, and what’s next.</span><button class="btn" data-go="reflect">Start my look back</button><button class="link center" data-go="share">Share that I did it</button></div>';
@@ -519,6 +532,7 @@
       var h = S.habit;
       var w = '<section class="screen"><div><div class="eyebrow">My plan</div><h1>Change your plan</h1></div>' +
         '<div class="field"><label class="label" for="ewhat">' + (h.mode === 'less' ? 'I’m cutting back on...' : 'I’m going to...') + '</label><textarea id="ewhat" rows="1" data-hbind="what">' + esc(h.what) + '</textarea></div>' +
+        (extra().mineQ ? '<div class="field"><label class="label" for="emine">' + esc(extra().mineQ) + '</label><textarea id="emine" rows="2" data-xbind="mine">' + esc(extra().mine || '') + '</textarea></div>' : '') +
         '<div class="field"><label class="label" for="eanchor">' + (h.mode === 'less' ? 'It usually happens...' : 'After I...') + '</label><textarea id="eanchor" rows="1" data-xbind="anchor">' + esc(extra().anchor || '') + '</textarea></div>' +
         '<div class="field"><label class="label" for="edim">On a tough day, I’ll...</label><textarea id="edim" rows="1" data-hbind="dimmer">' + esc(h.dimmer) + '</textarea></div>' +
         (h.mode === 'less' ? '<div class="field"><label class="label" for="einst">When the urge hits, I’ll...</label><textarea id="einst" rows="1" data-hbind="instead">' + esc(h.instead) + '</textarea></div>' : '') +
@@ -578,7 +592,7 @@
 
   function focusTracker() {
     var t = todayNum(), L = S.habit.length, e = S.entries[t];
-    var h = '<section class="screen focus fmin"><h1>' + esc(habitName()) + '</h1><p class="hint c">' + (t > L ? 'All ' + L + ' days done' : anchorLine() ? esc(anchorLine()) : 'Day ' + t + ' of ' + L) + '</p>';
+    var h = '<section class="screen focus fmin"><h1>' + esc(habitName()) + '</h1><p class="hint c">' + (t > L ? 'All ' + L + ' days done' : anchorLine() ? esc(anchorLine()) : 'Day ' + t + ' of ' + L) + '</p>' + (mineLine() && t <= L ? '<p class="mineline c">“' + esc(mineLine()) + '”</p>' : '');
     if (t > L) h += '<div class="big"><button class="btn" data-go="reflect">Start my look back</button><button class="link center" data-go="share">Share that I did it</button></div>';
     else if (!e) h += '<div class="big">' + showUpButtons(true) + '</div>';
     else {
@@ -1166,8 +1180,12 @@
       if (c && f.mode === 'less' && c.daily && !(S.draft.instead || '').trim()) S.draft.instead = c.daily;
       if (!txt) { toast('Write a few words first.'); return; }
       if (a === 'own') f.own = txt;
-      S.draft.mode = f.mode || 'more'; S.draft.what = txt; S.draft.found = c ? c.title : txt; f.chosen = txt; save(false);
-      stat('ideas', a === 'take' ? 'took:' + (ar.name || '') : 'own'); return go('what');
+      S.draft.mode = f.mode || 'more'; S.draft.what = txt; S.draft.found = c ? c.title : txt; f.chosen = txt;
+      // Some ideas need them to decide the actual content first (the words to say, who to message, what to write). Do that now, while it's fresh.
+      var pq = c && String(c.personal_question || '').trim();
+      if (pq) { S.draft.mineQ = pq; S.draft.mine = String(c.personal_draft || '').trim(); S.draft.mineWhy = ar.insight || ''; } else { S.draft.mineQ = ''; S.draft.mine = ''; S.draft.mineWhy = ''; }
+      save(false);
+      stat('ideas', a === 'take' ? 'took:' + (ar.name || '') : 'own'); return go(pq ? 'mine' : 'what');
     }
     if (a === 'pick') { f.pick = b.dataset.key; save(false); return render(); }
     if (a === 'chosen') { if (!f.pick) return; if (f.pick.indexOf('ai:') === 0 && f.ai && !f.daily) { var ao = f.ai.options[+f.pick.slice(3)]; if (ao && ao.daily) f.daily = ao.daily; } f.step = qs.length + 1; save(false); return go('find'); }
@@ -1350,6 +1368,7 @@
     if (t.dataset.bind) {
       S.draft[t.dataset.bind] = t.value; save(false);
       var pn = document.getElementById('previewName'); if (pn && t.dataset.bind === 'what') { pn.textContent = t.value.trim() || 'Your habit'; var pw = document.getElementById('previewWrap'); if (pw) pw.style.display = t.value.trim() ? 'flex' : 'none'; }
+      if (t.dataset.bind === 'mine') { var mb = view.querySelector('[data-act="minedone"]'); if (mb) mb.disabled = !t.value.trim(); }
       if (t.dataset.bind === 'instead') { view.querySelectorAll('[data-loop="instead"]').forEach(function (li) { li.textContent = t.value.trim() || 'Your instead'; }); }
       var next = view.querySelector('[data-step-next]');
       if (next) next.disabled = !stepValid(next.dataset.stepNext);
@@ -1389,7 +1408,7 @@
     if (d.winout) return addWin(d.winout);
     if (d.win) return openWin(d.win);
     if (d.winidea) { var wt = document.getElementById('winname'); if (wt) { wt.value = d.winidea; ui.winDraft = d.winidea; grow(wt); wt.focus(); } return; }
-    if (d.mic) return toggleMic(b);
+    if (d.mic) { if (S.screen === 'mine') { var mt = document.getElementById('mine'); return toggleMic(b, mt, function () { S.draft.mine = mt.value; save(false); var mb = view.querySelector('[data-act="minedone"]'); if (mb) mb.disabled = !mt.value.trim(); }); } return toggleMic(b); }
     if (d.horizon) { findSave(); S.find.horizon = d.horizon; save(false); return render(); }
     if (d.struggleBack) { ui.struggle = null; return render(); }
     if (d.back) return goBack();
@@ -1444,6 +1463,7 @@
       case 'calgoogle': calRead(); try { window.open(googleCalURL(), '_blank', 'noopener'); } catch (e) {} stat('calendar', 'google'); return;
       case 'testerreload': return void (async function () { try { if (window.caches) { var ks = await caches.keys(); await Promise.all(ks.map(function (k) { return caches.delete(k); })); } } catch (e) {} location.reload(); })();
       case 'copyfeedback': { var fl = location.origin + location.pathname.replace(/[^/]*$/, '') + 'feedback.html'; try { navigator.clipboard.writeText(fl).then(function () { toast('Copied. Paste it anywhere to share.'); }, function () { toast(fl); }); } catch (e) { toast(fl); } return; }
+      case 'minedone': stopMic(); if (!(S.draft.mine || '').trim()) return; S.draft.mine = S.draft.mine.trim(); save(false); return go('what');
       case 'testerreset': return confirmSheet('Start again from scratch?', 'Everything on this phone and in your account goes, so you start as a new person.', 'Start again', testerReset);
       case 'sharenote': ui.shareNote = !ui.shareNote; return render();
       case 'shareimg': return void shareImage();
@@ -1561,6 +1581,7 @@
     var hb = S.habit, ex = extra(), hard = ex.hard || {}, w = words().map(function (x) { return x.toLowerCase(); }), L = [];
     L.push('Today: ' + habitName() + '.');
     if (anchorLine()) L.push('When: ' + anchorLine() + '.');
+    if (mineLine()) L.push('My words: ' + mineLine());
     if (hb.mode === 'less' && (hb.instead || '').trim()) L.push('When the urge hits: ' + hb.instead.trim() + '.');
     L.push('Tough day? ' + (hb.dimmer || 'A lighter version') + '. That counts too.');
     L.push('');
@@ -1632,11 +1653,13 @@
     if (S.settings.view === 'focus') {
       return '<div class="plancard">' + row(PICON.what, less ? 'I’m cutting back on' : 'I’m going to', '<b>' + esc(h.what) + '</b><span class="psub">' + daysPhrase() + '</span>', '') +
         (anchorLine(h) ? row(PICON.when, 'When', '<b>' + esc(anchorLine(h)) + '</b>', '') : '') +
+        (mineLine(h) ? row(PICON.why, 'My words', '<b>“' + esc(mineLine(h)) + '”</b>', '') : '') +
         row(iconDown('#0F1215', 22), 'On a tough day', '<b>' + esc(h.dimmer) + '</b>', '') + '</div>' +
         '<button class="link" data-act="planedit" style="align-self:flex-start">Change my plan</button>';
     }
     var out = '<div class="plancard">' +
       row(PICON.what, less ? 'I’m cutting back on' : 'I’m going to', '<b>' + esc(h.what) + '</b><span class="psub">' + daysPhrase() + '</span>', ed) +
+      (mineLine(h) ? row(PICON.why, 'My words', '<b>“' + esc(mineLine(h)) + '”</b>', ed) : '') +
       row(PICON.why, less ? 'What I’m moving towards' : 'How I’ll feel', chips, ed);
     if (anchorLine(h)) out += row(PICON.when, less ? 'When it happens' : 'When', '<b>' + esc(anchorLine(h)) + '</b>', ed);
     if (less && (h.instead || '').trim()) out += row(PICON.swap, 'When the urge hits, I’ll', '<b>' + esc(h.instead) + '</b>', ed);
@@ -1660,7 +1683,7 @@
   }
   function finishSetup() {
     var dr = S.draft;
-    S.habit = { id: uuid(), mode: dr.mode, what: dr.what.trim(), gives: dr.gives.concat((dr.driveOwn || '').trim() ? [dr.driveOwn.trim()] : []), instead: dr.instead, feel: dr.feel.slice(), ownFeel: dr.ownFeel, dimmer: dr.dimmer.trim(), length: dr.length, start: todayStr(), status: 'active', extra: Object.assign({ anchor: (dr.anchor || '').trim(), hard: { start: (dr.hardStart || '').trim(), off: (dr.hardOff || '').trim(), spark: (dr.hardSpark || '').trim() } }, dr.found ? { found: dr.found } : {}, S.wins && S.wins.length ? { wins: S.wins.slice() } : {}), createdAt: new Date().toISOString() };
+    S.habit = { id: uuid(), mode: dr.mode, what: dr.what.trim(), gives: dr.gives.concat((dr.driveOwn || '').trim() ? [dr.driveOwn.trim()] : []), instead: dr.instead, feel: dr.feel.slice(), ownFeel: dr.ownFeel, dimmer: dr.dimmer.trim(), length: dr.length, start: todayStr(), status: 'active', extra: Object.assign({ anchor: (dr.anchor || '').trim(), hard: { start: (dr.hardStart || '').trim(), off: (dr.hardOff || '').trim(), spark: (dr.hardSpark || '').trim() } }, dr.found ? { found: dr.found } : {}, dr.mineQ && (dr.mine || '').trim() ? { mine: dr.mine.trim(), mineQ: dr.mineQ } : {}, S.wins && S.wins.length ? { wins: S.wins.slice() } : {}), createdAt: new Date().toISOString() };
     S.entries = {}; S.later = false; S.fb = {}; save();
     // Let Stuart know someone new has started (no words they wrote, and only if usage stats are on). Not for his own test runs.
     stat('setup_done', S.habit.mode === 'less' ? 'less' : 'more'); flushStats();
@@ -1794,7 +1817,7 @@
     if (ck) { S.consentAt = new Date().toISOString(); save(false); }
     var btn = view.querySelector('[data-act="sendcode"]'); if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
     var body = { action: 'send', email: email };
-    if (S.habit && ui.authFrom === 'plan') body.plan = { what: habitName(), anchor: anchorLine(), dimmer: S.habit.dimmer || '', length: S.habit.length, mode: S.habit.mode, name: firstName() || '' };
+    if (S.habit && ui.authFrom === 'plan') body.plan = { what: habitName(), mine: mineLine(), anchor: anchorLine(), dimmer: S.habit.dimmer || '', length: S.habit.length, mode: S.habit.mode, name: firstName() || '' };
     var r = await codeCall(body);
     if (r.error) {
       if (btn) { btn.disabled = false; btn.textContent = ui.authFrom === 'plan' ? 'Send my plan' : 'Send my code'; }
