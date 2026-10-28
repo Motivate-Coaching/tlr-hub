@@ -75,26 +75,33 @@ select { font: inherit; padding: 8px 10px; border-radius: 6px; border: 1px solid
     if (r[2].error) { var raw = await sb.from('showup_feedback').select('question,answer,created_at').order('created_at', { ascending: false }).limit(200); fb = (raw.data || []).map(function (x) { return Object.assign({ email: '(name to come)' }, x); }); }
     render(days, people, usage, fb || []);
   }
-  // Tester feedback: grouped by the "how would you feel" answer, the way Superhuman read theirs.
-  var QN = { disappointed: 'If they could no longer use it', toughday: 'Last tough day', nearlystopped: 'Nearly stopped?', stuck: 'Stuck, confused or annoyed', automatic: 'Habit feels automatic (1 to 5)', friend: 'What they’d tell a friend', change: 'One thing to change', paid: 'Paid for before', missed: 'Anything I should have asked' };
+  // Tester feedback: grouped by the "how would you feel" answer, the way Superhuman read theirs. Part 1 is first look and setup, Part 2 is living with it.
+  var QN = { ellis: 'If they could no longer use it', purpose: 'What they think it’s for', ease: 'Setup ease (1 very hard to 7 very easy)', tried: 'Parts tried', hesitate: 'Hesitated, unsure or annoyed', words: 'Words for it', toughday: 'Last tough day', nearlystopped: 'Nearly stopped?', automatic: 'Habit feels automatic (1 to 5)', friend: 'What they’d tell a friend', change: 'One thing to change', paid: 'Paid for before', missed: 'Anything I should have asked' };
+  function norm(t) { var a = t.answers || {}; if (t.v !== 2) { if (a.disappointed) { a.ellis = a.disappointed; delete a.disappointed; } if (a.stuck) { a.hesitate = a.stuck; delete a.stuck; } } t.answers = a; return t; }
   function tally(list, k) { var m = {}; list.forEach(function (t) { var a = (t.answers || {})[k]; if (!a || !a.pick) return; [].concat(a.pick).forEach(function (p) { m[p] = (m[p] || 0) + 1; }); }); return m; }
   function tallyHTML(title, m, total) { var ks = Object.keys(m).sort(function (a, b) { return m[b] - m[a]; }); if (!ks.length) return ''; return '<div><b style="font-weight:600">' + esc(title) + '</b>' + ks.map(function (k) { return '<div class="row"><span>' + esc(k) + '</span><span class="hint">' + m[k] + ' of ' + total + '</span></div><div class="bar"><i style="width:' + Math.round(m[k] / total * 100) + '%"></i></div>'; }).join('') + '</div>'; }
+  function avg(list, k) { var v = list.map(function (t) { return Number(((t.answers || {})[k] || {}).pick); }).filter(function (x) { return x > 0; }); return v.length ? (v.reduce(function (a, b) { return a + b; }, 0) / v.length).toFixed(1) : '–'; }
   function testerSection(list) {
+    list = list.map(norm);
     var h = '<section class="card"><h2>Tester feedback</h2>';
     if (!list.length) return h + '<p class="hint">No feedback yet. Send testers the link: motivate-coaching.github.io/tlr-hub/letsgo/feedback.html</p></section>';
-    var d = tally(list, 'disappointed'), answered = Object.keys(d).reduce(function (a, k) { return a + d[k]; }, 0), very = d['Very disappointed'] || 0;
-    var auto = list.map(function (t) { return Number(((t.answers || {}).automatic || {}).pick); }).filter(function (x) { return x > 0; });
+    var d = tally(list, 'ellis'), answered = Object.keys(d).reduce(function (a, k) { return a + d[k]; }, 0), very = d['Very disappointed'] || 0;
     h += '<div class="tiles"><div class="tile"><b>' + list.length + '</b><span>people sent feedback</span></div>' +
       '<div class="tile"><b>' + very + ' of ' + answered + '</b><span>would be very disappointed without it (aim for 40%+)</span></div>' +
-      '<div class="tile"><b>' + (auto.length ? (auto.reduce(function (a, b) { return a + b; }, 0) / auto.length).toFixed(1) : '–') + '</b><span>habit feels automatic, out of 5</span></div></div>';
-    h += tallyHTML(QN.disappointed, d, list.length) + tallyHTML(QN.toughday, tally(list, 'toughday'), list.length) + tallyHTML(QN.nearlystopped, tally(list, 'nearlystopped'), list.length) + tallyHTML(QN.stuck, tally(list, 'stuck'), list.length) + tallyHTML(QN.paid, tally(list, 'paid'), list.length);
+      '<div class="tile"><b>' + avg(list, 'ease') + '</b><span>setup ease out of 7 (typical is about 5.5)</span></div>' +
+      '<div class="tile"><b>' + avg(list, 'automatic') + '</b><span>habit feels automatic, out of 5</span></div></div>';
+    var routes = {}; list.forEach(function (t) { if (t.route) routes[t.route] = (routes[t.route] || 0) + 1; });
+    h += tallyHTML('How much they’d used it', routes, list.length);
+    h += '<h2 style="margin-top:8px">Part 1: first look and setup</h2>' + tallyHTML(QN.tried, tally(list, 'tried'), list.length) + tallyHTML(QN.hesitate, tally(list, 'hesitate'), list.length) + tallyHTML(QN.words, tally(list, 'words'), list.length);
+    h += '<h2 style="margin-top:8px">Part 2: living with it</h2>' + tallyHTML(QN.ellis, d, answered || 1) + tallyHTML(QN.toughday, tally(list, 'toughday'), list.length) + tallyHTML(QN.nearlystopped, tally(list, 'nearlystopped'), list.length) + tallyHTML(QN.paid, tally(list, 'paid'), list.length);
     var order = ['Very disappointed', 'Somewhat disappointed', 'Not disappointed', 'I’d already stopped using it', ''];
     order.forEach(function (g) {
-      var grp = list.filter(function (t) { return (((t.answers || {}).disappointed || {}).pick || '') === g; }); if (!grp.length) return;
-      h += '<h2 style="margin-top:8px">' + esc(g || 'Didn’t answer the first question') + ' (' + grp.length + ')</h2>';
+      var grp = list.filter(function (t) { return (((t.answers || {}).ellis || {}).pick || '') === g; }); if (!grp.length) return;
+      h += '<h2 style="margin-top:8px">' + esc(g || 'Only had a look or set it up') + ' (' + grp.length + ')</h2>';
       grp.forEach(function (t) {
         var u = t.usage, who = (t.name || t.email || 'A tester');
         h += '<div class="note"><div class="row"><b style="font-weight:600">' + esc(who) + '</b><span class="hint">' + esc(when(t.at)) + '</span></div>' +
+          (t.route ? '<p class="hint">' + esc(t.route) + '</p>' : '') +
           (u ? '<p class="hint">' + esc(u.habit || '') + ': day ' + u.day + ' of ' + u.length + ', ' + u.showups + ' show-ups, ' + u.lighter + ' lighter, ' + u.comebacks + ' comebacks' + (u.view === 'focus' ? ', Focused view' : '') + '</p>' : '');
         Object.keys(QN).forEach(function (k) { var a = (t.answers || {})[k]; if (!a) return; var p = a.pick ? [].concat(a.pick).join(', ') : ''; h += '<p style="margin:8px 0 0"><span class="hint">' + esc(QN[k]) + '</span><br>' + (p ? '<b style="font-weight:600">' + esc(p) + '</b>' : '') + (p && a.text ? '. ' : '') + esc(a.text || '') + '</p>'; });
         h += '</div>';
