@@ -48,7 +48,7 @@ function emailHtml(code: string, plan?: Plan) {
 <body style="margin:0;padding:0;background:#F5F1EB;font-family:Poppins,'Helvetica Neue',Helvetica,Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F1EB;padding:28px 16px;"><tr><td align="center">
 <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#FFFFFF;border-radius:10px;"><tr><td style="padding:32px;">
-<p style="margin:0 0 6px;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#4A4A4A;">Let’s Go<span style="color:#C9930A;">!</span></p>
+<p style="margin:0 0 10px;font-family:Poppins,'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:20px;font-weight:700;letter-spacing:-0.01em;color:#1A1A1A;">Let’s Go<span style="color:#C9930A;">!</span></p>
 <h1 style="margin:0 0 14px;font-family:'Playfair Display',Georgia,serif;font-weight:400;font-size:28px;color:#1A1A1A;">${hasPlan ? hi : 'Your sign-in code'}</h1>
 ${hasPlan ? planBlock(plan!) + '<p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#4A4A4A;">Your code to activate it:</p>' : ''}
 <p style="margin:0 0 18px;font-size:42px;font-weight:600;letter-spacing:0.18em;color:#0F1215;">${code}</p>
