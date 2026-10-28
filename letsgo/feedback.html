@@ -73,6 +73,12 @@ textarea:focus, .opt:focus-visible, button:focus-visible { outline: 3px solid va
 .celebrate { position: fixed; inset: 0; z-index: 100; background: rgba(15, 18, 21, 0.96); color: var(--white); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; padding: 24px; animation: fade 300ms ease-out both; }
 .celebrate h1 { color: var(--white); font-size: 40px; animation: rise 420ms 300ms ease-out both; }
 .celebrate p { color: var(--cream-dark); margin: 0; max-width: 340px; animation: rise 420ms 450ms ease-out both; }
+.namebox { position: relative; width: 100%; max-width: 340px; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.15); display: flex; flex-direction: column; gap: 10px; text-align: left; animation: rise 420ms 700ms ease-out both; }
+.namebox label { font-weight: 600; color: var(--white); }
+.namebox label span { font-weight: 400; color: var(--cream-deep); font-size: 14px; margin-left: 6px; }
+.namebox textarea { min-height: 52px; resize: none; }
+.namebox .hint { text-align: center; font-size: 14px; }
+.btn.light { background: var(--cream); color: var(--navy, #0F1215); }
 .confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 .confetti .cf { position: absolute; top: -20px; display: block; animation-name: cf-fall; animation-timing-function: cubic-bezier(.25,.6,.4,1); animation-fill-mode: both; }
 @keyframes cf-fall { 0% { transform: translate(0, 0) rotate(0); opacity: 1; } 85% { opacity: 1; } 100% { transform: translate(var(--dx), 105vh) rotate(var(--rot)); opacity: 0; } }
@@ -131,7 +137,7 @@ textarea:focus, .opt:focus-visible, button:focus-visible { outline: 3px solid va
   var main = document.getElementById('main'), bar = document.getElementById('bar'), backBtn = document.getElementById('back');
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   var micSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
-  var step = A.__step || 'intro'; // 'intro', 'route', a number (index into list()), 'name'
+  var step = A.__step || 'intro'; // 'intro', 'route', or a number (index into list())
   var open = {}; // which "add a comment" boxes are open
   function go(s) { stopMic(); step = s; A.__step = s; saveDraft(); render(); window.scrollTo(0, 0); }
   function textBox(k, label, small) {
@@ -152,7 +158,8 @@ textarea:focus, .opt:focus-visible, button:focus-visible { outline: 3px solid va
       bar.style.width = '0';
       main.innerHTML = '<section class="screen"><div class="eyebrow">Founding tester feedback</div><h1>How is <span class="brand">Let’s Go<span class="bang">!</span></span> really going?</h1>' +
         '<div class="stu"><img src="stuart.jpg" alt="" width="56" height="56"><p>Honest beats nice. What annoyed or confused you helps me most. <b>Stu</b></p></div>' +
-        '<p class="howlong">Only 2 minutes of your time. It’s mostly tapping buttons, any words are optional, and you can type or speak your answers.</p>' +
+        '<p class="howlong">Only 2 minutes of your time. It’s mostly tapping buttons, any words are optional, and you can type or speak your answers.</p> +
+        '<p class="hint privacy">Your answers go only to Stuart, to improve the app. No name needed. If you use <span class="brand">Let’s Go<span class="bang">!</span></span> on this phone, your show-up count is added too, never your notes. <a href="privacy.html">Privacy</a></p>' +
         '<div class="spacer"></div><button class="btn" data-go="route">Let’s start</button></section>';
       return;
     }
@@ -160,13 +167,6 @@ textarea:focus, .opt:focus-visible, button:focus-visible { outline: 3px solid va
       bar.style.width = '4%';
       var x0 = { k: 'route', opts: [R.look, R.setup, R.few, R.most, R.stopped] };
       main.innerHTML = '<section class="screen"><div class="eyebrow">First, so I only ask what fits</div><p class="qtext">How much have you used <span class="brand">Let’s Go<span class="bang">!</span></span> so far?</p>' + optButtons(x0, 'opts') + '</section>';
-      return;
-    }
-    if (step === 'name') {
-      bar.style.width = '100%';
-      main.innerHTML = '<section class="screen"><div class="count"><span class="eyebrow">All done</span><span class="cheer">That’s everything</span></div><p class="qtext">Want me to know who this is from?</p>' +
-        textBox('name', 'Your first name (optional)', true) + '<p class="err" id="err" hidden></p><div class="spacer"></div><button class="btn" id="send" data-act="send">Send my feedback</button>' +
-        '<p class="hint privacy">Your answers go only to Stuart, to improve the app. If you use <span class="brand">Let’s Go<span class="bang">!</span></span> on this phone, your show-up count is added too, never your notes. <a href="privacy.html">Privacy</a></p></section>';
       return;
     }
     var i = Math.min(step, n - 1), x = L[i];
@@ -188,14 +188,13 @@ textarea:focus, .opt:focus-visible, button:focus-visible { outline: 3px solid va
     }
     // Next only works once they've answered. To move on without answering they tap Skip, so a stray tap never loses an answer.
     var ok = answered(x), last = i === n - 1;
-    h += '<p class="err" id="err" hidden></p><div class="spacer"></div><button class="btn' + (ok ? '' : ' off') + '" data-act="next" aria-disabled="' + !ok + '">' + (last ? 'Finish' : 'Next') + '</button>' +
+    h += '<p class="err" id="err" hidden></p><div class="spacer"></div><button class="btn' + (ok ? '' : ' off') + '" data-act="next" aria-disabled="' + !ok + '">' + (last ? 'Send my feedback' : 'Next') + '</button>' +
       (req(x) ? '' : '<button type="button" class="skip" data-act="skip">Skip</button>') + '</section>';
     main.innerHTML = h;
   }
-  function next() { var L = list(); if (typeof step === 'number' && step < L.length - 1) go(step + 1); else go('name'); }
+  function next() { var L = list(); if (typeof step === 'number' && step < L.length - 1) go(step + 1); else send(); }
   backBtn.addEventListener('click', function () {
     if (step === 'route') return go('intro');
-    if (step === 'name') return go(list().length - 1);
     if (typeof step === 'number') return go(step > 0 ? step - 1 : 'route');
   });
   var advanceTimer = null;
@@ -299,14 +298,14 @@ textarea:focus, .opt:focus-visible, button:focus-visible { outline: 3px solid va
   }
   async function send() {
     stopMic();
-    var err = document.getElementById('err'), btn = document.getElementById('send'); err.hidden = true;
-    var out = { v: 3, route: route(), answers: {}, usage: usage(), name: ((A.name || {}).text || '').trim().slice(0, 80), view: window.innerWidth < 600 ? 'phone' : 'desktop' };
+    var err = document.getElementById('err'), btn = main.querySelector('[data-act="next"]'), skip = main.querySelector('[data-act="skip"]'); if (!btn || btn.disabled) return; err.hidden = true;
+    var out = { v: 3, route: route(), answers: {}, usage: usage(), ref: Math.random().toString(36).slice(2, 10) + Date.now().toString(36), view: window.innerWidth < 600 ? 'phone' : 'desktop' };
     list().forEach(function (x) {
       var a = A[x.k] || {}, p = a.pick, text = (a.text || '').trim().slice(0, 4000);
       if ((p && (x.multi ? p.length : String(p))) || text) out.answers[x.k] = { pick: p ? (x.multi ? p.slice() : p) : null, text: text };
     });
     if (!sb) { err.textContent = 'Couldn’t connect just now. Your answers are saved, so try again in a moment.'; err.hidden = false; return; }
-    btn.disabled = true; btn.textContent = 'Sending…';
+    btn.disabled = true; btn.textContent = 'Sending…'; if (skip) skip.disabled = true;
     try {
       var sess = (await sb.auth.getSession()).data.session;
       if (!sess) { var r = await sb.auth.signInAnonymously(); if (r.error) throw r.error; sess = r.data.session; }
@@ -315,18 +314,29 @@ textarea:focus, .opt:focus-visible, button:focus-visible { outline: 3px solid va
       try { localStorage.removeItem(DRAFT); } catch (e) {}
       bar.style.width = '100%'; backBtn.hidden = true;
       var el = document.createElement('div'); el.className = 'celebrate'; el.setAttribute('role', 'status');
-      el.innerHTML = confettiHTML(70) + '<h1>Thank you' + (out.name ? ', ' + esc(out.name) : '') + '.</h1><p>That took real effort, and it’s exactly what makes <span class="brand">Let’s Go<span class="bang">!</span></span> better. I read every answer.</p><p><b>Stu</b></p>';
+      // Their answers are already sent. Their name is a no-pressure extra, so leaving now loses nothing.
+      el.innerHTML = confettiHTML(70) + '<h1>Thank you.</h1><p>Your feedback is in. It’s exactly what makes <span class="brand">Let’s Go<span class="bang">!</span></span> better, and I read every answer.</p><p><b>Stu</b></p>' +
+        '<div class="namebox" id="namebox"><label for="t-who">Happy for me to know it’s you? <span>Optional</span></label><textarea id="t-who" rows="1" maxlength="80" placeholder="Your first name"></textarea>' +
+        '<button type="button" class="btn light" id="addname">Add my name</button><p class="hint">Or just close this page. You’re all done.</p></div>';
       document.body.appendChild(el);
       try { if (navigator.vibrate) navigator.vibrate([60, 40, 60]); } catch (e) {}
       main.innerHTML = '';
+      el.querySelector('#addname').addEventListener('click', async function () {
+        var nm = el.querySelector('#t-who').value.trim().slice(0, 80), b2 = this, box = el.querySelector('#namebox'); if (!nm) { el.querySelector('#t-who').focus(); return; }
+        b2.disabled = true; b2.textContent = 'Adding…';
+        var r2 = await sb.from('showup_feedback').insert({ user_id: sess.user.id, question: 'tester-feedback-name', answer: JSON.stringify({ ref: out.ref, name: nm }) });
+        if (r2.error) { b2.disabled = false; b2.textContent = 'Add my name'; return; }
+        box.innerHTML = '<p>Thanks, ' + esc(nm) + '. Lovely to know it was you.</p>';
+      });
     } catch (e2) {
-      btn.disabled = false; btn.textContent = 'Send my feedback';
+      btn.disabled = false; btn.textContent = 'Send my feedback'; if (skip) skip.disabled = false;
       err.textContent = 'Couldn’t send just now. Your answers are saved, so try again in a moment.'; err.hidden = false;
     }
   }
   // Pre-fill how much they've used it, from the app on this phone, so they just confirm it.
   (function () { var u = usage(); if (!u || A.route) return; A.route = { pick: u.showups >= 5 ? R.most : u.showups >= 1 ? R.few : R.setup }; saveDraft(); })();
-  if (typeof step === 'number' && step >= list().length) step = 'name';
+  // Older drafts may have stopped on the name screen, which no longer exists: take them to the last question.
+  if (step === 'name' || (typeof step === 'number' && step >= list().length)) step = list().length - 1;
   render();
 })();
 </script>

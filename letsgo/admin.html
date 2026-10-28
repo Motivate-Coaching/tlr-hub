@@ -73,7 +73,7 @@ select { font: inherit; padding: 8px 10px; border-radius: 6px; border: 1px solid
       sb.rpc('showup_feedback_admin', { since_days: days })
     ]);
     var people = r[0].data || [], usage = r[1].data || [], fb = r[2].data;
-    if (r[2].error) { var raw = await sb.from('showup_feedback').select('question,answer,created_at').order('created_at', { ascending: false }).limit(200); fb = (raw.data || []).map(function (x) { return Object.assign({ email: '(name to come)' }, x); }); }
+    if (r[2].error) { var raw = await sb.from('showup_feedback').select('question,answer,created_at').order('created_at', { ascending: false }).limit(200); fb = (raw.data || []).map(function (x) { return Object.assign({ email: '' }, x); }); }
     render(days, people, usage, fb || []);
   }
   // Tester feedback: grouped by the "how would you feel" answer, the way Superhuman read theirs. Part 1 is first look and setup, Part 2 is living with it.
@@ -115,8 +115,10 @@ select { font: inherit; padding: 8px 10px; border-radius: 6px; border: 1px solid
   function render(days, pl, usage, fb) {
     var active = pl.filter(function (p) { return p.last_tick && (Date.now() - new Date(p.last_tick)) < 7 * 864e5; }).length;
     var opens = people(usage, 'open'), focus = usage.filter(function (u) { return u.event === 'open' && u.view_mode === 'focus'; }).reduce(function (a, u) { return a + Number(u.people); }, 0);
-    var testers = fb.filter(function (f) { return f.question === 'tester-feedback'; }).map(function (f) { var j = {}; try { j = JSON.parse(f.answer); } catch (e) {} j.at = f.created_at; j.email = f.email; return j; });
-    fb = fb.filter(function (f) { return f.question !== 'tester-feedback'; });
+    // A first name, if they chose to add one after sending, arrives as its own row linked by ref.
+    var names = {}; fb.forEach(function (f) { if (f.question !== 'tester-feedback-name') return; try { var n = JSON.parse(f.answer); if (n.ref) names[n.ref] = n.name; } catch (e) {} });
+    var testers = fb.filter(function (f) { return f.question === 'tester-feedback'; }).map(function (f) { var j = {}; try { j = JSON.parse(f.answer); } catch (e) {} j.at = f.created_at; j.email = f.email; if (j.ref && names[j.ref]) j.name = names[j.ref]; return j; });
+    fb = fb.filter(function (f) { return f.question !== 'tester-feedback' && f.question !== 'tester-feedback-name'; });
     var checks = fb.filter(function (f) { return /^checkin/.test(f.question); });
     var h = '<div><div class="eyebrow"><span class="brand">Let’s Go<span class="bang">!</span></span> · only you can see this</div><h1>How it’s going</h1></div>' +
       '<div class="row"><p class="hint">Last ' + days + ' days. People in the summary are those who have added their email.</p><label class="hint">Period <select id="days"><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option></select></label></div>' +
