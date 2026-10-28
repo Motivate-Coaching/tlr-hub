@@ -128,7 +128,12 @@ Deno.serve(async (req) => {
     try {
       const bearer = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '')
       const { data: g } = await admin.auth.getUser(bearer)
-      if (g?.user?.is_anonymous) await admin.auth.admin.deleteUser(g.user.id)
+      if (g?.user?.is_anonymous) {
+        // Keep anything they sent as a guest (like tester feedback) by moving it to their real account first.
+        const realId = link.data?.user?.id || created.data?.user?.id
+        if (realId) await admin.from('showup_feedback').update({ user_id: realId }).eq('user_id', g.user.id)
+        await admin.auth.admin.deleteUser(g.user.id)
+      }
     } catch { /* not a guest, nothing to tidy */ }
     return json({ token_hash, isNew: !created.error })
   }
