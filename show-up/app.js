@@ -934,7 +934,7 @@
   var HORIZONS = [['30', '30 days'], ['90', 'three months'], ['365', 'a year']];
   function horizonLabel() { var f = S.find || {}, h = HORIZONS.filter(function (x) { return x[0] === f.horizon; })[0] || HORIZONS[1]; return h[1]; }
   function FIND_QS() {
-    var proud = { key: 'proud', q: 'Picture yourself a year from now, looking back. What would you have done that makes you insanely proud of yourself?', hint: 'Picture how life feels, not just the thing you did.', ph: 'e.g. I’d love to be able to say I sleep properly and my evenings are mine again' };
+    var proud = { key: 'proud', q: 'Picture yourself a year from now, feeling insanely proud of yourself. What did you do to make you feel this way?', hint: 'Picture how life feels, not just the thing you did.', ph: 'e.g. I finally sorted my sleep, and my evenings are mine again' };
     if (S.find && S.find.mode === 'less') return [
       { key: 'drain', q: 'What do you notice you do regularly that costs you more than it gives you?', hint: 'Jot down whatever comes. We’ll narrow it down together.', ph: 'e.g. Scrolling in bed at night, too much chocolate, not being present with family' },
       proud
