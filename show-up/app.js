@@ -425,7 +425,7 @@
       var L = S.habit.length, days = Math.min(todayNum(), L), n = count(function (x, k) { return k <= L; }), pct = Math.round(n / Math.max(1, days) * 100);
       var dots = '<div class="sharedots">'; for (var i = 1; i <= L; i++) dots += '<i class="' + (S.entries[i] ? 'on' : (i <= days ? 'off' : 'ahead')) + '"></i>'; dots += '</div>';
       return '<section class="screen"><div><div class="eyebrow">Share that I did it</div><h1>Your progress</h1></div><p class="lede">Only your habit and the days you showed up. Never your notes.</p>' +
-        '<div class="sharecard" id="sharecard"><div class="head"><span class="eyebrow" style="color:var(--cream-dark)">' + L + '-day challenge</span><img src="logo-white.png" alt="The Living Room (TLR), Tools for life"></div>' +
+        '<div class="sharecard" id="sharecard"><div class="head"><span class="eyebrow" style="color:var(--cream-dark)">' + L + '-day challenge</span><span class="wordmark">Let’s Go<span class="bang">!</span></span></div>' +
         '<h2>' + esc(habitName()) + '</h2>' + dots +
         '<div class="sharestat"><b>' + pct + '%</b><span>Showed up ' + n + ' of ' + days + ' days</span></div></div>' +
         '<button class="btn" data-act="shareimg">Share my card</button>' +
@@ -1185,11 +1185,14 @@
   // ── Share image ───────────────────────────────────────────────────────────
   function loadImg(src) { return new Promise(function (res, rej) { var i = new Image(); i.onload = function () { res(i); }; i.onerror = rej; i.src = src; }); }
   async function shareImage() {
-    try { await document.fonts.load('400 72px "Playfair Display"'); await document.fonts.load('600 32px Poppins'); } catch (e) {}
+    try { await document.fonts.load('400 72px "Playfair Display"'); await document.fonts.load('600 32px Poppins'); await document.fonts.load('700 56px Poppins'); } catch (e) {}
     var W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H;
     var g = c.getContext('2d'), t = todayNum(), L = S.habit.length;
     g.fillStyle = '#0F1215'; g.fillRect(0, 0, W, H);
-    try { var logo = await loadImg('logo-white.png'); g.drawImage(logo, W - 80 - 160, 80, 160, 160 * logo.height / logo.width); } catch (e) {}
+    try { await document.fonts.load('700 56px Poppins'); } catch (e) {}
+    g.font = '700 56px Poppins, sans-serif'; g.textAlign = 'right';
+    var bw = g.measureText('!').width; g.fillStyle = '#C9930A'; g.fillText('!', W - 80, 142);
+    g.fillStyle = '#FFFFFF'; g.fillText('Let\u2019s Go', W - 80 - bw, 142); g.textAlign = 'left';
     g.fillStyle = '#EDE8DF'; g.font = '600 34px Poppins, sans-serif'; g.fillText((L + '-day challenge').toUpperCase(), 80, 140);
     g.fillStyle = '#FFFFFF'; g.font = '400 88px "Playfair Display", Georgia, serif';
     var lines = wrap(g, habitName(), W - 160), y = 330; lines.slice(0, 3).forEach(function (l) { g.fillText(l, 80, y); y += 100; });

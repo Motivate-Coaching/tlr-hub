@@ -42,6 +42,8 @@ html.size-large .app { zoom: 1.12; }
 html.size-larger .app { zoom: 1.25; }
 .bar { position: sticky; top: 0; z-index: 20; height: calc(64px + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); display: grid; grid-template-columns: 96px 1fr 96px; align-items: center; justify-items: center; background: var(--navy); padding-left: max(6px, env(safe-area-inset-left, 0px)); padding-right: max(6px, env(safe-area-inset-right, 0px)); }
 .bar img { height: 40px; width: auto; display: block; }
+.wordmark { font-family: var(--body); font-weight: 700; font-size: 24px; line-height: 1; letter-spacing: -0.01em; color: var(--white); white-space: nowrap; }
+.wordmark .bang { color: var(--amber); }
 .home-btn { min-height: 48px; padding: 4px 10px; border: 0; border-radius: 4px; background: transparent; display: flex; align-items: center; justify-content: center; }
 .tlr-link { display: inline-flex; align-items: center; gap: 6px; }
 .icon-btn { width: 44px; height: 44px; border: 0; border-radius: 4px; background: transparent; display: flex; align-items: center; justify-content: center; color: var(--white); }
@@ -218,6 +220,7 @@ html.calm .burst .spark, html.calm .burst .ring { display: none; }
 .sharecard { background: var(--navy); color: var(--white); border-radius: 10px; padding: 22px; display: flex; flex-direction: column; gap: 16px; }
 .sharecard .head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .sharecard .head img { height: 44px; }
+.sharecard .wordmark { font-size: 22px; }
 .sharecard h2 { font-family: var(--display); font-weight: 400; font-size: 34px; line-height: 1.05; overflow-wrap: anywhere; }
 .sharecard .grid { grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 5px; }
 .sharecard .day { max-width: 30px; font-size: 11px; background: var(--navy-mid); color: var(--cream-dark); }
@@ -493,12 +496,12 @@ details.alldays[open] summary { margin-bottom: 12px; }
       <button class="icon-btn ghost" id="back" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
       <button class="icon-btn ghost" id="fwd" aria-label="Forward"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
     </div>
-    <button class="home-btn" id="homeBtn" aria-label="Home"><img src="logo-white.png" alt="The Living Room (TLR), Tools for life" width="49" height="40"></button>
+    <button class="home-btn" id="homeBtn" aria-label="Home"><span class="wordmark">Let’s Go<span class="bang">!</span></span></button>
     <button class="icon-btn ghost" id="settingsBtn" aria-label="Settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </header>
   <main id="view"></main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=20261027w"></script>
+<script src="app.js?v=20261028a"></script>
 </body>
 </html>
