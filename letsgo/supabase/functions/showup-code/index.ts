@@ -9,7 +9,7 @@ import webpush from 'npm:web-push@3.6.7'
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || ''
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const FROM = '"Let\'s Go" <stuart@motivate-coaching.com>'
+const FROM = '"Let\'s Go!" <stuart@motivate-coaching.com>'
 const CODE_MINUTES = 10
 const MAX_ATTEMPTS = 5
 const MAX_SENDS_PER_HOUR = 5
@@ -44,11 +44,11 @@ ${row(p.mode === 'less' ? 'Tough day? My smaller version' : 'Tough day? My light
 function emailHtml(code: string, plan?: Plan) {
   const hasPlan = !!(plan && plan.what)
   const hi = hasPlan && plan!.name ? `${esc(plan!.name)}, your plan is ready.` : 'Your plan is ready.'
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${hasPlan ? 'Activate your plan' : 'Your Let’s Go code'}</title></head>
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${hasPlan ? 'Activate your plan' : 'Your Let’s Go! code'}</title></head>
 <body style="margin:0;padding:0;background:#F5F1EB;font-family:Poppins,'Helvetica Neue',Helvetica,Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F1EB;padding:28px 16px;"><tr><td align="center">
 <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#FFFFFF;border-radius:10px;"><tr><td style="padding:32px;">
-<p style="margin:0 0 6px;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#4A4A4A;">Let’s Go</p>
+<p style="margin:0 0 6px;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#4A4A4A;">Let’s Go<span style="color:#C9930A;">!</span></p>
 <h1 style="margin:0 0 14px;font-family:'Playfair Display',Georgia,serif;font-weight:400;font-size:28px;color:#1A1A1A;">${hasPlan ? hi : 'Your sign-in code'}</h1>
 ${hasPlan ? planBlock(plan!) + '<p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#4A4A4A;">Your code to activate it:</p>' : ''}
 <p style="margin:0 0 18px;font-size:42px;font-weight:600;letter-spacing:0.18em;color:#0F1215;">${code}</p>
@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: FROM, to: [email], subject: body.plan?.what ? `Activate your plan: ${code}` : `Your Let’s Go code: ${code}`, html: emailHtml(code, body.plan), text: body.plan?.what ? `Your plan: ${String(body.plan.what).slice(0, 300)}. Your code to activate it is ${code}. It works for ${CODE_MINUTES} minutes.` : `Your Let’s Go code is ${code}. It works for ${CODE_MINUTES} minutes.` }),
+      body: JSON.stringify({ from: FROM, to: [email], subject: body.plan?.what ? `Activate your plan: ${code}` : `Your Let’s Go! code: ${code}`, html: emailHtml(code, body.plan), text: body.plan?.what ? `Your plan: ${String(body.plan.what).slice(0, 300)}. Your code to activate it is ${code}. It works for ${CODE_MINUTES} minutes.` : `Your Let’s Go! code is ${code}. It works for ${CODE_MINUTES} minutes.` }),
     })
     if (!res.ok) { console.error('[showup-code] Resend', res.status, (await res.text()).slice(0, 200)); return json({ error: 'email_failed' }, 502) }
     return json({ ok: true })

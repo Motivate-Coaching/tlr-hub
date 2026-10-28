@@ -110,7 +110,9 @@
   function isStandalone() { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true; }
   function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
   function fmtTime(t) { var p = t.split(':'), h = +p[0], m = +p[1]; return (h % 12 || 12) + (m ? ':' + String(m).padStart(2, '0') : '') + (h < 12 ? 'am' : 'pm'); }
-  function toast(msg) { document.querySelectorAll('.toast').forEach(function (t) { t.remove(); }); var el = document.createElement('div'); el.className = 'toast'; el.setAttribute('role', 'status'); el.textContent = msg; app.appendChild(el); setTimeout(function () { el.remove(); }, 2800); }
+  // The brand name always shows as Let's Go! with the amber exclamation mark.
+  function brand(t) { return esc(t).replace(/Let’s Go(?!!)/g, 'Let’s Go<span class="bang">!</span>'); }
+  function toast(msg) { document.querySelectorAll('.toast').forEach(function (t) { t.remove(); }); var el = document.createElement('div'); el.className = 'toast'; el.setAttribute('role', 'status'); el.innerHTML = brand(msg); app.appendChild(el); setTimeout(function () { el.remove(); }, 2800); }
   function applyComfort() {
     var r = document.documentElement;
     r.classList.toggle('size-large', S.settings.text === 'large');
@@ -498,10 +500,10 @@
         '<button class="link" data-act="newhabit" style="align-self:flex-start">Start a new habit</button>');
       h += sect('You and your data', '<div class="field"><label class="label" for="sname">Your first name</label><textarea id="sname" rows="1" data-name="1" autocomplete="given-name" placeholder="So we can say hello">' + esc(firstName()) + '</textarea></div>' +
         (user ? '<span>Signed in as <b>' + esc(user.email) + '</b></span>' : '<span>Saved on this device only.</span><button class="btn" data-account="settings">Save my progress</button>') +
-        '<button class="switch" role="switch" aria-checked="' + (s.analytics !== false) + '" data-toggle="analytics"><span><b>Help improve Let’s Go</b><span class="hint">Shares which buttons you tap, never what you write.</span></span><span class="track"></span></button>' +
+        '<button class="switch" role="switch" aria-checked="' + (s.analytics !== false) + '" data-toggle="analytics"><span><b>Help improve Let’s Go<span class="bang">!</span></b><span class="hint">Shares which buttons you tap, never what you write.</span></span><span class="track"></span></button>' +
         (user ? '<button class="switch" role="switch" aria-checked="' + !!s.marketing + '" data-toggle="marketing"><span><b>Ideas and updates from Stuart</b><span class="hint">Occasional emails. Off unless you choose.</span></span><span class="track"></span></button>' : '') +
         '<p class="hint">Your notes are only ever seen by you. During the pilot, Stuart sees your habit and how often you show up, never your notes.</p>' +
-        '<div class="row" style="flex-wrap:wrap;gap:8px;justify-content:flex-start"><button class="chip" data-act="exportdata">Download my data</button><button class="chip" data-act="deletedata">Delete my Let’s Go data</button></div>' +
+        '<div class="row" style="flex-wrap:wrap;gap:8px;justify-content:flex-start"><button class="chip" data-act="exportdata">Download my data</button><button class="chip" data-act="deletedata">Delete my Let’s Go<span class="bang">!</span> data</button></div>' +
         '<a class="link" href="privacy.html" style="align-self:flex-start">Privacy notice</a>' + '<a class="link" href="terms.html" style="align-self:flex-start">Terms of use</a>' +
         '<button class="switch" role="switch" aria-checked="' + !!s.tlrMember + '" data-act="tlrtoggle"><span><b>I’m in The Living Room</b><span class="hint">Shows member prices for booster calls.</span></span><span class="track"></span></button>' + (user ? '<button class="link" data-act="signout" style="align-self:flex-start">Sign out</button>' : ''));
       if (!isStandalone()) h += sect('Get the app', '<span>Put it on your home screen so it opens like an app.</span><button class="btn outline" data-act="install">Show me how</button>');
@@ -537,7 +539,7 @@
         h += installSteps(ios ? 'ios' : 'android');
         h += '<details class="ask"><summary>' + (ios ? 'On Android instead?' : 'On an iPhone instead?') + '</summary>' + installSteps(ios ? 'android' : 'ios') + '</details>';
       } else {
-        h += '<div class="card qrcard"><img src="qr.svg" width="132" height="132" alt="QR code for the Let’s Go app"><div><b>Point your phone’s camera here</b><span class="hint">Then tap the link that pops up.</span><button class="chip" data-act="copylink">Or copy the link</button></div></div>' +
+        h += '<div class="card qrcard"><img src="qr.svg" width="132" height="132" alt="QR code for the Let’s Go! app"><div><b>Point your phone’s camera here</b><span class="hint">Then tap the link that pops up.</span><button class="chip" data-act="copylink">Or copy the link</button></div></div>' +
           '<details class="ask"><summary>Then what?</summary><span class="eyebrow" style="display:block;margin:10px 0 6px">iPhone</span>' + installSteps('ios') + '<span class="eyebrow" style="display:block;margin:16px 0 6px">Android</span>' + installSteps('android') + '</details>' +
           (deferredInstall ? '<button class="btn outline" data-act="doinstall">Or install it on this computer</button>' : '');
       }
@@ -550,7 +552,7 @@
       return '<section class="screen"><div><div class="eyebrow">Your plan is ready</div><h1>Who should we send your plan to?</h1></div>' +
         '<p class="lede">We’ll email you your plan and a 6-digit code to activate it. No password needed.</p>' +
         '<div class="field"><label class="label" for="aemail">Email</label><input class="input" id="aemail" type="email" autocomplete="email" inputmode="email" value="' + esc(ui.authEmail || '') + '"></div>' +
-        (S.consentAt ? '' : '<label class="consent"><input type="checkbox" id="aconsent"><span>I agree to Let’s Go storing my habit, progress and notes so it can run for me. <a href="privacy.html">Privacy</a></span></label>') +
+        (S.consentAt ? '' : '<label class="consent"><input type="checkbox" id="aconsent"><span>I agree to Let’s Go<span class="bang">!</span> storing my habit, progress and notes so it can run for me. <a href="privacy.html">Privacy</a></span></label>') +
         '<p class="err" id="aerr" hidden></p><button class="btn" data-act="sendcode">Send my plan</button>' +
         '<button class="link center" data-act="plannotnow">Not now</button>' +
         '<p class="hint">Your plan is saved to your account, so it’s backed up and your morning nudge can reach you. <a href="privacy.html">How we look after your data</a></p></section>';
@@ -567,7 +569,7 @@
       return '<section class="screen"><div><div class="eyebrow">Save my progress</div><h1>Sign in or create your account</h1></div>' +
         '<p class="lede">Just your email. We’ll send you a 6-digit code, so there’s no password to remember.</p>' +
         '<div class="field"><label class="label" for="aemail">Email</label><input class="input" id="aemail" type="email" autocomplete="email" inputmode="email" value="' + esc(ui.authEmail || '') + '"></div>' +
-        (S.consentAt ? '' : '<label class="consent"><input type="checkbox" id="aconsent"><span>I agree to Let’s Go storing my habit, progress and notes so it can run for me. <a href="privacy.html">Privacy</a></span></label>') +
+        (S.consentAt ? '' : '<label class="consent"><input type="checkbox" id="aconsent"><span>I agree to Let’s Go<span class="bang">!</span> storing my habit, progress and notes so it can run for me. <a href="privacy.html">Privacy</a></span></label>') +
         '<p class="err" id="aerr" hidden></p><button class="btn" data-act="sendcode">Send my code</button>' + priv + '</section>';
     }
   };
@@ -1585,7 +1587,7 @@
     var t = calTimes(), now = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
     var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Motivate Coaching//Lets Go//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
       'UID:' + (S.habit.id || uuid()) + '@showup.motivate-coaching.com', 'DTSTAMP:' + now, 'DTSTART:' + t.st, 'DTEND:' + t.en, 'RRULE:' + t.rule,
-      'SUMMARY:' + icsEsc('Let’s Go: ' + habitName()), 'DESCRIPTION:' + icsEsc(calDescription()), 'URL:' + APPLINK,
+      'SUMMARY:' + icsEsc('Let’s Go! ' + habitName()), 'DESCRIPTION:' + icsEsc(calDescription()), 'URL:' + APPLINK,
       'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsEsc('Time to show up: ' + habitName()), 'TRIGGER:PT0M', 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'];
     return lines.map(icsFold).join('\r\n') + '\r\n';
   }
@@ -1602,7 +1604,7 @@
   }
   function googleCalURL() {
     var t = calTimes();
-    return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('Let’s Go: ' + habitName()) + '&dates=' + t.st + '/' + t.en +
+    return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('Let’s Go! ' + habitName()) + '&dates=' + t.st + '/' + t.en +
       '&details=' + encodeURIComponent(calDescription()) + '&recur=' + encodeURIComponent('RRULE:' + t.rule) + '&ctz=' + encodeURIComponent(S.settings.tz || 'UTC');
   }
   function daysPhrase() {
@@ -1673,7 +1675,7 @@
 
   // ── Your data: download and delete ────────────────────────────────────────
   function exportData() {
-    var out = { exported: new Date().toISOString(), app: 'Let’s Go', account: user ? user.email : null, name: S.settings.name || '', habit: S.habit, entries: S.entries, pastWins: S.wins || [], settings: S.settings };
+    var out = { exported: new Date().toISOString(), app: 'Let’s Go!', account: user ? user.email : null, name: S.settings.name || '', habit: S.habit, entries: S.entries, pastWins: S.wins || [], settings: S.settings };
     var blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
     var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'lets-go-my-data.json';
     document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
@@ -1742,7 +1744,7 @@
   }
   function confirmSheet(title, body, yes, fn) {
     var el = document.createElement('div'); el.className = 'sheet-bg';
-    el.innerHTML = '<div class="sheet" role="dialog" aria-label="' + esc(title) + '"><b style="font-size:20px;font-weight:600">' + esc(title) + '</b><p class="hint">' + esc(body) + '</p><button class="btn" data-c="yes">' + esc(yes) + '</button><button class="link center" data-c="no">Cancel</button></div>';
+    el.innerHTML = '<div class="sheet" role="dialog" aria-label="' + esc(title.replace(/Let’s Go/g, 'Let’s Go!')) + '"><b style="font-size:20px;font-weight:600">' + brand(title) + '</b><p class="hint">' + esc(body) + '</p><button class="btn" data-c="yes">' + esc(yes) + '</button><button class="link center" data-c="no">Cancel</button></div>';
     app.appendChild(el);
     el.addEventListener('click', function (ev) { var b = ev.target.closest('[data-c]'); if (!b && ev.target !== el) return; el.remove(); if (b && b.dataset.c === 'yes') fn(); });
   }
