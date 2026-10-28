@@ -59,7 +59,7 @@
   // Stuart's test devices: open the app once with ?tester to show "Start again" in Settings.
   var TESTER_EMAILS = ['stuart.fairbairns@gmail.com', 'stuart@motivate-coaching.com'];
   if (/[?&]tester\b/.test(location.search)) { try { localStorage.setItem('showup-tester', '1'); history.replaceState(null, '', location.pathname); } catch (e) {} }
-  function isTester() { var f = false; try { f = localStorage.getItem('showup-tester') === '1'; } catch (e) {} return f || !!(user && TESTER_EMAILS.indexOf((user.email || '').toLowerCase()) >= 0); }
+  function isTester() { var f = false; try { f = localStorage.getItem('showup-tester') === '1'; } catch (e) {} var byEmail = !!(user && TESTER_EMAILS.indexOf((user.email || '').toLowerCase()) >= 0); if (byEmail && !f) { try { localStorage.setItem('showup-tester', '1'); } catch (e) {} } return f || byEmail; }
   var FRESH = /[?&]fresh\b/.test(location.search);
   if (FRESH) {
     try { Object.keys(localStorage).forEach(function (k) { if (k === KEY || k.indexOf('sb-') === 0) localStorage.removeItem(k); }); } catch (e) {}
@@ -506,7 +506,7 @@
         '<button class="switch" role="switch" aria-checked="' + !!s.tlrMember + '" data-act="tlrtoggle"><span><b>I’m in The Living Room</b><span class="hint">Shows member prices for booster calls.</span></span><span class="track"></span></button>' + (user ? '<button class="link" data-act="signout" style="align-self:flex-start">Sign out</button>' : ''));
       if (!isStandalone()) h += sect('Get the app', '<span>Put it on your home screen so it opens like an app.</span><button class="btn outline" data-act="install">Show me how</button>');
       if (isTester()) h += '<div class="card soft small"><span class="eyebrow">Only you see this</span><a class="btn" href="admin.html">How it’s going: your view</a></div>';
-      if (isTester()) h += '<div class="card soft small"><span class="eyebrow">For testing (only you see this)</span><span>Wipes everything, including your account, so you can go through it all again as a new person. Sign in again with the same email and you start blank.</span><button class="btn outline" data-act="testerreset">Start again from scratch</button></div>';
+      if (isTester()) h += '<div class="card soft small"><span class="eyebrow">For testing (only you see this)</span><span>Wipes everything, including your account, so you can go through it all again as a new person. Sign in again with the same email and you start blank.</span><button class="btn outline" data-act="testerreset">Start again from scratch</button><button class="btn outline" data-act="testerreload">Reload the latest version</button></div>';
       h += sect('About', '<button class="link" data-go="science" style="align-self:flex-start">The science behind it</button><a class="link tlr-link" href="https://www.motivate-coaching.com/thelivingroom" target="_blank" rel="noopener" style="align-self:flex-start">About The Living Room (TLR) <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a>');
       return h + '</div></section>';
     },
@@ -1400,6 +1400,7 @@
       case 'lifesave': { var lv = ((document.getElementById('lifenote') || {}).value || '').trim(), lx = extra(); lx.noticed = lx.noticed || {}; var cur = lx.noticed[todayNum()] || { why: [] }; cur.why = cur.why || []; if (cur.why.indexOf('Plans changed') < 0) cur.why.push('Plans changed'); if (lv) cur.note = lv; cur.at = new Date().toISOString(); lx.noticed[todayNum()] = cur; save(); ui.struggle = null; toast('Noted. See you tomorrow.'); return go('tracker'); }
       case 'calics': calRead(); downloadICS(); return;
       case 'calgoogle': calRead(); try { window.open(googleCalURL(), '_blank', 'noopener'); } catch (e) {} stat('calendar', 'google'); return;
+      case 'testerreload': return void (async function () { try { if (window.caches) { var ks = await caches.keys(); await Promise.all(ks.map(function (k) { return caches.delete(k); })); } } catch (e) {} location.reload(); })();
       case 'testerreset': return confirmSheet('Start again from scratch?', 'Everything on this phone and in your account goes, so you start as a new person.', 'Start again', testerReset);
       case 'sharenote': ui.shareNote = !ui.shareNote; return render();
       case 'shareimg': return void shareImage();
@@ -1442,7 +1443,13 @@
   backBtn.addEventListener('click', goBack);
   fwdBtn.addEventListener('click', goForward);
   settingsBtn.addEventListener('click', function () { if (!S.habit && isTester()) return confirmSheet('Start again from scratch?', 'Testing only. Everything on this phone and in your account goes, so you start as a new person.', 'Start again', testerReset); go('settings'); });
-  document.getElementById('homeBtn').addEventListener('click', function () { ui.ideasOpen = false; go(S.habit ? 'tracker' : 'landing'); });
+  // Tester tools: tap the Let's Go! logo 5 times quickly to switch them on (survives reinstalls, no link needed).
+  var logoTaps = [];
+  document.getElementById('homeBtn').addEventListener('click', function () {
+    var now = Date.now(); logoTaps = logoTaps.filter(function (t) { return now - t < 3000; }); logoTaps.push(now);
+    if (logoTaps.length >= 5 && !isTester()) { logoTaps = []; try { localStorage.setItem('showup-tester', '1'); } catch (e) {} toast('Tester tools on. Your cog is top right.'); return render(); }
+    ui.ideasOpen = false; go(S.habit ? 'tracker' : 'landing');
+  });
 
   // Suggestions and examples: always shown in Full; in Focus they wait behind one tap.
   // Extras that wait behind one tap in both views.
