@@ -63,7 +63,7 @@ const TOOL = {
             challenges: {
               type: 'array',
               description: '2 or 3 challenges for the next 30 days.',
-              items: { type: 'object', properties: { title: { type: 'string', description: 'A short name, under 7 words.' }, daily: { type: 'string', description: 'The small thing to do most days, under 10 words.' }, personal_question: { type: 'string', description: 'Only if they must decide the actual content first: one short question so they decide it once now.' }, personal_draft: { type: 'string', description: 'Only with personal_question: a first-person draft answer from their own words, one or two short sentences.' } }, required: ['title', 'daily'] },
+              items: { type: 'object', properties: { title: { type: 'string', description: 'A short name, under 7 words.' }, daily: { type: 'string', description: 'The small thing to do most days, under 10 words, starting with a verb so it finishes the sentence "I\'m going to...", for example "Go for a 10 minute walk after lunch".' }, personal_question: { type: 'string', description: 'Only if they must decide the actual content first: one short question so they decide it once now.' }, personal_draft: { type: 'string', description: 'Only with personal_question: a first-person draft answer from their own words, one or two short sentences.' } }, required: ['title', 'daily'] },
             },
           },
           required: ['name', 'noticed', 'insight', 'challenges'],
@@ -74,6 +74,47 @@ const TOOL = {
     },
     required: ['at_risk', 'areas'],
   },
+}
+
+// Tough-day versions: three lighter versions of their own habit, so the examples fit what they're actually doing.
+// Its own small daily allowance, separate from challenge ideas. Nothing they write is stored here.
+const LIGHTER_LIMIT = 15
+const LIGHTER_TOOL = {
+  name: 'lighter',
+  description: 'Give three tough-day versions of their habit.',
+  input_schema: {
+    type: 'object',
+    properties: { options: { type: 'array', description: 'Exactly 3, from slightly lighter to the smallest possible version.', items: { type: 'string' } } },
+    required: ['options'],
+  },
+}
+async function lighter(admin: ReturnType<typeof createClient>, user: { id: string; app_metadata?: Record<string, unknown> }, body: { mode?: string; what?: string; anchor?: string }) {
+  const what = String(body.what || '').trim().slice(0, 200)
+  if (!what) return json({ error: 'empty' }, 400)
+  const today = new Date().toISOString().slice(0, 10)
+  const u = (user.app_metadata?.showup_lighter || {}) as { day?: string; n?: number }
+  const used = u.day === today ? u.n || 0 : 0
+  if (used >= LIGHTER_LIMIT) return json({ error: 'limit' }, 429)
+  const less = body.mode === 'less'
+  const prompt = (less
+    ? `They are cutting back on: ${what}.\nGive 3 realistic tough-day versions: what they will do on a hard day so it's still a small win, not perfection.`
+    : `Their daily habit: ${what}.\nGive 3 lighter versions they could still do on a tough day, from a bit lighter to the tiniest possible version that still counts.`) +
+    (body.anchor ? `\nIt happens: ${String(body.anchor).slice(0, 120)}.` : '') +
+    `\nEach one finishes the sentence "On a tough day, I'll..." so it starts with a verb, for example "Take a quick dip" or "Read one page". Under 10 words each. Specific to their habit. British English. No dashes, no exclamation marks.`
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+    body: JSON.stringify({ model: MODEL, max_tokens: 300, tools: [LIGHTER_TOOL], tool_choice: { type: 'tool', name: 'lighter' }, messages: [{ role: 'user', content: prompt }] }),
+  })
+  if (!res.ok) { console.error('[showup-reflect] lighter', res.status); return json({ error: 'ai_unavailable' }, 502) }
+  const data = await res.json()
+  const call = (data.content || []).find((c: { type?: string; name?: string }) => c.type === 'tool_use' && c.name === 'lighter')
+  let opts: unknown = call?.input?.options
+  if (typeof opts === 'string') { try { opts = JSON.parse(opts) } catch { opts = [] } }
+  const options = (Array.isArray(opts) ? opts : []).map((o) => String(o || '').replace(/\s*[–—]\s*/g, ', ').replace(/!/g, '').replace(/^["“]|["”.]$/g, '').trim()).filter((o) => o && o.length < 90).slice(0, 3)
+  if (!options.length) return json({ error: 'nothing' }, 422)
+  await admin.auth.admin.updateUserById(user.id, { app_metadata: { ...(user.app_metadata || {}), showup_lighter: { day: today, n: used + 1 } } })
+  return json({ options })
 }
 
 Deno.serve(async (req) => {
@@ -92,10 +133,11 @@ Deno.serve(async (req) => {
   const today = new Date().toISOString().slice(0, 10)
   const usage = (user.app_metadata?.showup_ai || {}) as { day?: string; n?: number }
   const used = usage.day === today ? usage.n || 0 : 0
-  if (used >= DAILY_LIMIT) return json({ error: 'limit' }, 429)
 
-  let body: { mode?: string; answers?: Record<string, string>; wins?: { name: string; outcome: string }[]; horizon?: string }
+  let body: { kind?: string; what?: string; anchor?: string; mode?: string; answers?: Record<string, string>; wins?: { name: string; outcome: string }[]; horizon?: string }
   try { body = await req.json() } catch { return json({ error: 'bad_request' }, 400) }
+  if (body.kind === 'lighter') return lighter(admin, user, body)
+  if (used >= DAILY_LIMIT) return json({ error: 'limit' }, 429)
   const labels: Record<string, string> = {
     proud: `Looking back from ${body.horizon || 'three months'} from now, what would make you insanely proud`,
     years: 'Something wanted for years and never got round to',
@@ -119,7 +161,7 @@ Deno.serve(async (req) => {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-    body: JSON.stringify({ model: MODEL, max_tokens: 1400, system: SYSTEM, tools: [TOOL], tool_choice: { type: 'tool', name: 'ideas' }, messages: [{ role: 'user', content: (less ? 'They want to cut back on or stop something. For each challenge, "title" is the behaviour to cut back on, in plain words, such as "Scrolling in bed late at night". "daily" is the simple rule or swap for most days, such as "Phone charges outside the bedroom".\n\n' : '') + lines.join('\n') }] }),
+    body: JSON.stringify({ model: MODEL, max_tokens: 1400, system: SYSTEM, tools: [TOOL], tool_choice: { type: 'tool', name: 'ideas' }, messages: [{ role: 'user', content: (less ? 'They want to cut back on or stop something. For each challenge, "title" is the behaviour to cut back on, in plain words, such as "Scrolling in bed late at night". "daily" is the simple rule or swap for most days, starting with a verb so it finishes "I\'ll...", such as "Charge my phone outside the bedroom".\n\n' : '') + lines.join('\n') }] }),
   })
   if (!res.ok) { console.error('[showup-reflect] anthropic', res.status, (await res.text()).slice(0, 300)); return json({ error: 'ai_unavailable' }, 502) }
   const data = await res.json()

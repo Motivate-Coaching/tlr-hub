@@ -41,12 +41,12 @@
   var GIVES = ['Autopilot', 'Tired', 'Stressed', 'Bored', 'Comfort', 'A reward', 'A break', 'Not sure'];
   // For cutting back: what you're moving towards (outcomes and feelings together).
   var GAINS = ['Better sleep', 'More energy', 'Better health', 'Lighter', 'Clear-headed', 'In control', 'Proud', 'Calm', 'Money saved', 'Like me again', 'Free', 'More present'];
-  var STARTERS_MORE = ['A 10 minute walk', 'Read before bed', 'In bed by 10:30pm', 'Drink more water'];
+  var STARTERS_MORE = ['Go for a 10 minute walk', 'Read before bed', 'Be in bed by 10:30pm', 'Drink more water'];
   var STARTERS_LESS = ['Phone in bed', 'Afternoon snacking', 'Wine on weeknights', 'Mindless scrolling'];
   var IDEAS = [
-    ['A 10 minute walk after lunch', 'Health'], ['In bed by 10:30pm on work nights', 'Rest'],
-    ['Phone off for the first hour', 'Me time'], ['20 minutes of reading before bed', 'Me time'],
-    ['A cold shower each morning', 'Energy'], ['Five minutes of stillness before the day starts', 'Calm'],
+    ['Go for a 10 minute walk after lunch', 'Health'], ['Be in bed by 10:30pm on work nights', 'Rest'],
+    ['Keep my phone off for the first hour', 'Me time'], ['Read for 20 minutes before bed', 'Me time'],
+    ['Have a cold shower each morning', 'Energy'], ['Take five minutes of stillness before the day starts', 'Calm'],
     ['Message one friend a day', 'Connection'], ['Write tomorrow’s top three tonight', 'Clarity']
   ];
   var SCIENCE = [
@@ -342,14 +342,19 @@
         '<div class="spacer"></div>' + stepButton('feel') + '</section>';
     },
     dimmer: function () {
-      var d = S.draft, less = d.mode === 'less';
+      var d = S.draft, less = d.mode === 'less', what = (d.what || '').trim(), lt = d.lighter && d.lighter.for === what ? d.lighter.opts : null;
+      if (what && !lt && !ui.lighterBusy && ui.lighterTried !== what) setTimeout(fetchLighter, 0);
+      var generic = less ? ['Have one block of chocolate, not the whole bar', 'Have one small glass, or something fizzy instead', 'Do five minutes of my instead, not the full twenty']
+        : ['Take a quick dip, or have a cold shower at home', 'Read one page', 'Put my kit on and stretch'];
+      var opts = lt || generic, ph = opts[0];
       return '<section class="screen">' + progress('dimmer') + '<h1>On a tough day, how far will you turn it down?</h1>' +
         '<p class="lede">Some days a 10, some days a 1. Both count.</p>' +
+        (what ? '<div class="card soft small"><span class="eyebrow">' + (less ? 'You’re cutting back on' : 'Your habit') + '</span><b style="font-weight:600">' + esc(what) + '</b>' + (anchorLine(d) ? '<span style="color:var(--text-mid)">' + esc(anchorLine(d)) + '</span>' : '') + '</div>' : '') +
         '<div class="field"><label class="label" for="dim">On a tough day, I’ll...</label>' +
-        '<textarea id="dim" rows="1" data-bind="dimmer" placeholder="' + (less ? 'Have one block of chocolate, not the whole bar' : 'A quick dip, or a cold shower at home') + '">' + esc(d.dimmer) + '</textarea></div>' +
-        tapToSee('Show me examples', '<div class="card small">' +
-        (less ? '<span>Chocolate? <b>One block, not the whole bar.</b></span><span>Wine on weeknights? <b>One small glass, or something fizzy instead.</b></span><span>Your instead? <b>Five minutes of it, not the full twenty.</b></span>'
-          : '<span>A gym session? <b>A shorter workout, a brisk walk, or kit on and a stretch.</b></span><span>Reading 10 pages? <b>Five pages, one page, or one paragraph.</b></span><span>A cold sea swim? <b>A quick dip, feet in, or a cold shower at home.</b></span>') + '</div>') +
+        '<textarea id="dim" rows="1" data-bind="dimmer" placeholder="' + esc(ph) + '">' + esc(d.dimmer) + '</textarea></div>' +
+        '<div class="lighter"><span class="label">' + (lt ? 'Ideas for yours' : ui.lighterBusy ? 'Finding ideas for yours…' : 'Ideas') + '</span><div class="starters">' +
+        opts.map(function (o) { return '<button class="chip" data-dimidea="' + esc(o) + '" aria-pressed="' + ((d.dimmer || '').trim() === o) + '">' + esc(o) + '</button>'; }).join('') + '</div>' +
+        '<span class="hint">Tap one to use it, then make it yours.</span></div>' +
         '<div class="spacer"></div>' + stepButton('dimmer') + '</section>';
     },
     hard: function () {
@@ -1454,6 +1459,7 @@
     if (d.back) return goBack();
     if (d.start) { S.draft.mode = d.start; return askNameThen('what'); }
     if (d.namego) return nameDone(d.namego === 'skip');
+    if (d.dimidea) { S.draft.dimmer = d.dimidea; save(false); render(); var dt = document.getElementById('dim'); if (dt) { dt.focus(); dt.setSelectionRange(dt.value.length, dt.value.length); } return; }
     if (d.starter) { S.draft.what = d.starter; save(false); return render(); }
     if (d.stepNext) { if (!stepValid(d.stepNext)) return; var nx = nextStep(d.stepNext); if (nx) return go(nx); return finishSetup(); }
     if (d.give) { var gi = S.draft.gives.indexOf(d.give); gi >= 0 ? S.draft.gives.splice(gi, 1) : S.draft.gives.push(d.give); save(false); b.setAttribute('aria-pressed', gi < 0); view.querySelectorAll('[data-loop="gives"]').forEach(function (lg) { lg.textContent = S.draft.gives.length ? S.draft.gives.join(', ') : 'Tap above'; }); view.querySelectorAll('[data-give="' + d.give + '"]').forEach(function (x) { x.setAttribute('aria-pressed', gi < 0); }); return; }
@@ -1849,6 +1855,18 @@
   }
 
   // Guest sign-in: lets the AI ideas run (and stay rate-limited per person) without asking for an email yet.
+  // Tough-day ideas written for their own habit. Falls back to the general examples if it can't reach the AI.
+  async function fetchLighter() {
+    var d = S.draft, what = (d.what || '').trim(); if (!what || !sb || ui.lighterBusy) return;
+    ui.lighterBusy = true; ui.lighterTried = what; if (S.screen === 'dimmer') render();
+    try {
+      if (await ensureGuest()) {
+        var r = await sb.functions.invoke('showup-reflect', { body: { kind: 'lighter', what: what, mode: d.mode, anchor: anchorLine(d) } });
+        if (!r.error && r.data && r.data.options && r.data.options.length && (S.draft.what || '').trim() === what) { S.draft.lighter = { for: what, opts: r.data.options.slice(0, 3) }; save(false); }
+      }
+    } catch (e) {}
+    ui.lighterBusy = false; if (S.screen === 'dimmer') render();
+  }
   async function ensureGuest() {
     if (user || guest) return true;
     if (!sb || !sb.auth || !sb.auth.signInAnonymously) return false;
