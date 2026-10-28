@@ -450,9 +450,13 @@ details.ask .isteps { margin-top: 10px; }
 .supportcard .choice { text-align: left; display: flex; flex-direction: column; gap: 2px; }
 .supportcard .choice small { color: var(--text-mid); }
 .tlrlist { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; color: var(--text); }
-.askhelp { text-align: left; border: 1px dashed var(--muted); display: flex; flex-direction: column; gap: 4px; cursor: pointer; font: inherit; color: inherit; }
-.askhelp b { font-weight: 600; }
-.askhelp span { color: var(--text-mid); font-size: 15px; }
+.askhelp { text-align: left; border: 1.5px solid var(--navy); border-left: 5px solid var(--amber); background: var(--white); display: flex; flex-direction: row; align-items: center; gap: 12px; cursor: pointer; font: inherit; color: inherit; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.askhelp:active { transform: translateY(1px); box-shadow: none; }
+.askhelp .ahtxt { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.askhelp b { font-weight: 600; font-size: 18px; color: var(--text); }
+.askhelp .ahtxt > span { color: var(--text-mid); font-size: 15px; }
+.askhelp .spark { color: var(--amber); }
+.askhelp .chev { font-size: 32px; line-height: 1; color: var(--navy); flex: 0 0 auto; }
 .consent { display: flex; gap: 12px; align-items: flex-start; font-size: 15px; color: var(--text-mid); cursor: pointer; }
 .consent input { width: 22px; height: 22px; margin: 1px 0 0; flex-shrink: 0; accent-color: var(--navy); }
 .hardblock { display: flex; flex-direction: column; gap: 8px; }
@@ -504,6 +508,6 @@ details.alldays[open] summary { margin-bottom: 12px; }
   <main id="view"></main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=20261028f"></script>
+<script src="app.js?v=20261028g"></script>
 </body>
 </html>

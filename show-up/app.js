@@ -256,7 +256,7 @@
         '<span class="hint">In your own words.' + (more ? ' Small enough to do on a rubbish day.' : '') + '</span></div>' +
         optional('Show me some ideas', '<div class="starters">' + (more ? STARTERS_MORE : STARTERS_LESS).map(function (s) { return '<button class="chip" data-starter="' + esc(s) + '">' + esc(s) + '</button>'; }).join('') + '</div>' +
           (more ? '<button class="link" data-act="ideas">More ideas</button>' : '')) +
-        '<button class="card soft askhelp" data-find="start" data-mode="' + d.mode + '"><b>Not sure yet? Let’s work it out together.</b><span>Two questions, then we’ll suggest where to focus.</span></button>' +
+        '<button class="card askhelp" data-find="start" data-mode="' + d.mode + '"><span class="ahtxt"><b><span class="spark" aria-hidden="true">✦</span> Challenge idea generator</b><span>Not sure what to pick? Answer two questions and we’ll suggest a few.</span></span><span class="chev" aria-hidden="true">›</span></button>' +
         '<div class="spacer"></div>' + stepButton('what') + '</section>' +
         (ui.ideasOpen ? ideasSheet() : '');
     },
@@ -948,11 +948,11 @@
   function FIND_QS() {
     var proud = { key: 'proud', q: 'Picture yourself a year from now. You’re feeling insanely proud of yourself. What did you do to feel this way?', hint: 'Picture how life feels, not just the thing you did.', ph: 'e.g. I finally sorted my sleep, and my evenings are mine again' };
     if (S.find && S.find.mode === 'less') return [
-      { key: 'drain', q: 'What do you notice you do regularly that costs you more than it gives you?', hint: 'Jot down whatever comes. We’ll narrow it down together.', ph: 'e.g. Scrolling in bed at night, too much chocolate, not being present with family' },
+      { key: 'drain', q: 'What do you notice you do regularly that costs you more than it gives you?', hint: 'Write or speak, as much as you like.', ph: 'e.g. Scrolling in bed at night, too much chocolate, not being present with family' },
       proud
     ];
     return [
-      { key: 'years', q: 'What have you wanted to do for years, or keep thinking about trying?', hint: 'Jot down whatever comes. We’ll narrow it down together.', ph: 'e.g. Get fit again, learn the guitar, write more, be calmer' },
+      { key: 'years', q: 'What have you wanted to do for years, or keep thinking about trying?', hint: 'Write or speak, as much as you like.', ph: 'e.g. Get fit again, learn the guitar, write more, be calmer' },
       proud
     ];
   }
@@ -987,7 +987,7 @@
       var q = qs[f.step], v = f.answers[q.key] || '';
       var bar = '<div class="progress" style="grid-template-columns:repeat(' + qs.length + ',1fr)" aria-hidden="true">' + qs.map(function (x, i) { return '<span' + (i <= f.step ? ' class="on"' : '') + '></span>'; }).join('') + '</div>';
       return '<section class="screen"><div class="stepper">' + bar + '<div class="eyebrow" style="margin-top:12px">Challenge ideas · ' + (f.step + 1) + ' of ' + qs.length + '</div>' +
-        (f.step === 0 ? '<p class="lede workintro">' + (S.settings.view === 'focus' ? 'Take your time. Ramble, ums and all. The more you share, the better the ideas.' : 'Take your time. Write or speak whatever comes up, ums and all, as much as you like. The more you share, the better we can help you find a challenge that genuinely matters to you.') + '</p>' : '') +
+        (f.step === 0 ? '<p class="lede workintro">This is about one change in your everyday life: something you’d love more of, or something to do less of. Share whatever comes to mind, and together we’ll shape it into something you can make happen.</p>' : '') +
         '<h1 class="findq">' + esc(q.q) + '</h1></div>' +
         '<p class="hint" style="margin-top:-8px">' + esc(q.hint) + '</p>' +
         '<div class="field"><textarea id="findans" rows="5" style="min-height:180px" placeholder="' + esc(q.ph) + '">' + esc(v) + '</textarea>' + micButton() + '<span class="hint">Private. Read by our AI helper to suggest ideas, never shared or kept.</span></div>' +
