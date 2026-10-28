@@ -30,7 +30,7 @@ type Profile = {
   user_id: string; timezone: string; reminder_time: string; reminder_days: number[]
   remind_email: boolean; remind_push: boolean; paused_until: string | null
 }
-type Habit = { id: string; user_id: string; what: string; dimmer: string; length_days: number; start_date: string; mode: string; extra?: { anchor?: string } }
+type Habit = { id: string; user_id: string; what: string; dimmer: string; length_days: number; start_date: string; mode: string; extra?: { anchor?: string; mine?: string } }
 
 function localParts(now: Date, tz: string) {
   let parts: Intl.DateTimeFormatPart[]
@@ -50,12 +50,12 @@ function esc(s: string) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!))
 }
 
-function emailHtml(o: { day: number; length: number; what: string; dimmer: string; line: string; comeback: boolean; less: boolean; noticed: boolean; anchor?: string }) {
+function emailHtml(o: { day: number; length: number; what: string; dimmer: string; line: string; comeback: boolean; less: boolean; noticed: boolean; anchor?: string; mine?: string }) {
   const year = new Date().getUTCFullYear()
   const headline = o.comeback ? `Day ${o.day}. A comeback day.` : `Day ${o.day}. Today counts.`
   const intro = o.comeback
     ? 'Missed a day, or just didn’t log it? Either way, today is the one that matters. If you did show up, you can fill it in on your tracker.'
-    : (o.anchor ? `${esc(o.anchor)}: ${esc(o.what)}. ` : '') + 'Showed up already, or about to? One tap and it counts.'
+    : (o.anchor ? `${esc(o.anchor)}: ${esc(o.what)}. ` : '') + 'Take a minute to walk it through first: see yourself doing it. Then one tap and it counts.'
   const noticed = o.noticed
     ? `<p style="margin:0 0 22px;font-size:15px;line-height:1.6;color:#1A1A1A;background:#F5F1EB;border-left:3px solid #C9930A;padding:12px 16px;border-radius:4px;">Thank you for looking back at the days that didn’t go to plan. Noticing what gets in the way is how you learn to work around it. That’s you still showing up, even when it’s tough. Let’s go again today.</p>`
     : ''
@@ -76,6 +76,7 @@ function emailHtml(o: { day: number; length: number; what: string; dimmer: strin
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F1EB;border-radius:6px;margin-bottom:24px;"><tr><td style="padding:18px 20px;">
       <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#4A4A4A;">My habit</p>
       <p style="margin:0 0 12px;font-size:18px;font-weight:600;color:#1A1A1A;">${esc(o.what)}</p>
+      ${o.mine ? `<p style="margin:0 0 12px;font-size:16px;line-height:1.5;color:#1A1A1A;border-left:3px solid #C9930A;padding-left:12px;">“${esc(o.mine)}”</p>` : ''}
       <p style="margin:0;font-size:14px;line-height:1.5;color:#4A4A4A;">${o.less ? 'Tough day? Your smaller version still counts:' : 'Tough day? A lighter version still counts:'} <b style="color:#1A1A1A;">${esc(o.dimmer)}</b></p>
     </td></tr></table>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:26px;"><tr><td align="center">
@@ -143,7 +144,7 @@ Deno.serve(async () => {
         const res = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ from: FROM, to: [emailById.get(p.user_id)], subject: `Day ${day}: ${habit.what}`, html: emailHtml({ anchor, day, length: habit.length_days, what: habit.what, dimmer: habit.dimmer, line, comeback, less: habit.mode === 'less', noticed }) }),
+          body: JSON.stringify({ from: FROM, to: [emailById.get(p.user_id)], subject: `Day ${day}: ${habit.what}`, html: emailHtml({ anchor, mine: String(habit.extra?.mine || '').trim(), day, length: habit.length_days, what: habit.what, dimmer: habit.dimmer, line, comeback, less: habit.mode === 'less', noticed }) }),
         })
         if (res.ok) emails++
         else { console.error('[showup-reminders] Resend error', await res.text()); await admin.from('showup_reminder_log').delete().match({ user_id: p.user_id, local_date: local.date, channel: 'email' }) }
