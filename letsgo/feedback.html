@@ -22,6 +22,7 @@ header { position: sticky; top: 0; z-index: 5; background: var(--navy); padding:
 header .back { justify-self: start; min-height: 44px; min-width: 44px; border: 0; background: transparent; color: var(--white); font: inherit; font-size: 15px; cursor: pointer; padding: 0 4px; }
 header .back[hidden] { visibility: hidden; display: block; }
 .wordmark { justify-self: center; font-weight: 700; font-size: 24px; line-height: 1; letter-spacing: -0.01em; color: var(--white); white-space: nowrap; }
+.brand { font-family: Poppins, system-ui, sans-serif; font-weight: 700; font-style: normal; letter-spacing: -0.01em; text-transform: none; white-space: nowrap; }
 .bang { color: var(--amber); }
 .prog { height: 6px; background: var(--cream-deep); }
 .prog i { display: block; height: 100%; background: var(--amber); width: 0; transition: width 300ms ease; }
@@ -67,9 +68,7 @@ textarea:focus, .opt:focus-visible, button:focus-visible { outline: 3px solid va
 .stu { display: flex; gap: 14px; align-items: center; background: var(--cream-dark); border-radius: 10px; padding: 14px 16px; }
 .stu img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; }
 .stu p { margin: 0; font-size: 15px; color: var(--text-mid); }
-.facts { display: flex; gap: 10px; }
-.facts span { flex: 1; background: var(--white); border-radius: 6px; padding: 12px; text-align: center; font-size: 14px; color: var(--text-mid); }
-.facts b { display: block; font-size: 22px; color: var(--text); }
+.howlong { background: var(--white); border-left: 3px solid var(--amber); border-radius: 6px; padding: 14px 16px; margin: 0; font-size: 16px; line-height: 1.55; color: var(--text); }
 .privacy a { color: var(--text-mid); }
 .celebrate { position: fixed; inset: 0; z-index: 100; background: rgba(15, 18, 21, 0.96); color: var(--white); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; padding: 24px; animation: fade 300ms ease-out both; }
 .celebrate h1 { color: var(--white); font-size: 40px; animation: rise 420ms 300ms ease-out both; }
@@ -96,7 +95,7 @@ textarea:focus, .opt:focus-visible, button:focus-visible { outline: 3px solid va
   var DRAFT = 'letsgo-feedback-draft-v3';
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   // The brand name always shows as Let's Go! with the amber exclamation mark.
-  var brand = function (s) { return esc(s).replace(/Let’s Go/g, 'Let’s Go<span class="bang">!</span>'); };
+  var brand = function (s) { return esc(s).replace(/Let’s Go/g, '<span class="brand">Let’s Go<span class="bang">!</span></span>'); };
 
   // Questions. Part 1 is first look and setup (anyone). Part 2 is living with it (people who've used it).
   // Sources: Single Ease Question (setup), five-second-test style "what is it for", Sean Ellis/Superhuman, The Mom Test.
@@ -151,23 +150,23 @@ textarea:focus, .opt:focus-visible, button:focus-visible { outline: 3px solid va
     backBtn.hidden = step === 'intro';
     if (step === 'intro') {
       bar.style.width = '0';
-      main.innerHTML = '<section class="screen"><div class="eyebrow">Founding tester feedback</div><h1>How’s Let’s Go<span class="bang">!</span> really going?</h1>' +
+      main.innerHTML = '<section class="screen"><div class="eyebrow">Founding tester feedback</div><h1>How is <span class="brand">Let’s Go<span class="bang">!</span></span> really going?</h1>' +
         '<div class="stu"><img src="stuart.jpg" alt="" width="56" height="56"><p>Honest beats nice. What annoyed or confused you helps me most. <b>Stu</b></p></div>' +
-        '<div class="facts"><span><b>2 min</b>to do</span><span><b>Mostly taps</b>words optional</span><span><b>Type or speak</b>your choice</span></div>' +
+        '<p class="howlong">Only 2 minutes of your time. It’s mostly tapping buttons, any words are optional, and you can type or speak your answers.</p>' +
         '<div class="spacer"></div><button class="btn" data-go="route">Let’s start</button></section>';
       return;
     }
     if (step === 'route') {
       bar.style.width = '4%';
       var x0 = { k: 'route', opts: [R.look, R.setup, R.few, R.most, R.stopped] };
-      main.innerHTML = '<section class="screen"><div class="eyebrow">First, so I only ask what fits</div><p class="qtext">How much have you used Let’s Go<span class="bang">!</span> so far?</p>' + optButtons(x0, 'opts') + '</section>';
+      main.innerHTML = '<section class="screen"><div class="eyebrow">First, so I only ask what fits</div><p class="qtext">How much have you used <span class="brand">Let’s Go<span class="bang">!</span></span> so far?</p>' + optButtons(x0, 'opts') + '</section>';
       return;
     }
     if (step === 'name') {
       bar.style.width = '100%';
       main.innerHTML = '<section class="screen"><div class="count"><span class="eyebrow">All done</span><span class="cheer">That’s everything</span></div><p class="qtext">Want me to know who this is from?</p>' +
         textBox('name', 'Your first name (optional)', true) + '<p class="err" id="err" hidden></p><div class="spacer"></div><button class="btn" id="send" data-act="send">Send my feedback</button>' +
-        '<p class="hint privacy">Your answers go only to Stuart, to improve the app. If you use Let’s Go<span class="bang">!</span> on this phone, your show-up count is added too, never your notes. <a href="privacy.html">Privacy</a></p></section>';
+        '<p class="hint privacy">Your answers go only to Stuart, to improve the app. If you use <span class="brand">Let’s Go<span class="bang">!</span></span> on this phone, your show-up count is added too, never your notes. <a href="privacy.html">Privacy</a></p></section>';
       return;
     }
     var i = Math.min(step, n - 1), x = L[i];
@@ -312,7 +311,7 @@ textarea:focus, .opt:focus-visible, button:focus-visible { outline: 3px solid va
       try { localStorage.removeItem(DRAFT); } catch (e) {}
       bar.style.width = '100%'; backBtn.hidden = true;
       var el = document.createElement('div'); el.className = 'celebrate'; el.setAttribute('role', 'status');
-      el.innerHTML = confettiHTML(70) + '<h1>Thank you' + (out.name ? ', ' + esc(out.name) : '') + '.</h1><p>That took real effort, and it’s exactly what makes Let’s Go<span class="bang">!</span> better. I read every answer.</p><p><b>Stu</b></p>';
+      el.innerHTML = confettiHTML(70) + '<h1>Thank you' + (out.name ? ', ' + esc(out.name) : '') + '.</h1><p>That took real effort, and it’s exactly what makes <span class="brand">Let’s Go<span class="bang">!</span></span> better. I read every answer.</p><p><b>Stu</b></p>';
       document.body.appendChild(el);
       try { if (navigator.vibrate) navigator.vibrate([60, 40, 60]); } catch (e) {}
       main.innerHTML = '';

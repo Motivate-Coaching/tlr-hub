@@ -111,7 +111,7 @@
   function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
   function fmtTime(t) { var p = t.split(':'), h = +p[0], m = +p[1]; return (h % 12 || 12) + (m ? ':' + String(m).padStart(2, '0') : '') + (h < 12 ? 'am' : 'pm'); }
   // The brand name always shows as Let's Go! with the amber exclamation mark.
-  function brand(t) { return esc(t).replace(/Let’s Go(?!!)/g, 'Let’s Go<span class="bang">!</span>'); }
+  function brand(t) { return esc(t).replace(/Let’s Go(?!!)/g, '<span class="brand">Let’s Go<span class="bang">!</span></span>'); }
   function toast(msg) { document.querySelectorAll('.toast').forEach(function (t) { t.remove(); }); var el = document.createElement('div'); el.className = 'toast'; el.setAttribute('role', 'status'); el.innerHTML = brand(msg); app.appendChild(el); setTimeout(function () { el.remove(); }, 2800); }
   function applyComfort() {
     var r = document.documentElement;
@@ -500,10 +500,10 @@
         '<button class="link" data-act="newhabit" style="align-self:flex-start">Start a new habit</button>');
       h += sect('You and your data', '<div class="field"><label class="label" for="sname">Your first name</label><textarea id="sname" rows="1" data-name="1" autocomplete="given-name" placeholder="So we can say hello">' + esc(firstName()) + '</textarea></div>' +
         (user ? '<span>Signed in as <b>' + esc(user.email) + '</b></span>' : '<span>Saved on this device only.</span><button class="btn" data-account="settings">Save my progress</button>') +
-        '<button class="switch" role="switch" aria-checked="' + (s.analytics !== false) + '" data-toggle="analytics"><span><b>Help improve Let’s Go<span class="bang">!</span></b><span class="hint">Shares which buttons you tap, never what you write.</span></span><span class="track"></span></button>' +
+        '<button class="switch" role="switch" aria-checked="' + (s.analytics !== false) + '" data-toggle="analytics"><span><b>Help improve <span class="brand">Let’s Go<span class="bang">!</span></span></b><span class="hint">Shares which buttons you tap, never what you write.</span></span><span class="track"></span></button>' +
         (user ? '<button class="switch" role="switch" aria-checked="' + !!s.marketing + '" data-toggle="marketing"><span><b>Ideas and updates from Stuart</b><span class="hint">Occasional emails. Off unless you choose.</span></span><span class="track"></span></button>' : '') +
         '<p class="hint">Your notes are only ever seen by you. During the pilot, Stuart sees your habit and how often you show up, never your notes.</p>' +
-        '<div class="row" style="flex-wrap:wrap;gap:8px;justify-content:flex-start"><button class="chip" data-act="exportdata">Download my data</button><button class="chip" data-act="deletedata">Delete my Let’s Go<span class="bang">!</span> data</button></div>' +
+        '<div class="row" style="flex-wrap:wrap;gap:8px;justify-content:flex-start"><button class="chip" data-act="exportdata">Download my data</button><button class="chip" data-act="deletedata">Delete my <span class="brand">Let’s Go<span class="bang">!</span></span> data</button></div>' +
         '<a class="link" href="privacy.html" style="align-self:flex-start">Privacy notice</a>' + '<a class="link" href="terms.html" style="align-self:flex-start">Terms of use</a>' +
         '<button class="switch" role="switch" aria-checked="' + !!s.tlrMember + '" data-act="tlrtoggle"><span><b>I’m in The Living Room</b><span class="hint">Shows member prices for booster calls.</span></span><span class="track"></span></button>' + (user ? '<button class="link" data-act="signout" style="align-self:flex-start">Sign out</button>' : ''));
       if (!isStandalone()) h += sect('Get the app', '<span>Put it on your home screen so it opens like an app.</span><button class="btn outline" data-act="install">Show me how</button>');
@@ -552,7 +552,7 @@
       return '<section class="screen"><div><div class="eyebrow">Your plan is ready</div><h1>Who should we send your plan to?</h1></div>' +
         '<p class="lede">We’ll email you your plan and a 6-digit code to activate it. No password needed.</p>' +
         '<div class="field"><label class="label" for="aemail">Email</label><input class="input" id="aemail" type="email" autocomplete="email" inputmode="email" value="' + esc(ui.authEmail || '') + '"></div>' +
-        (S.consentAt ? '' : '<label class="consent"><input type="checkbox" id="aconsent"><span>I agree to Let’s Go<span class="bang">!</span> storing my habit, progress and notes so it can run for me. <a href="privacy.html">Privacy</a></span></label>') +
+        (S.consentAt ? '' : '<label class="consent"><input type="checkbox" id="aconsent"><span>I agree to <span class="brand">Let’s Go<span class="bang">!</span></span> storing my habit, progress and notes so it can run for me. <a href="privacy.html">Privacy</a></span></label>') +
         '<p class="err" id="aerr" hidden></p><button class="btn" data-act="sendcode">Send my plan</button>' +
         '<button class="link center" data-act="plannotnow">Not now</button>' +
         '<p class="hint">Your plan is saved to your account, so it’s backed up and your morning nudge can reach you. <a href="privacy.html">How we look after your data</a></p></section>';
@@ -569,7 +569,7 @@
       return '<section class="screen"><div><div class="eyebrow">Save my progress</div><h1>Sign in or create your account</h1></div>' +
         '<p class="lede">Just your email. We’ll send you a 6-digit code, so there’s no password to remember.</p>' +
         '<div class="field"><label class="label" for="aemail">Email</label><input class="input" id="aemail" type="email" autocomplete="email" inputmode="email" value="' + esc(ui.authEmail || '') + '"></div>' +
-        (S.consentAt ? '' : '<label class="consent"><input type="checkbox" id="aconsent"><span>I agree to Let’s Go<span class="bang">!</span> storing my habit, progress and notes so it can run for me. <a href="privacy.html">Privacy</a></span></label>') +
+        (S.consentAt ? '' : '<label class="consent"><input type="checkbox" id="aconsent"><span>I agree to <span class="brand">Let’s Go<span class="bang">!</span></span> storing my habit, progress and notes so it can run for me. <a href="privacy.html">Privacy</a></span></label>') +
         '<p class="err" id="aerr" hidden></p><button class="btn" data-act="sendcode">Send my code</button>' + priv + '</section>';
     }
   };
