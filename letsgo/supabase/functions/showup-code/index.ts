@@ -135,6 +135,16 @@ Deno.serve(async (req) => {
         await admin.auth.admin.deleteUser(g.user.id)
       }
     } catch { /* not a guest, nothing to tidy */ }
+    // Let Stuart know when someone new activates (not for his own addresses).
+    if (!created.error && !['stuart.fairbairns@gmail.com', 'stuart@motivate-coaching.com'].includes(email) && RESEND_API_KEY) {
+      try {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ from: FROM, to: ['stuart@motivate-coaching.com'], subject: `New Let’s Go! account: ${email}`, html: `<p style="font-family:Poppins,Helvetica,Arial,sans-serif;font-size:16px;color:#1A1A1A;">${esc(email)} just activated their plan in <b>Let’s Go<span style="color:#C9930A;">!</span></b></p><p style="font-family:Poppins,Helvetica,Arial,sans-serif;"><a href="https://motivate-coaching.github.io/tlr-hub/letsgo/admin.html" style="color:#0F1215;">Open your view</a></p>` }),
+        })
+      } catch { /* the sign-in matters more than the alert */ }
+    }
     return json({ token_hash, isNew: !created.error })
   }
   return json({ error: 'action' }, 400)
