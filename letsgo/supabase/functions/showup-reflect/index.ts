@@ -33,7 +33,9 @@ Less is more. Give up to 3 areas, the most prominent first, and only include an 
 For each area give 2 or 3 challenges for the next 30 days. Each should be one small, specific thing they could do most days, small enough to still do on a tough day.
 
 If anything they wrote suggests they may be at risk of harming themselves or are in crisis, do not suggest challenges.
-Instead set "care" to a short, kind message encouraging them to talk to someone they trust or a local helpline, and leave areas empty.
+Instead set "at_risk" to true, set "care" to a short, kind message encouraging them to talk to someone they trust or a local helpline, and leave areas empty.
+Otherwise set "at_risk" to false and leave "care" out.
+If what they wrote is short, vague or random, still do your best: pick the most likely area and give gentle, simple challenges. Never return no areas unless at_risk is true.
 
 Use the ideas tool to give your answer.`
 
@@ -62,9 +64,10 @@ const TOOL = {
           required: ['name', 'noticed', 'insight', 'challenges'],
         },
       },
-      care: { type: 'string', description: 'Only if they may be at risk or in crisis: a short, kind message. Otherwise empty.' },
+      at_risk: { type: 'boolean', description: 'True only if they may be at risk of harming themselves or are in crisis.' },
+      care: { type: 'string', description: 'Only when at_risk is true: a short, kind message. Otherwise leave it out.' },
     },
-    required: ['areas', 'care'],
+    required: ['at_risk', 'areas'],
   },
 }
 
@@ -118,15 +121,33 @@ Deno.serve(async (req) => {
   const call = (data.content || []).find((c: { type?: string; name?: string }) => c.type === 'tool_use' && c.name === 'ideas')
   if (!call) { console.error('[showup-reflect] no tool result', data.stop_reason); return json({ error: 'ai_unavailable' }, 502) }
   const parsed = call.input || {}
+  // Small models sometimes send lists back as text (for example '[{"name": ...}]'). Read those as lists too.
+  const list = (v: unknown): unknown[] => {
+    if (Array.isArray(v)) return v
+    if (typeof v === 'string') { try { const j = JSON.parse(v); return Array.isArray(j) ? j : j && typeof j === 'object' ? [j] : [] } catch { return [] } }
+    return v && typeof v === 'object' ? [v] : []
+  }
   const clean = (s: unknown) => String(s || '').replace(/\s*[–—]\s*/g, ', ').replace(/!/g, '.').trim()
   type Ch = { title?: string; daily?: string }
   type Ar = { name?: string; noticed?: string; insight?: string; challenges?: Ch[] }
   const result = {
-    areas: (parsed.areas || []).slice(0, 3).map((a: Ar) => ({
+    areas: (list(parsed.areas) as Ar[]).slice(0, 3).map((a: Ar) => ({
       name: clean(a.name), noticed: clean(a.noticed), insight: clean(a.insight),
-      challenges: (a.challenges || []).slice(0, 3).map((c: Ch) => ({ title: clean(c.title), daily: clean(c.daily) })).filter((c: Ch) => c.title),
+      challenges: (list(a.challenges) as Ch[]).slice(0, 3).map((c: Ch) => ({ title: clean(c.title), daily: clean(c.daily) })).filter((c: Ch) => c.title),
     })).filter((a: Ar) => a.name && a.challenges && a.challenges.length),
-    care: clean(parsed.care),
+    care: '',
+  }
+  // Only show a care message when the model actually flagged risk, and it has real words in it (never an empty "" or a stray quote).
+  const careText = clean(parsed.care).replace(/^["'“”‘’\s]+|["'“”‘’\s]+$/g, '')
+  const atRisk = parsed.at_risk === true || parsed.at_risk === 'true'
+  if (atRisk) {
+    // Safety first: no challenges, and always a real message, even if the model's own message came back blank.
+    result.areas = []
+    result.care = /[a-z]{3}/i.test(careText) ? careText : 'It sounds like a lot is going on for you right now. Please talk to someone you trust, or a local helpline, today. You don’t have to carry this on your own.'
+  }
+  if (!result.areas.length && !result.care) {
+    console.error('[showup-reflect] nothing usable', 'areas:', typeof parsed.areas, Array.isArray(parsed.areas) ? parsed.areas.length : '', 'at_risk:', parsed.at_risk) // shape only, never their words
+    return json({ error: 'nothing' }, 422)
   }
 
   await admin.auth.admin.updateUserById(user.id, { app_metadata: { ...(user.app_metadata || {}), showup_ai: { day: today, n: used + 1 } } })
