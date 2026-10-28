@@ -62,7 +62,7 @@ textarea:focus, .opt:focus-visible, button:focus-visible { outline: 3px solid va
 .mic[aria-pressed="true"] svg { color: var(--amber); }
 .spacer { flex: 1; min-height: 8px; }
 .btn { font: inherit; font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; min-height: 56px; width: 100%; border: 0; border-radius: 4px; background: var(--navy); color: var(--white); cursor: pointer; }
-.btn[disabled] { opacity: 0.35; cursor: default; }
+.btn[disabled], .btn.off { opacity: 0.35; cursor: default; }
 .skip { align-self: center; font: inherit; font-size: 15px; color: var(--text-mid); background: transparent; border: 0; min-height: 44px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .err { color: #8C4A2F; font-size: 14px; margin: 0; }
 .stu { display: flex; gap: 14px; align-items: center; background: var(--cream-dark); border-radius: 10px; padding: 14px 16px; }
@@ -186,8 +186,9 @@ textarea:focus, .opt:focus-visible, button:focus-visible { outline: 3px solid va
       if (must || open[x.k] || ((A[x.k] || {}).text || '').trim()) h += textBox(x.k, x.more, true);
       else h += '<button type="button" class="addmore" data-open="' + x.k + '">+ Add a comment (type or speak)</button>';
     }
-    var ok = !req(x) || answered(x), last = i === n - 1;
-    h += '<p class="err" id="err" hidden></p><div class="spacer"></div><button class="btn" data-act="next"' + (ok ? '' : ' disabled') + '>' + (last ? 'Finish' : 'Next') + '</button>' +
+    // Next only works once they've answered. To move on without answering they tap Skip, so a stray tap never loses an answer.
+    var ok = answered(x), last = i === n - 1;
+    h += '<p class="err" id="err" hidden></p><div class="spacer"></div><button class="btn' + (ok ? '' : ' off') + '" data-act="next" aria-disabled="' + !ok + '">' + (last ? 'Finish' : 'Next') + '</button>' +
       (req(x) ? '' : '<button type="button" class="skip" data-act="skip">Skip</button>') + '</section>';
     main.innerHTML = h;
   }
@@ -203,6 +204,9 @@ textarea:focus, .opt:focus-visible, button:focus-visible { outline: 3px solid va
     if (b.dataset.go) return go(b.dataset.go);
     if (b.dataset.mic) return toggleMic(b, document.getElementById(b.dataset.mic));
     if (b.dataset.open) { open[b.dataset.open] = true; render(); var t = document.getElementById('t-' + b.dataset.open); if (t) t.focus(); return; }
+    if (b.dataset.act === 'next' && typeof step === 'number' && !answered(list()[step])) {
+      var cq = list()[step], er = document.getElementById('err'); er.textContent = (cq.text ? 'Type or speak an answer to carry on' : 'Choose an answer to carry on') + (req(cq) ? '.' : ', or tap Skip.'); er.hidden = false; return;
+    }
     if (b.dataset.act === 'next' || b.dataset.act === 'skip') return next();
     if (b.dataset.act === 'send') return send();
     if (!b.dataset.k) return;
@@ -226,7 +230,7 @@ textarea:focus, .opt:focus-visible, button:focus-visible { outline: 3px solid va
     var t = e.target; if (!t.dataset || !t.dataset.t) return;
     var x = ALL.filter(function (q) { return q.k === t.dataset.t; })[0];
     (A[t.dataset.t] || (A[t.dataset.t] = {})).text = t.value; saveDraft();
-    if (x && x.text && req(x)) { var nb = main.querySelector('[data-act="next"]'); if (nb) nb.disabled = !t.value.trim(); }
+    if (x && x.text) { var nb = main.querySelector('[data-act="next"]'), has = !!t.value.trim(); if (nb) { nb.classList.toggle('off', !has); nb.setAttribute('aria-disabled', String(!has)); } if (has) { var er = document.getElementById('err'); if (er) er.hidden = true; } }
   });
   function grow() {}
 
