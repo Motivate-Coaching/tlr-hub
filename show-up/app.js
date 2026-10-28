@@ -1239,7 +1239,16 @@
 
   // ── Phone notifications ──────────────────────────────────────────────────
   var swReg = null;
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').then(function (r) { swReg = r; }).catch(function () {});
+  if ('serviceWorker' in navigator) {
+    // Always check for a newer version on open, and switch to it straight away (unless they're mid-typing).
+    var hadSW = !!navigator.serviceWorker.controller, swReloaded = false;
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(function (r) { swReg = r; try { r.update(); } catch (e) {} }).catch(function () {});
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      var typing = document.activeElement && /^(TEXTAREA|INPUT)$/.test(document.activeElement.tagName);
+      if (hadSW && !swReloaded && !typing) { swReloaded = true; location.reload(); }
+    });
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && swReg) { try { swReg.update(); } catch (e) {} } });
+  }
   function b64ToBytes(b) { var p = '='.repeat((4 - b.length % 4) % 4), s = (b + p).replace(/-/g, '+').replace(/_/g, '/'), raw = atob(s), a = new Uint8Array(raw.length); for (var i = 0; i < raw.length; i++) a[i] = raw.charCodeAt(i); return a; }
   async function togglePush() {
     if (S.settings.push) {
