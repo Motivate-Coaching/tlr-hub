@@ -1519,7 +1519,7 @@
   };
   function planEditor() { return screens._editform(); }
   // ── Calendar: a repeating reminder in their own calendar, in their own words ──
-  var APPLINK = 'https://motivate-coaching.github.io/tlr-hub/show-up/';
+  var APPLINK = 'https://motivate-coaching.github.io/tlr-hub/letsgo/';
   function iconCal() { return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>'; }
   function calDefaultStart() { var n = new Date(), hm = (S.settings.time || '07:00').split(':'); return n.getHours() * 60 + n.getMinutes() < (+hm[0]) * 60 + (+hm[1]) ? todayStr() : addDays(todayStr(), 1); }
   function calRead() { var t = document.getElementById('caltime'), d = document.getElementById('calstart'); ui.cal = ui.cal || {}; if (t && t.value) ui.cal.time = t.value; if (d && d.value) ui.cal.start = d.value; }
@@ -1565,7 +1565,7 @@
     return lines.map(icsFold).join('\r\n') + '\r\n';
   }
   function downloadICS() {
-    var ics = buildICS(), name = 'show-up-' + habitName().toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 30) + '.ics';
+    var ics = buildICS(), name = 'lets-go-' + habitName().toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 30) + '.ics';
     stat('calendar', 'ics'); window.__lastICS = ics;
     try {
       var file = new File([ics], name, { type: 'text/calendar' });
@@ -1650,7 +1650,7 @@
   function exportData() {
     var out = { exported: new Date().toISOString(), app: 'Let’s Go', account: user ? user.email : null, name: S.settings.name || '', habit: S.habit, entries: S.entries, pastWins: S.wins || [], settings: S.settings };
     var blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
-    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'show-up-my-data.json';
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'lets-go-my-data.json';
     document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
     toast('Downloaded.');
   }
