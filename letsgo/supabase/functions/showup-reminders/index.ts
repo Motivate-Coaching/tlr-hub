@@ -55,7 +55,7 @@ function emailHtml(o: { day: number; length: number; what: string; dimmer: strin
   const headline = o.comeback ? `Day ${o.day}. A comeback day.` : `Day ${o.day}. Today counts.`
   const intro = o.comeback
     ? 'Missed a day, or just didn’t log it? Either way, today is the one that matters. If you did show up, you can fill it in on your tracker.'
-    : (o.anchor ? `${esc(o.anchor)}: ${esc(o.what)}. ` : '') + 'Showed up already, or about to? One tap and it counts.'
+    : (o.anchor ? `${esc(o.anchor)}: ${esc(o.what)}. ` : '') + 'Take a minute to walk it through first: see yourself doing it. Then one tap and it counts.'
   const noticed = o.noticed
     ? `<p style="margin:0 0 22px;font-size:15px;line-height:1.6;color:#1A1A1A;background:#F5F1EB;border-left:3px solid #C9930A;padding:12px 16px;border-radius:4px;">Thank you for looking back at the days that didn’t go to plan. Noticing what gets in the way is how you learn to work around it. That’s you still showing up, even when it’s tough. Let’s go again today.</p>`
     : ''

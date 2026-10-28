@@ -20,6 +20,23 @@
   var ANCHORS_LESS = ['in bed at night', 'after dinner', 'when I get home', 'when I’m bored at work', 'when I’m stressed', 'at the weekend'];
   // Their own words for a habit that needs them (for example the sentence they say each morning).
   function mineLine(h) { h = h || S.habit; return h && h.extra && h.extra.mine ? String(h.extra.mine).trim() : ''; }
+  // Walk it through: a minute picturing the moment, doing it, what might get in the way, and how it feels to have done it.
+  // Imagining the steps (not just the result) plus one specific plan is what the evidence supports. It never decides whether a day counts.
+  function walks() { var x = extra(); if (!x.walks || typeof x.walks !== 'object') x.walks = {}; return x.walks; }
+  function walkWhen() { return S.settings.walkWhen === 'evening' ? 'evening' : 'morning'; }
+  function walkDay() { var t = todayNum(); return walkWhen() === 'evening' && new Date().getHours() >= 17 ? t + 1 : t; }
+  function lastPlan() { var w = walks(), ks = Object.keys(w).map(Number).sort(function (a, b) { return b - a; }); for (var i = 0; i < ks.length; i++) if (w[ks[i]].plan) return w[ks[i]].plan; return ''; }
+  function walkCard(t, focus) {
+    if (!S.habit) return '';
+    var L = S.habit.length, w = walks(), h = '', y = w[t - 1];
+    if (y && y.plan && y.did == null && t - 1 >= 1) h += '<div class="card soft small walkreview"><span class="eyebrow">Yesterday you planned</span><b style="font-weight:600">' + esc(y.plan) + '</b><span>Did it happen?</span>' +
+      '<div class="chips"><button class="chip" data-walkdid="yes">Yes</button><button class="chip" data-walkdid="partly">Partly</button><button class="chip" data-walkdid="no">Not this time</button></div></div>';
+    if (t > L) return h;
+    var d = walkDay(); if (d > L) return h;
+    if (w[d]) return h + '<p class="walked">' + checkIcon('#3B6D11') + '<span>Walked through' + (d > t ? ' for tomorrow' : '') + (w[d].plan ? ': ' + esc(w[d].plan) : '') + '</span></p>';
+    if (d === t && S.entries[t]) return h;
+    return h + '<button class="card askhelp walkcard" data-go="walk"><span class="ahtxt"><b>Walk it through' + (d > t ? ' for tomorrow' : '') + '</b><span>About a minute. See yourself doing it.</span></span><span class="chev" aria-hidden="true">›</span></button>';
+  }
   function anchorLine(h) { h = h || S.habit || S.draft; var a = ((h.extra && h.extra.anchor) || h.anchor || '').trim(); if (!a) return ''; return h.mode === 'less' ? 'Usually ' + a : 'After I ' + a; }
   var GIVES = ['Autopilot', 'Tired', 'Stressed', 'Bored', 'Comfort', 'A reward', 'A break', 'Not sure'];
   // For cutting back: what you're moving towards (outcomes and feelings together).
@@ -224,7 +241,7 @@
 
   // ── Screens ───────────────────────────────────────────────────────────────
   var BACK = {
-    what: function () { return S.draft.mineQ ? 'mine' : S.draft.found ? 'find' : 'landing'; }, mine: 'find', name: 'landing', viewpick: function () { return S.nameAsked ? 'landing' : 'name'; }, wins: 'tracker', less: 'feel',
+    what: function () { return S.draft.mineQ ? 'mine' : S.draft.found ? 'find' : 'landing'; }, mine: 'find', walk: 'tracker', name: 'landing', viewpick: function () { return S.nameAsked ? 'landing' : 'name'; }, wins: 'tracker', less: 'feel',
     find: function () { var f = S.find || {}; if (f.step > 0) { f.step--; save(false); return 'find'; } return 'landing'; }, feel: 'when', when: 'what', dimmer: function () { return S.draft.mode === 'less' ? 'less' : 'feel'; }, hard: 'dimmer',
     length: function () { return ui.returnTo || 'ready'; }, note: 'tracker', slipped: 'tracker', share: 'tracker', science: function () { return S.habit ? 'settings' : 'landing'; },
     words: function () { return ui.wordsFrom || 'tracker'; }, sendplan: 'ready', settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', calendar: function () { return ui.calFrom === 'install' ? 'install' : ui.calFrom || 'tracker'; }, install: function () { return ui.installFrom || (S.habit ? 'settings' : 'landing'); }, account: function () { return ui.returnTo || 'tracker'; }
@@ -264,6 +281,23 @@
         '<button class="card askhelp" data-find="start" data-mode="' + d.mode + '"><span class="ahtxt"><b><span class="spark" aria-hidden="true">✦</span> Challenge idea generator</b><span>Not sure what to pick? Answer two questions and we’ll suggest a few.</span></span><span class="chev" aria-hidden="true">›</span></button>' +
         '<div class="spacer"></div>' + stepButton('what') + '</section>' +
         (ui.ideasOpen ? ideasSheet() : '');
+    },
+    walk: function () {
+      var t = todayNum(), d = walkDay(), tom = d > t, hb = S.habit, a = anchorLine(), less = hb.mode === 'less', mine = mineLine();
+      var day = tom ? 'tomorrow' : 'today', plan = ui.walkPlan != null ? ui.walkPlan : lastPlan();
+      var steps2 = [
+        a ? 'Picture the moment it happens: <b>' + esc(a.charAt(0).toLowerCase() + a.slice(1)) + '</b>.' : 'Picture the moment it happens ' + day + ': where you are, what’s around you.',
+        less ? (hb.instead ? 'See yourself choosing what you’ll do instead: <b>' + esc(hb.instead) + '</b>.' : 'See yourself letting it pass, and what you do instead.') : 'See yourself doing it: <b>' + esc(hb.what) + '</b>. The first step, then the rest.',
+        'What might get in the way? See yourself handling it.',
+        'Notice how good it feels to have done it.'
+      ];
+      var field = '<div class="field"><label class="label" for="walkplan">' + (tom ? 'Tomorrow' : 'Today') + ' I will…</label><textarea id="walkplan" rows="1" placeholder="One specific thing. Small is fine.">' + esc(plan) + '</textarea>' + micButton() + '</div>';
+      return '<section class="screen walk"><div><div class="eyebrow">Walk it through · about a minute</div><h1>See yourself doing it ' + day + '.</h1></div>' +
+        (mine ? '<div class="mineline">Start with your words: “' + esc(mine) + '”</div>' : '') +
+        '<ol class="walksteps">' + steps2.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ol>' +
+        '<div class="walktimer" id="walktimer"><button class="btn outline" data-act="walktimer">Start a 1 minute timer</button><span class="hint">Close your eyes if you like. It’s fine not to.</span></div>' +
+        (mine ? field : '<details class="ask"' + (plan ? ' open' : '') + '><summary>Write one thing for ' + day + ' (optional)</summary>' + field + '</details>') +
+        '<div class="spacer"></div><button class="btn" data-act="walkdone">Done</button></section>';
     },
     // Make it yours: for ideas that only work once they've decided the actual content (what to say, write, who to message).
     mine: function () {
@@ -393,6 +427,7 @@
         (anchorLine() ? '<p class="anchorline">' + esc(anchorLine()) + '</p>' : '') +
         (mineLine() ? '<p class="mineline">“' + esc(mineLine()) + '”</p>' : '') +
         '<div class="row homesub"><span>' + (t > L ? 'All ' + L + ' days · complete' : 'Day ' + t + ' of ' + L) + '</span><button class="plan-link" data-go="plan">' + iconPlan() + 'My plan</button></div></div>';
+      h += walkCard(t);
       if (t > L) {
         h += '<div class="card"><b style="font-size:20px;font-weight:600">You gave it ' + L + ' days.</b><span style="color:var(--text-mid)">Time for your look back: what you noticed, and what’s next.</span><button class="btn" data-go="reflect">Start my look back</button><button class="link center" data-go="share">Share that I did it</button></div>';
       } else if (!e) {
@@ -505,6 +540,7 @@
         (s.pausedUntil && s.pausedUntil >= todayStr() ? '<div class="row"><span>Paused until ' + esc(prettyDate(s.pausedUntil)) + '.</span><button class="chip" data-pause="0">Resume</button></div>' :
           '<div class="chips">' + [[1, 'Tomorrow'], [3, '3 days'], [7, '7 days']].map(function (o) { return '<button class="chip" data-pause="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>') +
         '<p class="hint">Pausing never touches your progress.</p>');
+      h += sect('Walk it through', '<span>A minute to see yourself doing it. When suits you?</span><div class="chips">' + [['evening', 'The night before'], ['morning', 'In the morning']].map(function (o) { return '<button class="chip" data-walkwhen="' + o[0] + '" aria-pressed="' + (walkWhen() === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div><p class="hint">The night before suits early habits, like the gym first thing.</p>');
       h += sect('How it looks', '<div class="choices">' +
         '<button class="choice" data-view="full" aria-pressed="' + (s.view === 'full') + '"><b>Detailed</b><small>Examples, tips and your full progress</small></button>' +
         '<button class="choice" data-view="focus" aria-pressed="' + (s.view === 'focus') + '"><b>Focused</b><small>Just the essentials, calmer screens</small></button></div>' +
@@ -593,6 +629,7 @@
   function focusTracker() {
     var t = todayNum(), L = S.habit.length, e = S.entries[t];
     var h = '<section class="screen focus fmin"><h1>' + esc(habitName()) + '</h1><p class="hint c">' + (t > L ? 'All ' + L + ' days done' : anchorLine() ? esc(anchorLine()) : 'Day ' + t + ' of ' + L) + '</p>' + (mineLine() && t <= L ? '<p class="mineline c">“' + esc(mineLine()) + '”</p>' : '');
+    h += walkCard(t, true);
     if (t > L) h += '<div class="big"><button class="btn" data-go="reflect">Start my look back</button><button class="link center" data-go="share">Share that I did it</button></div>';
     else if (!e) h += '<div class="big">' + showUpButtons(true) + '</div>';
     else {
@@ -1365,6 +1402,7 @@
   view.addEventListener('input', function (e) {
     var t = e.target;
     if (t.tagName === 'TEXTAREA') grow(t);
+    if (t.id === 'walkplan') ui.walkPlan = t.value;
     if (t.dataset.bind) {
       S.draft[t.dataset.bind] = t.value; save(false);
       var pn = document.getElementById('previewName'); if (pn && t.dataset.bind === 'what') { pn.textContent = t.value.trim() || 'Your habit'; var pw = document.getElementById('previewWrap'); if (pw) pw.style.display = t.value.trim() ? 'flex' : 'none'; }
@@ -1408,7 +1446,9 @@
     if (d.winout) return addWin(d.winout);
     if (d.win) return openWin(d.win);
     if (d.winidea) { var wt = document.getElementById('winname'); if (wt) { wt.value = d.winidea; ui.winDraft = d.winidea; grow(wt); wt.focus(); } return; }
-    if (d.mic) { if (S.screen === 'mine') { var mt = document.getElementById('mine'); return toggleMic(b, mt, function () { S.draft.mine = mt.value; save(false); var mb = view.querySelector('[data-act="minedone"]'); if (mb) mb.disabled = !mt.value.trim(); }); } return toggleMic(b); }
+    if (d.walkdid) { var yw = walks()[todayNum() - 1]; if (yw) { yw.did = d.walkdid; save(); stat('walkdid', d.walkdid); } if (d.walkdid !== 'no') toast(d.walkdid === 'yes' ? 'Good. That’s how it builds.' : 'Partly still counts.'); else toast('Noted. Today’s a fresh go.'); return render(); }
+    if (d.walkwhen) { S.settings.walkWhen = d.walkwhen; save(); return render(); }
+    if (d.mic) { if (S.screen === 'walk') { var wpt = document.getElementById('walkplan'); return toggleMic(b, wpt, function () { ui.walkPlan = wpt.value; }); } if (S.screen === 'mine') { var mt = document.getElementById('mine'); return toggleMic(b, mt, function () { S.draft.mine = mt.value; save(false); var mb = view.querySelector('[data-act="minedone"]'); if (mb) mb.disabled = !mt.value.trim(); }); } return toggleMic(b); }
     if (d.horizon) { findSave(); S.find.horizon = d.horizon; save(false); return render(); }
     if (d.struggleBack) { ui.struggle = null; return render(); }
     if (d.back) return goBack();
@@ -1463,6 +1503,19 @@
       case 'calgoogle': calRead(); try { window.open(googleCalURL(), '_blank', 'noopener'); } catch (e) {} stat('calendar', 'google'); return;
       case 'testerreload': return void (async function () { try { if (window.caches) { var ks = await caches.keys(); await Promise.all(ks.map(function (k) { return caches.delete(k); })); } } catch (e) {} location.reload(); })();
       case 'copyfeedback': { var fl = location.origin + location.pathname.replace(/[^/]*$/, '') + 'feedback.html'; try { navigator.clipboard.writeText(fl).then(function () { toast('Copied. Paste it anywhere to share.'); }, function () { toast(fl); }); } catch (e) { toast(fl); } return; }
+      case 'walktimer': {
+        var wt = document.getElementById('walktimer'); if (!wt) return;
+        wt.innerHTML = '<div class="tbar"><i></i></div><span class="hint" id="wtl">One minute. Take your time.</span>';
+        clearTimeout(ui.walkT); ui.walkT = setTimeout(function () { var l = document.getElementById('wtl'); if (l) l.textContent = 'That’s a minute. Nicely done.'; buzz(); }, 60000);
+        return;
+      }
+      case 'walkdone': {
+        stopMic(); clearTimeout(ui.walkT);
+        var wd = walkDay(), wp = ((document.getElementById('walkplan') || {}).value || '').trim().slice(0, 300);
+        walks()[wd] = { at: new Date().toISOString(), plan: wp }; ui.walkPlan = null; save();
+        stat('walk', wp ? 'plan' : 'done');
+        toast(wd > todayNum() ? 'Walked through. Tomorrow’s ready.' : 'Walked through. Now go and do it.'); return go('tracker');
+      }
       case 'minedone': stopMic(); if (!(S.draft.mine || '').trim()) return; S.draft.mine = S.draft.mine.trim(); save(false); return go('what');
       case 'testerreset': return confirmSheet('Start again from scratch?', 'Everything on this phone and in your account goes, so you start as a new person.', 'Start again', testerReset);
       case 'sharenote': ui.shareNote = !ui.shareNote; return render();
