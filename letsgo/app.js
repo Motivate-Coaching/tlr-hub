@@ -1024,11 +1024,14 @@
     return ideasScreen(f);
   }
   // After the questions: the AI pulls out the areas, they pick one, check it rings true, then choose a challenge.
+  // A care message only counts if it has real words in it (an early version could save an empty "" and show a blank card).
+  function careText(ai) { var c = String((ai && ai.care) || '').replace(/^["'“”‘’\s]+|["'“”‘’\s]+$/g, ''); return /[a-z]{3}/i.test(c) ? c : ''; }
   function ideasScreen(f) {
+    if (f.ai && !careText(f.ai) && !(f.ai.areas || []).length) { f.ai = null; f.aiTried = false; }
     var top = '<section class="screen"><div><div class="eyebrow">Challenge ideas</div>';
     var own = '<div class="field"><label class="label" for="ownch">Or write my own</label><textarea id="ownch" rows="1" placeholder="' + (f.mode === 'less' ? 'e.g. No phone in bed' : 'e.g. A 20 minute walk each day') + '">' + esc(f.own || '') + '</textarea></div><button class="btn outline" data-find="own">Use mine</button>';
     var ai = f.ai || {}, areas = ai.areas || [];
-    if (ai.care) return top + '<h1>Before anything else.</h1></div><div class="why"><span>' + esc(ai.care) + '</span></div><div class="spacer"></div>' + own + '</section>';
+    if (careText(ai)) return top + '<h1>Before anything else.</h1></div><div class="why"><span>' + esc(careText(ai)) + '</span></div><div class="spacer"></div>' + own + '</section>';
     if (!areas.length) {
       if (!user && !guest) {
         if (authChecked && !ui.guestFailed && !ui.guestTrying) { ui.guestTrying = true; ensureGuest().then(function (ok) { ui.guestTrying = false; if (!ok) ui.guestFailed = true; render(); }); }
@@ -1038,7 +1041,7 @@
       }
       if (!f.aiTried && !ui.aiBusy) setTimeout(reflectAI, 0);
       if (ui.aiBusy || !f.aiTried) return top + '<h1>Reading what you shared…</h1></div><p class="lede">Looking for what matters most to you. This takes a few seconds.</p><div class="dotpulse" aria-hidden="true"><span></span><span></span><span></span></div></section>';
-      return top + '<h1>We couldn’t reach it just now.</h1></div><button class="btn" data-act="reflectai">Try again</button><div class="spacer"></div>' + own + '</section>';
+      return top + (ui.aiNothing ? '<h1>I couldn’t quite find ideas in that.</h1></div><p class="lede">Try again, or go back and add a little more about what you’d love to change.</p>' : '<h1>We couldn’t reach it just now.</h1></div>') + '<button class="btn" data-act="reflectai">Try again</button><div class="spacer"></div>' + own + '</section>';
     }
     var r = f.r || 'areas', ar = areas[f.area || 0] || areas[0];
     if (r === 'areas') {
@@ -1062,7 +1065,7 @@
   }
   function aiCard(f, n) {
     if (!n || !sb) return '';
-    if (f.ai && f.ai.care) return '<div class="why"><span class="eyebrow">Before anything else</span><span>' + esc(f.ai.care) + '</span></div>';
+    if (careText(f.ai)) return '<div class="why"><span class="eyebrow">Before anything else</span><span>' + esc(careText(f.ai)) + '</span></div>';
     if (f.ai && f.ai.heard) {
       var h = '<div class="card heard"><span class="eyebrow">What I’m hearing</span><p>' + esc(f.ai.heard) + '</p>' +
         (f.ai.themes && f.ai.themes.length ? '<div class="chips">' + f.ai.themes.map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('') + '</div>' : '') + '</div>';
@@ -1080,13 +1083,14 @@
   }
   async function reflectAI() {
     var f = S.find; if (!f || !sb || (!user && !guest) || ui.aiBusy) return;
-    f.aiTried = true; ui.aiBusy = true; render();
+    f.aiTried = true; ui.aiBusy = true; ui.aiNothing = false; render();
     try {
       var r = await sb.functions.invoke('showup-reflect', { body: { mode: f.mode || 'more', answers: f.answers, wins: (S.wins || []).map(function (w) { return { name: w.name, outcome: w.outcome }; }), horizon: horizonLabel() } });
       if (r.error) {
         var st = r.error.context && r.error.context.status;
-        toast(st === 429 ? 'That’s today’s ideas used. Write your own below, or come back tomorrow.' : 'Couldn’t reach it just now. Try again in a moment.');
-      } else if (r.data && ((r.data.areas && r.data.areas.length) || r.data.care)) { f.ai = r.data; f.r = 'areas'; f.area = 0; save(false); }
+        toast(st === 429 ? 'That’s today’s ideas used. Write your own below, or come back tomorrow.' : st === 422 ? (ui.aiNothing = true, 'I couldn’t quite find ideas in that. Try again, or add a little more about what you’d love to change.') : 'Couldn’t reach it just now. Try again in a moment.');
+      } else if (r.data && ((r.data.areas && r.data.areas.length) || careText(r.data))) { f.ai = r.data; f.r = 'areas'; f.area = 0; save(false); }
+      else { ui.aiNothing = true; toast('I couldn’t quite find ideas in that. Try again, or add a little more about what you’d love to change.'); }
     } catch (e) { toast('Couldn’t reach it just now. Try again in a moment.'); }
     ui.aiBusy = false; render();
   }
