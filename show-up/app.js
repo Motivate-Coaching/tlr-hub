@@ -408,10 +408,11 @@
       var v = ui.vp || S.settings.view || 'full', n = firstName(), simple = v === 'focus';
       var seg = '<div class="seg2" role="group" aria-label="Try a view"><button data-vp="full" aria-pressed="' + !simple + '">Detailed</button><button data-vp="focus" aria-pressed="' + simple + '">Focused</button></div>';
       var go = '<div class="spacer"></div><button class="btn" data-act="vpgo">Continue with ' + (simple ? 'Focused' : 'Detailed') + '</button>';
-      var title = '<h1>' + (n ? 'Lovely to meet you, ' + esc(n) + '.' : 'Choose your view') + '</h1>';
+      var hello = n ? '<p class="vphello">Lovely to meet you, ' + esc(n) + '.</p>' : '';
+      var title = hello + '<h1>Choose your view</h1>';
       if (simple) return '<section class="screen vpage simple">' + title + seg + '<p class="lede c">Just what you need. Nothing else.</p>' + go + '</section>';
-      return '<section class="screen vpage"><div><div class="eyebrow">Before we start</div>' + title + '</div>' +
-        '<div class="vpintro">' + (n ? '<b>Choose your view</b>' : '') + '<p class="lede">Tap each one to try it. This page changes to show you. You can switch any time in Settings.</p></div>' + seg +
+      return '<section class="screen vpage"><div>' + (n ? '' : '<div class="eyebrow">Before we start</div>') + title + '</div>' +
+        '<div class="vpintro"><p class="lede">Tap each one to try it. This page changes to show you. You can switch any time in Settings.</p></div>' + seg +
         '<ul class="vplist"><li><b>Examples and ideas</b><span>to help you get started</span></li><li><b>Tips and the science</b><span>behind each step</span></li><li><b>Your whole week</b><span>at a glance, plus your past wins</span></li></ul>' +
         '<p class="hint">Good if you like to see the full picture. Prefer fewer words on screen? Try Focused.</p>' + go + '</section>';
     },
