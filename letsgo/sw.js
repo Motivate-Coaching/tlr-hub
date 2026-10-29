@@ -1,6 +1,6 @@
 /* Let’s Go service worker: works offline and shows the morning nudge. */
-const CACHE = 'letsgo-20261028r';
-const SHELL = ['./', './index.html', './app.js?v=20261028r', './manifest.webmanifest', './logo-white.png', './stuart.jpg',
+const CACHE = 'letsgo-20261029a';
+const SHELL = ['./', './index.html', './app.js?v=20261029a', './manifest.webmanifest', './logo-white.png', './stuart.jpg',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png'];
 
 self.addEventListener('install', (e) => {

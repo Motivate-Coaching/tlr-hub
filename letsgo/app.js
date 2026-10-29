@@ -1791,10 +1791,11 @@
     } catch (e) { toast('Couldn’t delete just now. Please try again, or email stuart@motivate-coaching.com.'); }
   }
   // ── More support: a booster call with Stu, or joining The Living Room. ──
-  // Paste the links in when they exist. Until then only Stuart sees this (so he can check it).
+  // Shown to everyone once a booster link is set.
   var SUPPORT = {
-    boosterMember: '',   // Calendly link for the 30-minute booster call, member price
-    boosterStandard: '', // Calendly link for the 30-minute booster call, standard price
+    // Pay first on Stripe; each Payment Link then sends them on to the Calendly booster event to pick a time.
+    boosterMember: 'https://buy.stripe.com/14A00jfHmeDW7FAeXnebu06',   // £45, The Living Room member price
+    boosterStandard: 'https://buy.stripe.com/7sY7sLan22Ve6BwdTjebu07', // £75, standard price
     priceMember: '£45', priceStandard: '£75',
     tlrJoin: '',         // The Living Room payment page
     tlrInfo: '',         // The Living Room landing page
@@ -1808,7 +1809,8 @@
       return h + '<span>Are you part of The Living Room?</span><div class="row" style="gap:10px;justify-content:flex-start"><button class="chip" data-act="tlrmember" data-v="yes">Yes</button><button class="chip" data-act="tlrmember" data-v="no">Not yet</button></div></div>';
     }
     h += '<button class="choice" data-act="booster"><b>Book a 30-minute booster call with Stu</b><small>Get back on track, one to one. ' + esc(m ? SUPPORT.priceMember + ' for members' : SUPPORT.priceStandard) + '</small></button>';
-    if (!m) h += '<button class="choice" data-act="tlrbridge"><b>Join The Living Room</b><small>Ongoing support from Stu and people doing the same work.</small></button>';
+    // Join only shows once its payment link exists (Stuart always sees it, to check it).
+    if (!m && (SUPPORT.tlrJoin || isTester())) h += '<button class="choice" data-act="tlrbridge"><b>Join The Living Room</b><small>Ongoing support from Stu and people doing the same work.</small></button>';
     if (!supportLive()) h += '<span class="hint">Only you can see this until the links are added.</span>';
     return h + '</div>';
   }
