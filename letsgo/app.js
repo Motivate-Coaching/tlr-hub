@@ -1797,8 +1797,8 @@
     boosterMember: 'https://buy.stripe.com/14A00jfHmeDW7FAeXnebu06',   // £45, The Living Room member price
     boosterStandard: 'https://buy.stripe.com/7sY7sLan22Ve6BwdTjebu07', // £75, standard price
     priceMember: '£45', priceStandard: '£75',
-    tlrJoin: '',         // The Living Room payment page
-    tlrInfo: '',         // The Living Room landing page
+    tlrJoin: 'https://buy.stripe.com/4gMdR966MgM41hcdTjebu00', // The Living Room payment page
+    tlrInfo: 'https://www.motivate-coaching.com/thelivingroom',  // The Living Room landing page
     tlrPrice: ''         // e.g. '£XX a month'
   };
   function supportLive() { return !!(SUPPORT.boosterMember || SUPPORT.boosterStandard || SUPPORT.tlrJoin); }
