@@ -70,11 +70,12 @@ select { font: inherit; padding: 8px 10px; border-radius: 6px; border: 1px solid
     var r = await Promise.all([
       sb.rpc('showup_pilot_summary'),
       sb.rpc('showup_usage_summary', { since_days: days }),
-      sb.rpc('showup_feedback_admin', { since_days: days })
+      sb.rpc('showup_feedback_admin', { since_days: days }),
+      sb.rpc('showup_new_starters', { since_days: days })
     ]);
     var people = r[0].data || [], usage = r[1].data || [], fb = r[2].data;
     if (r[2].error) { var raw = await sb.from('showup_feedback').select('question,answer,created_at').order('created_at', { ascending: false }).limit(200); fb = (raw.data || []).map(function (x) { return Object.assign({ email: '' }, x); }); }
-    render(days, people, usage, fb || []);
+    render(days, people, usage, fb || [], r[3].error ? null : (r[3].data || []));
   }
   // Tester feedback: grouped by the "how would you feel" answer, the way Superhuman read theirs. Part 1 is first look and setup, Part 2 is living with it.
   var QN = { ellis: 'If they could no longer use it', purpose: 'What they think it’s for', ease: 'Setup ease (1 very hard to 7 very easy)', tried: 'Parts tried', hesitate: 'Hesitated, unsure or annoyed', words: 'Words for it', toughday: 'Last tough day', nearlystopped: 'Nearly stopped?', automatic: 'Habit feels automatic (1 to 5)', friend: 'What they’d tell a friend', change: 'One thing to change', paid: 'Paid for before', missed: 'Anything I should have asked' };
@@ -110,9 +111,18 @@ select { font: inherit; padding: 8px 10px; border-radius: 6px; border: 1px solid
     });
     return h + '<p class="hint">Look for themes that come up 3 or more times, and compare what people say with what they actually did.</p></section>';
   }
+  // New starters: everyone who added their email in this period, newest first. People who finish setup but never add an email have no email to show.
+  function startersSection(st) {
+    if (!st) return '';
+    var h = '<section class="card"><h2>New starters</h2><p class="hint">Everyone who added their email in this period, newest first. Someone who finishes setup but skips the email step won’t show here.</p>';
+    if (!st.length) return h + '<p class="hint">Nobody new yet.</p></section>';
+    h += '<div class="scroll"><table><tr><th>Joined</th><th>Email</th><th>Habit</th><th class="n">Show-ups</th></tr>';
+    st.forEach(function (p) { var kind = p.mode === 'less' ? 'Break: ' : p.mode ? 'Build: ' : ''; h += '<tr><td>' + esc(when(p.joined_at)) + '</td><td>' + esc(p.email) + '</td><td>' + (p.habit ? esc(kind + p.habit) : '<span class="hint">no habit saved yet</span>') + '</td><td class="n">' + (p.habit ? p.show_ups : '') + '</td></tr>'; });
+    return h + '</table></div></section>';
+  }
   function count(usage, ev, det) { return usage.filter(function (u) { return u.event === ev && (det === undefined || u.detail === det); }).reduce(function (a, u) { return a + Number(u.times); }, 0); }
   function people(usage, ev, det) { return usage.filter(function (u) { return u.event === ev && (det === undefined || u.detail === det); }).reduce(function (a, u) { return a + Number(u.people); }, 0); }
-  function render(days, pl, usage, fb) {
+  function render(days, pl, usage, fb, starters) {
     var active = pl.filter(function (p) { return p.last_tick && (Date.now() - new Date(p.last_tick)) < 7 * 864e5; }).length;
     var opens = people(usage, 'open'), focus = usage.filter(function (u) { return u.event === 'open' && u.view_mode === 'focus'; }).reduce(function (a, u) { return a + Number(u.people); }, 0);
     // A first name, if they chose to add one after sending, arrives as its own row linked by ref.
@@ -128,6 +138,7 @@ select { font: inherit; padding: 8px 10px; border-radius: 6px; border: 1px solid
       '<div class="tile"><b>' + opens + '</b><span>app opens (people)</span></div>' +
       '<div class="tile"><b>' + (opens ? Math.round(focus / opens * 100) : 0) + '%</b><span>using Focused view</span></div>' +
       '<div class="tile"><b>' + checks.length + '</b><span>weekly check-ins</span></div></div>';
+    h += startersSection(starters);
     h += testerSection(testers);
     // Check-ins and feedback
     h += '<section class="card"><h2>Check-ins and feedback</h2>';
