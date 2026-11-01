@@ -1,6 +1,6 @@
 // Let's Go! V2. One focus, one or more actions, each with its own schedule.
 // Step 1 of the V2 build: saved on this device only. Sign-in, sync, AI and reminders follow.
-import * as M from './model.js?v=20261101a';
+import * as M from './model.js?v=20261101b';
 
 const KEY = 'letsgo-v2';
 const $ = s => document.querySelector(s);
@@ -44,17 +44,29 @@ function render() {
 
 // ---------- Today ----------
 function dayNum(f, k) { return M.diffDays(k, f.start) + 1; }
+const ICON = {
+  today: '<path d="M12 4v2M12 18v2M4 12H2M22 12h-2M6.3 6.3 4.9 4.9M19.1 19.1l-1.4-1.4M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/><circle cx="12" cy="12" r="4"/>',
+  week: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+  chart: '<path d="M5 20V12M10 20V7M15 20v-5M20 20V4"/>',
+  task: '<path d="M9 11l2.5 2.5L16 9"/><rect x="4" y="4" width="16" height="16" rx="3"/>',
+  stu: '<path d="M4 18c0-3.5 3.6-5 8-5s8 1.5 8 5M12 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>',
+  search: '<circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/>'
+};
+const icon = (k, cls) => '<span class="ic ' + (cls || '') + '" aria-hidden="true"><svg viewBox="0 0 24 24">' + ICON[k] + '</svg></span>';
+function secHead(k, title, right) { return '<div class="sec-h">' + icon(k) + '<h2>' + title + '</h2>' + (right ? '<span class="sec-r">' + right + '</span>' : '') + '</div>'; }
+
 function actionCard(f, a, k, weekly) {
   const e = M.entry(a, k), rule = M.ruleFor(a, k);
   const meta = [a.cue ? 'After I ' + esc(a.cue) : '', weekly ? weekly.done + ' of ' + weekly.target + ' this week' : esc(M.describe(rule))].filter(Boolean).map(x => '<span>' + x + '</span>').join('');
   if (M.counted(e)) {
     const small = e.kind === 'small';
     return '<div class="action ' + (small ? 'smalldone' : 'done') + '"><div class="status"><span style="display:flex;gap:10px;align-items:center"><span class="tick' + (small ? ' half' : '') + '" aria-hidden="true">✓</span>' + esc(a.text) + '</span><button class="link" data-undo="' + a.id + '">Undo</button></div>' +
-      '<p class="hint">' + (small ? 'Smaller version done. That counts.' : 'Done. Nice work.') + '</p></div>';
+      '<p class="hint">' + (small ? 'Smaller version done. That counts.' : e.up ? 'Turned it up. Brilliant. Notice how that felt.' : 'Done. Nice work.') + '</p></div>';
   }
   return '<div class="action"><div class="what">' + esc(a.text) + '</div><div class="meta">' + meta + '</div>' +
     '<div class="btns"><button class="btn" data-do="' + a.id + '" data-kind="full">Done</button><button class="btn outline" data-do="' + a.id + '" data-kind="small">Smaller version</button></div>' +
-    (a.small ? '<p class="hint full-only">Smaller version: ' + esc(a.small) + '</p>' : '') + '</div>';
+    (a.small ? '<p class="hint full-only">Smaller version: ' + esc(a.small) + '</p>' : '') +
+    (a.up ? '<button class="link up" data-do="' + a.id + '" data-kind="full" data-up="1">I turned it up: ' + esc(a.up) + '</button>' : '') + '</div>';
 }
 function weekStrip(f, now) {
   const ws = M.weekStart(now); let h = '<div class="week" role="list">';
@@ -109,25 +121,43 @@ function renderToday() {
   } else if (now > M.endDate(f)) {
     h += '<section class="card"><h2>Your review day has come</h2><p class="lead">You recorded ' + total.done + ' of ' + total.planned + ' planned sessions. Take a minute to look back and choose what happens next.</p><button class="btn" data-act="review">Look back</button></section>';
   } else {
-    h += '<section class="stack"><div class="row"><h2>Today</h2><span class="hint">' + (list.due.length ? list.due.filter(a => M.counted(M.entry(a, now))).length + ' of ' + list.due.length + ' done' : '') + '</span></div>';
+    const doneN = list.due.filter(a => M.counted(M.entry(a, now))).length, allDone = list.due.length && doneN === list.due.length;
+    h += '<section class="card sec today">' + secHead('today', 'Today', list.due.length ? '<span class="pill dark">' + doneN + ' of ' + list.due.length + ' done</span>' : '');
     if (!list.due.length && !list.weekly.length) {
       const next = f.actions.map(a => M.nextDue(f, a, now)).filter(Boolean).sort()[0];
-      h += '<div class="card soft"><h2>Nothing planned today</h2><p class="lead">Rest days are part of the plan.' + (next ? ' Next up: ' + fmt(next, { weekday: 'long', day: 'numeric', month: 'short' }) + '.' : '') + '</p></div>';
+      h += '<div class="banner rest"><strong>Nothing planned today</strong><span>Rest days are part of the plan.' + (next ? ' Next up: ' + fmt(next, { weekday: 'long', day: 'numeric', month: 'short' }) + '.' : '') + '</span></div>';
     }
+    if (allDone) h += '<div class="banner ok"><span class="tick" aria-hidden="true">✓</span><strong>All done for today</strong></div>';
     list.due.forEach(a => { h += actionCard(f, a, now); });
-    list.weekly.forEach(w => { h += '<div class="tag" style="margin-top:4px">This week</div>' + actionCard(f, w.a, now, w.p); });
+    list.weekly.forEach(w => { h += '<div class="tag">Any day this week</div>' + actionCard(f, w.a, now, w.p); });
     h += '</section>';
   }
 
-  h += '<section class="card"><div class="row"><h2>This week</h2><button class="link" data-tab-go="progress">See progress</button></div>' + weekStrip(f, now) + '<div class="full-only">' + legend() + '</div></section>';
+  h += '<section class="card sec">' + secHead('week', 'This week', '<button class="link" data-tab-go="progress">Progress</button>') + weekStrip(f, now) + '<div class="full-only">' + legend() + '</div></section>';
 
-  if (total.planned) h += '<section class="card full-only"><div class="eyebrow">The bigger picture</div><div class="row" style="align-items:flex-end"><div><span class="big-num">' + total.done + '</span> <span class="hint">of ' + total.planned + ' planned sessions done</span></div></div>' + chart(f, now, 90) + '<p class="hint">Green is done, amber is a smaller version. Both count.</p></section>';
+  if (total.planned) {
+    const wk = M.tally(f, M.weekStart(now), M.addDays(M.weekStart(now), 6), now);
+    const backs = f.actions.reduce((n, a) => n + Object.keys(a.entries || {}).filter(k => M.isComeback(f, a, k, now)).length, 0);
+    h += '<section class="card sec full-only">' + secHead('chart', 'Your progress') +
+      '<div class="tiles"><div class="tile"><b>' + total.done + '</b><span>sessions done</span></div><div class="tile"><b>' + wk.done + '<small>/' + wk.planned + '</small></b><span>this week</span></div><div class="tile"><b>' + backs + '</b><span>comebacks</span></div></div>' +
+      chart(f, now, 100) + '<p class="hint">Green is done, amber is a smaller version. Both count.</p></section>';
+  }
 
   const tasks = (f.tasks || []).filter(t => !t.done);
-  if (tasks.length) h += '<section class="card full-only"><h2>To sort out</h2><p class="hint">One-off jobs that make the plan easier.</p>' + tasks.map(t => '<button class="task" data-task="' + t.id + '"><span class="box" aria-hidden="true"></span><span>' + esc(t.text) + '</span></button>').join('') + '</section>';
+  if (tasks.length) h += '<section class="card sec sort full-only">' + secHead('task', 'To sort out') + '<p class="hint">One-off jobs that make the plan easier.</p>' +
+    tasks.map(t => '<div class="taskrow"><button class="box" data-task="' + t.id + '" aria-label="Mark ‘' + esc(t.text) + '’ as sorted"></button><span class="tt">' + esc(t.text) + '</span>' +
+      '<a class="btn small light srch" href="' + searchUrl(t.text) + '" target="_blank" rel="noopener">' + icon('search', 'bare') + 'Search</a></div>').join('') + '</section>';
 
-  h += '<section class="card soft full-only"><div class="stu"><img src="../stuart.jpg" alt=""><div class="stack" style="gap:8px"><div class="eyebrow">A thought from Stu</div><q>' + esc(stuLine(f, now)) + '</q></div></div></section>';
+  h += '<section class="card sec stucard full-only"><div class="stu"><img src="../stuart.jpg" alt=""><div class="stack" style="gap:8px"><div class="eyebrow">A thought from Stu</div><q>' + esc(stuLine(f, now)) + '</q></div></div></section>';
   main.innerHTML = h;
+}
+
+// One-off tasks open a Google search in a new tab. Places (courts, gyms, classes) open Google Maps,
+// which uses the person's own Google location settings. Nothing about their location reaches us.
+function searchUrl(text) {
+  const q = text.replace(/^(find|look for|search for|book|get|choose|pick)\s+(a|an|the|some)?\s*/i, '').trim();
+  const place = /\b(near|nearby|local|court|courts|gym|club|class|classes|pool|studio|park|centre|center|coach|physio|venue)\b/i.test(text);
+  return place ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(/near/i.test(q) ? q : q + ' near me') : 'https://www.google.com/search?q=' + encodeURIComponent(q);
 }
 
 const STU = [
@@ -149,11 +179,11 @@ main.addEventListener('click', e => {
   const f = S.focus, now = M.today();
   if (t.dataset.do) {
     const a = f.actions.find(x => x.id === t.dataset.do); a.entries = a.entries || {};
-    a.entries[now] = { kind: t.dataset.kind, at: new Date().toISOString() }; save(); render();
+    a.entries[now] = { kind: t.dataset.kind, at: new Date().toISOString() }; if (t.dataset.up) a.entries[now].up = true; save(); render();
     const card = main.querySelector('[data-undo="' + a.id + '"]'); if (card) card.closest('.action').classList.add('pop');
     if (navigator.vibrate && !S.settings.calm) try { navigator.vibrate(20); } catch (err) {}
     const comeback = M.isComeback(f, a, now, now);
-    toast(comeback ? 'Welcome back. Comebacks are what count.' : t.dataset.kind === 'small' ? 'Smaller version logged. It counts.' : 'Logged. Nice work.', () => { delete a.entries[now]; save(); render(); });
+    toast(comeback ? 'Welcome back. Comebacks are what count.' : t.dataset.up ? 'Turned up. Brilliant.' : t.dataset.kind === 'small' ? 'Smaller version logged. It counts.' : 'Logged. Nice work.', () => { delete a.entries[now]; save(); render(); });
     return;
   }
   if (t.dataset.undo) { const a = f.actions.find(x => x.id === t.dataset.undo); const old = a.entries[now]; delete a.entries[now]; save(); render(); toast('Undone.', () => { a.entries[now] = old; save(); render(); }); return; }
@@ -195,12 +225,32 @@ function dayDetail(k) {
 }
 
 // ---------- Progress ----------
+// Running total of sessions done against sessions planned, day by day. A smooth area for done, a dashed line for planned.
+function lineChart(f, now) {
+  const end = M.endDate(f) < now ? M.endDate(f) : now, days = [];
+  for (let k = f.start; k <= end; k = M.addDays(k, 1)) days.push(k);
+  if (days.length < 2) return '<p class="hint">Your running total appears here after your first couple of days.</p>';
+  let done = 0, plan = 0; const pts = days.map(k => { const t = M.tally(f, k, k, now); done += t.done; plan += t.planned; return { done, plan }; });
+  const W = 320, H = 130, max = Math.max(1, ...pts.map(p => Math.max(p.done, p.plan))), x = i => 6 + i / (pts.length - 1) * (W - 12), y = v => H - 6 - v / max * (H - 18);
+  const path = key => pts.map((p, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(p[key]).toFixed(1)).join(' ');
+  const area = path('done') + ' L' + x(pts.length - 1).toFixed(1) + ' ' + (H - 6) + ' L' + x(0) + ' ' + (H - 6) + ' Z';
+  const last = pts[pts.length - 1];
+  return '<svg class="chart" viewBox="0 0 ' + W + ' ' + (H + 18) + '" role="img" aria-label="Running total: ' + last.done + ' sessions done of ' + last.plan + ' planned">' +
+    '<defs><linearGradient id="lg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3B6D11" stop-opacity=".35"/><stop offset="1" stop-color="#3B6D11" stop-opacity="0"/></linearGradient></defs>' +
+    '<path d="' + area + '" fill="url(#lg)"/><path d="' + path('plan') + '" fill="none" stroke="#B8AFA0" stroke-width="1.5" stroke-dasharray="4 4"/>' +
+    '<path d="' + path('done') + '" fill="none" stroke="#3B6D11" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+    '<circle cx="' + x(pts.length - 1) + '" cy="' + y(last.done) + '" r="5" fill="#fff" stroke="#3B6D11" stroke-width="2.5"/>' +
+    '<text x="6" y="' + (H + 14) + '" font-size="11" fill="#4A4A4A" font-family="Poppins, sans-serif">' + M.parseDate(f.start).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + '</text>' +
+    '<text x="' + (W - 6) + '" y="' + (H + 14) + '" font-size="11" text-anchor="end" fill="#4A4A4A" font-family="Poppins, sans-serif">Today</text></svg>';
+}
+
 function renderProgress() {
   const f = S.focus, now = M.today(), t = M.tally(f, f.start, M.endDate(f), now);
   const wk = M.tally(f, M.weekStart(now), M.addDays(M.weekStart(now), 6), now);
   let h = '<div><div class="eyebrow">Progress</div><h1>How it’s going</h1></div>' +
-    '<section class="card"><div class="row" style="align-items:flex-end"><div><span class="big-num">' + t.done + '</span> <span class="hint">of ' + t.planned + ' planned sessions</span></div><span class="pill dark">This week ' + wk.done + ' of ' + wk.planned + '</span></div>' +
-    chart(f, now, 130) + legendBars() +
+    '<section class="card sec">' + secHead('chart', 'Running total') + '<div class="row" style="align-items:flex-end"><div><span class="big-num">' + t.done + '</span> <span class="hint">of ' + t.planned + ' planned sessions</span></div><span class="pill dark">This week ' + wk.done + ' of ' + wk.planned + '</span></div>' +
+    lineChart(f, now) + '<div class="legend"><span><i style="background:var(--green)"></i>Sessions done</span><span><i style="border:1.5px dashed #B8AFA0"></i>Sessions planned</span></div></section>' +
+    '<section class="card sec">' + secHead('week', 'Week by week') + chart(f, now, 120) + legendBars() +
     '<p class="hint">Rest days and paused days never count against you. Days you haven’t logged are shown as not logged, not as missed. Tap any day on Today to fill it in.</p></section>';
   if (t.unlogged) h += '<section class="card soft"><h2>' + t.unlogged + ' planned ' + (t.unlogged === 1 ? 'day isn’t' : 'days aren’t') + ' logged</h2><p class="lead">If you did them, fill them in. If not, that’s fine too.</p><button class="btn outline" data-tab-go="today">Go to this week</button></section>';
   h += '<section class="stack"><h2>Each action</h2>';
@@ -229,7 +279,7 @@ function renderPlan() {
   h += '<section class="stack"><h2>Actions</h2>';
   f.actions.forEach(a => {
     h += '<div class="card"><div class="row"><strong>' + esc(a.text) + '</strong><button class="link" data-act="edit" data-id="' + a.id + '">Change</button></div>' +
-      '<p class="hint">' + esc(M.describe(M.ruleFor(a, now))) + (a.cue ? ' · After I ' + esc(a.cue) : '') + '</p>' + (a.small ? '<p class="hint">Smaller version: ' + esc(a.small) + '</p>' : '') + '</div>';
+      '<p class="hint">' + esc(M.describe(M.ruleFor(a, now))) + (a.cue ? ' · After I ' + esc(a.cue) : '') + '</p>' + (a.small ? '<p class="hint">Turn it down: ' + esc(a.small) + '</p>' : '') + (a.up ? '<p class="hint">Turn it up: ' + esc(a.up) + '</p>' : '<button class="link" data-act="edit" data-id="' + a.id + '">Add a turn-it-up version</button>') + '</div>';
   });
   h += '<button class="btn outline" data-act="addaction">Add an action</button></section>';
   h += '<section class="card"><div class="row"><h2>Review day</h2><button class="link" data-act="length">Change</button></div><p class="lead">' + fmt(M.endDate(f)) + ', after ' + f.length + ' days. You can keep going after that.</p></section>';
@@ -342,18 +392,19 @@ function applyRuleClick(b, r) {
 }
 function editAction(id) {
   const f = S.focus, now = M.today(), a = id ? f.actions.find(x => x.id === id) : null;
-  const d = { text: a ? a.text : '', cue: a ? a.cue || '' : '', small: a ? a.small || '' : '', rule: a ? Object.assign({}, M.ruleFor(a, now)) : { type: 'days', days: [0, 1, 2, 3, 4, 5, 6] } };
+  const d = { text: a ? a.text : '', cue: a ? a.cue || '' : '', small: a ? a.small || '' : '', up: a ? a.up || '' : '', rule: a ? Object.assign({}, M.ruleFor(a, now)) : { type: 'days', days: [0, 1, 2, 3, 4, 5, 6] } };
   const paint = () => {
     sheet.innerHTML = '<div class="stack"><h2>' + (a ? 'Change this action' : 'Add an action') + '</h2>' +
       '<label class="field">I’m going to...<textarea rows="1" id="ea-text">' + esc(d.text) + '</textarea></label>' +
       '<div class="field" style="font-weight:600">How often</div>' + ruleUI(d.rule, 'ea') +
       '<label class="field">After I... <span class="hint" style="font-weight:400">(optional)</span><textarea rows="1" id="ea-cue">' + esc(d.cue) + '</textarea></label>' +
       '<label class="field">Smaller version for tough days<textarea rows="1" id="ea-small">' + esc(d.small) + '</textarea></label>' +
+      '<label class="field">Turn it up <span class="hint" style="font-weight:400">(optional)</span><textarea rows="1" id="ea-up" placeholder="Stretch for 20 minutes">' + esc(d.up) + '</textarea><span class="hint" style="font-weight:400">Up for more on a good day? Make it more challenging if you fancy it, and notice what you notice. If you stop showing up, turn the volume back down so you can get back in.</span></label>' +
       (a ? '<p class="hint">Changes apply from today. Past days stay as they were.</p>' : '') +
       '<button class="btn" value="save">Save</button>' + (a && f.actions.length > 1 ? '<button class="link" value="remove">Stop this action</button>' : '') + '<button class="link" value="x">Cancel</button></div>';
     sheet.querySelectorAll('textarea').forEach(grow);
   };
-  const keep = () => { ['text', 'cue', 'small'].forEach(k => { const el = $('#ea-' + k); if (el) d[k] = el.value; }); };
+  const keep = () => { ['text', 'cue', 'small', 'up'].forEach(k => { const el = $('#ea-' + k); if (el) d[k] = el.value; }); };
   sheet.onclick = e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.for) { keep(); d.rule = applyRuleClick(b, d.rule); paint(); return; }
@@ -363,8 +414,8 @@ function editAction(id) {
     if (b.value === 'save') {
       if (!d.text.trim()) { $('#ea-text').focus(); return; }
       if (d.rule.type === 'every' && !d.rule.anchor) d.rule.anchor = now;
-      if (a) { a.text = d.text.trim(); a.cue = d.cue.trim(); a.small = d.small.trim(); const old = M.ruleFor(a, now); if (JSON.stringify(Object.assign({}, old, { from: 0 })) !== JSON.stringify(Object.assign({}, d.rule, { from: 0 }))) M.changeSchedule(a, now, d.rule); }
-      else f.actions.push({ id: uid(), text: d.text.trim(), cue: d.cue.trim(), small: d.small.trim(), from: now, schedules: [Object.assign({ from: now }, d.rule)], entries: {} });
+      if (a) { a.text = d.text.trim(); a.cue = d.cue.trim(); a.small = d.small.trim(); a.up = d.up.trim(); const old = M.ruleFor(a, now); if (JSON.stringify(Object.assign({}, old, { from: 0 })) !== JSON.stringify(Object.assign({}, d.rule, { from: 0 }))) M.changeSchedule(a, now, d.rule); }
+      else f.actions.push({ id: uid(), text: d.text.trim(), cue: d.cue.trim(), small: d.small.trim(), up: d.up.trim(), from: now, schedules: [Object.assign({ from: now }, d.rule)], entries: {} });
       save(); sheet.close(); render();
     }
   };
@@ -399,14 +450,15 @@ function renderSetup() {
         '<label class="field">I’m going to...<textarea rows="1" data-f="text" data-i="' + i + '" placeholder="' + ['Stretch for 10 minutes', 'Do a weights session', 'Play padel'][i % 3] + '">' + esc(a.text) + '</textarea></label>' +
         '<div style="font-weight:600">How often</div>' + ruleUI(a.rule, 'd' + i) +
         '<label class="field">Smaller version for tough days<textarea rows="1" data-f="small" data-i="' + i + '" placeholder="' + ['Stretch for 2 minutes', 'One set of each exercise', 'Have a hit against the wall'][i % 3] + '">' + esc(a.small) + '</textarea></label>' +
-        '<label class="field">After I... <span class="hint" style="font-weight:400">(optional)</span><textarea rows="1" data-f="cue" data-i="' + i + '" placeholder="make my morning coffee">' + esc(a.cue) + '</textarea></label></div>').join('') +
+        '<label class="field">After I... <span class="hint" style="font-weight:400">(optional)</span><textarea rows="1" data-f="cue" data-i="' + i + '" placeholder="make my morning coffee">' + esc(a.cue) + '</textarea></label>' +
+        '<details class="more"><summary>Turn it up on a good day (optional)</summary><label class="field"><span class="sr">Turn it up</span><textarea rows="1" data-f="up" data-i="' + i + '" placeholder="' + ['Stretch for 20 minutes', 'Add an extra set', 'Play a full match'][i % 3] + '">' + esc(a.up || '') + '</textarea></label><p class="hint">Up for more on a good day? Make it more challenging if you fancy it, and notice what you notice. If you stop showing up, turn the volume back down so you can get back in.</p></details></div>').join('') +
       '<button class="btn outline" data-s="add">Add another action</button>' +
       '<label class="field">Anything to sort out first? <span class="hint" style="font-weight:400">(optional, one per line)</span><textarea rows="2" id="tasks" placeholder="Find a padel court near me">' + esc(d.tasks.join('\n')) + '</textarea></label>' +
       '<button class="btn" data-s="next2">Next: check your plan</button><button class="link" data-s="back">Back</button>';
   } else {
     h = bar + '<div><div class="eyebrow">Step 3 of 3</div><h1>Here’s your plan</h1></div>' +
       '<section class="card hero"><div class="eyebrow">My focus</div><h1>' + esc(d.title) + '</h1>' + (d.why ? '<p style="color:#D9D4CA">So I can ' + esc(d.why) + '</p>' : '') + '</section>' +
-      d.actions.map(a => '<div class="card"><strong>' + esc(a.text) + '</strong><span class="hint">' + esc(M.describe(a.rule)) + (a.cue ? ' · After I ' + esc(a.cue) : '') + '</span>' + (a.small ? '<span class="hint">Tough day: ' + esc(a.small) + '</span>' : '') + '</div>').join('') +
+      d.actions.map(a => '<div class="card"><strong>' + esc(a.text) + '</strong><span class="hint">' + esc(M.describe(a.rule)) + (a.cue ? ' · After I ' + esc(a.cue) : '') + '</span>' + (a.small ? '<span class="hint">Tough day: ' + esc(a.small) + '</span>' : '') + (a.up ? '<span class="hint">Good day: ' + esc(a.up) + '</span>' : '') + '</div>').join('') +
       (d.tasks.length ? '<div class="card soft"><strong>To sort out</strong>' + d.tasks.map(t => '<span>' + esc(t) + '</span>').join('') + '</div>' : '') +
       '<div class="stack" style="gap:8px"><div style="font-weight:600">Start</div><div class="chips"><button class="chip" data-s="start" data-v="today" aria-pressed="' + (d.start === M.today()) + '">Today</button><button class="chip" data-s="start" data-v="tomorrow" aria-pressed="' + (d.start === M.addDays(M.today(), 1)) + '">Tomorrow</button></div></div>' +
       '<div class="stack" style="gap:8px"><div style="font-weight:600">Look back after</div><div class="chips">' + [30, 60, 90].map(n => '<button class="chip" data-s="len" data-v="' + n + '" aria-pressed="' + (d.length === n) + '">' + n + ' days</button>').join('') + '</div><p class="hint">A review point, not a finish line. You can keep going.</p></div>' +
@@ -415,7 +467,7 @@ function renderSetup() {
   main.innerHTML = h;
   main.querySelectorAll('textarea').forEach(grow);
 }
-function newDraftAction(text) { return { text: text || '', small: '', cue: '', rule: { type: 'days', days: [0, 1, 2, 3, 4, 5, 6] } }; }
+function newDraftAction(text) { return { text: text || '', small: '', cue: '', up: '', rule: { type: 'days', days: [0, 1, 2, 3, 4, 5, 6] } }; }
 function keepDraft() {
   const d = draft();
   ['intent', 'title', 'why'].forEach(k => { const el = $('#' + k); if (el) d[k] = el.value; });
@@ -448,7 +500,7 @@ main.addEventListener('click', e => {
   if (s === 'go') {
     S.focus = { id: uid(), title: d.title.trim(), why: d.why.trim(), intent: d.intent.trim(), start: d.start, length: d.length, pauses: [], worked: [],
       tasks: d.tasks.map(t => ({ id: uid(), text: t, done: false })),
-      actions: d.actions.map(a => { const r = Object.assign({}, a.rule); if (r.type === 'every' && !r.anchor) r.anchor = d.start; return { id: uid(), text: a.text.trim(), small: a.small.trim(), cue: a.cue.trim(), schedules: [Object.assign({ from: d.start }, r)], entries: {} }; }) };
+      actions: d.actions.map(a => { const r = Object.assign({}, a.rule); if (r.type === 'every' && !r.anchor) r.anchor = d.start; return { id: uid(), text: a.text.trim(), small: a.small.trim(), up: (a.up || '').trim(), cue: a.cue.trim(), schedules: [Object.assign({ from: d.start }, r)], entries: {} }; }) };
     S.draft = null; S.sample = false; S.tab = 'today'; save(); render(); toast('Your plan is ready. Let’s go.'); return;
   }
   save(); renderSetup(); window.scrollTo(0, 0);
@@ -460,8 +512,8 @@ function sampleFocus() {
   const f = { id: 'sample', title: 'Feel stronger and move more', why: 'have more energy and feel good in my body', start, length: 30, pauses: [], worked: [{ at: now, kind: 'start', text: 'Laying my mat out the night before' }],
     tasks: [{ id: 't1', text: 'Find a padel court near me', done: false }, { id: 't2', text: 'Choose a 10 minute stretch routine', done: true }],
     actions: [
-      { id: 'a1', text: 'Stretch for 10 minutes', small: 'Stretch for 2 minutes', cue: 'make my morning coffee', schedules: [{ from: start, type: 'days', days: [0, 1, 2, 3, 4, 5, 6] }], entries: {} },
-      { id: 'a2', text: 'Do a weights session', small: 'One set of each exercise', cue: 'get home from work', schedules: [{ from: start, type: 'every', n: 2, anchor: start }], entries: {} },
+      { id: 'a1', text: 'Stretch for 10 minutes', small: 'Stretch for 2 minutes', up: 'Stretch for 20 minutes', cue: 'make my morning coffee', schedules: [{ from: start, type: 'days', days: [0, 1, 2, 3, 4, 5, 6] }], entries: {} },
+      { id: 'a2', text: 'Do a weights session', small: 'One set of each exercise', up: 'Add an extra set', cue: 'get home from work', schedules: [{ from: start, type: 'every', n: 2, anchor: start }], entries: {} },
       { id: 'a3', text: 'Play padel', small: 'Have a hit against the wall', cue: '', schedules: [{ from: start, type: 'weekly', times: 1 }], entries: {} }] };
   const pat = [1, 1, 0, 1, 2, 1, 1, 0, 1, 1, 2, 1, 1, 1, 0];
   for (let i = 0; i < 15; i++) {
