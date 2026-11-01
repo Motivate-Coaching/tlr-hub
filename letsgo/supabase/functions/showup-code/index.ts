@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ from: FROM, to: ['stuart@motivate-coaching.com'], subject: `New Let’s Go! account: ${email}`, html: `<p style="font-family:Poppins,Helvetica,Arial,sans-serif;font-size:16px;color:#1A1A1A;">${esc(email)} just activated their plan in <b>Let’s Go<span style="color:#C9930A;">!</span></b></p><p style="font-family:Poppins,Helvetica,Arial,sans-serif;"><a href="https://motivate-coaching.github.io/tlr-hub/letsgo/admin.html" style="color:#0F1215;">Open your view</a></p>` }),
+          body: JSON.stringify({ from: FROM, to: ['stuart@motivate-coaching.com', 'stuart.fairbairns@gmail.com'], subject: `New Let’s Go! account: ${email}`, html: `<p style="font-family:Poppins,Helvetica,Arial,sans-serif;font-size:16px;color:#1A1A1A;">${esc(email)} just activated their plan in <b>Let’s Go<span style="color:#C9930A;">!</span></b></p><p style="font-family:Poppins,Helvetica,Arial,sans-serif;"><a href="https://motivate-coaching.github.io/tlr-hub/letsgo/admin.html" style="color:#0F1215;">Open your view</a></p>` }),
         })
       } catch { /* the sign-in matters more than the alert */ }
     }

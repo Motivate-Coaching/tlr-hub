@@ -10,7 +10,8 @@ const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || ''
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const FROM = '"Let\'s Go!" <stuart@motivate-coaching.com>'
-const TO = 'stuart@motivate-coaching.com'
+// Both inboxes: a message sent from an address to itself can be filtered out, so Gmail gets a copy too.
+const TO = ['stuart@motivate-coaching.com', 'stuart.fairbairns@gmail.com']
 const ADMIN_URL = 'https://motivate-coaching.github.io/tlr-hub/letsgo/admin.html#feedback'
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -47,7 +48,7 @@ async function started(admin: ReturnType<typeof createClient>, sid: string) {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: FROM, to: [TO], subject: `Someone new started Let’s Go! (${kind.toLowerCase()})`, html }),
+    body: JSON.stringify({ from: FROM, to: TO, subject: `Someone new started Let’s Go! (${kind.toLowerCase()})`, html }),
   })
   if (!res.ok) { console.error('[showup-notify] Resend start', res.status, (await res.text()).slice(0, 200)); return json({ error: 'email_failed' }, 502) }
   console.log('[showup-notify] start sent')
@@ -101,7 +102,7 @@ ${lines.map((l) => `<p style="margin:0 0 2px;font-size:12px;font-weight:600;lett
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: FROM, to: [TO], subject: `New Let’s Go! feedback${pick('ellis') ? `: ${pick('ellis')}` : ''}`, html }),
+    body: JSON.stringify({ from: FROM, to: TO, subject: `New Let’s Go! feedback${pick('ellis') ? `: ${pick('ellis')}` : ''}`, html }),
   })
   if (!res.ok) { console.error('[showup-notify] Resend', res.status, (await res.text()).slice(0, 200)); return json({ error: 'email_failed' }, 502) }
   await admin.auth.admin.updateUserById(user.id, { app_metadata: { ...(user.app_metadata || {}), showup_notified: [...sent, String(row.id)].slice(-20) } })
