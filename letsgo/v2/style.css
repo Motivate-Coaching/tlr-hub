@@ -159,3 +159,6 @@ dialog .stack { gap: 14px; }
 .link.up { font-size: 14px; color: var(--text-mid); min-height: 36px; }
 details.more summary { cursor: pointer; font-weight: 600; min-height: 44px; display: flex; align-items: center; }
 details.more[open] { display: flex; flex-direction: column; gap: 8px; }
+.mic { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--muted); border-radius: 4px; background: var(--white); color: var(--navy); font-size: 14px; font-weight: 600; cursor: pointer; }
+.mic[aria-pressed="true"] { background: var(--navy); color: var(--white); border-color: var(--navy); }
+.tabs[hidden] { display: none; }

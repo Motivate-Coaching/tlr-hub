@@ -1,6 +1,6 @@
 // Let's Go! V2. One focus, one or more actions, each with its own schedule.
 // Step 1 of the V2 build: saved on this device only. Sign-in, sync, AI and reminders follow.
-import * as M from './model.js?v=20261101b';
+import * as M from './model.js?v=20261102a';
 
 const KEY = 'letsgo-v2';
 const $ = s => document.querySelector(s);
@@ -31,8 +31,48 @@ function partOfDay() { const h = new Date().getHours(); return h < 12 ? 'Morning
 function grow(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
 document.addEventListener('input', e => { if (e.target.tagName === 'TEXTAREA') grow(e.target); });
 
+// ---------- speak instead of typing (ported from V1) ----------
+// Transcribes exactly what's said and keeps listening through pauses (up to 10 minutes) until they tap stop.
+// Android Chrome repeats earlier words in "continuous" mode, so there it listens one phrase at a time and restarts.
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const IS_ANDROID = /android/i.test(navigator.userAgent), MIC_MAX_MS = 10 * 60 * 1000;
+let mic = null;
+function micBtn(id) { return SR ? '<button type="button" class="mic" data-mic-for="' + id + '" aria-pressed="false" aria-label="Speak instead of typing"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Speak</span></button>' : ''; }
+function micIdle(b) { if (b && b.isConnected) { b.setAttribute('aria-pressed', 'false'); b.querySelector('span').textContent = 'Speak'; } }
+function stopMic() { if (!mic) return; const m = mic; mic = null; m.wanted = false; try { m.rec && m.rec.stop(); } catch (e) {} micIdle(m.btn); }
+function addHeard(m, text) {
+  text = (text || '').replace(/\s+/g, ' ').trim(); if (!text) return;
+  const prev = m.lastFinal; let add = text;
+  if (prev && text === prev) return;
+  if (prev && text.indexOf(prev) === 0) add = text.slice(prev.length).trim();
+  m.lastFinal = text; if (add) m.done = (m.done ? m.done.replace(/\s*$/, ' ') : '') + add;
+}
+function micListen(m) {
+  const r = new SR(); m.rec = r;
+  r.lang = navigator.language && /^en/i.test(navigator.language) ? navigator.language : 'en-GB';
+  r.continuous = !IS_ANDROID; r.interimResults = true; r.maxAlternatives = 1;
+  r.onresult = ev => { let tmp = ''; for (let i = ev.resultIndex; i < ev.results.length; i++) { if (ev.results[i].isFinal) addHeard(m, ev.results[i][0].transcript); else tmp += ev.results[i][0].transcript; } m.ta.value = (m.done || '') + (tmp ? (m.done ? ' ' : '') + tmp.trim() : ''); grow(m.ta); };
+  r.onerror = e => { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { m.wanted = false; toast('Microphone blocked. You can allow it in your browser settings.'); } };
+  r.onend = () => {
+    m.ta.value = m.done || ''; grow(m.ta); m.ta.dispatchEvent(new Event('input', { bubbles: true }));
+    if (m.wanted && mic === m && Date.now() - m.started < MIC_MAX_MS && m.ta.isConnected) { setTimeout(() => { if (m.wanted && mic === m) { try { micListen(m); } catch (e) { stopMic(); } } }, 120); return; }
+    if (mic === m) { mic = null; micIdle(m.btn); }
+  };
+  r.start();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-mic-for]'); if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  if (mic) return stopMic();
+  const ta = document.getElementById(b.dataset.micFor); if (!ta) return;
+  const m = { btn: b, ta, wanted: true, started: Date.now(), done: ta.value.replace(/\s+$/, ''), lastFinal: '' }; mic = m;
+  try { micListen(m); b.setAttribute('aria-pressed', 'true'); b.querySelector('span').textContent = 'Listening… tap to stop'; }
+  catch (err) { mic = null; toast('Speaking isn’t available here. Typing works just as well.'); }
+}, true);
+
 // ---------- render ----------
 function render() {
+  stopMic();
   applySettings(); showSave();
   const setup = !S.focus;
   tabs.hidden = setup; main.classList.toggle('setup', setup);
@@ -112,7 +152,7 @@ function renderToday() {
   let h = (S.sample ? '<div class="samplebar"><span>This is a sample plan.</span><button class="link" data-act="mine">Make my own</button></div>' : '') +
     '<div><div class="eyebrow">' + fmt(now) + '</div><h1>' + partOfDay() + (S.name ? ', ' + esc(S.name) : '') + '.</h1></div>' +
     '<section class="card hero"><span class="pill">Day ' + n + ' of ' + f.length + '</span><div class="eyebrow">My focus</div><h1>' + esc(f.title) + '</h1>' +
-    (f.why ? '<p style="color:#D9D4CA" class="full-only">So I can ' + esc(f.why) + '</p>' : '') +
+    (f.why ? '<p style="color:#D9D4CA" class="full-only">Moving towards: ' + esc(f.why) + '</p>' : '') +
     '<div class="meter" aria-hidden="true"><i style="width:' + pct + '%"></i></div></section>';
 
   if (M.isPaused(f, now)) {
@@ -275,7 +315,7 @@ function legendBars() { return '<div class="legend"><span><i style="background:v
 // ---------- Plan ----------
 function renderPlan() {
   const f = S.focus, now = M.today();
-  let h = '<div><div class="eyebrow">My plan</div><h1>' + esc(f.title) + '</h1>' + (f.why ? '<p class="lead" style="margin-top:8px">So I can ' + esc(f.why) + '</p>' : '') + '</div>';
+  let h = '<div><div class="eyebrow">My plan</div><h1>' + esc(f.title) + '</h1>' + (f.why ? '<p class="lead" style="margin-top:8px">Moving towards: ' + esc(f.why) + '</p>' : '') + '</div>';
   h += '<section class="stack"><h2>Actions</h2>';
   f.actions.forEach(a => {
     h += '<div class="card"><div class="row"><strong>' + esc(a.text) + '</strong><button class="link" data-act="edit" data-id="' + a.id + '">Change</button></div>' +
@@ -436,10 +476,10 @@ function renderSetup() {
       '<p class="hint">Version 2 preview. Saved on this phone only for now.</p>';
   } else if (d.step === 1) {
     h = bar + '<div><div class="eyebrow">Step 1 of 3</div><h1>What do you want to work on?</h1></div>' +
-      '<p class="lead">Write it however it comes out. One thing or a few. Messy is fine.</p>' +
-      '<label class="field"><span class="sr">What you want to work on</span><textarea rows="3" id="intent" placeholder="I want to get fitter: stretch every day, weights every other day and padel once a week">' + esc(d.intent) + '</textarea></label>' +
+      '<p class="lead">Something you want more of, or something you’re fed up with. Write or speak it however it comes out. Messy is fine.</p>' +
+      '<label class="field"><span class="sr">What you want to work on</span><textarea rows="3" id="intent" placeholder="I feel unfit and sluggish. I want to stretch every day, lift weights every other day and play padel once a week">' + esc(d.intent) + '</textarea>' + micBtn('intent') + '</label>' +
+      '<label class="field">Now picture it sorted. What’s different for you? <span class="hint" style="font-weight:400">This is what you’re moving towards.</span><textarea rows="2" id="why" placeholder="I feel strong in my body, I have energy for the kids and I enjoy moving again">' + esc(d.why) + '</textarea>' + micBtn('why') + '</label>' +
       '<label class="field">Give it a short name<textarea rows="1" id="title" placeholder="Feel stronger and move more">' + esc(d.title) + '</textarea></label>' +
-      '<label class="field">Why does it matter to you? <span class="hint" style="font-weight:400">(optional)</span><textarea rows="1" id="why" placeholder="feel strong and have more energy for the kids">' + esc(d.why) + '</textarea></label>' +
       '<button class="btn" data-s="next1">Next: the actions</button>';
   } else if (d.step === 2) {
     if (!d.actions.length) d.actions.push(newDraftAction(''));
@@ -457,7 +497,7 @@ function renderSetup() {
       '<button class="btn" data-s="next2">Next: check your plan</button><button class="link" data-s="back">Back</button>';
   } else {
     h = bar + '<div><div class="eyebrow">Step 3 of 3</div><h1>Here’s your plan</h1></div>' +
-      '<section class="card hero"><div class="eyebrow">My focus</div><h1>' + esc(d.title) + '</h1>' + (d.why ? '<p style="color:#D9D4CA">So I can ' + esc(d.why) + '</p>' : '') + '</section>' +
+      '<section class="card hero"><div class="eyebrow">My focus</div><h1>' + esc(d.title) + '</h1>' + (d.why ? '<p style="color:#D9D4CA">Moving towards: ' + esc(d.why) + '</p>' : '') + '</section>' +
       d.actions.map(a => '<div class="card"><strong>' + esc(a.text) + '</strong><span class="hint">' + esc(M.describe(a.rule)) + (a.cue ? ' · After I ' + esc(a.cue) : '') + '</span>' + (a.small ? '<span class="hint">Tough day: ' + esc(a.small) + '</span>' : '') + (a.up ? '<span class="hint">Good day: ' + esc(a.up) + '</span>' : '') + '</div>').join('') +
       (d.tasks.length ? '<div class="card soft"><strong>To sort out</strong>' + d.tasks.map(t => '<span>' + esc(t) + '</span>').join('') + '</div>' : '') +
       '<div class="stack" style="gap:8px"><div style="font-weight:600">Start</div><div class="chips"><button class="chip" data-s="start" data-v="today" aria-pressed="' + (d.start === M.today()) + '">Today</button><button class="chip" data-s="start" data-v="tomorrow" aria-pressed="' + (d.start === M.addDays(M.today(), 1)) + '">Tomorrow</button></div></div>' +
@@ -509,7 +549,7 @@ main.addEventListener('click', e => {
 // A clearly labelled sample, with two weeks of made-up history, so people can look around.
 function sampleFocus() {
   const now = M.today(), start = M.addDays(now, -15);
-  const f = { id: 'sample', title: 'Feel stronger and move more', why: 'have more energy and feel good in my body', start, length: 30, pauses: [], worked: [{ at: now, kind: 'start', text: 'Laying my mat out the night before' }],
+  const f = { id: 'sample', title: 'Feel stronger and move more', why: 'feeling strong, more energy and enjoying moving again', start, length: 30, pauses: [], worked: [{ at: now, kind: 'start', text: 'Laying my mat out the night before' }],
     tasks: [{ id: 't1', text: 'Find a padel court near me', done: false }, { id: 't2', text: 'Choose a 10 minute stretch routine', done: true }],
     actions: [
       { id: 'a1', text: 'Stretch for 10 minutes', small: 'Stretch for 2 minutes', up: 'Stretch for 20 minutes', cue: 'make my morning coffee', schedules: [{ from: start, type: 'days', days: [0, 1, 2, 3, 4, 5, 6] }], entries: {} },
