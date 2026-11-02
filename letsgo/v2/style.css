@@ -162,3 +162,10 @@ details.more[open] { display: flex; flex-direction: column; gap: 8px; }
 .mic { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--muted); border-radius: 4px; background: var(--white); color: var(--navy); font-size: 14px; font-weight: 600; cursor: pointer; }
 .mic[aria-pressed="true"] { background: var(--navy); color: var(--white); border-color: var(--navy); }
 .tabs[hidden] { display: none; }
+.back { border: 0; background: none; color: var(--white); width: 40px; height: 40px; margin-left: -10px; display: grid; place-items: center; cursor: pointer; }
+.back svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.back[hidden], .samplecta[hidden] { display: none; }
+.bar { justify-content: flex-start; } .bar .save { margin-left: auto; }
+.samplecta { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(64px + env(safe-area-inset-bottom, 0px)); width: 100%; max-width: 520px; z-index: 29; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px; background: var(--amber); color: var(--navy); font-weight: 600; box-shadow: 0 -4px 14px rgba(15,18,21,.12); }
+.samplecta .btn { min-height: 44px; }
+main.withcta { padding-bottom: 190px; }
