@@ -569,3 +569,6 @@ function sampleFocus() {
 
 sheet.addEventListener('close', () => { sheet.onclick = null; });
 render();
+
+// V2 preview installs as its own app (own scope), separate from V1.
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js', { scope: './', updateViaCache: 'none' }).then(r => { try { r.update(); } catch (e) {} }).catch(() => {});

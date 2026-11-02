@@ -169,3 +169,6 @@ details.more[open] { display: flex; flex-direction: column; gap: 8px; }
 .samplecta { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(64px + env(safe-area-inset-bottom, 0px)); width: 100%; max-width: 520px; z-index: 29; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px; background: var(--amber); color: var(--navy); font-weight: 600; box-shadow: 0 -4px 14px rgba(15,18,21,.12); }
 .samplecta .btn { min-height: 44px; }
 main.withcta { padding-bottom: 190px; }
+
+/* V2 preview marker: green exclamation mark so it's easy to tell apart from V1 on a phone. Remove at switch-over. */
+.bang { color: #8FB46A; }
