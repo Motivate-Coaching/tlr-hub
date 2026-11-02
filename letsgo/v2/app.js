@@ -76,6 +76,7 @@ function render() {
   applySettings(); showSave();
   const setup = !S.focus;
   tabs.hidden = setup; main.classList.toggle('setup', setup);
+  $('#back').hidden = !(S.sample && S.focus) && !(setup && S.started); $('#samplecta').hidden = !(S.sample && S.focus); main.classList.toggle('withcta', !!(S.sample && S.focus));
   if (setup) return renderSetup();
   tabs.querySelectorAll('button').forEach(b => b.setAttribute('aria-current', b.dataset.tab === S.tab ? 'page' : 'false'));
   ({ today: renderToday, progress: renderProgress, plan: renderPlan, support: renderSupport })[S.tab || 'today']();
@@ -149,7 +150,7 @@ function renderToday() {
   const f = S.focus, now = M.today(), list = M.todayList(f, now);
   const total = M.tally(f, f.start, M.endDate(f), now);
   const n = Math.max(1, Math.min(dayNum(f, now), f.length)), pct = Math.round(n / f.length * 100);
-  let h = (S.sample ? '<div class="samplebar"><span>This is a sample plan.</span><button class="link" data-act="mine">Make my own</button></div>' : '') +
+  let h = (S.sample ? '<div class="samplebar"><span>You’re looking at a sample plan. Have a look around, then make your own.</span></div>' : '') +
     '<div><div class="eyebrow">' + fmt(now) + '</div><h1>' + partOfDay() + (S.name ? ', ' + esc(S.name) : '') + '.</h1></div>' +
     '<section class="card hero"><span class="pill">Day ' + n + ' of ' + f.length + '</span><div class="eyebrow">My focus</div><h1>' + esc(f.title) + '</h1>' +
     (f.why ? '<p style="color:#D9D4CA" class="full-only">Moving towards: ' + esc(f.why) + '</p>' : '') +
@@ -214,6 +215,8 @@ function stuLine(f, now) {
   return STU[(d + f.title.length) % STU.length];
 }
 
+$('#back').addEventListener('click', () => { S.focus = null; S.sample = false; S.started = false; S.draft = null; save(); render(); window.scrollTo(0, 0); });
+$('#makemine').addEventListener('click', () => { S.focus = null; S.sample = false; S.started = true; S.draft = null; save(); render(); window.scrollTo(0, 0); });
 main.addEventListener('click', e => {
   const t = e.target.closest('button'); if (!t) return;
   const f = S.focus, now = M.today();
