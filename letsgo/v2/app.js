@@ -1,6 +1,6 @@
 // Let's Go! V2. One focus, one or more actions, each with its own schedule.
 // Step 1 of the V2 build: saved on this device only. Sign-in, sync, AI and reminders follow.
-import * as M from './model.js?v=20261102a';
+import * as M from './model.js?v=20261102b';
 
 const KEY = 'letsgo-v2';
 const $ = s => document.querySelector(s);
@@ -462,46 +462,97 @@ function editAction(id) {
   paint(); sheet.showModal();
 }
 
+// ---------- AI coach (letsgo-coach Edge Function) ----------
+// Uses the same Supabase project and sign-in as V1. If nobody is signed in, a guest sign-in keeps the daily limit fair.
+const SB_URL = 'https://ycxmhilwaixfwiedkkzj.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InljeG1oaWx3YWl4ZndpZWRra3pqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5ODY1MjUsImV4cCI6MjEwODU2MjUyNX0.XRe4jBt4RYwwnAxwnSmVVGf_DtEiHn7yasgk6Rfb3tU';
+let sb = null;
+function client() { if (!sb && window.supabase) try { sb = window.supabase.createClient(SB_URL, SB_ANON); } catch (e) { sb = null; } return sb; }
+async function coach(body) {
+  const c = client(); if (!c) throw new Error('offline');
+  let s = (await c.auth.getSession()).data.session;
+  if (!s) { const r = await c.auth.signInAnonymously(); s = r.data && r.data.session; }
+  if (!s) throw new Error('sign_in');
+  const res = await fetch(SB_URL + '/functions/v1/letsgo-coach', { method: 'POST', headers: { Authorization: 'Bearer ' + s.access_token, apikey: SB_ANON, 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  const j = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(j.error || 'failed');
+  return j;
+}
+
 // ---------- Setup ----------
-// Step 1 what you want to work on (messy words welcome), 2 the actions, 3 review and start.
-function draft() { if (!S.draft) S.draft = { step: 1, intent: '', title: '', why: '', actions: [], tasks: [], length: 30, start: M.today() }; return S.draft; }
+// 1 What you want to work on (messy words welcome, typed or spoken).
+// 2 What we heard: if there is more than one focus, choose one for now; then start with the end in mind.
+// 3 Actions: drafted from their words, with questions only when the answer changes the plan.
+// 4 The plan, then start.
+const STEPNO = { what: 1, think: 1, choose: 2, end: 2, think2: 3, questions: 3, actions: 3, plan: 4 };
+function draft() { if (!S.draft) S.draft = { step: 'what', intent: '', title: '', towards: '', outcome: '', matters: '', actions: [], tasks: [], later: [], length: 30, start: M.today() }; if (typeof S.draft.step === 'number') S.draft.step = 'what'; return S.draft; }
+const loading = msg => '<div class="thinking" role="status"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><p class="lead">' + msg + '</p></div>';
+function careCard(t) { return '<section class="card sec"><div class="stu"><img src="../stuart.jpg" alt=""><div class="stack" style="gap:8px"><h2>Before anything else</h2><p class="lead">' + esc(t) + '</p></div></div></section><button class="btn outline" data-s="restart">Back to the start</button>'; }
+
 function renderSetup() {
-  const d = draft();
-  const bar = '<div class="steps" aria-label="Step ' + d.step + ' of 3">' + [1, 2, 3].map(i => '<span class="' + (i <= d.step ? 'on' : '') + '"></span>').join('') + '</div>';
+  const d = draft(), n = STEPNO[d.step] || 1;
+  const bar = '<div class="steps four" aria-label="Step ' + n + ' of 4">' + [1, 2, 3, 4].map(i => '<span class="' + (i <= n ? 'on' : '') + '"></span>').join('') + '</div>';
+  const eb = t => '<div class="eyebrow">Step ' + n + ' of 4 · ' + t + '</div>';
   let h = '';
-  if (d.step === 0 || (!S.started && d.step === 1 && !d.intent)) {
+  if (!S.started && d.step === 'what' && !d.intent) {
     h = '<div style="padding-top:12px"><div class="eyebrow">Welcome to ' + brand + '</div><h1 style="margin-top:8px">Turn what matters into a plan you’ll actually follow.</h1></div>' +
-      '<p class="lead">Tell us what you want to work on, in your own words. We’ll shape it into small actions, show you what’s on each day, and help you keep going when life gets in the way.</p>' +
+      '<p class="lead">Tell us what you want to work on, in your own words. We’ll help you get clear on what you really want, shape it into small actions, and help you keep going when life gets in the way.</p>' +
       '<button class="btn" data-s="begin">Let’s go</button><button class="btn outline" data-s="sample">Take a look around first</button>' +
       '<p class="hint">Version 2 preview. Saved on this phone only for now.</p>';
-  } else if (d.step === 1) {
-    h = bar + '<div><div class="eyebrow">Step 1 of 3</div><h1>What do you want to work on?</h1></div>' +
-      '<p class="lead">Something you want more of, or something you’re fed up with. Write or speak it however it comes out. Messy is fine.</p>' +
-      '<label class="field"><span class="sr">What you want to work on</span><textarea rows="3" id="intent" placeholder="I feel unfit and sluggish. I want to stretch every day, lift weights every other day and play padel once a week">' + esc(d.intent) + '</textarea>' + micBtn('intent') + '</label>' +
-      '<label class="field">Now picture it sorted. What’s different for you? <span class="hint" style="font-weight:400">This is what you’re moving towards.</span><textarea rows="2" id="why" placeholder="I feel strong in my body, I have energy for the kids and I enjoy moving again">' + esc(d.why) + '</textarea>' + micBtn('why') + '</label>' +
-      '<label class="field">Give it a short name<textarea rows="1" id="title" placeholder="Feel stronger and move more">' + esc(d.title) + '</textarea></label>' +
-      '<button class="btn" data-s="next1">Next: the actions</button>';
-  } else if (d.step === 2) {
+  } else if (d.step === 'what') {
+    h = bar + '<div>' + eb('What matters') + '<h1>What do you want to work on?</h1></div>' +
+      '<p class="lead">Something you want more of, or something you’re fed up with. One thing or a few. Write or speak it however it comes out. Messy is fine.</p>' +
+      '<label class="field"><span class="sr">What you want to work on</span><textarea rows="4" id="intent" placeholder="I want to lose weight and feel fitter. I also want to be more consistent with my business.">' + esc(d.intent) + '</textarea>' + micBtn('intent') + '</label>' +
+      '<p class="hint">Private. Read by our AI helper to shape your plan, never shared or kept.</p>' +
+      '<button class="btn" data-s="understand">Next</button>';
+  } else if (d.step === 'think' || d.step === 'think2') {
+    h = bar + loading(d.step === 'think' ? 'Reading what you wrote…' : 'Shaping some actions for you…');
+  } else if (d.step === 'care') {
+    h = careCard(d.care);
+  } else if (d.step === 'choose') {
+    h = bar + '<div>' + eb('Your focus') + '<h1>Here’s what I’m hearing</h1></div>' +
+      (d.reply ? '<p class="lead">' + esc(d.reply) + '</p>' : '') +
+      '<div class="card soft"><div class="stu"><img src="../stuart.jpg" alt=""><p>I’m picking up more than one thing you could focus on. Working on one at a time is what makes a change stick, so let’s choose one for now. The others stay saved for later.</p></div></div>' +
+      '<h2>Which feels like the bigger priority right now?</h2>' +
+      d.focuses.map((f, i) => '<button class="pick" data-s="pick" data-i="' + i + '"><strong>' + esc(f.title) + '</strong><span class="hint">You said: “' + esc(f.heard) + '”</span></button>').join('') +
+      '<button class="link" data-s="back">Back</button>';
+  } else if (d.step === 'end') {
+    const ex = (d.examples || []);
+    h = bar + '<div>' + eb('Start with the end in mind') + '<h1>' + esc(d.title || 'Your focus') + '</h1></div>' +
+      (d.reply && (d.focuses || []).length < 2 ? '<p class="lead">' + esc(d.reply) + '</p>' : '') +
+      '<label class="field">Picture it sorted. What’s different for you?<textarea rows="2" id="towards" placeholder="I feel comfortable in my body and have energy all day">' + esc(d.towards) + '</textarea>' + micBtn('towards') + '</label>' +
+      '<label class="field">In 30 days, what would tell you it’s working?<textarea rows="1" id="outcome" placeholder="My clothes feel more comfortable">' + esc(d.outcome) + '</textarea></label>' +
+      (ex.length ? '<div class="chips">' + ex.map((x, i) => '<button class="chip" data-s="ex" data-i="' + i + '" aria-pressed="' + (d.outcome === x) + '">' + esc(x) + '</button>').join('') + '</div>' : '') +
+      '<label class="field">Why does this matter to you?<textarea rows="2" id="matters" placeholder="So I can keep up with my kids and feel confident again">' + esc(d.matters) + '</textarea>' + micBtn('matters') + '</label>' +
+      '<label class="field">Name it<textarea rows="1" id="title">' + esc(d.title) + '</textarea></label>' +
+      '<button class="btn" data-s="toactions">Next: the actions</button><button class="link" data-s="back">Back</button>';
+  } else if (d.step === 'questions') {
+    h = bar + '<div>' + eb('A couple of quick questions') + '<h1>So we get this right for you</h1></div>' +
+      d.questions.map((q, qi) => '<div class="stack" style="gap:8px"><div style="font-weight:600">' + esc(q.q) + '</div><div class="chips">' + q.options.map((o, oi) => '<button class="chip" data-s="ans" data-q="' + qi + '" data-o="' + oi + '" aria-pressed="' + (q.a === o) + '">' + esc(o) + '</button>').join('') + '</div></div>').join('') +
+      '<button class="btn" data-s="answered">Next</button><button class="link" data-s="skipq">Skip</button>';
+  } else if (d.step === 'actions') {
     if (!d.actions.length) d.actions.push(newDraftAction(''));
-    h = bar + '<div><div class="eyebrow">Step 2 of 3</div><h1>What will you actually do?</h1></div>' +
-      '<p class="lead">Split it into actions. Each one gets its own days.</p>' +
-      (d.intent ? '<div class="card soft"><span class="hint">You wrote</span><p>“' + esc(d.intent) + '”</p></div>' : '') +
-      d.actions.map((a, i) => '<div class="actionedit"><div class="row"><h2>Action ' + (i + 1) + '</h2>' + (d.actions.length > 1 ? '<button class="x" data-s="rm" data-i="' + i + '" aria-label="Remove action ' + (i + 1) + '">×</button>' : '') + '</div>' +
-        '<label class="field">I’m going to...<textarea rows="1" data-f="text" data-i="' + i + '" placeholder="' + ['Stretch for 10 minutes', 'Do a weights session', 'Play padel'][i % 3] + '">' + esc(a.text) + '</textarea></label>' +
+    h = bar + '<div>' + eb('Your actions') + '<h1>What will you actually do?</h1></div>' +
+      '<p class="lead">' + esc(d.intro || 'Here’s a starting point. Change anything so it fits your life.') + '</p>' +
+      (d.note ? '<p class="hint">' + esc(d.note) + '</p>' : '') +
+      d.actions.map((a, i) => '<div class="actionedit"><div class="row"><h2>' + (a.from_user ? 'Your idea' : 'Action ' + (i + 1)) + '</h2>' + (d.actions.length > 1 ? '<button class="x" data-s="rm" data-i="' + i + '" aria-label="Remove action ' + (i + 1) + '">×</button>' : '') + '</div>' +
+        (a.why ? '<p class="hint">' + esc(a.why) + '</p>' : '') +
+        '<label class="field">I’m going to...<textarea rows="1" data-f="text" data-i="' + i + '">' + esc(a.text) + '</textarea></label>' +
         '<div style="font-weight:600">How often</div>' + ruleUI(a.rule, 'd' + i) +
-        '<label class="field">Smaller version for tough days<textarea rows="1" data-f="small" data-i="' + i + '" placeholder="' + ['Stretch for 2 minutes', 'One set of each exercise', 'Have a hit against the wall'][i % 3] + '">' + esc(a.small) + '</textarea></label>' +
-        '<label class="field">After I... <span class="hint" style="font-weight:400">(optional)</span><textarea rows="1" data-f="cue" data-i="' + i + '" placeholder="make my morning coffee">' + esc(a.cue) + '</textarea></label>' +
-        '<details class="more"><summary>Turn it up on a good day (optional)</summary><label class="field"><span class="sr">Turn it up</span><textarea rows="1" data-f="up" data-i="' + i + '" placeholder="' + ['Stretch for 20 minutes', 'Add an extra set', 'Play a full match'][i % 3] + '">' + esc(a.up || '') + '</textarea></label><p class="hint">Up for more on a good day? Make it more challenging if you fancy it, and notice what you notice. If you stop showing up, turn the volume back down so you can get back in.</p></details></div>').join('') +
-      '<button class="btn outline" data-s="add">Add another action</button>' +
-      '<label class="field">Anything to sort out first? <span class="hint" style="font-weight:400">(optional, one per line)</span><textarea rows="2" id="tasks" placeholder="Find a padel court near me">' + esc(d.tasks.join('\n')) + '</textarea></label>' +
-      '<button class="btn" data-s="next2">Next: check your plan</button><button class="link" data-s="back">Back</button>';
+        '<label class="field">Smaller version for tough days<textarea rows="1" data-f="small" data-i="' + i + '">' + esc(a.small) + '</textarea></label>' +
+        '<details class="more"><summary>More: when, and turn it up</summary><label class="field">After I... <span class="hint" style="font-weight:400">(optional)</span><textarea rows="1" data-f="cue" data-i="' + i + '" placeholder="make my morning coffee">' + esc(a.cue) + '</textarea></label>' +
+        '<label class="field">Turn it up on a good day<textarea rows="1" data-f="up" data-i="' + i + '">' + esc(a.up || '') + '</textarea></label><p class="hint">Up for more on a good day? Make it more challenging if you fancy it, and notice what you notice. If you stop showing up, turn the volume back down so you can get back in.</p></details></div>').join('') +
+      '<div class="row"><button class="btn outline small" data-s="add">Add my own</button><button class="btn outline small" data-s="more">Other ideas</button></div>' +
+      '<label class="field">Anything to sort out first? <span class="hint" style="font-weight:400">(optional, one per line)</span><textarea rows="2" id="tasks" placeholder="Find a gym near me">' + esc(d.tasks.join('\n')) + '</textarea></label>' +
+      '<button class="btn" data-s="toplan">Next: check your plan</button><button class="link" data-s="back">Back</button>';
   } else {
-    h = bar + '<div><div class="eyebrow">Step 3 of 3</div><h1>Here’s your plan</h1></div>' +
-      '<section class="card hero"><div class="eyebrow">My focus</div><h1>' + esc(d.title) + '</h1>' + (d.why ? '<p style="color:#D9D4CA">Moving towards: ' + esc(d.why) + '</p>' : '') + '</section>' +
+    h = bar + '<div>' + eb('Your plan') + '<h1>Here’s your plan</h1></div>' +
+      '<section class="card hero"><div class="eyebrow">My focus</div><h1>' + esc(d.title) + '</h1>' + (d.towards ? '<p style="color:#D9D4CA">Moving towards: ' + esc(d.towards) + '</p>' : '') + (d.outcome ? '<p style="color:#D9D4CA">In 30 days: ' + esc(d.outcome) + '</p>' : '') + '</section>' +
       d.actions.map(a => '<div class="card"><strong>' + esc(a.text) + '</strong><span class="hint">' + esc(M.describe(a.rule)) + (a.cue ? ' · After I ' + esc(a.cue) : '') + '</span>' + (a.small ? '<span class="hint">Tough day: ' + esc(a.small) + '</span>' : '') + (a.up ? '<span class="hint">Good day: ' + esc(a.up) + '</span>' : '') + '</div>').join('') +
       (d.tasks.length ? '<div class="card soft"><strong>To sort out</strong>' + d.tasks.map(t => '<span>' + esc(t) + '</span>').join('') + '</div>' : '') +
+      (d.later.length ? '<p class="hint">Saved for later: ' + d.later.map(esc).join(', ') + '</p>' : '') +
       '<div class="stack" style="gap:8px"><div style="font-weight:600">Start</div><div class="chips"><button class="chip" data-s="start" data-v="today" aria-pressed="' + (d.start === M.today()) + '">Today</button><button class="chip" data-s="start" data-v="tomorrow" aria-pressed="' + (d.start === M.addDays(M.today(), 1)) + '">Tomorrow</button></div></div>' +
-      '<div class="stack" style="gap:8px"><div style="font-weight:600">Look back after</div><div class="chips">' + [30, 60, 90].map(n => '<button class="chip" data-s="len" data-v="' + n + '" aria-pressed="' + (d.length === n) + '">' + n + ' days</button>').join('') + '</div><p class="hint">A review point, not a finish line. You can keep going.</p></div>' +
+      '<div class="stack" style="gap:8px"><div style="font-weight:600">Look back after</div><div class="chips">' + [30, 60, 90].map(x => '<button class="chip" data-s="len" data-v="' + x + '" aria-pressed="' + (d.length === x) + '">' + x + ' days</button>').join('') + '</div><p class="hint">A review point, not a finish line. You can keep going.</p></div>' +
       '<button class="btn" data-s="go">Start my plan</button><button class="link" data-s="back">Back</button>';
   }
   main.innerHTML = h;
@@ -510,40 +561,91 @@ function renderSetup() {
 function newDraftAction(text) { return { text: text || '', small: '', cue: '', up: '', rule: { type: 'days', days: [0, 1, 2, 3, 4, 5, 6] } }; }
 function keepDraft() {
   const d = draft();
-  ['intent', 'title', 'why'].forEach(k => { const el = $('#' + k); if (el) d[k] = el.value; });
+  ['intent', 'title', 'towards', 'outcome', 'matters'].forEach(k => { const el = $('#' + k); if (el) d[k] = el.value; });
   main.querySelectorAll('textarea[data-f]').forEach(el => { d.actions[+el.dataset.i][el.dataset.f] = el.value; });
   const t = $('#tasks'); if (t) d.tasks = t.value.split('\n').map(x => x.trim()).filter(Boolean);
 }
+function setStep(step) { draft().step = step; save(); renderSetup(); window.scrollTo(0, 0); main.focus({ preventScroll: true }); }
+function fromAI(a) { const r = a.schedule || { type: 'days', days: [0, 1, 2, 3, 4, 5, 6] }; return { text: a.text || '', small: a.small || '', up: a.up || '', cue: '', why: a.why || '', from_user: !!a.from_user, rule: r.type === 'every' ? { type: 'every', n: r.n || 2, anchor: null } : r.type === 'weekly' ? { type: 'weekly', times: r.times || 1 } : { type: 'days', days: r.days || [0, 1, 2, 3, 4, 5, 6] } }; }
+
+async function understand() {
+  const d = draft();
+  setStep('think');
+  try {
+    const r = await coach({ kind: 'understand', said: d.intent });
+    if (r.at_risk) { d.care = r.care; return setStep('care'); }
+    d.reply = r.reply || ''; d.focuses = r.focuses || [];
+    if (d.focuses.length > 1) return setStep('choose');
+    choose(0);
+  } catch (e) {
+    // No AI right now: carry on by hand, nothing lost.
+    d.focuses = [{ title: d.intent.trim().split(/[.:;\n]/)[0].slice(0, 60), heard: d.intent, towards: '', outcome_examples: [] }]; d.reply = '';
+    choose(0); toast(e.message === 'limit' ? 'That’s the AI helper’s limit for today. You can carry on by hand.' : 'Couldn’t reach the AI helper just now. You can carry on by hand.');
+  }
+}
+function choose(i) {
+  const d = draft(), f = d.focuses[i];
+  d.title = f.title; d.towards = f.towards || d.towards; d.examples = f.outcome_examples || []; d.heard = f.heard;
+  d.later = d.focuses.filter((x, j) => j !== i).map(x => x.title);
+  d.actions = []; d.questions = []; d.answers = [];
+  setStep('end');
+}
+async function suggest(more) {
+  const d = draft(), prev = d.step;
+  setStep('think2');
+  try {
+    const r = await coach({ kind: 'actions', said: d.intent, title: d.title, towards: d.towards, outcome: d.outcome, why: d.matters, answers: d.answers || [], more: !!more, have: d.actions.map(a => a.text).join('; ') });
+    if (r.at_risk) { d.care = r.care; return setStep('care'); }
+    if (!more && r.questions && r.questions.length && !(d.answers || []).length) { d.questions = r.questions; d.pending = r; return setStep('questions'); }
+    applyActions(r, more);
+  } catch (e) {
+    toast(e.message === 'limit' ? 'That’s the AI helper’s limit for today. You can add actions by hand.' : 'Couldn’t reach the AI helper just now. You can add actions by hand.');
+    setStep(prev === 'think2' ? 'actions' : prev === 'end' ? 'actions' : 'actions');
+  }
+}
+function applyActions(r, more) {
+  const d = draft();
+  const fresh = (r.actions || []).map(fromAI);
+  d.actions = more ? d.actions.filter(a => a.text.trim()).concat(fresh) : fresh;
+  if (!more) { d.intro = r.intro || ''; d.note = r.note || ''; }
+  (r.helpers || []).forEach(h => { if (!d.tasks.includes(h)) d.tasks.push(h); });
+  setStep('actions');
+}
+
 main.addEventListener('click', e => {
   if (S.focus) return;
-  const b = e.target.closest('button'); if (!b) return;
+  const b = e.target.closest('button'); if (!b || b.dataset.micFor) return;
   const d = draft(); keepDraft();
   if (b.dataset.for && b.dataset.for[0] === 'd') { const i = +b.dataset.for.slice(1); d.actions[i].rule = applyRuleClick(b, d.actions[i].rule); save(); renderSetup(); return; }
   const s = b.dataset.s;
-  if (s === 'begin') { S.started = true; d.step = 1; }
+  if (s === 'begin') { S.started = true; return setStep('what'); }
   if (s === 'sample') { S.sample = true; S.focus = sampleFocus(); S.tab = 'today'; save(); render(); return; }
-  if (s === 'next1') {
-    if (!d.intent.trim() && !d.title.trim()) { $('#intent').focus(); return toast('Write a few words first.'); }
-    if (!d.title.trim()) d.title = d.intent.trim().split(/[.:;\n]/)[0].slice(0, 60);
-    d.step = 2;
-  }
+  if (s === 'restart') { S.draft = null; return setStep('what'); }
+  if (s === 'understand') { if (!d.intent.trim()) { $('#intent').focus(); return toast('Write or say a few words first.'); } return understand(); }
+  if (s === 'pick') return choose(+b.dataset.i);
+  if (s === 'ex') { d.outcome = d.examples[+b.dataset.i]; save(); return renderSetup(); }
+  if (s === 'toactions') { if (!d.title.trim()) d.title = (d.heard || d.intent).slice(0, 60); return suggest(false); }
+  if (s === 'ans') { const q = d.questions[+b.dataset.q]; q.a = q.options[+b.dataset.o]; save(); return renderSetup(); }
+  if (s === 'answered') { d.answers = d.questions.filter(q => q.a).map(q => ({ q: q.q, a: q.a })); if (!d.answers.length) return applyActions(d.pending || {}, false); return suggest(false); }
+  if (s === 'skipq') return applyActions(d.pending || {}, false);
+  if (s === 'more') return suggest(true);
   if (s === 'add') d.actions.push(newDraftAction(''));
   if (s === 'rm') d.actions.splice(+b.dataset.i, 1);
-  if (s === 'next2') {
+  if (s === 'toplan') {
     d.actions = d.actions.filter(a => a.text.trim());
     if (!d.actions.length) { d.actions.push(newDraftAction('')); save(); renderSetup(); return toast('Add at least one action.'); }
-    d.step = 3;
+    return setStep('plan');
   }
-  if (s === 'back') d.step = Math.max(1, d.step - 1);
+  if (s === 'back') { const prev = { choose: 'what', end: (d.focuses || []).length > 1 ? 'choose' : 'what', questions: 'end', actions: 'end', plan: 'actions', care: 'what' }[d.step] || 'what'; return setStep(prev); }
   if (s === 'start') d.start = b.dataset.v === 'today' ? M.today() : M.addDays(M.today(), 1);
   if (s === 'len') d.length = +b.dataset.v;
   if (s === 'go') {
-    S.focus = { id: uid(), title: d.title.trim(), why: d.why.trim(), intent: d.intent.trim(), start: d.start, length: d.length, pauses: [], worked: [],
+    S.focus = { id: uid(), title: d.title.trim(), why: d.towards.trim(), outcome: d.outcome.trim(), matters: d.matters.trim(), intent: d.intent.trim(), later: d.later, start: d.start, length: d.length, pauses: [], worked: [],
       tasks: d.tasks.map(t => ({ id: uid(), text: t, done: false })),
-      actions: d.actions.map(a => { const r = Object.assign({}, a.rule); if (r.type === 'every' && !r.anchor) r.anchor = d.start; return { id: uid(), text: a.text.trim(), small: a.small.trim(), up: (a.up || '').trim(), cue: a.cue.trim(), schedules: [Object.assign({ from: d.start }, r)], entries: {} }; }) };
+      actions: d.actions.map(a => { const r = Object.assign({}, a.rule); if (r.type === 'every' && !r.anchor) r.anchor = d.start; return { id: uid(), text: a.text.trim(), small: (a.small || '').trim(), up: (a.up || '').trim(), cue: (a.cue || '').trim(), schedules: [Object.assign({ from: d.start }, r)], entries: {} }; }) };
     S.draft = null; S.sample = false; S.tab = 'today'; save(); render(); toast('Your plan is ready. Let’s go.'); return;
   }
-  save(); renderSetup(); window.scrollTo(0, 0);
+  save(); renderSetup();
 });
 
 // A clearly labelled sample, with two weeks of made-up history, so people can look around.

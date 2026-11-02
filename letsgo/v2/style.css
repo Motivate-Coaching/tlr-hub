@@ -162,3 +162,11 @@ details.more[open] { display: flex; flex-direction: column; gap: 8px; }
 .mic { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--muted); border-radius: 4px; background: var(--white); color: var(--navy); font-size: 14px; font-weight: 600; cursor: pointer; }
 .mic[aria-pressed="true"] { background: var(--navy); color: var(--white); border-color: var(--navy); }
 .tabs[hidden] { display: none; }
+.steps.four { grid-template-columns: repeat(4, 1fr); }
+.pick { display: flex; flex-direction: column; gap: 4px; text-align: left; width: 100%; padding: 16px; border-radius: 10px; border: 2px solid var(--navy); background: var(--white); cursor: pointer; font-size: 17px; }
+.pick:hover, .pick:focus-visible { background: var(--amber-soft); }
+.thinking { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 60px 0; text-align: center; }
+.dots { display: flex; gap: 8px; }
+.dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--amber); animation: dot 1s infinite ease-in-out; }
+.dots i:nth-child(2) { animation-delay: .15s; } .dots i:nth-child(3) { animation-delay: .3s; }
+@keyframes dot { 0%, 100% { opacity: .3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-4px); } }
