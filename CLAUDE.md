@@ -16,15 +16,25 @@ Stuart is coach and product owner. Claude builds. Stuart is not a developer: exp
 
 ## Stack
 
-Plain HTML, CSS and vanilla JS on GitHub Pages. No framework, no build step, no npm. Supabase JS v2 from the jsDelivr CDN for auth and data. Google Fonts: Playfair Display (headings) and Inter (body). GitHub Pages deploys automatically from main, usually live within 1 to 2 minutes.
+Plain HTML, CSS and vanilla JS on GitHub Pages. No framework, no build step, no npm. Supabase JS v2 from the jsDelivr CDN for auth and data. Google Fonts: Poppins (all UI and body text) and Playfair Display (the one headline per page), as set in tlr-design-system.html. Most older Hub pages still load Inter; that is a known inconsistency, not the standard. GitHub Pages deploys automatically from main, usually live within 1 to 2 minutes.
 
 ## How to work in this repo
 
 1. Work on a branch and open a pull request. Merging to main makes changes live for members, so before merging anything that changes pages members use, tell Stuart what will change and get his OK.
 2. Database changes go in supabase/migrations/ as a new timestamped .sql file (YYYYMMDDHHMMSS_short_name.sql). Never edit an existing migration. Cloud sessions can reach Supabase through the Supabase connector, but the database is live, so show Stuart the change in plain language and get his OK before applying any migration.
 3. Never commit secrets. The Supabase anon key in auth.js is public by design and fine. Any other key (service role, Resend, Mailchimp, Stripe) must never appear in any file.
-4. When auth.js or history.js change, bump the ?v= query string on every page that loads them. Current: auth.js?v=20260922, history.js?v=20260922b.
+4. When auth.js or history.js change, bump the ?v= query string on every page that loads them. Pages are currently mixed (auth.js?v=20260922 on most, 20260930 on a few; history.js?v=20260930 on most, 20260922b on a few), so set every page to the new value when you next bump.
 5. Back buttons always use onclick="history.back()". Never hardcode index.html.
+6. Verify before saying anything is done: run it, look at screenshots, and for live changes confirm the GitHub Pages deployment for the merge commit succeeded (gh api repos/Motivate-Coaching/tlr-hub/deployments). github.io and jsdelivr are blocked from cloud sessions, so check deployments via the API, not by fetching the site.
+7. GitHub GraphQL is blocked here, so `gh pr create` fails. Open and merge pull requests with the REST API (gh api repos/Motivate-Coaching/tlr-hub/pulls ...). After a push, wait for mergeable_state to be clean before merging.
+8. Secrets Stuart must set himself go in Supabase, Edge Functions, Secrets. Never ask him to paste a secret into chat, and never put one in a file. If you generate one for him, give it to him privately and delete it afterwards.
+
+## Working with Stuart
+
+- Keep replies short. Plain English, no jargon. No em dashes anywhere, in copy or in replies.
+- He wants decisions grounded in evidence that works, not assumptions, with hyperlinked sources.
+- He often leaves work running, so keep pauses to the ones the rules above require.
+- Write his name as Stuart Fairbairns (with the s), and Stuart Fairbairns PCC professionally. He goes by Stu.
 
 ## Shared JS
 
@@ -46,6 +56,8 @@ Canonical reference: identity-audit.html. Every worksheet loads supabase-js, aut
 - M6 Difficult Conversations: getting-clear-before-you-speak, having-the-conversation, after-the-conversation, why-we-avoid-them
 - M7 Identity (redesigned): identity-audit, stories-i-inherited, who-am-i-now, identity-i-choose
 
+Let's Go (letsgo/, formerly show-up/): see the Show Up section below.
+
 Other pages: index.html (resource library), dashboard.html, login.html, reset-password.html, my-wheel.html, my-journal.html, values-discovery.html (public, no login), tlr-quiz.html (Clarity Scorecard), tlr-5states.html (The 5 Ways We Get Lost), tlr-admin.html (analytics, Stuart only, enforced by RLS), tlr-design-system.html.
 
 ## Database
@@ -54,14 +66,54 @@ Other pages: index.html (resource library), dashboard.html, login.html, reset-pa
 - tool_snapshots: named version history. RLS: own rows only, authenticated role.
 - activity_log: page views and events. RLS: own rows, plus Stuart's email can read all.
 - values_responses: public Values Discovery submissions. Anyone can insert; nobody can update; only Stuart's email can read. Email is not unique, so retakes add a new row.
-Tables created with raw SQL need explicit GRANTs.
+- Old showup_* tables in this project are from the first pilot week and are no longer used; Show Up now has its own project (see Show Up below).
+Tables created with raw SQL need explicit GRANTs, including for service_role when an Edge Function reads them.
+
+## Edge functions and schedules
+
+- session-reminders: TLR session reminder emails (1 hour and 24 hours before), run by pg_cron every 30 minutes.
+- showup-reminders: Show Up morning nudges by email (Resend, from "TLR Show Up" <stuart@motivate-coaching.com>) and web push, run by pg_cron every 15 minutes. Sends once per person per day (showup_reminder_log), only to people with a profile row, so a person must be signed in inside Show Up to get nudges.
+- showup-reflect: the "What I'm hearing" reflection in Help me choose. Signed-in users only, 5 a day each (counted in app_metadata.showup_ai), Claude Haiku via forced tool output, nothing stored.
+- Secret names (values live only in Supabase secrets): RESEND_API_KEY, VAPID_PRIVATE_KEY, ANTHROPIC_API_KEY. The VAPID public key in letsgo/app.js and the function is public by design.
+
+## Show Up, now Let's Go (habit app, letsgo/)
+
+A separate product from TLR, with its own Supabase project: Show Up, ref ycxmhilwaixfwiedkkzj (eu-west-2 London, free plan, same organisation). Its migrations live in letsgo/supabase/migrations and its Edge Functions in letsgo/supabase/functions (showup-code: email-code sign-in, account deletion, and the server-made phone-notification key; showup-reminders; showup-reflect; showup-notify: emails stuart@motivate-coaching.com when tester feedback is sent (called by feedback.html after saving, once per row) and when someone new finishes setup (alerts go to both stuart@motivate-coaching.com and stuart.fairbairns@gmail.com, because self-sent mail can be filtered) (kind 'started', called by the app with its stats session id, checked against a recent setup_done event in showup_events, once per session, max 50 a day, never for testers or when usage stats are off). showup-code also emails Stu when a new account activates). Secrets in that project: RESEND_API_KEY, ANTHROPIC_API_KEY. Anyone can sign up: email, then a 6-digit code, no password. Piloted with TLR members and a few others as founding testers. Price: see Positioning below (earlier idea was $9.99 a month or $59.99 a year). Renamed "Let's Go" on 27 Oct 2026 (Stuart's decision; legal clearance with a trade mark lawyer still to do). On 28 Oct 2026 the folder moved from show-up/ to letsgo/ (live at /tlr-hub/letsgo/). show-up/ now only holds redirect pages and a service worker that retires itself; leave them so old links and installs land in the right place. Tables, functions and the localStorage key keep their showup names.
+
+- Files: letsgo/index.html (shell and all CSS), app.js (all logic, one IIFE), sw.js (service worker, network-first cache), manifest.webmanifest, icons/, qr.svg, logo-white.png, stuart.jpg. When app.js changes, bump app.js?v= in index.html and the CACHE name and shell entry in sw.js together.
+- State lives in localStorage key showup-v1 and syncs to Supabase when signed in. Sign-in is Show Up's own (email code), not the TLR Hub account. Extra per-habit data (noticed days, what's worked, past wins, chosen focus) lives in showup_habits.extra.
+- Two views of the same data: Full (everything, examples shown) and Focus (for ADHD and anxiety: one thing per screen, extras behind one tap, calm motion). Use optional(label, html), .full-only and .focus-only. Check both views for every change.
+- Core flow: name (once), view choice, then Build, Break or Let's work it out (AI challenge ideas), then what, when (the "After I..." anchor, stored in extra.anchor), feel, (instead), tough-day plan, then a confetti finish, the plan (Stu's welcome note), and once, install steps with the calendar option. "When it gets hard" is asked just in time on I'm struggling, not in setup. After the confetti, people who aren't signed in see "Who should we send your plan to?" (sendplan): email, then a 6-digit code to activate; the code email includes their plan. Challenge ideas work before any email via a Supabase guest (anonymous) sign-in, so the 5-a-day limit still applies; showup-code deletes the guest account when they verify. If guest sign-in is off, the ideas screen falls back to asking for an email.
+- Stu as the guide: stuCard() with stuart.jpg on the plan, home on days 3, 7, 14, 21 and 28 (signed-in people get a one-tap weekly check-in that lands in showup_feedback as checkin-dayN), I'm struggling and the day-30 look back. Phone nudges replace email by default when switched on.
+- Tough-day step (screen 'dimmer'): shows their habit and anchor as a reminder, and three tough-day ideas written for their habit (showup-reflect kind 'lighter', 15 a day, guest sign-in if needed; cached in draft.lighter) as tap-to-fill chips, with general examples as the fallback. Every example and placeholder must finish the sentence it sits under ("On a tough day, I'll...", "I'm going to..."), so start with a verb, never "A ...".
+- Make it yours (screen 'mine'): when an AI idea needs the person to decide the content first (showup-reflect returns personal_question and personal_draft on that challenge), they write it once before the habit step; saved as habit.extra.mine and extra.mineQ, shown on home (both views), plan, edit form, plan email, morning email and calendar.
+- Walk it through (screen 'walk'): an optional minute on home before the show-up tap, for everyone: picture the moment (their anchor), see yourself doing it, what might get in the way, how good it feels to have done it (process, not outcome, visualisation), optional 1 minute timer, and "Today I will..." (one line, shown for habits with extra.mine or once they've written one, otherwise tucked away; pre-filled from the last plan; Speak works). Saved in extra.walks[day] = {at, plan, did}; next day asks "Did it happen?" with one tap. Settings: walk it through the night before (after 5pm it plans tomorrow) or in the morning (settings.walkWhen). It never decides whether a day counts. Evidence: reports/What makes a daily habit stick.md.
+- Daily: one "I showed up today" button (every show-up counts the same, lighter versions included) and an "I'm struggling" button (three situations, a rotating question, What's worked for me, one small step; video slots in STRUGGLE_VIDEO). Missed days stay plain and can be tapped later to count or to note what got in the way. Count show-ups and comebacks, never streaks.
+- Positioning (Stuart's decisions, held for launch): a paid add-on, never free, because the price brings in committed users. Not on the TLR landing page or in the checkout; offer it straight after joining, on the welcome page and in the welcome call. Working price £5 to £9 a month for members (standalone habit apps run about $5 a month or $30 to $50 a year). No "proven" claims until the app has its own results. "Showing up" is a brand thread across TLR and the app, not a front-door hook.
+- Tester feedback: letsgo/feedback.html (standalone page, same branding). One question per screen with 'Question X of N' (count fixed per route) and a progress bar; intro states 2 minutes; routing question first (pre-filled from the phone): quick look/set up 6 questions, used it 10, stopped 8. Single-choice taps auto-advance after a short pause, Next only works once answered (Skip to pass an optional one), Back always available, comments collapsed behind '+ Add a comment (type or speak)'. Answers send from the last question; no name is needed. The confetti thank-you then offers an optional first name, saved as a separate 'tester-feedback-name' row linked by ref, so leaving at that point loses nothing. Part 1 First look and setup (purpose, setup ease 1 to 7 with why if 4 or lower, where they hesitated, up to three words); Part 2 Living with it (last tough day, nearly stopped, habit-strength); for users the Sean Ellis question comes first. The brand always shows as Let's Go! in the logo font (Poppins Bold, never uppercased) with an amber exclamation mark, wherever it appears, including inside Playfair headings (brand() helper, .brand span). Reword sentences so it never sits next to clashing punctuation (for example "How is Let's Go! really going?", not "How's Let's Go!"). Saved as one showup_feedback row (question 'tester-feedback', answer JSON v3 incl. show-up counts from the phone, never notes), via guest sign-in if needed. Stu's view (admin.html) groups it by the Ellis answer. showup-code moves a guest's feedback to their real account before deleting the guest.
+- V2 (letsgo/v2/, started 1 Nov 2026, preview only, V1 untouched): one focus with several actions, each on its own schedule (set days, every other day, or N times a week), kept as dated schedule versions. model.js holds all date and progress logic (pure functions, tested); app.js is the UI (Today with tracker, week strip and weekly chart; Progress; My plan; Support). Step 1 saves on the phone only (localStorage letsgo-v2); sign-in, sync to new additive tables, AI setup and action-aware reminders come next. Planned days with no entry are 'not logged', never 'missed'; rest and paused days never count against anyone.
+- Hosting: GitHub Pages terms and Vercel's free Hobby plan don't allow commercial SaaS. Move to a host that allows commercial use on Stu's own domain before charging. A Vercel project 'tlr-hub' on Stu's account mirrors every push.
+- Copy rules: warm, direct, never shaming. "Tough day", not "hard day". Never "failed" or "missed".
+- Tests: Playwright scripts against a local server (python3 -m http.server 8765 from the repo root), Chromium at /opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell, phone viewport 390x844. Block external requests in tests; stub window.supabase when a test needs the signed-out state.
 
 ## Known issues and open work
 
-1. Design and tone pass on M1, M2, M3, M4 and M6 (21 tools) to match the redesigned M5 and M7, plus checking each tool follows the standard pattern.
-2. Research what members value on Skool, Circle and similar platforms.
-3. Long term: white-label platform for other coaches (workspace_id multi-tenancy with RLS, Stripe billing, coach admin view, course builder).
+1. Show Up parking lot: Stuart's struggling videos, email capture for the public launch (separate unticked marketing box), prescriptive challenges (for example a fitness challenge), real app name, sales page, Stripe product.
+2. Design and tone pass on M1, M2, M3, M4 and M6 (21 tools) to match the redesigned M5 and M7, plus checking each tool follows the standard pattern.
+3. Research what members value on Skool, Circle and similar platforms.
+4. Long term: white-label platform for other coaches (workspace_id multi-tenancy with RLS, Stripe billing, coach admin view, course builder).
 
 ## Design system
 
---navy #0F1215, --navy-mid #1C2B3A, --gold #E8A800, --gold-light #F5C842, --cream #F9F7F2, --cream-dark #EFE9DF, --white #FFFFFF, --text-dark #111820, --text-mid #445566, --text-muted #8899AA, --border #E2D9CE, --accent #1A6B72 (teal, history.js UI). Full reference: tlr-design-system.html.
+tlr-design-system.html (TLR Design System v1.0) is the single source of truth for anything members see, including mockups and emails. Read it in full before designing or styling anything, and check finished work against it before showing Stuart. If this file and the design system disagree, the design system wins.
+
+Summary (from the design system):
+- Fonts: Poppins for everything functional (body, labels, inputs, buttons). Playfair Display 400 for the page or tool title only. Never introduce other fonts.
+- Base palette: --navy #0F1215 (headers, topbar, primary buttons), --navy-mid #1C2B3A, --cream #F5F1EB (page background), --cream-dark #EDE8DF, --cream-deep #E5DDD1, --text-dark #1A1A1A, --text-mid #4A4A4A, --text-muted #888880, --border rgba(0,0,0,0.1). Green #3B6D11 for success states only.
+- Theme accents (one per theme): Theme 1 #2B4A6F slate, Theme 2 #5C6B3A olive, Theme 3 #8C4A2F terracotta, Theme 4 #1A6B72 teal, Theme 5 #C9930A amber. Show Up uses amber #C9930A as its accent. Never introduce a colour outside this system.
+- Radius: 4px buttons, 6px inputs and cards, 10px major panels. Spacing on a 4px base.
+- Buttons: uppercase, 0.08em letter-spacing.
+- Inputs: auto-expanding textarea rows="1", never input type="text".
+- Copy: no em dashes; write "The Living Room (TLR)" in full on first use; say "theme" or "topic", never "month" or "week"; sentence case; no clichés; at most one exclamation mark per tool.
+
+Known inconsistencies to fix over time: 38 of 49 pages still load Inter instead of Poppins; 15 pages use cream #F9F7F2 instead of #F5F1EB; the dashboard uses gold #E8A800, which is not in the design system.

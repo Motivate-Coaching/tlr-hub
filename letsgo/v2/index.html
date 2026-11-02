@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0F1215">
+<meta name="robots" content="noindex">
+<title>Let’s Go! V2</title>
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400&family=Poppins:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="style.css?v=20261102a">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="app">
+  <header class="bar">
+    <button class="back" id="back" hidden aria-label="Back to the start"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="wordmark brand">Let’s Go<span class="bang">!</span></span>
+    <span class="save" id="save" aria-live="polite"></span>
+  </header>
+  <main id="main" tabindex="-1"></main>
+  <div class="samplecta" id="samplecta" hidden><span>Like what you see?</span><button class="btn light small" id="makemine">Create my plan</button></div>
+  <nav class="tabs" id="tabs" aria-label="Main" hidden>
+    <button data-tab="today"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg>Today</button>
+    <button data-tab="progress"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V12M10 20V7M15 20v-5M20 20V4"/></svg>Progress</button>
+    <button data-tab="plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zM9 9h6M9 13h6M9 17h3"/></svg>My plan</button>
+    <button data-tab="support"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/></svg>Support</button>
+  </nav>
+</div>
+<dialog id="sheet"></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<script type="module" src="app.js?v=20261102a"></script>
+</body>
+</html>
