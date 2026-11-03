@@ -508,6 +508,39 @@ details.alldays[open] summary { margin-bottom: 12px; }
 .settings details.sect summary::after { content: ""; width: 9px; height: 9px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); margin-top: -4px; transition: transform 150ms; }
 .settings details.sect[open] summary::after { transform: rotate(225deg); margin-top: 4px; }
 .settings .sbody { display: flex; flex-direction: column; gap: 14px; padding: 4px 16px 18px; }
+
+/* ── V2 layer: bottom menu, clear sections, tracker and graphs ── */
+.tabs { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 520px; z-index: 30; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--navy); padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)); }
+.tabs button { border: 0; background: none; color: #B9B5AD; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; min-height: 52px; justify-content: center; }
+.tabs svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.tabs button[aria-current="page"] { color: var(--amber); font-weight: 600; }
+html.has-tabs .screen { padding-bottom: 110px; }
+.sec { background: var(--white); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 14px; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 1px 2px rgba(15,18,21,.05), 0 6px 18px rgba(15,18,21,.06); }
+.sec-h { display: flex; align-items: center; gap: 10px; }
+.sec-h h2 { flex: 1; font-size: 18px; }
+.sec-r { font-size: 13px; font-weight: 600; color: var(--text-mid); border: 1px solid rgba(0,0,0,0.12); border-radius: 999px; padding: 2px 10px; white-space: nowrap; }
+.ic { width: 34px; height: 34px; border-radius: 8px; background: var(--navy); color: var(--amber); display: grid; place-items: center; flex: none; }
+.ic svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.sec.today { border-top: 4px solid var(--amber); }
+.sec.soft2 { background: var(--cream-dark); border-color: transparent; box-shadow: none; }
+.focushero { background: var(--navy); color: var(--white); border-radius: 10px; padding: 22px 20px; display: flex; flex-direction: column; gap: 6px; position: relative; }
+.focushero .eyebrow { color: #C9C5BD; }
+.focushero h1 { color: var(--white); font-size: clamp(26px, 7.5vw, 32px); padding-right: 92px; }
+.focushero .fh-line { color: #D9D4CA; margin: 0; }
+.focushero .pill { position: absolute; top: 18px; right: 18px; border: 1px solid rgba(255,255,255,0.3); border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 600; }
+.meter { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.15); overflow: hidden; margin-top: 10px; }
+.meter i { display: block; height: 100%; background: var(--amber); border-radius: 3px; }
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.tile { background: var(--cream); border-radius: 6px; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; }
+.tile b { font-family: var(--display); font-weight: 400; font-size: 30px; line-height: 1; }
+.tile b small { font-size: 16px; color: var(--muted); }
+.tile span { font-size: 12px; color: var(--text-mid); }
+.chart { width: 100%; height: auto; display: block; }
+.legend2 { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--text-mid); }
+.legend2 span { display: inline-flex; align-items: center; gap: 6px; }
+.legend2 i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.allgood { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 6px; background: #E3ECD8; color: var(--green); font-weight: 600; }
+.bignum { font-family: var(--display); font-size: 44px; line-height: 1; }
 </style>
 </head>
 <body>
@@ -521,8 +554,14 @@ details.alldays[open] summary { margin-bottom: 12px; }
     <button class="icon-btn ghost" id="settingsBtn" aria-label="Settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </header>
   <main id="view"></main>
+  <nav class="tabs" id="tabs" aria-label="Main" hidden>
+    <button data-tab="tracker"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg>Today</button>
+    <button data-tab="progress"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V12M10 20V7M15 20v-5M20 20V4"/></svg>Progress</button>
+    <button data-tab="plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zM9 9h6M9 13h6M9 17h3"/></svg>My plan</button>
+    <button data-tab="slipped"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/></svg>Support</button>
+  </nav>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=v2e1"></script>
+<script src="app.js?v=v2e2"></script>
 </body>
 </html>

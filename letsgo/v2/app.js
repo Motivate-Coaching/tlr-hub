@@ -97,6 +97,8 @@
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   var view = document.getElementById('view');
+  var tabsEl = document.getElementById('tabs');
+  tabsEl.addEventListener('click', function (e) { var b = e.target.closest('button[data-tab]'); if (b && b.dataset.tab !== S.screen) go(b.dataset.tab); });
   var app = document.getElementById('app');
   var backBtn = document.getElementById('back');
   var fwdBtn = document.getElementById('fwd');
@@ -245,7 +247,7 @@
   var BACK = {
     what: function () { return S.draft.mineQ ? 'mine' : S.draft.found ? 'find' : 'landing'; }, mine: 'find', walk: 'tracker', name: 'landing', viewpick: function () { return S.nameAsked ? 'landing' : 'name'; }, wins: 'tracker', less: 'feel',
     find: function () { var f = S.find || {}; if (f.step > 0) { f.step--; save(false); return 'find'; } return 'landing'; }, feel: 'when', when: 'what', dimmer: function () { return S.draft.mode === 'less' ? 'less' : 'feel'; }, hard: 'dimmer',
-    length: function () { return ui.returnTo || 'ready'; }, note: 'tracker', slipped: 'tracker', share: 'tracker', science: function () { return S.habit ? 'settings' : 'landing'; },
+    length: function () { return ui.returnTo || 'ready'; }, progress: 'tracker', note: 'tracker', slipped: 'tracker', share: 'tracker', science: function () { return S.habit ? 'settings' : 'landing'; },
     words: function () { return ui.wordsFrom || 'tracker'; }, sendplan: 'ready', settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', calendar: function () { return ui.calFrom === 'install' ? 'install' : ui.calFrom || 'tracker'; }, install: function () { return ui.installFrom || (S.habit ? 'settings' : 'landing'); }, account: function () { return ui.returnTo || 'tracker'; }
   };
 
@@ -429,27 +431,45 @@
         '<div class="card"><b style="font-size:20px;font-weight:600">Day one is tomorrow.</b><span style="color:var(--text-mid)">Your nudge arrives at ' + esc(fmtTime(S.settings.time)) + '. Changed your mind?</span><button class="btn outline" data-act="starttoday">Start today instead</button></div>' +
         whyCard(false) + '</section>';
       if (S.settings.view === 'focus') return focusTracker();
-      var t = todayNum(), L = S.habit.length, e = S.entries[t];
-      var h = '<section class="screen home"><div><h1>' + esc(habitName()) + '</h1>' +
-        (anchorLine() ? '<p class="anchorline">' + esc(anchorLine()) + '</p>' : '') +
-        (mineLine() ? '<p class="mineline">“' + esc(mineLine()) + '”</p>' : '') +
-        '<div class="row homesub"><span>' + (t > L ? 'All ' + L + ' days · complete' : 'Day ' + t + ' of ' + L) + '</span><button class="plan-link" data-go="plan">' + iconPlan() + 'My plan</button></div></div>';
-      h += walkCard(t);
+      var t = todayNum(), L = S.habit.length, e = S.entries[t], tt = Math.min(t, L);
+      var pct = Math.round(Math.min(t, L) / L * 100), st = stats();
+      var h = '<section class="screen home">' +
+        '<div class="focushero"><span class="pill">' + (t > L ? L + ' days' : 'Day ' + t + ' of ' + L) + '</span><div class="eyebrow">My focus</div><h1>' + esc(habitName()) + '</h1>' +
+        (anchorLine() ? '<p class="fh-line">' + esc(anchorLine()) + '</p>' : '') +
+        (mineLine() ? '<p class="fh-line">“' + esc(mineLine()) + '”</p>' : '') +
+        '<div class="meter" aria-hidden="true"><i style="width:' + pct + '%"></i></div></div>';
+      // Today: the one thing to do, then what happens after.
+      h += '<section class="sec today">' + secHead('today', 'Today', e ? 'Done' : '');
       if (t > L) {
-        h += '<div class="card"><b style="font-size:20px;font-weight:600">You gave it ' + L + ' days.</b><span style="color:var(--text-mid)">Time for your look back: what you noticed, and what’s next.</span><button class="btn" data-go="reflect">Start my look back</button><button class="link center" data-go="share">Share that I did it</button></div>';
+        h += '<b style="font-size:18px;font-weight:600">You gave it ' + L + ' days.</b><span style="color:var(--text-mid)">Time for your look back: what you noticed, and what’s next.</span><button class="btn" data-go="reflect">Start my look back</button>';
       } else if (!e) {
-        h += showUpButtons();
+        h += walkCard(t) + showUpButtons();
       } else {
-        h += '<div class="done"><span class="bigstar"></span><span class="msg">' + esc(doneMsg(e)) + '</span><button data-go="note">' + (e.note ? 'Edit note' : 'Add a note') + '</button></div>' +
-          '<button class="link center" data-act="undo" style="margin-top:-10px;font-size:14px;font-weight:500">Tapped by mistake? Undo today</button>';
-        if (t === L && !S.fb.reflect) h += '<div class="card soft"><b style="font-weight:600">That’s your last day.</b><button class="btn" data-go="reflect">Start my look back</button></div>';
+        h += '<div class="allgood"><span class="bigstar" style="width:20px;height:20px"></span>' + esc(doneMsg(e)) + '</div>' +
+          '<div class="row" style="justify-content:space-between"><button class="link" data-go="note">' + (e.note ? 'Edit note' : 'Add a note') + '</button><button class="link" data-act="undo" style="font-weight:500">Undo today</button></div>';
+        if (t === L && !S.fb.reflect) h += '<button class="btn" data-go="reflect">That’s your last day. Start my look back</button>';
+        h += walkCard(t);
       }
+      h += '</section>';
       h += catchUpCard(t);
-      h += '<div class="card weekcard"><span class="eyebrow">This week</span>' + weekHTML(t) +
-        '<details class="alldays"><summary>See all ' + L + ' days</summary>' + gridHTML(t, true) + '<p class="hint" style="margin:8px 0 0">Tap any day to fill it in or add a note.</p></details></div>';
+      h += '<section class="sec">' + secHead('week', 'This week', '<button class="link" data-go="progress" style="min-height:0;font-size:13px">Progress</button>') + weekHTML(t) + '</section>';
+      if (tt > 1 || st.done) h += '<section class="sec full-only">' + secHead('chart', 'Your progress') +
+        '<div class="tiles"><div class="tile"><b>' + st.done + '</b><span>show-ups</span></div><div class="tile"><b>' + st.week + '<small>/' + st.weekOf + '</small></b><span>last 7 days</span></div><div class="tile"><b>' + st.backs + '</b><span>comebacks</span></div></div>' +
+        barChart(90) + '<p class="hint">Green is a full show-up, amber a lighter version. Both count.</p></section>';
       var na = nudgeAsk(t); h += stuDay(t) + (na || (signInCard() + extraCards(t)));
-      h += '<div class="row" style="justify-content:center;flex-wrap:wrap;gap:4px 16px">' + (e ? '<button class="link" data-go="slipped">I’m struggling</button>' : '') + '<button class="link" data-go="wins">My past wins</button></div></section>';
+      h += '</section>';
       return h;
+    },
+    progress: function () {
+      if (!S.habit) return screens.landing();
+      var st = stats();
+      return '<section class="screen"><div><div class="eyebrow">Progress</div><h1>How it’s going</h1></div>' +
+        '<section class="sec">' + secHead('chart', 'Running total') + '<div><span class="bignum">' + st.done + '</span> <span class="hint" style="display:inline">of ' + st.so + ' days so far</span></div>' + lineChart() +
+        '<div class="legend2"><span><i style="background:var(--green)"></i>Show-ups</span><span><i style="border:1.5px dashed #B8AFA0"></i>Days so far</span></div></section>' +
+        '<section class="sec">' + secHead('week', 'Week by week') + barChart(120) + '<div class="legend2"><span><i style="background:var(--green)"></i>Showed up</span><span><i style="background:var(--amber)"></i>Lighter version</span><span><i style="border:1.5px dashed #C9BFAE"></i>Days in the week</span></div></section>' +
+        '<section class="sec">' + secHead('task', 'Every day') + gridHTML(todayNum(), true) + '<p class="hint">Tap any day to fill it in or add a note. Missed days stay plain, never red.</p></section>' +
+        '<div class="tiles"><div class="tile"><b>' + st.full + '</b><span>full show-ups</span></div><div class="tile"><b>' + st.light + '</b><span>lighter versions</span></div><div class="tile"><b>' + st.backs + '</b><span>comebacks</span></div></div>' +
+        '<button class="btn outline" data-go="share">Share my progress</button><button class="link center" data-go="wins">My past wins</button></section>';
     },
     note: function () {
       var t = ui.noteDay || todayNum(), e = S.entries[t] || {};
@@ -761,12 +781,70 @@
   }
   window.__showupGreetReset = function () { S.lastGreet = ''; save(false); };
 
+
+  // ── V2 layer helpers: section headings, honest stats and the two charts ──
+  var ICON = {
+    today: '<path d="M12 4v2M12 18v2M4 12H2M22 12h-2M6.3 6.3 4.9 4.9M19.1 19.1l-1.4-1.4M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/><circle cx="12" cy="12" r="4"/>',
+    week: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+    chart: '<path d="M5 20V12M10 20V7M15 20v-5M20 20V4"/>',
+    task: '<path d="M9 11l2.5 2.5L16 9"/><rect x="4" y="4" width="16" height="16" rx="3"/>'
+  };
+  function secHead(k, title, right) { return '<div class="sec-h"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24">' + ICON[k] + '</svg></span><h2>' + title + '</h2>' + (right ? '<span class="sec-r">' + right + '</span>' : '') + '</div>'; }
+  // "So far" counts days up to yesterday, plus today once it's ticked, so an unticked today never looks like a gap.
+  function stats() {
+    var t = todayNum(), L = S.habit.length, last = Math.min(t, L), e = S.entries;
+    var inRange = function (x, k) { return k <= last; };
+    var done = count(inRange), full = count(function (x, k) { return k <= last && x.kind !== 'dimmer'; }), backs = count(function (x, k) { return k <= last && x.comeback; });
+    var so = Math.min(last - 1, L) + (e[last] ? 1 : 0), wFrom = Math.max(1, last - 6);
+    var week = count(function (x, k) { return k >= wFrom && k <= last; }), weekOf = Math.max(0, last - wFrom) + (e[last] ? 1 : 0);
+    return { done: done, full: full, light: done - full, backs: backs, so: Math.max(so, done), week: week, weekOf: Math.max(weekOf, week) };
+  }
+  function barChart(H) {
+    var t = Math.min(todayNum(), S.habit.length), weeks = [];
+    for (var w = 0; w * 7 < t; w++) {
+      var from = w * 7 + 1, to = Math.min(from + 6, t), full = 0, light = 0;
+      for (var d = from; d <= to; d++) { var x = S.entries[d]; if (x) { if (x.kind === 'dimmer') light++; else full++; } }
+      var days = to - from + 1 - (to === todayNum() && !S.entries[to] ? 1 : 0);
+      weeks.push({ n: w + 1, days: Math.max(days, full + light), full: full, light: light });
+    }
+    weeks = weeks.slice(-8); if (!weeks.length) return '';
+    var W = 320, n = weeks.length, bw = Math.min(30, (W - 20) / n - 10), max = 7;
+    var g = '<svg class="chart" viewBox="0 0 ' + W + ' ' + (H + 22) + '" role="img" aria-label="Show-ups each week">';
+    weeks.forEach(function (x, i) {
+      var cx = 10 + (i + 0.5) * ((W - 20) / n), xl = cx - bw / 2, sc = (H - 8) / max;
+      g += '<rect x="' + xl + '" y="' + (H - x.days * sc) + '" width="' + bw + '" height="' + (x.days * sc) + '" rx="4" fill="none" stroke="#C9BFAE" stroke-width="1.5" stroke-dasharray="3 3"/>';
+      if (x.full) g += '<rect x="' + xl + '" y="' + (H - x.full * sc) + '" width="' + bw + '" height="' + (x.full * sc) + '" rx="4" fill="#3B6D11"/>';
+      if (x.light) g += '<rect x="' + xl + '" y="' + (H - (x.full + x.light) * sc) + '" width="' + bw + '" height="' + (x.light * sc) + '" rx="4" fill="#C9930A"/>';
+      g += '<text x="' + cx + '" y="' + (H + 16) + '" font-size="11" text-anchor="middle" fill="#4A4A4A" font-family="Poppins, sans-serif">Wk ' + x.n + '</text>';
+    });
+    return g + '</svg>';
+  }
+  function lineChart() {
+    var t = Math.min(todayNum(), S.habit.length);
+    if (t < 2) return '<p class="hint">Your running total appears here after your first couple of days.</p>';
+    var pts = [], done = 0;
+    for (var d = 1; d <= t; d++) { if (S.entries[d]) done++; pts.push({ done: done, plan: d === t && !S.entries[d] ? d - 1 : d }); }
+    var W = 320, H = 130, max = Math.max(1, t), x = function (i) { return 6 + i / (pts.length - 1) * (W - 12); }, y = function (v) { return H - 6 - v / max * (H - 18); };
+    var path = function (k) { return pts.map(function (p, i) { return (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(p[k]).toFixed(1); }).join(' '); };
+    var last = pts[pts.length - 1];
+    return '<svg class="chart" viewBox="0 0 ' + W + ' ' + (H + 18) + '" role="img" aria-label="' + last.done + ' show-ups so far">' +
+      '<defs><linearGradient id="lg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3B6D11" stop-opacity=".35"/><stop offset="1" stop-color="#3B6D11" stop-opacity="0"/></linearGradient></defs>' +
+      '<path d="' + path('done') + ' L' + x(pts.length - 1).toFixed(1) + ' ' + (H - 6) + ' L' + x(0) + ' ' + (H - 6) + ' Z" fill="url(#lg)"/>' +
+      '<path d="' + path('plan') + '" fill="none" stroke="#B8AFA0" stroke-width="1.5" stroke-dasharray="4 4"/>' +
+      '<path d="' + path('done') + '" fill="none" stroke="#3B6D11" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+      '<circle cx="' + x(pts.length - 1) + '" cy="' + y(last.done) + '" r="5" fill="#fff" stroke="#3B6D11" stroke-width="2.5"/>' +
+      '<text x="6" y="' + (H + 14) + '" font-size="11" fill="#4A4A4A" font-family="Poppins, sans-serif">Day 1</text><text x="' + (W - 6) + '" y="' + (H + 14) + '" font-size="11" text-anchor="end" fill="#4A4A4A" font-family="Poppins, sans-serif">Today</text></svg>';
+  }
+
   function render() {
     var s = screens[S.screen] ? S.screen : 'landing';
     if (s === 'tracker' && !S.habit) s = 'landing';
     var focus = S.settings.view === 'focus';
     document.documentElement.classList.toggle('focus-mode', focus);
 
+    var TABS = { tracker: 1, progress: 1, plan: 1, slipped: 1 }, showTabs = !!S.habit && !!TABS[s] && !(s === 'plan' && ui.planEdit);
+    tabsEl.hidden = !showTabs; document.documentElement.classList.toggle('has-tabs', showTabs);
+    tabsEl.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-current', b.dataset.tab === s ? 'page' : 'false'); });
     view.innerHTML = screens[s]();
     backBtn.classList.toggle('ghost', !BACK[s] && !ui.hist.length);
     fwdBtn.classList.toggle('ghost', !ui.fwd.length);
