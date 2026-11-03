@@ -541,6 +541,17 @@ html.has-tabs .screen { padding-bottom: 110px; }
 .legend2 i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
 .allgood { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 6px; background: #E3ECD8; color: var(--green); font-weight: 600; }
 .bignum { font-family: var(--display); font-size: 44px; line-height: 1; }
+.v2land .hero h1 { font-size: clamp(36px, 10vw, 46px); }
+.v2with { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--text-mid); }
+.v2with img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+.sdots { display: flex; gap: 6px; } .sdots i { width: 8px; height: 8px; border-radius: 50%; background: var(--cream-deep); } .sdots i.on { background: var(--navy); }
+.pickcard { display: flex; flex-direction: column; gap: 4px; text-align: left; width: 100%; padding: 16px; border-radius: 10px; border: 2px solid var(--navy); background: var(--white); font-size: 17px; }
+.pickcard b { font-weight: 600; } .pickcard span { font-size: 14px; color: var(--text-mid); }
+.pickcard[aria-pressed="true"] { background: var(--navy); color: var(--white); } .pickcard[aria-pressed="true"] span { color: #D9D4CA; }
+.thinking { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 60px 0; text-align: center; }
+.tdots { display: flex; gap: 8px; } .tdots i { width: 10px; height: 10px; border-radius: 50%; background: var(--amber); animation: tdot 1s infinite ease-in-out; }
+.tdots i:nth-child(2) { animation-delay: .15s; } .tdots i:nth-child(3) { animation-delay: .3s; }
+@keyframes tdot { 0%, 100% { opacity: .3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-4px); } }
 </style>
 </head>
 <body>
@@ -562,6 +573,6 @@ html.has-tabs .screen { padding-bottom: 110px; }
   </nav>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=v2e2"></script>
+<script src="app.js?v=v2e3"></script>
 </body>
 </html>

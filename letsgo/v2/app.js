@@ -96,6 +96,7 @@
   function save(touch) { if (touch !== false) S.updatedAt = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} if (user) queueSync(); }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+  S.viewChosen = true; // V2: no view choice in setup (research: a choice made before seeing either view). It stays in Settings.
   var view = document.getElementById('view');
   var tabsEl = document.getElementById('tabs');
   tabsEl.addEventListener('click', function (e) { var b = e.target.closest('button[data-tab]'); if (b && b.dataset.tab !== S.screen) go(b.dataset.tab); });
@@ -118,9 +119,9 @@
   function checkIcon(c) { return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'; }
   function pencil() { return '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>'; }
   // Setup steps: a numbered label, a bar that fills as you go, and the newest segment animates in.
-  function steps() { return S.draft.mode === 'less' ? ['what', 'when', 'feel', 'less', 'dimmer'] : ['what', 'when', 'feel', 'dimmer']; }
-  var STEP_LABEL = { what: 'Your habit', less: 'What you’ll do instead', feel: 'How it’ll feel', dimmer: 'Your tough-day plan', hard: 'When it gets hard', when: 'When' };
-  function stepLabel(k) { return k === 'feel' && S.draft.mode === 'less' ? 'What you’re moving towards' : STEP_LABEL[k]; }
+  function steps() { return S.draft.mode === 'less' ? ['feel', 'what', 'when', 'less', 'dimmer'] : ['feel', 'what', 'when', 'dimmer']; }
+  var STEP_LABEL = { what: 'Your first action', less: 'What you’ll do instead', feel: 'How it’ll feel', dimmer: 'Your tough-day plan', hard: 'When it gets hard', when: 'When' };
+  function stepLabel(k) { return k === 'feel' ? 'Picture it' : STEP_LABEL[k]; }
   function nextStep(k) { var st = steps(); return st[st.indexOf(k) + 1]; }
   function stepValid(k) { var d = S.draft; return k === 'what' ? !!d.what.trim() : k === 'feel' ? !!(d.feel.length || d.ownFeel.trim()) : k === 'less' ? !!d.instead.trim() : k === 'dimmer' ? !!d.dimmer.trim() : true; }
   function stepButton(k) { var nx = nextStep(k); return '<button class="btn" data-step-next="' + k + '" ' + (stepValid(k) ? '' : 'disabled') + '>' + (nx ? 'Next: ' + stepLabel(nx).toLowerCase() : 'Finish setup') + '</button>'; }
@@ -245,8 +246,9 @@
 
   // ── Screens ───────────────────────────────────────────────────────────────
   var BACK = {
-    what: function () { return S.draft.mineQ ? 'mine' : S.draft.found ? 'find' : 'landing'; }, mine: 'find', walk: 'tracker', name: 'landing', viewpick: function () { return S.nameAsked ? 'landing' : 'name'; }, wins: 'tracker', less: 'feel',
-    find: function () { var f = S.find || {}; if (f.step > 0) { f.step--; save(false); return 'find'; } return 'landing'; }, feel: 'when', when: 'what', dimmer: function () { return S.draft.mode === 'less' ? 'less' : 'feel'; }, hard: 'dimmer',
+    say: 'landing', hearing: function () { var d = S.draft; if (d.focusIdx != null && ((d.coach && d.coach.focuses) || []).length > 1) { d.focusIdx = null; d.acts = null; d.pick = null; save(false); return 'hearing'; } return 'say'; },
+    what: function () { return S.draft.mineQ ? 'mine' : 'feel'; }, mine: 'find', walk: 'tracker', name: function () { return S.draft.coach ? 'hearing' : 'landing'; }, viewpick: function () { return S.nameAsked ? 'landing' : 'name'; }, wins: 'tracker', less: 'when',
+    find: function () { var f = S.find || {}; if (f.step > 0) { f.step--; save(false); return 'find'; } return 'landing'; }, feel: function () { return S.draft.coach ? 'hearing' : S.draft.found ? 'find' : 'landing'; }, when: 'what', dimmer: function () { return S.draft.mode === 'less' ? 'less' : 'when'; }, hard: 'dimmer',
     length: function () { return ui.returnTo || 'ready'; }, progress: 'tracker', note: 'tracker', slipped: 'tracker', share: 'tracker', science: function () { return S.habit ? 'settings' : 'landing'; },
     words: function () { return ui.wordsFrom || 'tracker'; }, sendplan: 'ready', settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', calendar: function () { return ui.calFrom === 'install' ? 'install' : ui.calFrom || 'tracker'; }, install: function () { return ui.installFrom || (S.habit ? 'settings' : 'landing'); }, account: function () { return ui.returnTo || 'tracker'; }
   };
@@ -259,18 +261,49 @@
 
   var screens = {
     landing: function () {
-      return '<section class="screen landing">' +
-        '<div class="hero"><h1>Build a habit you want.</h1>' +
-        '<p class="sub">Or break one you don’t.</p>' +
-        '<p class="sub2">One minute to set up, one tap a day.</p></div>' +
-        '<div class="btns"><button class="btn" data-start="more">Build a habit</button>' +
-        '<button class="btn outline" data-start="less">Break a habit</button>' +
-        '<button class="link center" data-find="start">Not sure what to try? <b>Let’s work it out</b></button></div>' +
+      return '<section class="screen landing v2land">' +
+        '<div class="v2with"><img src="../stuart.jpg" alt="" width="40" height="40"><span>with Stuart Fairbairns PCC</span></div>' +
+        '<div class="hero"><h1>What do you want to change?</h1>' +
+        '<p class="sub">Something to start or something to stop. Say it messy, and we’ll turn it into one small step a day.</p></div>' +
+        '<div class="btns"><button class="btn" data-act="startplan">Start my plan</button>' +
+        '<p class="hint" style="text-align:center;margin:0">Not sure yet? That’s a perfectly good place to start.</p></div>' +
         '<div class="spacer"></div>' +
-        '<p class="foot">' + (user ? '' : '<button class="link inline" data-account="landing">Sign in</button> · ') +
-        (isStandalone() ? '' : '<button class="link inline" data-act="install">Get the app</button> · ') +
-        '<button class="link inline" data-go="science">How it works</button> · <a class="link inline" href="../privacy.html">Privacy</a> · <a class="link inline" href="../terms.html">Terms</a></p>' +
+        '<p class="hint" style="text-align:center;margin:0">A few minutes to set up. One tap a day after that.</p>' +
+        '<p class="foot">' + (user ? '' : '<button class="link inline" data-account="landing">I already have an account</button> · ') +
+        '<a class="link inline" href="../privacy.html">Privacy</a> · <a class="link inline" href="../terms.html">Terms</a></p>' +
         (isTester() ? '<button class="link center" data-act="testerreset" style="font-size:13px;color:var(--muted)">Testing: start again from scratch</button>' : '') + '</section>';
+    },
+    say: function () {
+      var d = S.draft, ex = ['get moving most mornings', 'stop scrolling before bed', 'make proper time for the business', 'feel less on autopilot'];
+      return '<section class="screen"><div class="sdots" aria-label="Getting started"><i class="on"></i><i></i><i></i></div>' +
+        '<h1>In your own words, what would you like to change?</h1>' +
+        '<p class="lede">Messy is fine. Type it or tap Speak.</p>' +
+        '<div class="field"><textarea id="sayans" rows="3" style="min-height:120px" placeholder="I’d like to...">' + esc(d.say || '') + '</textarea>' + micButton() + '</div>' +
+        '<div class="starters">' + ex.map(function (s) { return '<button class="chip" data-sayex="' + esc(s) + '">' + esc(s) + '</button>'; }).join('') + '</div>' +
+        '<button class="chip" data-find="start" style="align-self:flex-start">I’m not sure yet. Help me choose.</button>' +
+        '<p class="hint">Private. Read by our AI helper to shape your plan, never shared or kept.</p>' +
+        '<div class="spacer"></div><button class="btn" data-act="shape"' + ((d.say || '').trim() ? '' : ' disabled') + '>Shape my focus</button></section>';
+    },
+    hearing: function () {
+      var d = S.draft, c = d.coach || {};
+      var top = '<section class="screen"><div class="sdots" aria-label="Getting started"><i class="on"></i><i class="on"></i><i></i></div>';
+      if (ui.coachBusy) return top + '<div class="thinking" role="status"><span class="tdots" aria-hidden="true"><i></i><i></i><i></i></span><p class="lede" style="margin:0">' + (ui.coachBusy === 'actions' ? 'Finding a good first step…' : 'Reading what you wrote…') + '</p></div></section>';
+      if (c.care) return top + '<h1>Before anything else</h1>' + stuCard(esc(c.care)) + '<button class="btn outline" data-go="say">Back</button></section>';
+      var fs = c.focuses || [];
+      if (d.focusIdx == null && fs.length > 1) {
+        return top + '<h1>Here’s what I’m hearing</h1>' + (c.reply ? '<p class="lede">' + esc(c.reply) + '</p>' : '') +
+          stuCard('I’m hearing more than one thing here. Working on one at a time is what makes it stick. Which one first? The others will wait in Later.') +
+          fs.map(function (f, i) { return '<button class="pickcard" data-focus="' + i + '"><b>' + esc(f.title) + '</b><span>You said: “' + esc(f.heard) + '”</span></button>'; }).join('') +
+          '<div class="spacer"></div></section>';
+      }
+      var f = fs[d.focusIdx || 0] || { title: d.say }, acts = d.acts || [];
+      return top + '<div class="eyebrow">Your focus</div><h1>' + esc(f.title) + '</h1>' +
+        (fs.length < 2 && c.reply ? '<p class="lede">' + esc(c.reply) + '</p>' : '') +
+        '<div class="allgood"><span class="bigstar" style="width:18px;height:18px"></span>You’ve done the hardest bit: naming it.</div>' +
+        (acts.length ? '<h2>Pick a first small step</h2>' + acts.map(function (x, i) { return '<button class="pickcard" data-act1="' + i + '" aria-pressed="' + (d.pick === i) + '"><b>' + esc(x.text) + '</b>' + (x.why ? '<span>' + esc(x.why) + '</span>' : '') + '</button>'; }).join('') +
+          '<button class="link" data-act1="own">I’ll write my own</button>' : '<button class="btn outline" data-act="coachacts">Suggest a first step</button>') +
+        (d.later && d.later.length ? '<p class="hint">Waiting in Later: ' + d.later.map(esc).join(', ') + '</p>' : '') +
+        '<div class="spacer"></div><button class="btn" data-act="hearingnext"' + (d.pick != null ? '' : ' disabled') + '>Next</button></section>';
     },
     what: function () {
       var d = S.draft, more = d.mode === 'more';
@@ -336,13 +369,10 @@
         '<div class="spacer"></div>' + stepButton('less') + '</section>';
     },
     feel: function () {
-      var d = S.draft, less = d.mode === 'less', list = less ? GAINS : FEELINGS;
-      var h = '<section class="screen">' + progress('feel') + '<h1>' + (less ? 'What are you moving towards?' : 'When you’ve done it, how will you feel?') + '</h1>' +
-        '<p class="lede">' + (less ? 'Cutting back is the how. This is the why. Tap a few.' : 'Tap a few.') + '</p><div class="chips">';
-      list.forEach(function (f, i) { h += '<button class="chip' + (i >= 6 && !ui.moreChips && d.feel.indexOf(f) < 0 ? ' extra' : '') + '" data-feel="' + esc(f) + '" aria-pressed="' + (d.feel.indexOf(f) >= 0) + '">' + esc(f) + '</button>'; });
-      h += '</div>' + (ui.moreChips ? '' : '<button class="link focus-only" data-act="morechips">Show more words</button>');
-      return h + '<div class="field"><label class="label" for="own">Your own words (optional)</label>' +
-        '<textarea id="own" rows="1" data-bind="ownFeel" placeholder="' + (less ? 'Fit into my jeans, wake up fresh' : 'Separate with commas') + '">' + esc(d.ownFeel) + '</textarea></div>' +
+      var d = S.draft;
+      return '<section class="screen">' + progress('feel') + '<h1>Picture it going well a month from now. What’s different?</h1>' +
+        '<p class="lede">One line is plenty. This is what you’re moving towards.</p>' +
+        '<div class="field"><textarea id="own" rows="2" data-bind="ownFeel" placeholder="I feel lighter, I’ve got energy for the kids and I trust myself again">' + esc(d.ownFeel) + '</textarea></div>' +
         '<div class="spacer"></div>' + stepButton('feel') + '</section>';
     },
     dimmer: function () {
@@ -495,8 +525,7 @@
         '<p class="hint">Good if you like to see the full picture. Prefer fewer words on screen? Try Focused.</p>' + go + '</section>';
     },
     name: function () {
-      return '<section class="screen"><div><div class="eyebrow">Before we start</div><h1>What should we call you?</h1></div>' +
-        '<p class="lede" style="margin-top:-6px">We’ll use it when we check in with you.</p>' +
+      return '<section class="screen">' + stuCard('Lovely start. I’m Stu, and I’ll be checking in with you along the way.') + '<h1>What should Stu call you?</h1>' +
         '<div class="field"><label class="label" for="firstname">Your name</label><textarea id="firstname" rows="1" autocomplete="given-name" autocapitalize="words" spellcheck="false" enterkeyhint="next" maxlength="40" placeholder="First name, or a nickname">' + esc(firstName()) + '</textarea></div>' +
         '<div class="spacer"></div><button class="btn" data-namego="go">Continue</button><button class="link center" data-namego="skip">Skip for now</button></section>';
     },
@@ -1488,6 +1517,7 @@
     var t = e.target;
     if (t.tagName === 'TEXTAREA') grow(t);
     if (t.id === 'walkplan') ui.walkPlan = t.value;
+    if (t.id === 'sayans') { S.draft.say = t.value; save(false); var sb2 = view.querySelector('[data-act="shape"]'); if (sb2) sb2.disabled = !t.value.trim(); }
     if (t.dataset.bind) {
       S.draft[t.dataset.bind] = t.value; save(false);
       var pn = document.getElementById('previewName'); if (pn && t.dataset.bind === 'what') { pn.textContent = t.value.trim() || 'Your habit'; var pw = document.getElementById('previewWrap'); if (pw) pw.style.display = t.value.trim() ? 'flex' : 'none'; }
@@ -1533,7 +1563,10 @@
     if (d.winidea) { var wt = document.getElementById('winname'); if (wt) { wt.value = d.winidea; ui.winDraft = d.winidea; grow(wt); wt.focus(); } return; }
     if (d.walkdid) { var yw = walks()[todayNum() - 1]; if (yw) { yw.did = d.walkdid; save(); stat('walkdid', d.walkdid); } if (d.walkdid !== 'no') toast(d.walkdid === 'yes' ? 'Good. That’s how it builds.' : 'Partly still counts.'); else toast('Noted. Today’s a fresh go.'); return render(); }
     if (d.walkwhen) { S.settings.walkWhen = d.walkwhen; save(); return render(); }
-    if (d.mic) { if (S.screen === 'walk') { var wpt = document.getElementById('walkplan'); return toggleMic(b, wpt, function () { ui.walkPlan = wpt.value; }); } if (S.screen === 'mine') { var mt = document.getElementById('mine'); return toggleMic(b, mt, function () { S.draft.mine = mt.value; save(false); var mb = view.querySelector('[data-act="minedone"]'); if (mb) mb.disabled = !mt.value.trim(); }); } return toggleMic(b); }
+    if (d.sayex) { var st0 = document.getElementById('sayans'); st0.value = (st0.value.trim() ? st0.value.trim() + '. ' : 'I’d like to ') + d.sayex; st0.dispatchEvent(new Event('input', { bubbles: true })); grow(st0); return; }
+    if (d.focus != null && S.screen === 'hearing') return pickFocus(+d.focus);
+    if (d.act1 != null) { if (d.act1 === 'own') { S.draft.pick = -1; S.draft.what = ''; S.draft.dimmer = ''; save(false); return askNameThen('feel'); } S.draft.pick = +d.act1; save(false); return render(); }
+    if (d.mic) { if (S.screen === 'say') { var sa = document.getElementById('sayans'); return toggleMic(b, sa, function () { S.draft.say = sa.value; save(false); var sb3 = view.querySelector('[data-act="shape"]'); if (sb3) sb3.disabled = !sa.value.trim(); }); } if (S.screen === 'walk') { var wpt = document.getElementById('walkplan'); return toggleMic(b, wpt, function () { ui.walkPlan = wpt.value; }); } if (S.screen === 'mine') { var mt = document.getElementById('mine'); return toggleMic(b, mt, function () { S.draft.mine = mt.value; save(false); var mb = view.querySelector('[data-act="minedone"]'); if (mb) mb.disabled = !mt.value.trim(); }); } return toggleMic(b); }
     if (d.horizon) { findSave(); S.find.horizon = d.horizon; save(false); return render(); }
     if (d.struggleBack) { ui.struggle = null; return render(); }
     if (d.back) return goBack();
@@ -1573,6 +1606,10 @@
     switch (d.act) {
       case 'ideas': ui.ideasOpen = true; return render();
       case 'closeideas': if (e.target.closest('[data-stop]') && !b.matches('button')) return; ui.ideasOpen = false; return render();
+      case 'startplan': S.draft = fresh().draft; save(false); return go('say');
+      case 'shape': return void coachUnderstand();
+      case 'coachacts': return void coachActions();
+      case 'hearingnext': return hearingNext();
       case 'finish': return finishSetup();
       case 'later': S.later = true; if (S.habit && !count(function () { return true; })) S.habit.start = addDays(todayStr(), 1); save(); return render();
       case 'gosettings': return go('settings');
@@ -1949,6 +1986,53 @@
     } catch (e) {}
     ui.lighterBusy = false; if (S.screen === 'dimmer') render();
   }
+  // ── V2 setup coach (letsgo-coach): hears what they wrote, spots more than one focus, suggests a first small step ──
+  async function coachCall(body) {
+    if (!sb || !(await ensureGuest())) throw new Error('sign_in');
+    var r = await sb.functions.invoke('letsgo-coach', { body: body });
+    if (r.error) { var m = 'failed'; try { m = (await r.error.context.json()).error || m; } catch (e) {} throw new Error(m); }
+    return r.data || {};
+  }
+  function guessMode(text) { return /\b(stop|quit|cut (back|down)|less|no more|give up|fewer)\b/i.test(text || '') ? 'less' : 'more'; }
+  async function coachUnderstand() {
+    var d = S.draft; if (!(d.say || '').trim()) return;
+    d.coach = null; d.focusIdx = null; d.acts = null; d.pick = null; d.later = [];
+    ui.coachBusy = 'understand'; save(false); go('hearing');
+    try {
+      var r = await coachCall({ kind: 'understand', said: d.say });
+      d.coach = r.at_risk ? { care: r.care } : { reply: r.reply || '', focuses: r.focuses || [] };
+      stat('coach', r.at_risk ? 'care' : 'focuses:' + (r.focuses || []).length);
+    } catch (e) {
+      d.coach = { reply: '', focuses: [{ title: d.say.trim().split(/[.:;\n]/)[0].slice(0, 60), heard: d.say.trim(), towards: '', outcome_examples: [] }] };
+      toast(e.message === 'limit' ? 'That’s the AI helper’s limit for today. You can carry on and write your own step.' : 'Couldn’t reach the AI helper just now. You can carry on and write your own step.');
+    }
+    ui.coachBusy = null; save(false);
+    if (!d.coach.care && (d.coach.focuses || []).length < 2) return pickFocus(0);
+    render();
+  }
+  function pickFocus(i) {
+    var d = S.draft, fs = (d.coach && d.coach.focuses) || [], f = fs[i] || {};
+    d.focusIdx = i; d.later = fs.filter(function (x, j) { return j !== i; }).map(function (x) { return x.title; });
+    d.focusTitle = f.title || ''; if (f.towards && !d.ownFeel) d.ownFeel = f.towards;
+    d.mode = guessMode((f.heard || '') + ' ' + (d.say || '')); save(false);
+    return void coachActions();
+  }
+  async function coachActions() {
+    var d = S.draft, f = ((d.coach && d.coach.focuses) || [])[d.focusIdx || 0] || {};
+    ui.coachBusy = 'actions'; render();
+    try {
+      var r = await coachCall({ kind: 'actions', said: d.say, title: f.title || d.say, towards: f.towards || '', outcome: (f.outcome_examples || [])[0] || '', why: '' });
+      if (r.at_risk) d.coach = { care: r.care };
+      else { d.acts = (r.actions || []).slice(0, 3); d.coachHelpers = r.helpers || []; d.coachNote = r.note || ''; if (d.acts.length === 1) d.pick = 0; }
+    } catch (e) { d.acts = []; toast('Couldn’t reach the AI helper just now. You can write your own first step.'); }
+    ui.coachBusy = null; save(false); render();
+  }
+  function hearingNext() {
+    var d = S.draft, x = (d.acts || [])[d.pick];
+    if (x) { d.what = x.text; d.dimmer = x.small || d.dimmer; d.upVersion = x.up || ''; }
+    save(false); askNameThen('feel');
+  }
+
   async function ensureGuest() {
     if (user || guest) return true;
     if (!sb || !sb.auth || !sb.auth.signInAnonymously) return false;

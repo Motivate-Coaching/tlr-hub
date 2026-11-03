@@ -1,6 +1,6 @@
 /* Let's Go! V2 preview service worker. Its own scope (/letsgo/v2/), so it installs as a separate app from V1.
    Network first so updates land straight away; the saved copy is only used offline. Only touches its own caches. */
-const CACHE = 'letsgo-v2-e2';
+const CACHE = 'letsgo-v2-e3';
 self.addEventListener('install', (e) => { self.skipWaiting(); });
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k.startsWith('letsgo-v2-') && k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
