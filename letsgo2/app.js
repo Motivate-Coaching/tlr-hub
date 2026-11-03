@@ -264,7 +264,7 @@
       return '<section class="screen landing v2land">' +
         '<div class="v2with"><img src="../letsgo/stuart.jpg" alt="" width="40" height="40"><span>with Stuart Fairbairns PCC</span></div>' +
         '<div class="hero"><h1>Build a habit you want. Or break one you don’t.</h1>' +
-        '<p class="sub">Wherever you’re starting from, we’ll help you shape a plan that fits your life, and stick with it.</p></div>' +
+        '<p class="sub">Wherever you’re starting from, we’ll help you shape a plan that fits your life, and help you stick with it.</p></div>' +
         '<div class="btns"><button class="btn" data-act="startplan" data-mode="more">Build a habit</button>' +
         '<button class="btn outline" data-act="startplan" data-mode="less">Break a habit</button>' +
         '<button class="link center" data-find="start">Not sure what to work on? <b>Help me choose</b></button></div>' +
