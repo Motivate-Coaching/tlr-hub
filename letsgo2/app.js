@@ -37,7 +37,7 @@
     if (d === t && S.entries[t]) return h;
     return h + '<button class="card askhelp walkcard" data-go="walk"><span class="ahtxt"><b>Walk it through' + (d > t ? ' for tomorrow' : '') + '</b><span>About a minute. See yourself doing it.</span></span><span class="chev" aria-hidden="true">›</span></button>';
   }
-  function anchorLine(h) { h = h || S.habit || S.draft; var a = ((h.extra && h.extra.anchor) || h.anchor || '').trim(); if (!a) return ''; return h.mode === 'less' ? 'Usually ' + a : 'After I ' + a; }
+  function anchorLine(h) { h = h || S.habit || S.draft; var a = ((h.extra && h.extra.anchor) || h.anchor || '').trim().replace(/^(after i|usually)\b[\s,.:]*/i, ''); if (!a) return ''; return h.mode === 'less' ? 'Usually ' + a : 'After I ' + a; }
   var GIVES = ['Autopilot', 'Tired', 'Stressed', 'Bored', 'Comfort', 'A reward', 'A break', 'Not sure'];
   // For cutting back: what you're moving towards (outcomes and feelings together).
   var GAINS = ['Better sleep', 'More energy', 'Better health', 'Lighter', 'Clear-headed', 'In control', 'Proud', 'Calm', 'Money saved', 'Like me again', 'Free', 'More present'];
@@ -877,7 +877,7 @@
     tabsEl.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-current', b.dataset.tab === s ? 'page' : 'false'); });
     view.innerHTML = screens[s]();
     // V2 design layer: on setup question screens, the question and its answer sit together in one clear card.
-    if (['feel', 'what', 'when', 'less', 'dimmer', 'hard', 'mine', 'say', 'name', 'note'].indexOf(s) >= 0) {
+    if (['feel', 'what', 'when', 'less', 'dimmer', 'hard', 'mine', 'say', 'name', 'note', 'sendplan', 'account', 'length'].indexOf(s) >= 0) {
       var sec = view.querySelector('section.screen'), h1 = sec && sec.querySelector(':scope > h1, :scope > div > h1');
       if (h1) {
         var card = document.createElement('div'); card.className = 'qcard';
@@ -1375,7 +1375,7 @@
     var hb = S.habit, k = ui.struggle, ex = extra(), worked = ex.worked || [], hard = ex.hard || {};
     var h = '<section class="screen"><div><div class="eyebrow">I’m struggling</div><h1>' + (k === 'life' ? 'Life happens.' : k ? esc(STRUGGLE[k].label) + '.' : 'Thanks for being honest.') + '</h1></div>';
     if (!k) {
-      h += stuCard('Struggling doesn’t mean you’ve failed. It means it matters. Which feels closest?') + '<div style="display:flex;flex-direction:column;gap:10px">';
+      h += stuCard('Struggling doesn’t mean it isn’t working. It means it matters. Which feels closest?') + '<div style="display:flex;flex-direction:column;gap:10px">';
       Object.keys(STRUGGLE).forEach(function (key) { h += '<button class="choice" style="min-height:62px" data-struggle="' + key + '"><b>' + esc(STRUGGLE[key].label) + '</b></button>'; });
       h += '<button class="choice" style="min-height:62px" data-struggle="life"><b>Something came up</b></button></div>';
       return h + '</section>';
@@ -1837,7 +1837,7 @@
       return '<div class="prow"><span class="pic">' + icon + '</span><div class="pbody"><small>' + label + '</small>' + body + '</div>' + edit + '</div>';
     };
     var ed = '<button class="pedit" data-act="planedit">Edit</button>';
-    var chips = '<div class="pchips">' + words().map(function (w, i) { return '<span' + (i === 0 ? ' class="first"' : '') + '>' + esc(w.toLowerCase()) + '</span>'; }).join('') + '</div>';
+    var ws = words(), chips = ws.length === 1 && /\s/.test(ws[0]) ? '<b>' + esc(ws[0].charAt(0).toUpperCase() + ws[0].slice(1)) + '</b>' : '<div class="pchips">' + ws.map(function (w, i) { return '<span' + (i === 0 ? ' class="first"' : '') + '>' + esc(w.toLowerCase()) + '</span>'; }).join('') + '</div>';
     if (S.settings.view === 'focus') {
       return '<div class="plancard">' + row(PICON.what, less ? 'I’m cutting back on' : 'I’m going to', '<b>' + esc(h.what) + '</b><span class="psub">' + daysPhrase() + '</span>', '') +
         (anchorLine(h) ? row(PICON.when, 'When', '<b>' + esc(anchorLine(h)) + '</b>', '') : '') +
