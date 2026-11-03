@@ -534,7 +534,7 @@
       var L = S.habit.length, days = Math.min(todayNum(), L), n = count(function (x, k) { return k <= L; }), pct = Math.round(n / Math.max(1, days) * 100);
       var dots = '<div class="sharedots">'; for (var i = 1; i <= L; i++) dots += '<i class="' + (S.entries[i] ? 'on' : (i <= days ? 'off' : 'ahead')) + '"></i>'; dots += '</div>';
       return '<section class="screen"><div><div class="eyebrow">Share that I did it</div><h1>Your progress</h1></div><p class="lede">Only your habit and the days you showed up. Never your notes.</p>' +
-        '<div class="sharecard" id="sharecard"><div class="head"><span class="eyebrow" style="color:var(--cream-dark)">' + L + '-day challenge</span><span class="wordmark">Let’s Go<span class="bang">!</span></span></div>' +
+        '<div class="sharecard" id="sharecard"><div class="head"><span class="eyebrow" style="color:var(--cream-dark)">' + L + '-day challenge</span><span class="wordmark">Let’s Go<span class="bang">!</span><sup class="tm" aria-hidden="true">™</sup></span></div>' +
         '<h2>' + esc(habitName()) + '</h2>' + dots +
         '<div class="sharestat"><b>' + pct + '%</b><span>Showed up ' + n + ' of ' + days + ' days</span></div></div>' +
         '<button class="btn" data-act="shareimg">Share my card</button>' +
@@ -617,7 +617,7 @@
         '<a class="link" href="../letsgo/privacy.html" style="align-self:flex-start">Privacy notice</a>' + '<a class="link" href="../letsgo/terms.html" style="align-self:flex-start">Terms of use</a>' +
         '<button class="switch" role="switch" aria-checked="' + !!s.tlrMember + '" data-act="tlrtoggle"><span><b>I’m in The Living Room</b><span class="hint">Shows member prices for booster calls.</span></span><span class="track"></span></button>' + (user ? '<button class="link" data-act="signout" style="align-self:flex-start">Sign out</button>' : ''));
       if (!isStandalone()) h += sect('Get the app', '<span>Put it on your home screen so it opens like an app.</span><button class="btn outline" data-act="install">Show me how</button>');
-      h += sect('About', '<button class="link" data-go="science" style="align-self:flex-start">The science behind it</button><a class="link tlr-link" href="https://www.motivate-coaching.com/thelivingroom" target="_blank" rel="noopener" style="align-self:flex-start">About The Living Room (TLR) <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a>');
+      h += sect('About', '<button class="link" data-go="science" style="align-self:flex-start">The science behind it</button><a class="link tlr-link" href="https://www.motivate-coaching.com/thelivingroom" target="_blank" rel="noopener" style="align-self:flex-start">About The Living Room (TLR) <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a><p class="hint" style="margin:4px 0 0">Let’s Go!™ is a trade mark of Stuart Fairbairns, trading as Motivate Coaching.</p>');
       return h + '</div></section>';
     },
     edit: function () { ui.planEdit = true; return planEditor(); },
@@ -869,6 +869,7 @@
   function render() {
     var s = screens[S.screen] ? S.screen : 'landing';
     if (s === 'tracker' && !S.habit) s = 'landing';
+    document.documentElement.setAttribute('data-screen', s);
     var focus = S.settings.view === 'focus';
     document.documentElement.classList.toggle('focus-mode', focus);
 
