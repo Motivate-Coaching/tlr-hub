@@ -117,6 +117,62 @@ async function lighter(admin: ReturnType<typeof createClient>, user: { id: strin
   return json({ options })
 }
 
+// Themes (V2 "Help me choose", step 1): every theme in what they said, so they choose the focus themselves.
+// Anything mentioned even once is kept, because a single mention can matter most to them. Its own daily allowance.
+const THEMES_LIMIT = 15
+const THEMES_TOOL = {
+  name: 'themes',
+  description: 'Give back the themes in what they shared.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      themes: {
+        type: 'array',
+        description: 'Every distinct theme they mention, up to 6, most talked about first. Include anything mentioned even once.',
+        items: { type: 'object', properties: { name: { type: 'string', description: 'The theme in 1 to 4 plain words, using their words where possible, e.g. Fitness and strength, Learning to cook.' }, noticed: { type: 'string', description: "One short sentence to them, starting 'You mentioned', using their words." } }, required: ['name', 'noticed'] },
+      },
+      at_risk: { type: 'boolean', description: 'True only if they may be at risk of harming themselves or are in crisis.' },
+      care: { type: 'string', description: 'Only when at_risk is true: a short, kind message encouraging them to talk to someone they trust or a local helpline.' },
+    },
+    required: ['at_risk', 'themes'],
+  },
+}
+async function themes(admin: ReturnType<typeof createClient>, user: { id: string; app_metadata?: Record<string, unknown> }, body: { mode?: string; text?: string }) {
+  const text = String(body.text || '').trim().slice(0, 4000)
+  if (!text) return json({ error: 'empty' }, 400)
+  const today = new Date().toISOString().slice(0, 10)
+  const u = (user.app_metadata?.showup_themes || {}) as { day?: string; n?: number }
+  const used = u.day === today ? u.n || 0 : 0
+  if (used >= THEMES_LIMIT) return json({ error: 'limit' }, 429)
+  const sys = `You help someone choose one focus for a habit challenge, inside an app made by Stuart Fairbairns, an ICF PCC coach.
+They have written or spoken freely, so it may be long and messy. List the distinct things they would like to change, so they can choose one themselves.
+Keep every distinct wish, including anything mentioned only once: a single mention can be the thing that matters most. When the same wish comes up in different words, give it once (for example "get fitter" and "being fit is the big one" are one theme). Most talked about first. Up to 6.
+${body.mode === 'less' ? 'They want to cut back on or stop something, so each theme is a thing to do less of.' : 'Each theme is something they would love more of or want to change.'}
+Speak to them as "you". Use their own words. British English. No dashes, no exclamation marks. Never diagnose or judge. Never invent anything.
+If anything suggests they may be at risk of harming themselves or are in crisis, set at_risk to true, give a short kind care message, and leave themes empty.
+Use the themes tool.`
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+    body: JSON.stringify({ model: MODEL, max_tokens: 700, system: sys, tools: [THEMES_TOOL], tool_choice: { type: 'tool', name: 'themes' }, messages: [{ role: 'user', content: text }] }),
+  })
+  if (!res.ok) { console.error('[showup-reflect] themes', res.status); return json({ error: 'ai_unavailable' }, 502) }
+  const data = await res.json()
+  const call = (data.content || []).find((c: { type?: string; name?: string }) => c.type === 'tool_use' && c.name === 'themes')
+  const p = call?.input || {}
+  let t: unknown = p.themes
+  if (typeof t === 'string') { try { t = JSON.parse(t) } catch { t = [] } }
+  const clean = (x: unknown) => String(x || '').replace(/\s*[–—]\s*/g, ', ').replace(/!/g, '.').trim()
+  if (p.at_risk === true || p.at_risk === 'true') {
+    const c = clean(p.care).replace(/^["'“”‘’\s]+|["'“”‘’\s]+$/g, '')
+    return json({ themes: [], care: /[a-z]{3}/i.test(c) ? c : 'It sounds like a lot is going on for you right now. Please talk to someone you trust, or a local helpline, today. You don’t have to carry this on your own.' })
+  }
+  const list = (Array.isArray(t) ? t : []).map((x: { name?: string; noticed?: string }) => ({ name: clean(x?.name), noticed: clean(x?.noticed) })).filter((x) => x.name).slice(0, 6)
+  if (!list.length) return json({ error: 'nothing' }, 422)
+  await admin.auth.admin.updateUserById(user.id, { app_metadata: { ...(user.app_metadata || {}), showup_themes: { day: today, n: used + 1 } } })
+  return json({ themes: list, care: '' })
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
@@ -134,12 +190,14 @@ Deno.serve(async (req) => {
   const usage = (user.app_metadata?.showup_ai || {}) as { day?: string; n?: number }
   const used = usage.day === today ? usage.n || 0 : 0
 
-  let body: { kind?: string; what?: string; anchor?: string; mode?: string; answers?: Record<string, string>; wins?: { name: string; outcome: string }[]; horizon?: string }
+  let body: { kind?: string; text?: string; focus?: string; what?: string; anchor?: string; mode?: string; answers?: Record<string, string>; wins?: { name: string; outcome: string }[]; horizon?: string }
   try { body = await req.json() } catch { return json({ error: 'bad_request' }, 400) }
   if (body.kind === 'lighter') return lighter(admin, user, body)
+  if (body.kind === 'themes') return themes(admin, user, body)
   if (used >= DAILY_LIMIT) return json({ error: 'limit' }, 429)
+  const focus = String(body.focus || '').replace(/\s+/g, ' ').trim().slice(0, 80)
   const labels: Record<string, string> = {
-    proud: `Looking back from ${body.horizon || 'three months'} from now, what would make you insanely proud`,
+    proud: focus ? `Picturing a year from now, insanely proud of themselves, what they did about ${focus}` : `Looking back from ${body.horizon || 'three months'} from now, what would make you insanely proud`,
     years: 'Something wanted for years and never got round to',
     new: 'Something new to explore',
     admire: 'Someone admired, and what they would love to get better at',
@@ -161,7 +219,7 @@ Deno.serve(async (req) => {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-    body: JSON.stringify({ model: MODEL, max_tokens: 1400, system: SYSTEM, tools: [TOOL], tool_choice: { type: 'tool', name: 'ideas' }, messages: [{ role: 'user', content: (less ? 'They want to cut back on or stop something. For each challenge, "title" is the behaviour to cut back on, in plain words, such as "Scrolling in bed late at night". "daily" is the simple rule or swap for most days, starting with a verb so it finishes "I\'ll...", such as "Charge my phone outside the bedroom".\n\n' : '') + lines.join('\n') }] }),
+    body: JSON.stringify({ model: MODEL, max_tokens: 1400, system: SYSTEM, tools: [TOOL], tool_choice: { type: 'tool', name: 'ideas' }, messages: [{ role: 'user', content: (focus ? `They have chosen to focus on: ${focus}. Give exactly one area, named "${focus}" (tidied to 1 to 4 words if needed). Use everything they wrote that relates to it, and nothing else.\n\n` : '') + (less ? 'They want to cut back on or stop something. For each challenge, "title" is the behaviour to cut back on, in plain words, such as "Scrolling in bed late at night". "daily" is the simple rule or swap for most days, starting with a verb so it finishes "I\'ll...", such as "Charge my phone outside the bedroom".\n\n' : '') + lines.join('\n') }] }),
   })
   if (!res.ok) { console.error('[showup-reflect] anthropic', res.status, (await res.text()).slice(0, 300)); return json({ error: 'ai_unavailable' }, 502) }
   const data = await res.json()
