@@ -926,6 +926,11 @@
     S.screen = s; save(false); render();
   }
   function goBack() {
+    if (S.screen === 'find' && S.find && S.find.focus) {
+      var ff = S.find;
+      if (ff.step >= FIND_QS().length) { ff.step = 1; ff.ai = null; ff.aiTried = false; save(false); return render(); }
+      if (ff.step === 1) { ff.focus = null; save(false); return render(); }
+    }
     if (S.screen === 'find' && S.find && S.find.ai && S.find.r && S.find.r !== 'areas') { S.find.r = S.find.r === 'ideas' ? 'insight' : 'areas'; save(false); return render(); }
     if (S.screen === 'find' && S.find && S.find.step > 0) { S.find.step--; save(false); return render(); }
     var prev = ui.hist.pop();
@@ -1127,7 +1132,8 @@
   var HORIZONS = [['30', '30 days'], ['90', 'three months'], ['365', 'a year']];
   function horizonLabel() { var f = S.find || {}, h = HORIZONS.filter(function (x) { return x[0] === f.horizon; })[0] || HORIZONS[1]; return h[1]; }
   function FIND_QS() {
-    var proud = { key: 'proud', q: 'Picture yourself a year from now. You’re feeling insanely proud of yourself. What did you do to feel this way?', hint: 'Picture how life feels, not just the thing you did.', ph: 'e.g. I finally sorted my sleep, and my evenings are mine again' };
+    var fc = S.find && S.find.focus;
+    var proud = { key: 'proud', q: fc ? 'Picture yourself a year from now, feeling insanely proud of yourself. When it comes to ' + fc.charAt(0).toLowerCase() + fc.slice(1) + ', what did you do?' : 'Picture yourself a year from now. You’re feeling insanely proud of yourself. What did you do to feel this way?', hint: fc ? 'Picture how life feels, not just the thing you did. Write or speak as much as you like.' : 'Picture how life feels, not just the thing you did.', ph: fc ? 'What did you do, and how does life feel now?' : 'e.g. I finally sorted my sleep, and my evenings are mine again' };
     if (S.find && S.find.mode === 'less') return [
       { key: 'drain', q: 'What’s something you do regularly that costs you more than it gives you?', hint: 'Write or speak as much as you like. Share whatever comes to mind, and we’ll pick out a few things you could focus on.', ph: 'e.g. Scrolling in bed at night, too much chocolate, not being present with family' },
       proud
@@ -1189,6 +1195,7 @@
   }
   function findScreen() {
     var f = S.find || (S.find = { step: 0, answers: {} }), qs = FIND_QS();
+    if (f.step === 1 && !f.focus && (f.answers[qs[0].key] || '').trim()) return themesScreen(f);
     if (f.step < qs.length) {
       var q = qs[f.step], v = f.answers[q.key] || '';
       var bar = '<div class="progress" style="grid-template-columns:repeat(' + qs.length + ',1fr)" aria-hidden="true">' + qs.map(function (x, i) { return '<span' + (i <= f.step ? ' class="on"' : '') + '></span>'; }).join('') + '</div>';
@@ -1201,6 +1208,41 @@
         '<button class="link center" data-find="skip">Skip this one</button></section>';
     }
     return ideasScreen(f);
+  }
+  // Step 1 of the funnel: everything they said, as themes. They choose one; the rest wait in Later.
+  // Choosing one wish first, then picturing the best outcome for it, follows WOOP (Oettingen); one goal at a time follows Dalton and Spiller (2012).
+  function themesScreen(f) {
+    var top = '<section class="screen"><div><div class="eyebrow">Challenge ideas · 1 of 2</div>';
+    var src = (f.answers[FIND_QS()[0].key] || '').trim();
+    if (f.themes && f.themesFor !== src) f.themes = null;
+    var th = f.themes;
+    if (th && careText(th)) return top + '<h1>Before anything else.</h1></div><div class="why"><span>' + esc(careText(th)) + '</span></div></section>';
+    if (!th || !(th.themes || []).length) {
+      if (!user && !guest) {
+        if (authChecked && !ui.guestFailed && !ui.guestTrying) { ui.guestTrying = true; ensureGuest().then(function (ok) { ui.guestTrying = false; if (!ok) ui.guestFailed = true; render(); }); }
+        if (ui.guestFailed) return top + '<h1>Add your email to carry on.</h1></div><p class="lede">We’ll read what you shared and pick out what you could focus on. It also saves your progress.</p><button class="btn" data-account="find">Add my email</button>' + themeOwn() + '</section>';
+      } else if (!ui.themesBusy && !ui.themesFailed) setTimeout(themesAI, 0);
+      if (ui.themesFailed) return top + '<h1>We couldn’t reach it just now.</h1></div><button class="btn" data-find="themesretry">Try again</button>' + themeOwn() + '</section>';
+      return top + '<h1>Reading what you shared…</h1></div><p class="lede">Picking out everything you mentioned. This takes a few seconds.</p><div class="dotpulse" aria-hidden="true"><span></span><span></span><span></span></div></section>';
+    }
+    var h = top + '<h1>Here’s what we heard.</h1></div><p class="lede">You mentioned ' + (th.themes.length === 1 ? 'one thing' : th.themes.length + ' things') + '. Which one would you like to work on first? The others wait for you in Later.</p><div style="display:flex;flex-direction:column;gap:10px">';
+    th.themes.forEach(function (t, i) { h += '<button class="pickcard" data-find="theme" data-i="' + i + '"><b>' + esc(t.name) + '</b><span>' + esc(t.noticed) + '</span></button>'; });
+    var why = '<div class="why"><span class="eyebrow">Why one thing</span><span>A clear plan helps people follow through on one goal, but stops helping once they take on several. Pick the one that matters most right now. You can come back for the others.</span></div>';
+    h += '</div>' + (S.settings.view === 'focus' ? tapToSee('Why just one?', why) : why);
+    return h + themeOwn() + '</section>';
+  }
+  function themeOwn() { return '<div class="field"><label class="label" for="ownfocus">Something else?</label><textarea id="ownfocus" rows="1" placeholder="e.g. Time with my parents"></textarea></div><button class="btn outline" data-find="themeown">Use this</button>'; }
+  async function themesAI() {
+    var f = S.find; if (!f || !sb || (!user && !guest) || ui.themesBusy) return;
+    var src = (f.answers[FIND_QS()[0].key] || '').trim(); if (!src) return;
+    ui.themesBusy = true; ui.themesFailed = false;
+    try {
+      var r = await sb.functions.invoke('showup-reflect', { body: { kind: 'themes', mode: f.mode || 'more', text: src } });
+      if (r.error) { var st = r.error.context && r.error.context.status; ui.themesFailed = true; toast(st === 429 ? 'That’s today’s limit reached. Write your own focus below.' : st === 422 ? 'I couldn’t pick anything out of that. Write your own focus below, or go back and add a little more.' : 'Couldn’t reach it just now. Try again in a moment.'); }
+      else if (r.data && (((r.data.themes || []).length) || careText(r.data))) { f.themes = r.data; f.themesFor = src; save(false); }
+      else ui.themesFailed = true;
+    } catch (e) { ui.themesFailed = true; toast('Couldn’t reach it just now. Try again in a moment.'); }
+    ui.themesBusy = false; render();
   }
   // After the questions: the AI pulls out the areas, they pick one, check it rings true, then choose a challenge.
   // A care message only counts if it has real words in it (an early version could save an empty "" and show a blank card).
@@ -1238,9 +1280,9 @@
       return top + '<h1>' + esc(ar.name) + '</h1></div><div class="why"><span class="eyebrow">What we noticed</span><span>' + esc(ar.noticed) + '</span><span style="font-weight:600">' + esc(ar.insight) + '</span></div>' +
         '<p class="lede">Does this ring true?</p><div class="spacer"></div><button class="btn" data-find="resonates">Yes, that’s it</button><button class="btn outline" data-find="toareas">Not quite. Show me the other areas</button></section>';
     }
-    var h2 = top + '<h1>A few challenges to try.</h1></div><p class="lede">Within ' + esc(ar.name.toLowerCase()) + ', pick the one that gives you a little jolt.</p><div style="display:flex;flex-direction:column;gap:10px">';
-    (ar.challenges || []).forEach(function (c, i) { h2 += '<button class="choice" data-find="take" data-i="' + i + '"><b>' + esc(c.title) + '</b><small>' + esc(c.daily) + '</small></button>'; });
-    return h2 + '</div>' + own + '<div class="spacer"></div><button class="link center" data-find="toareas">Not convinced? Back to the areas</button></section>';
+    var h2 = top + '<h1>A few challenges to try.</h1></div>' + (f.focus && ar.insight ? '<div class="why"><span class="eyebrow">' + esc(f.focus) + '</span><span>' + esc(ar.insight) + '</span></div>' : '') + '<p class="lede">Within ' + esc((f.focus || ar.name).toLowerCase()) + ', pick the one that gives you a little jolt.</p><div style="display:flex;flex-direction:column;gap:10px">';
+    (ar.challenges || []).forEach(function (c, i) { h2 += '<button class="choice" data-find="take" data-i="' + i + '"><b>' + esc(c.title) + '</b>' + (c.daily ? '<small>' + esc(c.daily.replace(/^i[’']?m going to\s+|^i[’']ll\s+/i, '').replace(/^./, function (x) { return x.toUpperCase(); })) + '</small>' : '') + '</button>'; });
+    return h2 + '</div>' + own + '<div class="spacer"></div><button class="link center" data-find="' + (f.focus ? 'tothemes' : 'toareas') + '">' + (f.focus ? 'Not convinced? Choose a different focus' : 'Not convinced? Back to the areas') + '</button></section>';
   }
   function aiCard(f, n) {
     if (!n || !sb) return '';
@@ -1264,11 +1306,11 @@
     var f = S.find; if (!f || !sb || (!user && !guest) || ui.aiBusy) return;
     f.aiTried = true; ui.aiBusy = true; ui.aiNothing = false; render();
     try {
-      var r = await sb.functions.invoke('showup-reflect', { body: { mode: f.mode || 'more', answers: f.answers, wins: (S.wins || []).map(function (w) { return { name: w.name, outcome: w.outcome }; }), horizon: horizonLabel() } });
+      var r = await sb.functions.invoke('showup-reflect', { body: { mode: f.mode || 'more', answers: f.answers, focus: f.focus || undefined, wins: (S.wins || []).map(function (w) { return { name: w.name, outcome: w.outcome }; }), horizon: horizonLabel() } });
       if (r.error) {
         var st = r.error.context && r.error.context.status;
         toast(st === 429 ? 'That’s today’s ideas used. Write your own below, or come back tomorrow.' : st === 422 ? (ui.aiNothing = true, 'I couldn’t quite find ideas in that. Try again, or add a little more about what you’d love to change.') : 'Couldn’t reach it just now. Try again in a moment.');
-      } else if (r.data && ((r.data.areas && r.data.areas.length) || careText(r.data))) { f.ai = r.data; f.r = 'areas'; f.area = 0; save(false); }
+      } else if (r.data && ((r.data.areas && r.data.areas.length) || careText(r.data))) { f.ai = r.data; f.r = f.focus ? 'ideas' : 'areas'; f.area = 0; save(false); }
       else { ui.aiNothing = true; toast('I couldn’t quite find ideas in that. Try again, or add a little more about what you’d love to change.'); }
     } catch (e) { toast('Couldn’t reach it just now. Try again in a moment.'); }
     ui.aiBusy = false; render();
@@ -1333,17 +1375,26 @@
     stopMic();
     if (a === 'start') { var md = (b && b.dataset.mode) || 'more', keep = S.find && S.find.mode === md ? S.find.answers : {}; S.find = { step: 0, mode: md, answers: keep || {}, horizon: '365' }; save(false); return askNameThen('find'); }
     if (a === 'next' || a === 'skip') { if (a === 'next') findSave(); f.step++; f.ai = null; f.aiTried = false; f.r = 'areas'; f.area = 0; f.pick = null; save(false); return go('find'); }
+    if (a === 'theme' || a === 'themeown') {
+      var all = (f.themes && f.themes.themes) || [], pick = a === 'theme' ? (all[+b.dataset.i] || {}).name : ((document.getElementById('ownfocus') || {}).value || '').replace(/\s+/g, ' ').trim();
+      if (!pick) { toast('Write a few words first.'); return; }
+      f.focus = pick; f.later = all.map(function (t) { return t.name; }).filter(function (n) { return n !== pick; });
+      f.ai = null; f.aiTried = false; save(false); stat('themes', a === 'theme' ? 'picked' : 'own'); return render();
+    }
+    if (a === 'themesretry') { ui.themesFailed = false; return render(); }
+    if (a === 'tothemes') { f.step = 1; f.focus = null; f.ai = null; f.aiTried = false; save(false); return render(); }
     if (a === 'area') { f.area = +b.dataset.i; f.r = 'insight'; save(false); return render(); }
     if (a === 'resonates') { f.r = 'ideas'; save(false); return render(); }
     if (a === 'toareas') { f.r = 'areas'; save(false); return render(); }
     if (a === 'ownonly') { f.r = 'ideas'; f.ownOnly = true; save(false); return render(); }
     if (a === 'take' || a === 'own') {
       var ar = ((f.ai || {}).areas || [])[f.area || 0] || {}, c = a === 'take' ? (ar.challenges || [])[+b.dataset.i] : null;
-      var txt = c ? ((f.mode === 'less' ? c.title : c.daily) || c.title) : ((document.getElementById('ownch') || {}).value || '').trim();
+      var txt = c ? ((f.mode === 'less' ? c.title : c.daily) || c.title).replace(/^i[’']?m going to\s+|^i[’']ll\s+/i, '').replace(/^./, function (x) { return x.toUpperCase(); }).replace(/\.$/, '') : ((document.getElementById('ownch') || {}).value || '').trim();
       if (c && f.mode === 'less' && c.daily && !(S.draft.instead || '').trim()) S.draft.instead = c.daily;
       if (!txt) { toast('Write a few words first.'); return; }
       if (a === 'own') f.own = txt;
       S.draft.mode = f.mode || 'more'; S.draft.what = txt; S.draft.found = c ? c.title : txt; f.chosen = txt;
+      if (f.focus) S.draft.later = (f.later || []).slice();
       // Some ideas need them to decide the actual content first (the words to say, who to message, what to write). Do that now, while it's fresh.
       var pq = c && String(c.personal_question || '').trim();
       if (pq) { S.draft.mineQ = pq; S.draft.mine = String(c.personal_draft || '').trim(); S.draft.mineWhy = ar.insight || ''; } else { S.draft.mineQ = ''; S.draft.mine = ''; S.draft.mineWhy = ''; }
@@ -1871,7 +1922,7 @@
   }
   function finishSetup() {
     var dr = S.draft;
-    S.habit = { id: uuid(), mode: dr.mode, what: dr.what.trim(), gives: dr.gives.concat((dr.driveOwn || '').trim() ? [dr.driveOwn.trim()] : []), instead: dr.instead, feel: dr.feel.slice(), ownFeel: dr.ownFeel, dimmer: dr.dimmer.trim(), length: dr.length, start: todayStr(), status: 'active', extra: Object.assign({ anchor: (dr.anchor || '').trim(), hard: { start: (dr.hardStart || '').trim(), off: (dr.hardOff || '').trim(), spark: (dr.hardSpark || '').trim() } }, dr.found ? { found: dr.found } : {}, dr.mineQ && (dr.mine || '').trim() ? { mine: dr.mine.trim(), mineQ: dr.mineQ } : {}, S.wins && S.wins.length ? { wins: S.wins.slice() } : {}), createdAt: new Date().toISOString() };
+    S.habit = { id: uuid(), mode: dr.mode, what: dr.what.trim(), gives: dr.gives.concat((dr.driveOwn || '').trim() ? [dr.driveOwn.trim()] : []), instead: dr.instead, feel: dr.feel.slice(), ownFeel: dr.ownFeel, dimmer: dr.dimmer.trim(), length: dr.length, start: todayStr(), status: 'active', extra: Object.assign({ anchor: (dr.anchor || '').trim(), hard: { start: (dr.hardStart || '').trim(), off: (dr.hardOff || '').trim(), spark: (dr.hardSpark || '').trim() } }, dr.found ? { found: dr.found } : {}, dr.later && dr.later.length ? { later: dr.later.slice() } : {}, dr.mineQ && (dr.mine || '').trim() ? { mine: dr.mine.trim(), mineQ: dr.mineQ } : {}, S.wins && S.wins.length ? { wins: S.wins.slice() } : {}), createdAt: new Date().toISOString() };
     S.entries = {}; S.later = false; S.fb = {}; save();
     // Let Stuart know someone new has started (no words they wrote, and only if usage stats are on). Not for his own test runs.
     stat('setup_done', S.habit.mode === 'less' ? 'less' : 'more'); flushStats();
