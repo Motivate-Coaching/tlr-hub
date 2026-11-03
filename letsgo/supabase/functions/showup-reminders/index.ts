@@ -12,7 +12,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const FROM = '"Let\'s Go!" <letsgo@motivate-coaching.com>'
-const REPLY_TO = 'stuart@motivate-coaching.com'
+const REPLY_TO = 'letsgo@motivate-coaching.com'
 const APP_URL = 'https://motivate-coaching.github.io/tlr-hub/letsgo/'
 const WINDOW_MINS = 60 // send any time in the hour after their chosen time, once
 
