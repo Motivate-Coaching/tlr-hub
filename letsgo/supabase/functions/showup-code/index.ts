@@ -9,7 +9,8 @@ import webpush from 'npm:web-push@3.6.7'
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || ''
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const FROM = '"Let\'s Go!" <stuart@motivate-coaching.com>'
+const FROM = '"Let\'s Go!" <letsgo@motivate-coaching.com>'
+const REPLY_TO = 'stuart@motivate-coaching.com'
 const CODE_MINUTES = 10
 const MAX_ATTEMPTS = 5
 const MAX_SENDS_PER_HOUR = 5
@@ -103,7 +104,7 @@ Deno.serve(async (req) => {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: FROM, to: [email], subject: body.plan?.what ? `Activate your plan: ${code}` : `Your Let’s Go! code: ${code}`, html: emailHtml(code, body.plan), text: body.plan?.what ? `Your plan: ${String(body.plan.what).slice(0, 300)}. Your code to activate it is ${code}. It works for ${CODE_MINUTES} minutes.` : `Your Let’s Go! code is ${code}. It works for ${CODE_MINUTES} minutes.` }),
+      body: JSON.stringify({ from: FROM, reply_to: REPLY_TO, to: [email], subject: body.plan?.what ? `Activate your plan: ${code}` : `Your Let’s Go! code: ${code}`, html: emailHtml(code, body.plan), text: body.plan?.what ? `Your plan: ${String(body.plan.what).slice(0, 300)}. Your code to activate it is ${code}. It works for ${CODE_MINUTES} minutes.` : `Your Let’s Go! code is ${code}. It works for ${CODE_MINUTES} minutes.` }),
     })
     if (!res.ok) { console.error('[showup-code] Resend', res.status, (await res.text()).slice(0, 200)); return json({ error: 'email_failed' }, 502) }
     return json({ ok: true })
