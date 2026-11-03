@@ -876,6 +876,17 @@
     tabsEl.hidden = !showTabs; document.documentElement.classList.toggle('has-tabs', showTabs);
     tabsEl.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-current', b.dataset.tab === s ? 'page' : 'false'); });
     view.innerHTML = screens[s]();
+    // V2 design layer: on setup question screens, the question and its answer sit together in one clear card.
+    if (['feel', 'what', 'when', 'less', 'dimmer', 'hard', 'mine', 'say', 'name', 'note'].indexOf(s) >= 0) {
+      var sec = view.querySelector('section.screen'), h1 = sec && sec.querySelector(':scope > h1, :scope > div > h1');
+      if (h1) {
+        var card = document.createElement('div'); card.className = 'qcard';
+        var node = h1, stop = false; // a heading wrapped with an eyebrow moves in on its own
+        if (h1.parentElement !== sec) { var wrap = h1.parentElement; wrap.parentElement.insertBefore(card, wrap.nextSibling); card.appendChild(h1); node = card.nextElementSibling; }
+        else { sec.insertBefore(card, h1); node = h1; }
+        while (node && !stop) { var nx = node.nextElementSibling; if (node.classList.contains('spacer') || node.matches('button.btn, [data-step-next]')) stop = true; else if (node !== card) card.appendChild(node); node = nx; }
+      }
+    }
     backBtn.classList.toggle('ghost', !BACK[s] && !ui.hist.length);
     fwdBtn.classList.toggle('ghost', !ui.fwd.length);
     settingsBtn.classList.toggle('ghost', s === 'settings' || (!isTester() && (!S.habit || ['what', 'when', 'less', 'feel', 'dimmer', 'hard'].indexOf(s) >= 0)));
@@ -1182,10 +1193,10 @@
       var q = qs[f.step], v = f.answers[q.key] || '';
       var bar = '<div class="progress" style="grid-template-columns:repeat(' + qs.length + ',1fr)" aria-hidden="true">' + qs.map(function (x, i) { return '<span' + (i <= f.step ? ' class="on"' : '') + '></span>'; }).join('') + '</div>';
       return '<section class="screen"><div class="stepper">' + bar + '<div class="eyebrow" style="margin-top:12px">Challenge ideas · ' + (f.step + 1) + ' of ' + qs.length + '</div>' +
-        (f.step === 0 && firstName() ? '<p class="findwelcome">Welcome, ' + esc(firstName()) + '. Let’s get you on track and find the right thing for you to focus on.</p>' : '') + (f.step === 0 ? '<p class="lede workintro">This is about one change in your everyday life: something you’d love more of, or something to do less of. Together we’ll shape it into something you can make happen.</p>' : '') +
-        '<h1 class="findq">' + esc(q.q) + '</h1></div>' +
-        '<p class="hint" style="margin-top:-8px">' + esc(q.hint) + '</p>' +
-        '<div class="field"><textarea id="findans" rows="5" style="min-height:180px" placeholder="' + esc(q.ph) + '">' + esc(v) + '</textarea>' + micButton() + '<span class="hint">Private. Read by our AI helper to suggest ideas, never shared or kept.</span></div>' +
+        (f.step === 0 ? '<div class="v2hero">' + (firstName() ? '<p class="findwelcome">Welcome, ' + esc(firstName()) + '.</p><p class="fwsub">Let’s get you on track and find the right thing for you to focus on.</p>' : '<p class="findwelcome">Let’s find the right thing for you to focus on.</p>') + '</div>' : '') + (f.step === 0 ? '<p class="lede workintro">This is about one change in your everyday life: something you’d love more of, or something to do less of. Together we’ll shape it into something you can make happen.</p>' : '') +
+        '</div><div class="qcard"><h1 class="findq">' + esc(q.q) + '</h1>' +
+        '<p class="hint">' + esc(q.hint) + '</p>' +
+        '<div class="field"><textarea id="findans" rows="5" style="min-height:180px" placeholder="' + esc(q.ph) + '">' + esc(v) + '</textarea>' + micButton() + '<span class="hint">Private. Read by our AI helper to suggest ideas, never shared or kept.</span></div></div>' +
         '<div class="spacer"></div><button class="btn" data-find="next">' + (f.step === qs.length - 1 ? 'Show me ideas' : 'Next') + '</button>' +
         '<button class="link center" data-find="skip">Skip this one</button></section>';
     }

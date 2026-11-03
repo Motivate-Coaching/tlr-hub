@@ -553,6 +553,27 @@ html.has-tabs .screen { padding-bottom: 110px; }
 .tdots i:nth-child(2) { animation-delay: .15s; } .tdots i:nth-child(3) { animation-delay: .3s; }
 @keyframes tdot { 0%, 100% { opacity: .3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-4px); } }
 .findwelcome { margin: 0; font-family: var(--display); font-size: 24px; line-height: 1.25; color: var(--text); }
+
+/* ── V2 design layer: clear, separate sections on every screen (inspired by the V2 prototype) ── */
+.card, .stu, .today-card, .why, .askhelp, .qcard, .pickcard { box-shadow: 0 1px 2px rgba(15,18,21,.05), 0 6px 18px rgba(15,18,21,.07); border: 1px solid rgba(0,0,0,.07); }
+.card.soft, .card.soft.small { box-shadow: none; border-color: transparent; }
+.v2hero { background: var(--navy); color: var(--white); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.v2hero .findwelcome { color: var(--white); font-size: 28px; }
+.v2hero .fwsub { margin: 0; color: #D9D4CA; font-size: 16px; line-height: 1.5; }
+.lede.workintro { margin: 0; background: var(--cream-dark); border-left: 4px solid var(--amber); border-radius: 6px; padding: 14px 16px; color: var(--text); font-size: 15px; }
+.qcard { background: var(--white); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 12px; border-top: 4px solid var(--amber); }
+.qcard h1.findq { font-size: clamp(24px, 7vw, 30px); }
+.qcard textarea { background: var(--cream); border-color: var(--cream-deep); }
+.qcard textarea:focus { border-color: var(--navy); background: var(--white); }
+/* Setup questions: the answer area sits in its own white panel */
+.screen > .field:has(textarea) { background: var(--white); border-radius: 10px; padding: 16px; border: 1px solid rgba(0,0,0,.07); box-shadow: 0 1px 2px rgba(15,18,21,.05), 0 6px 18px rgba(15,18,21,.07); }
+.screen > .field:has(textarea) textarea { background: var(--cream); border-color: var(--cream-deep); }
+.screen > .field:has(textarea) textarea:focus { border-color: var(--navy); background: var(--white); }
+.screen > .lede { color: var(--text-mid); }
+.starters .chip, .chips .chip { box-shadow: 0 1px 2px rgba(15,18,21,.06); }
+.qcard > h1 { font-size: clamp(26px, 7.5vw, 32px); }
+.qcard .lede { margin: -4px 0 0; }
+.qcard .field { gap: 8px; }
 </style>
 </head>
 <body>
@@ -574,6 +595,6 @@ html.has-tabs .screen { padding-bottom: 110px; }
   </nav>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=v2e8"></script>
+<script src="app.js?v=v2e9"></script>
 </body>
 </html>
