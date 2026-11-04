@@ -400,7 +400,7 @@
         '<p class="hint" style="text-align:center;margin:0">A few minutes to set up. One tap a day after that.</p>' +
         '<p class="foot">' +
         '<a class="link inline" href="../letsgo/privacy.html">Privacy</a> · <a class="link inline" href="../letsgo/terms.html">Terms</a></p>' +
-        (isTester() ? '<button class="link center" data-act="testerreset" style="font-size:13px;color:var(--muted)">Testing: start again from scratch</button>' : '') + '</section>';
+        (isTester() ? '<button class="link center" data-act="testerreset" style="font-size:13px;color:var(--muted)">Testing: start again from scratch</button>' : '') + landPreview() + '</section>';
     },
     say: function () {
       var d = S.draft, less = d.mode === 'less', ex = less ? ['scroll on my phone in bed', 'snack in the evenings', 'say yes to everything', 'hit snooze every morning'] : ['get moving most mornings', 'read before bed', 'make proper time for the business', 'drink more water'];
@@ -573,7 +573,7 @@
     plan: function () {
       if (!S.habit) return screens.landing();
       if (ui.planEdit) return focusEditor();
-      return '<section class="screen"><div><div class="eyebrow">My plan</div><h1>' + esc(habitName()) + '</h1></div>' + planCard('plan') + archiveCard() +
+      return '<section class="screen"><div><div class="eyebrow">My plan</div><h1>' + esc(habitName()) + '</h1></div><div class="plangrid">' + planCard('plan') + '</div>' + archiveCard() +
         '<div class="spacer"></div><button class="btn" data-go="tracker">Back to today</button></section>';
     },
     actedit: function () { if (!S.habit || !ui.edit) return screens.plan(); return actEditor(); },
@@ -597,8 +597,8 @@
         '<div class="focushero"><span class="pill">' + (S.habit.finishedOn ? 'Finished' : t > L ? L + ' days' : 'Day ' + t + ' of ' + L) + '</span><div class="eyebrow">' + (S.habit.mode === 'less' ? 'Cutting back on' : 'My focus') + '</div><h1>' + esc(habitName()) + '</h1>' +
         (mineLine() ? '<p class="fh-line">“' + esc(mineLine()) + '”</p>' : '') +
         '<div class="meter" role="img" aria-label="Review period: day ' + Math.min(t, L) + ' of ' + L + '"><i style="width:' + Math.round(Math.min(t, L) / L * 100) + '%"></i></div><span class="fh-cap">Review in ' + Math.max(0, L - t + 1) + ' day' + (L - t + 1 === 1 ? '' : 's') + '</span></div>';
-      h += '<section class="sec today">' + secHead('today', 'Today') + todaySection(false) + '</section>';
-      h += catchUpCard();
+      h += '<div class="colL"><section class="sec today">' + secHead('today', 'Today') + todaySection(false) + '</section>';
+      h += catchUpCard() + '</div><div class="colR">';
       h += '<section class="sec">' + secHead('week', 'This week', '<button class="link" data-go="progress" style="min-height:0;font-size:13px">Progress</button>') + weekHTML() +
         '<div class="legend2"><span><i style="background:var(--green)"></i>Done</span><span><i style="background:var(--amber)"></i>Lighter</span><span><i class="rest"></i>Rest day</span></div></section>';
       if (st.planned || st.done) h += '<section class="sec full-only">' + secHead('chart', 'Your progress') +
@@ -607,21 +607,21 @@
       else h += '<section class="sec full-only">' + secHead('chart', 'Your progress') + '<p class="hint" style="margin:0">Your first planned action is ready. Your progress will show here.</p></section>';
       var na = nudgeAsk(); h += stuDay(t) + (na || (signInCard() + extraCards(t)));
       if (t <= 5 && !S.viewTipDone) h += '<div class="card soft small"><b style="font-weight:600">Prefer fewer details on screen?</b><span>Focused view shows just today, calmly. You can switch back any time.</span><div class="row" style="gap:12px;justify-content:flex-start"><button class="chip" data-act="tryfocus">Try Focused view</button><button class="link" data-act="viewtipno" style="font-size:14px">No thanks</button></div></div>';
-      return h + '</section>';
+      return h + '</div></section>';
     },
     progress: function () {
       if (!S.habit) return screens.landing();
       var st = stats();
       if (!st.planned && !st.done) return '<section class="screen"><div><div class="eyebrow">Progress</div><h1>How it’s going</h1></div><div class="card soft"><b style="font-weight:600">Nothing to show yet.</b><span>Your progress appears here from your first planned day.</span></div>' +
         '<section class="sec">' + secHead('task', 'Every day') + gridHTML(todayNum(), true) + '</section><button class="link center" data-go="wins">My past wins</button></section>';
-      return '<section class="screen"><div><div class="eyebrow">Progress</div><h1>How it’s going</h1></div>' +
+      return '<section class="screen widegrid"><div class="wtitle"><div class="eyebrow">Progress</div><h1>How it’s going</h1></div><div class="colL">' +
         '<section class="sec">' + secHead('chart', 'Running total') + '<div><span class="bignum">' + st.done + '</span> <span class="hint" style="display:inline">show-up' + (st.done === 1 ? '' : 's') + ', from ' + st.planned + ' planned so far</span></div>' + lineChart() +
         '<div class="legend2"><span><i style="background:var(--green)"></i>Show-ups</span><span><i style="border:1.5px dashed #9A907F"></i>Planned</span></div></section>' +
-        '<section class="sec">' + secHead('week', 'Week by week') + barChart(120) + '<div class="legend2"><span><i style="background:var(--green)"></i>Full version</span><span><i style="background:var(--amber)"></i>Lighter version</span><span><i style="border:1.5px dashed #9A907F"></i>Planned</span></div></section>' +
+        '<section class="sec">' + secHead('week', 'Week by week') + barChart(120) + '<div class="legend2"><span><i style="background:var(--green)"></i>Full version</span><span><i style="background:var(--amber)"></i>Lighter version</span><span><i style="border:1.5px dashed #9A907F"></i>Planned</span></div></section></div><div class="colR">' +
         '<section class="sec">' + secHead('task', 'Every day') + gridHTML(todayNum(), true) + '<p class="hint">Tap any day to fill it in, change it or add a note. Days not logged stay plain, never red. Rest days are part of the plan.</p></section>' +
         '<div class="tiles"><div class="tile"><b>' + st.full + '</b><span>full versions</span></div><div class="tile"><b>' + st.light + '</b><span>lighter versions</span></div><div class="tile"><b>' + st.backs + '</b><span>comebacks</span></div></div>' +
         (st.unlogged ? '<p class="hint">' + st.unlogged + ' planned ' + (st.unlogged === 1 ? 'day isn’t' : 'days aren’t') + ' logged. If you did them, tap the day to fill it in.</p>' : '') +
-        '<button class="btn outline" data-go="share">Share my progress</button><button class="link center" data-go="wins">My past wins</button></section>';
+        '<button class="btn outline" data-go="share">Share my progress</button><button class="link center" data-go="wins">My past wins</button></div></section>';
     },
     note: function () {
       var d = ui.noteDay || todayStr(), a = actById(ui.noteAct) || mainAct(), e = (a && a.entries[d]) || {};
@@ -923,6 +923,8 @@
         while (node && !stop) { var nx = node.nextElementSibling; if (node.classList.contains('spacer') || node.matches('button.btn, [data-step-next]')) stop = true; else if (node !== card) card.appendChild(node); node = nx; }
       }
     }
+    if (GUIDE[s] || ['name', 'mine', 'sendplan', 'account'].indexOf(s) >= 0) { var sc = view.querySelector('section.screen'); if (sc) { sc.classList.add('setupwide'); sc.insertAdjacentHTML('afterbegin', wideGuide(s)); } }
+    sideFoot();
     backBtn.classList.toggle('ghost', !BACK[s] && !ui.hist.length);
     fwdBtn.classList.toggle('ghost', !ui.fwd.length);
     settingsBtn.classList.toggle('ghost', s === 'settings' || (!isTester() && (!S.habit || ['what', 'when', 'less', 'feel', 'often', 'dimmer', 'hard'].indexOf(s) >= 0)));
@@ -1014,6 +1016,41 @@
   // ── Not signed in: nudges can't reach you ─────────────────────────────────
   // ── Stu as the guide: his photo and a short line at the moments that matter ──
 
+
+  // Wide screens only: a live-looking example of the Today screen beside the welcome, so people see what they'll get.
+  function landPreview() {
+    var dots = ['on', 'on', 'rest', 'on small', 'today', 'ahead', 'ahead'].map(function (c, i) { return '<span class="wd ' + c + '"><span>' + 'MTWTFSS'.charAt(i) + '</span><i></i></span>'; }).join('');
+    return '<div class="landprev" aria-hidden="true"><div class="lp-phone">' +
+      '<div class="focushero"><span class="pill">Day 9 of 30</span><div class="eyebrow">My focus</div><h1>Feel fitter and stronger</h1><div class="meter"><i style="width:30%"></i></div><span class="fh-cap">Review in 22 days</span></div>' +
+      '<section class="sec today"><div class="sec-h"><span class="ic"><svg viewBox="0 0 24 24">' + ICON.today + '</svg></span><h2>Today</h2></div>' +
+      '<div class="actcard done"><div class="act-top"><b class="act-t">Stretch for 10 minutes</b><span class="act-s">After I make my morning coffee</span></div><div class="act-done"><span class="tickdot">' + checkIcon('#FFFFFF') + '</span><span>Done today</span></div></div>' +
+      '<div class="actcard"><div class="act-top"><b class="act-t">Play padel</b><span class="act-s">0 of 1 this week</span></div><span class="btn showup-btn">' + checkIcon('#FFFFFF') + 'Done</span></div></section>' +
+      '<section class="sec"><div class="sec-h"><span class="ic"><svg viewBox="0 0 24 24">' + ICON.week + '</svg></span><h2>This week</h2></div><div class="week">' + dots + '</div></section>' +
+      '</div><p class="lp-cap">Your plan, your days. A lighter version on a tough day counts too.</p></div>';
+  }
+  // Wide screens only: a short guide beside each setup step, with Stu.
+  var GUIDE = {
+    say: 'Messy is fine. We pick out what matters, and you choose what to work on.',
+    hearing: 'One focus at a time is what makes it stick. Everything else waits in Later.',
+    feel: 'Picturing it going well, then planning for what gets in the way, helps people follow through.',
+    what: 'Start with what you’ll actually do. Small and specific beats big and vague.',
+    when: 'Linking it to something you already do gives you a reliable cue to remember it.',
+    less: 'Swapping in something you’ll do works better than only trying to stop.',
+    often: 'Pick what’s realistic for an ordinary week. Rest days never count against you.',
+    dimmer: 'Some days a 10, some days a 1. Deciding the lighter version now means a tough day still counts.',
+    find: 'Write or speak freely. You choose the focus, and we help shape it.'
+  };
+  function wideGuide(s) {
+    var t = GUIDE[s] || 'Do It Your Way. Hold It Lightly.';
+    return '<aside class="wideguide" aria-hidden="true"><img src="../letsgo/stuart.jpg" alt="" width="72" height="72"><b>Stu</b><p>' + esc(t) + '</p><span class="wg-brand">Let’s Go<span class="bang">!</span></span></aside>';
+  }
+  function sideFoot() {
+    var el = document.getElementById('sideFoot'); if (!el) return;
+    if (!S.habit) { el.innerHTML = ''; return; }
+    var t = todayNum(), L = S.habit.length, left = Math.max(0, L - t + 1);
+    el.innerHTML = '<div class="sf-focus"><span class="eyebrow">' + (S.habit.mode === 'less' ? 'Cutting back on' : 'My focus') + '</span><b>' + esc(habitName()) + '</b><span>' + (S.habit.finishedOn ? 'Finished' : t > L ? 'Ready for your look back' : 'Day ' + t + ' of ' + L + ' · review in ' + left + ' day' + (left === 1 ? '' : 's')) + '</span></div>' +
+      '<div class="sf-stu"><img src="../letsgo/stuart.jpg" alt="" width="40" height="40"><span>with Stuart Fairbairns PCC</span></div>';
+  }
 
   // ══ V2 engine: actions, schedules, check-ins and progress ═════════════════
   // Everything here reads the plan through model.js, so Today, Progress, reminders and the calendar agree.
@@ -1429,22 +1466,21 @@
     var h = S.habit, less = h.mode === 'less', focus = S.settings.view === 'focus';
     var row = function (icon, label, body, edit) { return '<div class="prow"><span class="pic">' + icon + '</span><div class="pbody"><small>' + label + '</small>' + body + '</div>' + (edit || '') + '</div>'; };
     var ws = words(), chips = ws.length === 1 && /\s/.test(ws[0]) ? '<b>' + esc(ws[0].charAt(0).toUpperCase() + ws[0].slice(1)) + '</b>' : '<div class="pchips">' + ws.map(function (w, i) { return '<span' + (i === 0 ? ' class="first"' : '') + '>' + esc(w.toLowerCase()) + '</span>'; }).join('') + '</div>';
-    var out = '<div class="plancard">' + row(PICON.what, less ? 'I’m cutting back on' : 'My focus', '<b>' + esc(habitName()) + '</b>', focus ? '' : '<button class="pedit" data-act="editfocus">Edit</button>');
+    var out = '<div class="pA"><div class="plancard">' + row(PICON.what, less ? 'I’m cutting back on' : 'My focus', '<b>' + esc(habitName()) + '</b>', focus ? '' : '<button class="pedit" data-act="editfocus">Edit</button>');
     if (mineLine()) out += row(PICON.why, 'My words', '<b>“' + esc(mineLine()) + '”</b>', '');
     if (!focus) out += row(PICON.why, less ? 'What I’m moving towards' : 'What I’m moving towards', chips, '');
-    out += '</div>';
+    out += '</div></div><div class="pB">';
     out += '<div class="sec-h" style="margin-top:4px"><h2 style="font-size:20px">' + (less ? 'What I’ll do instead' : 'My actions') + '</h2></div><div class="plancard">';
     liveActs().forEach(function (a) {
       out += '<div class="prow act"><span class="pic">' + PICON.when + '</span><div class="pbody"><b>' + esc(a.text) + '</b><span class="psub">' + esc(describeRule(ruleNow(a))) + (anchorLine(a) ? ' · ' + esc(anchorLine(a)) : '') + '</span>' +
         (a.small ? '<span class="psub">Tough day: ' + esc(a.small) + '</span>' : '') + '</div><button class="pedit" data-editact="' + a.id + '">Edit</button></div>';
     });
-    out += '</div><button class="btn outline" data-editact="new">' + (liveActs().length ? 'Add another action' : 'Add an action') + '</button>';
+    out += '</div><button class="btn outline" data-editact="new">' + (liveActs().length ? 'Add another action' : 'Add an action') + '</button>' + laterCard() + '</div><div class="pC">';
     out += '<div class="plancard">' + row(PICON.when, 'Review after', '<b>' + h.length + ' days</b><span class="psub">From ' + esc(prettyDate(h.start)) + ' to ' + esc(prettyDate(lastDate())) + '</span><button class="link" data-act="startdate" style="align-self:flex-start;font-size:14px;min-height:36px">Change start date</button>', '<button class="pedit" data-length="' + from + '">Change</button>') +
       row(iconClock('#0F1215'), 'Nudges', '<b>' + esc(reminderLine()) + '</b>', '<button class="pedit" data-act="gosettings">Change</button>') + '</div>';
     var hp = extra().helpers || [];
     if (hp.length) out += '<div class="card soft"><span class="eyebrow">Might help you get started</span>' + hp.map(function (x) { return '<a class="link" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + encodeURIComponent(x) + '" style="align-self:flex-start">' + esc(x) + ' <span aria-hidden="true">↗</span><span class="sr"> (opens a search in a new tab)</span></a>'; }).join('') + '</div>';
-    out += laterCard();
-    return out;
+    return out + '</div>';
   }
   function laterCard() {
     var L = (S.habit.later || []).filter(function (x) { return !x.used; }); if (!L.length) return '';

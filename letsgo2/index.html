@@ -619,6 +619,85 @@ html.has-tabs .screen { padding-bottom: 110px; }
 .pickcard .psched { font-size: 13px; font-weight: 600; color: var(--text-mid); }
 .pickcard[aria-pressed="true"] .psched { color: var(--amber); }
 h1[tabindex="-1"]:focus { outline: none; }
+
+/* ══ Larger screens: tablets and laptops get a layout made for them, not a stretched phone ══ */
+.side-brand, .side-foot, .landprev, .wideguide { display: none; }
+.colL, .colR, .pA, .pB, .pC { display: contents; }
+@media (min-width: 760px) {
+  body { padding: 0; background: var(--cream-dark); }
+  .app { max-width: none; min-height: 100vh; border-radius: 0; overflow: visible; }
+  .bar { border-radius: 0; }
+  .screen { width: 100%; max-width: 720px; margin: 0 auto; padding-left: 32px; padding-right: 32px; }
+  .sheet-bg { align-items: center; }
+  .sheet { max-width: 560px; border-radius: 10px; max-height: 88vh; overflow: auto; }
+  .toast { bottom: 32px; }
+  /* Navigation moves to a sidebar */
+  html.has-tabs .app { display: grid; grid-template-columns: 96px minmax(0, 1fr); grid-template-rows: auto 1fr; }
+  html.has-tabs .bar { grid-column: 2; }
+  html.has-tabs #view { grid-column: 2; grid-row: 2; }
+  html.has-tabs .tabs { position: sticky; top: 0; left: auto; transform: none; grid-column: 1; grid-row: 1 / span 2; align-self: start; height: 100vh; max-width: none; width: auto;
+    display: flex; flex-direction: column; gap: 4px; padding: 16px 10px; border-top: 0; box-shadow: none; }
+  html.has-tabs .tabs button { min-height: 68px; border-radius: 10px; font-size: 12px; }
+  html.has-tabs .tabs button[aria-current="page"] { background: rgba(255,255,255,.07); }
+  html.has-tabs .side-brand { display: flex; justify-content: center; padding: 6px 0 18px; }
+  html.has-tabs .side-brand .wordmark { font-size: 15px; }
+  html.has-tabs .screen { padding-bottom: 48px; }
+  html.has-tabs .bar .home-btn { visibility: hidden; }
+  /* Setup: Stu beside each step */
+  .screen.setupwide { max-width: 1000px; display: grid; grid-template-columns: 260px minmax(0, 1fr); column-gap: 40px; row-gap: 22px; align-content: start; }
+  .screen.setupwide > * { grid-column: 2; }
+  .screen.setupwide > .wideguide { grid-column: 1; grid-row: 1 / span 40; align-self: start; position: sticky; top: 96px;
+    display: flex; flex-direction: column; gap: 10px; padding: 24px; border-radius: 10px; background: var(--navy); color: var(--white); }
+  .wideguide img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2px solid var(--amber); }
+  .wideguide b { font-size: 15px; font-weight: 600; }
+  .wideguide p { margin: 0; font-family: var(--display); font-size: 21px; line-height: 1.35; color: var(--white); }
+  .wideguide .wg-brand { margin-top: 8px; font-weight: 700; font-size: 15px; color: #C8C2B6; }
+  /* Welcome: a proper front page */
+  .screen.v2land { max-width: 1120px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px); column-gap: 56px; row-gap: 20px; align-content: center; min-height: calc(100vh - 64px); }
+  .screen.v2land > * { grid-column: 1; }
+  .screen.v2land > .landprev { grid-column: 2; grid-row: 1 / span 20; align-self: center; display: flex; flex-direction: column; gap: 14px; }
+  .screen.v2land .hero h1 { font-size: clamp(40px, 4.6vw, 60px); }
+  .screen.v2land > .spacer { display: none; }
+  .lp-phone { background: var(--cream); border-radius: 28px; padding: 18px 16px 22px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 60px rgba(15,18,21,.18), 0 0 0 10px var(--navy); transform: rotate(1.5deg); }
+  .lp-phone .focushero h1 { font-size: 26px; }
+  .lp-phone .sec { pointer-events: none; }
+  .lp-cap { margin: 8px 0 0; text-align: center; color: var(--text-mid); font-size: 14px; }
+  .fromqr { border: 2px solid var(--amber); }
+  .lp-phone { zoom: .84; }
+}
+/* Dashboards split into two columns once there's room (landscape tablets and laptops). */
+@media (min-width: 1000px) {
+  /* Today: the actions on the left, the week and progress beside them */
+  .screen.home { max-width: 1120px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+  .screen.home > .focushero { grid-column: 1 / -1; }
+  .screen.home > .colL, .screen.home > .colR { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+  /* Progress: charts on the left, every day on the right */
+  .screen.widegrid { max-width: 1120px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+  .screen.widegrid > .wtitle { grid-column: 1 / -1; }
+  .screen.widegrid > .colL, .screen.widegrid > .colR { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+  /* My plan: focus and review on the left, actions on the right */
+  .plangrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-rows: auto 1fr; gap: 22px 24px; align-items: start; }
+  .plangrid > .pA { display: flex; flex-direction: column; gap: 18px; grid-column: 1; grid-row: 1; }
+  .plangrid > .pB { display: flex; flex-direction: column; gap: 14px; grid-column: 2; grid-row: 1 / span 2; }
+  .plangrid > .pC { display: flex; flex-direction: column; gap: 18px; grid-column: 1; grid-row: 2; }
+  .plangrid .sec-h { margin-top: 0 !important; }
+  html[data-screen="plan"] .screen { max-width: 1040px; }
+  .screen.home .chart, .screen.widegrid .chart { max-height: 230px; }
+  .screen.widegrid > .colR > .tiles { background: var(--white); padding: 16px; border-radius: 10px; box-shadow: 0 1px 2px rgba(15,18,21,.05), 0 6px 18px rgba(15,18,21,.07); }
+}
+@media (min-width: 1100px) {
+  html.has-tabs .app { grid-template-columns: 248px minmax(0, 1fr); }
+  html.has-tabs .tabs { padding: 22px 16px; }
+  html.has-tabs .tabs button { flex-direction: row; justify-content: flex-start; gap: 14px; min-height: 52px; padding: 0 16px; font-size: 15px; }
+  html.has-tabs .side-brand { justify-content: flex-start; padding: 4px 16px 26px; }
+  html.has-tabs .side-brand .wordmark { font-size: 24px; }
+  html.has-tabs .side-foot { display: flex; flex-direction: column; gap: 16px; margin-top: auto; padding: 16px; color: #C8C2B6; font-size: 13px; }
+  .sf-focus { display: flex; flex-direction: column; gap: 4px; padding: 14px; border-radius: 10px; background: rgba(255,255,255,.06); }
+  .sf-focus .eyebrow { color: #C8C2B6; }
+  .sf-focus b { color: var(--white); font-size: 15px; font-weight: 600; line-height: 1.3; }
+  .sf-stu { display: flex; align-items: center; gap: 10px; }
+  .sf-stu img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+}
 </style>
 </head>
 <body>
@@ -633,14 +712,16 @@ h1[tabindex="-1"]:focus { outline: none; }
   </header>
   <main id="view"></main>
   <nav class="tabs" id="tabs" aria-label="Main" hidden>
+    <div class="side-brand" aria-hidden="true"><span class="wordmark">Let’s Go<span class="bang">!</span></span></div>
     <button data-tab="tracker"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg>Today</button>
     <button data-tab="progress"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V12M10 20V7M15 20v-5M20 20V4"/></svg>Progress</button>
     <button data-tab="plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zM9 9h6M9 13h6M9 17h3"/></svg>My plan</button>
     <button data-tab="slipped"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/></svg>Support</button>
+    <div class="side-foot" id="sideFoot"></div>
   </nav>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="model.js?v=v3a2"></script>
-<script src="app.js?v=v3a6"></script>
+<script src="app.js?v=v3a7"></script>
 </body>
 </html>
