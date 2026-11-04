@@ -147,7 +147,69 @@ function describe(r) {
   return d.map(x => DN[x]).join(', ');
 }
 
-const api = { dateKey, today, parseDate, addDays, diffDays, weekday, weekStart, endDate, ruleFor, isPaused, inRange, isDue, isWeekly, entry, counted, dayState, weeklyProgress, tally, weeklySeries, todayList, nextDue, isComeback, changeSchedule, describe };
+// ── Patterns: gentle, honest links worth noticing ─────────────────────────
+// Self-tracking research: people want these links but small samples throw up false ones,
+// so we only speak when there's enough data and the difference is large and unlikely to be chance.
+// Only days where the person logged something count: a blank day is "not logged", never "didn't".
+const PAT = { minDays: 21, minGroup: 5, minDiff: 0.3, maxP: 0.02, minWeekday: 4, minWeekdayDiff: 0.4, maxWeekdayP: 0.01 };
+function lfact(n) { let s = 0; for (let i = 2; i <= n; i++) s += Math.log(i); return s; }
+// Two-sided Fisher exact test for a 2x2 table [[a,b],[c,d]].
+function fisher(a, b, c, d) {
+  const r1 = a + b, r2 = c + d, c1 = a + c, n = r1 + r2;
+  const pr = x => Math.exp(lfact(r1) + lfact(r2) + lfact(c1) + lfact(n - c1) - lfact(n) - lfact(x) - lfact(r1 - x) - lfact(c1 - x) - lfact(r2 - c1 + x));
+  const p0 = pr(a); let p = 0;
+  for (let x = Math.max(0, c1 - r2); x <= Math.min(r1, c1); x++) { const q = pr(x); if (q <= p0 * (1 + 1e-7)) p += q; }
+  return Math.min(1, p);
+}
+function patterns(f, now = today(), acts) {
+  acts = acts || f.actions || [];
+  const last = endDate(f) < now ? endDate(f) : now, out = { ready: false, daysLeft: 0, links: [], weekday: null };
+  const days = diffDays(last, f.start) + 1;
+  if (days < PAT.minDays) { out.daysLeft = PAT.minDays - Math.max(0, days); return out; }
+  out.ready = true;
+  // Logged days: any entry of any kind in this focus that day, not paused.
+  const logged = [];
+  for (let k = f.start; k <= last; k = addDays(k, 1)) if (!isPaused(f, k) && acts.some(a => inRange(f, a, k) && entry(a, k) && entry(a, k).kind !== 'none')) logged.push(k);
+  const live = (a, k) => inRange(f, a, k) && (isDue(f, a, k) || isWeekly(a, k));
+  // Links between two actions on the same day.
+  const found = [];
+  for (const A of acts) for (const B of acts) {
+    if (A === B) continue;
+    let yy = 0, yn = 0, ny = 0, nn = 0;
+    for (const k of logged) {
+      if (!isDue(f, A, k) || !live(B, k)) continue;
+      const a = counted(entry(A, k)), b = counted(entry(B, k));
+      if (a) { if (b) yy++; else yn++; } else { if (b) ny++; else nn++; }
+    }
+    const g1 = yy + yn, g0 = ny + nn; if (g1 < PAT.minGroup || g0 < PAT.minGroup) continue;
+    const r1 = yy / g1, r0 = ny / g0; if (r1 - r0 < PAT.minDiff) continue;
+    const p = fisher(yy, yn, ny, nn); if (p > PAT.maxP) continue;
+    found.push({ a: A.id, b: B.id, with: [yy, g1], without: [ny, g0], diff: r1 - r0, p });
+  }
+  // Keep the clearest link per pair of actions, then the two clearest overall.
+  found.sort((x, y) => x.p - y.p || y.diff - x.diff);
+  const seen = new Set();
+  for (const x of found) { const key = [x.a, x.b].sort().join('|'); if (seen.has(key)) continue; seen.add(key); out.links.push(x); if (out.links.length === 2) break; }
+  // Days of the week: across all planned (non-weekly) action-days that have passed.
+  const wd = [0, 1, 2, 3, 4, 5, 6].map(() => [0, 0]);
+  for (const a of acts) for (let k = f.start; k <= last; k = addDays(k, 1)) {
+    if (!isDue(f, a, k) || (k === now && !counted(entry(a, k)))) continue;
+    wd[weekday(k)][1]++; if (counted(entry(a, k))) wd[weekday(k)][0]++;
+  }
+  const ok = wd.map((x, i) => ({ d: i, done: x[0], of: x[1], r: x[1] ? x[0] / x[1] : 0 })).filter(x => x.of >= PAT.minWeekday);
+  // A day stands out only against all the other days together, corrected for checking seven days.
+  if (ok.length >= 2) {
+    const tot = ok.reduce((t, x) => [t[0] + x.done, t[1] + x.of], [0, 0]);
+    const vsRest = x => { const rd = tot[0] - x.done, ro = tot[1] - x.of; return { diff: x.r - (ro ? rd / ro : 0), p: fisher(x.done, x.of - x.done, rd, ro - rd) }; };
+    ok.sort((x, y) => y.r - x.r || y.of - x.of);
+    const best = ok[0], low = ok[ok.length - 1], b = vsRest(best), l = vsRest(low);
+    const pick = [b.diff >= PAT.minWeekdayDiff / 2 && b.p <= PAT.maxWeekdayP ? 'best' : '', -l.diff >= PAT.minWeekdayDiff / 2 && l.p <= PAT.maxWeekdayP ? 'low' : ''];
+    if (best.r - low.r >= PAT.minWeekdayDiff && (pick[0] || pick[1])) out.weekday = { best, low };
+  }
+  return out;
+}
+
+const api = { patterns, fisher, PAT, dateKey, today, parseDate, addDays, diffDays, weekday, weekStart, endDate, ruleFor, isPaused, inRange, isDue, isWeekly, entry, counted, dayState, weeklyProgress, tally, weeklySeries, todayList, nextDue, isComeback, changeSchedule, describe };
 root.LGM = api;
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
