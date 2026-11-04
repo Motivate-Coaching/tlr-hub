@@ -1,3 +1,5 @@
+(function (root) {
+'use strict';
 // Let's Go! V2: dates, schedules and progress. Pure functions, no DOM, so they can be tested.
 // A focus holds one or more actions. Each action has its own schedule, kept as versions
 // so a change applies from a date onwards and never rewrites the past.
@@ -9,36 +11,36 @@
 // Entry kinds: 'full' (did it), 'small' (did the smaller version), 'skip' (said it didn't happen).
 // A planned day with no entry is "not logged", never assumed missed.
 
-export function dateKey(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
-export const today = () => dateKey(new Date());
-export function parseDate(k) { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d, 12); }
-export function addDays(k, n) { const d = parseDate(k); d.setDate(d.getDate() + n); return dateKey(d); }
-export function diffDays(a, b) { const u = k => { const [y, m, d] = k.split('-').map(Number); return Date.UTC(y, m - 1, d); }; return Math.round((u(a) - u(b)) / 864e5); }
-export function weekday(k) { return parseDate(k).getDay(); }
-export function weekStart(k) { const wd = (weekday(k) + 6) % 7; return addDays(k, -wd); }
-export function endDate(f) { return addDays(f.start, f.length - 1); }
+function dateKey(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+const today = () => dateKey(new Date());
+function parseDate(k) { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d, 12); }
+function addDays(k, n) { const d = parseDate(k); d.setDate(d.getDate() + n); return dateKey(d); }
+function diffDays(a, b) { const u = k => { const [y, m, d] = k.split('-').map(Number); return Date.UTC(y, m - 1, d); }; return Math.round((u(a) - u(b)) / 864e5); }
+function weekday(k) { return parseDate(k).getDay(); }
+function weekStart(k) { const wd = (weekday(k) + 6) % 7; return addDays(k, -wd); }
+function endDate(f) { return addDays(f.start, f.length - 1); }
 
-export function ruleFor(a, k) {
+function ruleFor(a, k) {
   const v = (a.schedules || []).filter(s => s.from <= k);
   return v.length ? v[v.length - 1] : (a.schedules || [])[0];
 }
-export function isPaused(f, k) { return (f.pauses || []).some(p => k >= p.from && (!p.to || k <= p.to)); }
-export function inRange(f, a, k) { return k >= f.start && k <= endDate(f) && (!a.from || k >= a.from) && (!a.until || k <= a.until) && (!f.finishedOn || k <= f.finishedOn); }
+function isPaused(f, k) { return (f.pauses || []).some(p => k >= p.from && (!p.to || k <= p.to)); }
+function inRange(f, a, k) { return k >= f.start && k <= endDate(f) && (!a.from || k >= a.from) && (!a.until || k <= a.until) && (!f.finishedOn || k <= f.finishedOn); }
 
 // True when the action is planned for this exact day. Weekly targets are never "due" on a given day.
-export function isDue(f, a, k) {
+function isDue(f, a, k) {
   if (!inRange(f, a, k) || isPaused(f, k)) return false;
   const r = ruleFor(a, k); if (!r) return false;
   if (r.type === 'days') return r.days.includes(weekday(k));
   if (r.type === 'every') { const d = diffDays(k, r.anchor || f.start); return d >= 0 && d % r.n === 0; }
   return false;
 }
-export function isWeekly(a, k) { const r = ruleFor(a, k); return !!r && r.type === 'weekly'; }
-export function entry(a, k) { return (a.entries || {})[k]; }
-export function counted(e) { return !!e && (e.kind === 'full' || e.kind === 'small'); }
+function isWeekly(a, k) { const r = ruleFor(a, k); return !!r && r.type === 'weekly'; }
+function entry(a, k) { return (a.entries || {})[k]; }
+function counted(e) { return !!e && (e.kind === 'full' || e.kind === 'small'); }
 
 // What a single day looks like for one action.
-export function dayState(f, a, k, now = today()) {
+function dayState(f, a, k, now = today()) {
   if (!inRange(f, a, k)) return 'outside';
   const e = entry(a, k);
   if (counted(e)) return e.kind;
@@ -51,7 +53,7 @@ export function dayState(f, a, k, now = today()) {
 }
 
 // Weekly target for one action in the week containing k, as { target, done }.
-export function weeklyProgress(f, a, k, now = today()) {
+function weeklyProgress(f, a, k, now = today()) {
   const ws = weekStart(k), r = ruleFor(a, k); if (!r || r.type !== 'weekly') return null;
   let done = 0, open = 0;
   for (let i = 0; i < 7; i++) { const d = addDays(ws, i); if (!inRange(f, a, d) || isPaused(f, d)) continue; open++; if (counted(entry(a, d))) done++; }
@@ -59,7 +61,7 @@ export function weeklyProgress(f, a, k, now = today()) {
 }
 
 // Planned opportunities in a date range, up to "now". Weekly targets count as their target per week.
-export function tally(f, from, to, now = today()) {
+function tally(f, from, to, now = today()) {
   const out = { planned: 0, full: 0, small: 0, skip: 0, unlogged: 0, rest: 0, paused: 0 };
   const last = to < now ? to : now;
   for (const a of f.actions) {
@@ -87,7 +89,7 @@ export function tally(f, from, to, now = today()) {
 }
 
 // One bar per week from the start: done (full + smaller) against planned. Used for the progress graph.
-export function weeklySeries(f, now = today()) {
+function weeklySeries(f, now = today()) {
   const out = [], end = endDate(f) < now ? endDate(f) : now;
   for (let ws = weekStart(f.start); ws <= end; ws = addDays(ws, 7)) {
     const from = ws < f.start ? f.start : ws, to = addDays(ws, 6);
@@ -98,7 +100,7 @@ export function weeklySeries(f, now = today()) {
 }
 
 // Today's list: actions due today, then weekly targets still open this week.
-export function todayList(f, now = today()) {
+function todayList(f, now = today()) {
   const due = [], weekly = [];
   for (const a of f.actions) {
     if (!inRange(f, a, now) || isPaused(f, now)) continue;
@@ -109,13 +111,13 @@ export function todayList(f, now = today()) {
 }
 
 // Next planned day for an action after a date.
-export function nextDue(f, a, after = today()) {
+function nextDue(f, a, after = today()) {
   for (let k = addDays(after, 1), i = 0; i < 400 && k <= endDate(f); k = addDays(k, 1), i++) if (isDue(f, a, k)) return k;
   return null;
 }
 
 // A comeback: a counted day after at least one planned day that wasn't counted, having counted before.
-export function isComeback(f, a, k, now = today()) {
+function isComeback(f, a, k, now = today()) {
   let gap = 0, before = false;
   for (let d = addDays(k, -1), i = 0; i < 60 && d >= f.start; d = addDays(d, -1), i++) {
     if (!isDue(f, a, d)) continue;
@@ -126,7 +128,7 @@ export function isComeback(f, a, k, now = today()) {
 }
 
 // Change an action's schedule from a date onwards. Past days keep the rule that applied then.
-export function changeSchedule(a, from, rule) {
+function changeSchedule(a, from, rule) {
   const keep = (a.schedules || []).filter(s => s.from < from);
   a.schedules = keep.concat([Object.assign({ from }, rule)]);
   return a;
@@ -134,7 +136,7 @@ export function changeSchedule(a, from, rule) {
 
 // Short human description of a rule, for plan screens and reminders.
 const DN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-export function describe(r) {
+function describe(r) {
   if (!r) return '';
   if (r.type === 'weekly') return r.times === 1 ? 'Once a week, any day' : r.times + ' times a week, any days';
   if (r.type === 'every') return r.n === 2 ? 'Every other day' : 'Every ' + r.n + ' days';
@@ -144,3 +146,8 @@ export function describe(r) {
   if (d.join() === '6,0') return 'Weekends';
   return d.map(x => DN[x]).join(', ');
 }
+
+const api = { dateKey, today, parseDate, addDays, diffDays, weekday, weekStart, endDate, ruleFor, isPaused, inRange, isDue, isWeekly, entry, counted, dayState, weeklyProgress, tally, weeklySeries, todayList, nextDue, isComeback, changeSchedule, describe };
+root.LGM = api;
+if (typeof module !== 'undefined' && module.exports) module.exports = api;
+})(typeof window !== 'undefined' ? window : globalThis);
