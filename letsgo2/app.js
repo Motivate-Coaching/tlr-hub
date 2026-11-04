@@ -309,6 +309,8 @@
   async function pullRemote() {
     if (!user || !sb) return;
     try {
+      // Coming from V1? The first V2 sign-in copies their V1 plans into V2 (V1 itself is left untouched). Does nothing otherwise.
+      if (!S.v1Imported) { try { var im = await sb.rpc('lg_import_v1'); if (!im.error) S.v1Imported = true; } catch (e) {} }
       var res = await Promise.all([sb.from('lg_profiles').select('*').eq('user_id', user.id).maybeSingle(), sb.from('lg_focuses').select('*').eq('user_id', user.id),
         sb.from('lg_actions').select('*').eq('user_id', user.id), sb.from('lg_checkins').select('*').eq('user_id', user.id)]);
       for (var i = 0; i < res.length; i++) if (res[i].error) throw res[i].error;
