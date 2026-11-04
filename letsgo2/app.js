@@ -2297,7 +2297,7 @@
     priceMember: '£45', priceStandard: '£75',
     tlrJoin: 'https://buy.stripe.com/4gMdR966MgM41hcdTjebu00', // The Living Room payment page
     tlrInfo: 'https://www.motivate-coaching.com/thelivingroom',  // The Living Room landing page
-    tlrPrice: '£69 a month, the founding member rate'
+    tlrPrice: '£99 a month'
   };
   function supportLive() { return !!(SUPPORT.boosterMember || SUPPORT.boosterStandard || SUPPORT.tlrJoin); }
   function supportCard() {
