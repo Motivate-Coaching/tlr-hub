@@ -101,7 +101,8 @@ A separate product from TLR, with its own Supabase project: Show Up, ref ycxmhil
 
 ## Known issues and open work
 
-1. Show Up parking lot: Stuart's struggling videos, email capture for the public launch (separate unticked marketing box), prescriptive challenges (for example a fitness challenge), real app name, sales page, Stripe product.
+1. Parked (Stu, 4 Nov 2026): connecting Let's Go! to other apps or phone health data (Apple Health, Health Connect, Samsung Health, step counters). Not now; a possible future version. Evidence and options: reports/Connecting Lets Go to other apps.md.
+1b. Show Up parking lot: Stuart's struggling videos, email capture for the public launch (separate unticked marketing box), prescriptive challenges (for example a fitness challenge), real app name, sales page, Stripe product.
 2. Design and tone pass on M1, M2, M3, M4 and M6 (21 tools) to match the redesigned M5 and M7, plus checking each tool follows the standard pattern.
 3. Research what members value on Skool, Circle and similar platforms.
 4. Long term: white-label platform for other coaches (workspace_id multi-tenancy with RLS, Stripe billing, coach admin view, course builder).
