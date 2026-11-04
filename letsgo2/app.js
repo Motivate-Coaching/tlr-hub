@@ -95,6 +95,7 @@
   if (/[?&]tester\b/.test(location.search)) { try { localStorage.setItem('showup-tester', '1'); history.replaceState(null, '', location.pathname); } catch (e) {} }
   function isTester() { var f = false; try { f = localStorage.getItem('showup-tester') === '1'; } catch (e) {} var byEmail = !!(user && TESTER_EMAILS.indexOf((user.email || '').toLowerCase()) >= 0); if (byEmail && !f) { try { localStorage.setItem('showup-tester', '1'); } catch (e) {} } return f || byEmail; }
   var FRESH = /[?&]fresh\b/.test(location.search);
+  var FROM_QR = /[?&]from=qr\b/.test(location.search); // opened from the QR code on a computer
   if (FRESH) {
     try { Object.keys(localStorage).forEach(function (k) { if (k === KEY || k.indexOf('sb-') === 0) localStorage.removeItem(k); }); } catch (e) {}
     try { history.replaceState(null, '', location.pathname); } catch (e) {}
@@ -392,9 +393,10 @@
         '<div class="btns"><button class="btn" data-act="startplan" data-mode="more">Build a habit</button>' +
         '<button class="btn outline" data-act="startplan" data-mode="less">Break a habit</button>' +
         '<button class="link center" data-find="start">Not sure what to work on? <b>Help me choose</b></button></div>' +
+        (user ? '' : '<div class="card soft small' + (FROM_QR ? ' fromqr' : '') + '"><b style="font-weight:600">' + (FROM_QR ? 'Carrying on from your computer?' : 'Already set up on another device?') + '</b><span>Sign in with the same email and your plan comes with you.</span><button class="btn' + (FROM_QR ? '' : ' outline') + '" data-account="landing">Sign in</button></div>') +
         '<div class="spacer"></div>' +
         '<p class="hint" style="text-align:center;margin:0">A few minutes to set up. One tap a day after that.</p>' +
-        '<p class="foot">' + (user ? '' : '<button class="link inline" data-account="landing">I already have an account</button> · ') +
+        '<p class="foot">' +
         '<a class="link inline" href="../letsgo/privacy.html">Privacy</a> · <a class="link inline" href="../letsgo/terms.html">Terms</a></p>' +
         (isTester() ? '<button class="link center" data-act="testerreset" style="font-size:13px;color:var(--muted)">Testing: start again from scratch</button>' : '') + '</section>';
     },
@@ -506,7 +508,7 @@
     },
     walk: function () {
       var d = walkDay(), tom = d > todayStr(), hb = S.habit, less = hb.mode === 'less', mine = mineLine();
-      var wa = liveActs(d).filter(function (x) { return M.isDue(hb, x, d) || M.isWeekly(x, d); })[0] || mainAct(), a = anchorLine(wa);
+      var wa = liveActs(null, d).filter(function (x) { return M.isDue(hb, x, d) || M.isWeekly(x, d); })[0] || mainAct(), a = anchorLine(wa);
       var day = tom ? 'tomorrow' : 'today', plan = ui.walkPlan != null ? ui.walkPlan : lastPlan();
       var steps2 = [
         a ? 'Picture the moment it happens: <b>' + esc(a.charAt(0).toLowerCase() + a.slice(1)) + '</b>.' : 'Picture the moment it happens ' + day + ': where you are, what’s around you.',
@@ -552,7 +554,7 @@
       if (!done && due && !S.later) {
         h += '<div class="card"><b style="font-size:20px;font-weight:600">Done it already today?</b><span style="color:var(--text-mid)">Count it now. A lighter version counts too.</span>' +
           '<button class="btn" data-log="full" data-a="' + a.id + '">' + checkIcon('#FFFFFF') + 'I showed up today</button>' +
-          '<button class="link center" data-act="later">I’ll start tomorrow</button></div>';
+          '<button class="link center" data-act="later">I’ll start tomorrow</button><button class="link center" data-act="startdate">Already started before today?</button></div>';
       } else if (!done && !due) {
         h += '<div class="card soft"><b style="font-weight:600">Nothing planned today.</b><span>Your first one is ' + esc(nx ? relDay(nx.d) : 'soon') + (nx ? ': ' + esc(nx.a.text) : '') + '.</span></div>';
       } else if (S.later && !done) {
@@ -1263,7 +1265,7 @@
     return h + '</div><button class="link" data-act="catchdone" style="align-self:flex-start;font-size:14px">' + (gap ? 'That’s everything' : 'No, carry on') + '</button></div>';
   }
   function catchDay(d) {
-    var due = liveActs(d).filter(function (a) { return M.isDue(S.habit, a, d); });
+    var due = liveActs(null, d).filter(function (a) { return M.isDue(S.habit, a, d); });
     if (due.length === 1) return logAct(due[0].id, 'full', d);
     openDay(d);
   }
@@ -1435,7 +1437,7 @@
         (a.small ? '<span class="psub">Tough day: ' + esc(a.small) + '</span>' : '') + '</div><button class="pedit" data-editact="' + a.id + '">Edit</button></div>';
     });
     out += '</div><button class="btn outline" data-editact="new">' + (liveActs().length ? 'Add another action' : 'Add an action') + '</button>';
-    out += '<div class="plancard">' + row(PICON.when, 'Review after', '<b>' + h.length + ' days</b><span class="psub">From ' + esc(prettyDate(h.start)) + ' to ' + esc(prettyDate(lastDate())) + '</span>', '<button class="pedit" data-length="' + from + '">Change</button>') +
+    out += '<div class="plancard">' + row(PICON.when, 'Review after', '<b>' + h.length + ' days</b><span class="psub">From ' + esc(prettyDate(h.start)) + ' to ' + esc(prettyDate(lastDate())) + '</span><button class="link" data-act="startdate" style="align-self:flex-start;font-size:14px;min-height:36px">Change start date</button>', '<button class="pedit" data-length="' + from + '">Change</button>') +
       row(iconClock('#0F1215'), 'Nudges', '<b>' + esc(reminderLine()) + '</b>', '<button class="pedit" data-act="gosettings">Change</button>') + '</div>';
     var hp = extra().helpers || [];
     if (hp.length) out += '<div class="card soft"><span class="eyebrow">Might help you get started</span>' + hp.map(function (x) { return '<a class="link" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + encodeURIComponent(x) + '" style="align-self:flex-start">' + esc(x) + ' <span aria-hidden="true">↗</span><span class="sr"> (opens a search in a new tab)</span></a>'; }).join('') + '</div>';
@@ -2046,6 +2048,7 @@
       case 'reopen': S.habit.finishedOn = null; S.habit.length = Math.max(S.habit.length, todayNum() + 29); touchF(); save(); toast('Keep going. Your next look back is in ' + (S.habit.length - todayNum() + 1) + ' days.'); return render();
       case 'logextra': return logExtraSheet();
       case 'syncnow': syncRetry = 0; return void syncAll();
+      case 'startdate': return startDateSheet();
       case 'tryfocus': S.viewTipDone = true; S.settings.view = 'focus'; save(); toast('Focused view on. Switch back in Settings, under How it looks.'); return render();
       case 'viewtipno': S.viewTipDone = true; save(false); return render();
       case 'lensave': { var lc2 = document.getElementById('lencustom'), cv = lc2 && +lc2.value, L2 = cv ? Math.max(7, Math.min(730, Math.round(cv))) : (ui.lenPick || (S.habit ? S.habit.length : S.draft.length)); ui.lenPick = null; if (S.habit) { S.habit.length = L2; touchF(); } else S.draft.length = L2; save(); return appBack(); }
@@ -2228,6 +2231,36 @@
     f.status = 'active'; f.finishedOn = null; S.habit = f;
     if (todayNum() > f.length) f.length = todayNum() + 29;
     touchF(); save(); toast('Welcome back to ' + habitName() + '.'); go('tracker');
+  }
+  // Already started before today? Move the start back (up to 90 days), then fill in the days since.
+  function startDateSheet() {
+    var f = S.habit, min = addDays(todayStr(), -90), first = null;
+    acts().forEach(function (x) { Object.keys(x.entries || {}).forEach(function (d) { if (counted(x.entries[d]) && (!first || d < first)) first = d; }); });
+    var max = first && first < todayStr() ? first : todayStr();
+    var body = '<div class="row"><b style="font-size:20px;font-weight:600">When did you start?</b><button class="link" data-c="close">Close</button></div>' +
+      '<span class="hint">If you began before you set this up, pick the day you started. Then you can fill in the days since.</span>' +
+      '<div class="field"><label class="label" for="sdate">Start date</label><input class="input" id="sdate" type="date" min="' + min + '" max="' + max + '" value="' + esc(f.start) + '"></div>' +
+      '<button class="btn" data-c="save">Save</button>';
+    var el = openSheet('When did you start?', body, function (ev, b, close) {
+      if (b.dataset.c === 'close') return close();
+      if (b.dataset.c !== 'save') return;
+      var v = el.querySelector('#sdate').value;
+      if (!v || v < min || v > max) return toast(v > max ? 'Pick a day on or before your first show-up.' : 'Pick a day in the last 90 days.');
+      close(); setStart(v);
+    });
+  }
+  // The plan and its first schedules begin on the new date. Actions added later keep their own start. Nothing logged is moved.
+  function setStart(d) {
+    var f = S.habit, old = f.start; if (d === old) return;
+    f.start = d; S.later = false;
+    acts().forEach(function (x) {
+      var orig = !x.from || x.from === old || x.from <= d;
+      (x.schedules || []).forEach(function (r, i) { if ((i === 0 && orig) || r.from < d) r.from = d; });
+      if (orig) x.from = d;
+      touchA(x);
+    });
+    touchF(); save(); stat('startdate', String(daysBetween(d, todayStr())));
+    toast(d < todayStr() ? 'Start moved to ' + prettyDate(d) + '. Tap any day to fill it in.' : 'Starting today.'); go('tracker');
   }
   // Did something on a day it wasn't planned? It counts, and it doesn't change the plan.
   function logExtraSheet() {
