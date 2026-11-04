@@ -617,7 +617,7 @@
       return '<section class="screen widegrid"><div class="wtitle"><div class="eyebrow">Progress</div><h1>How it’s going</h1></div><div class="colL">' +
         '<section class="sec">' + secHead('chart', 'Running total') + '<div><span class="bignum">' + st.done + '</span> <span class="hint" style="display:inline">show-up' + (st.done === 1 ? '' : 's') + ', from ' + st.planned + ' planned so far</span></div>' + lineChart() +
         '<div class="legend2"><span><i style="background:var(--green)"></i>Show-ups</span><span><i style="border:1.5px dashed #9A907F"></i>Planned</span></div></section>' +
-        '<section class="sec">' + secHead('week', 'Week by week') + barChart(120) + '<div class="legend2"><span><i style="background:var(--green)"></i>Full version</span><span><i style="background:var(--amber)"></i>Lighter version</span><span><i style="border:1.5px dashed #9A907F"></i>Planned</span></div></section></div><div class="colR">' +
+        '<section class="sec">' + secHead('week', 'Week by week') + barChart(120) + '<div class="legend2"><span><i style="background:var(--green)"></i>Full version</span><span><i style="background:var(--amber)"></i>Lighter version</span><span><i style="border:1.5px dashed #9A907F"></i>Planned</span></div></section>' + optional('Patterns worth noticing', patternsHTML()) + '</div><div class="colR">' +
         '<section class="sec">' + secHead('task', 'Every day') + gridHTML(todayNum(), true) + '<p class="hint">Tap any day to fill it in, change it or add a note. Days not logged stay plain, never red. Rest days are part of the plan.</p></section>' +
         '<div class="tiles"><div class="tile"><b>' + st.full + '</b><span>full versions</span></div><div class="tile"><b>' + st.light + '</b><span>lighter versions</span></div><div class="tile"><b>' + st.backs + '</b><span>comebacks</span></div></div>' +
         (st.unlogged ? '<p class="hint">' + st.unlogged + ' planned ' + (st.unlogged === 1 ? 'day isn’t' : 'days aren’t') + ' logged. If you did them, tap the day to fill it in.</p>' : '') +
@@ -896,7 +896,8 @@
     today: '<path d="M12 4v2M12 18v2M4 12H2M22 12h-2M6.3 6.3 4.9 4.9M19.1 19.1l-1.4-1.4M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/><circle cx="12" cy="12" r="4"/>',
     week: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
     chart: '<path d="M5 20V12M10 20V7M15 20v-5M20 20V4"/>',
-    task: '<path d="M9 11l2.5 2.5L16 9"/><rect x="4" y="4" width="16" height="16" rx="3"/>'
+    task: '<path d="M9 11l2.5 2.5L16 9"/><rect x="4" y="4" width="16" height="16" rx="3"/>',
+    link: '<circle cx="6" cy="17" r="2.5"/><circle cx="18" cy="7" r="2.5"/><path d="M8 15.5 16 8.5"/><circle cx="17" cy="18" r="1.5"/><circle cx="7" cy="6" r="1.5"/>'
   };
   function secHead(k, title, right) { return '<div class="sec-h"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24">' + ICON[k] + '</svg></span><h2>' + title + '</h2>' + (right ? '<span class="sec-r">' + right + '</span>' : '') + '</div>'; }
   // "So far" counts days up to yesterday, plus today once it's ticked, so an unticked today never looks like a gap.
@@ -1121,6 +1122,16 @@
     var all = M.tally(f, f.start, end), open = end === todayStr() ? todayOpen() : 0;
     var wFrom = addDays(end, -6) < f.start ? f.start : addDays(end, -6), wk = M.tally(f, wFrom, end);
     return { done: all.done, full: all.full, light: all.small, planned: Math.max(0, all.planned - open), unlogged: all.unlogged, backs: comebacks(), week: wk.done, weekOf: Math.max(0, wk.planned - open) };
+  }
+  // Patterns worth noticing (model.js does the maths, cautiously). Worded as something to notice, never a verdict.
+  function patternsHTML() {
+    var list = acts(), p = M.patterns(S.habit, todayStr(), list), q = function (id) { var a = actById(id); return '“' + esc(a ? a.text : '') + '”'; };
+    var h = '<section class="sec">' + secHead('link', 'Patterns worth noticing');
+    if (!p.ready) return h + '<p class="hint" style="margin:0">After three weeks, this is where you’ll see links worth noticing, like whether one action makes another easier, or which days suit you best. ' + p.daysLeft + ' day' + (p.daysLeft === 1 ? '' : 's') + ' to go.' + (list.length < 2 ? ' Links between actions need at least two in your plan.' : '') + '</p></section>';
+    var items = p.links.map(function (x) { return '<li>On days you did ' + q(x.a) + ', you also did ' + q(x.b) + ' <b>' + x.with[0] + ' of ' + x.with[1] + '</b> times. On other days, ' + x.without[0] + ' of ' + x.without[1] + '.</li>'; });
+    if (p.weekday) { var w = p.weekday; items.push('<li>' + DAY_LABELS[w.best.d] + ' suits you best: you showed up <b>' + w.best.done + ' of ' + w.best.of + '</b> times. ' + DAY_LABELS[w.low.d] + ' is trickier: ' + w.low.done + ' of ' + w.low.of + '.</li>'); }
+    if (!items.length) return h + '<p class="hint" style="margin:0">Nothing stands out yet, and that’s normal. We only show a pattern when it’s clear enough not to be chance.</p></section>';
+    return h + '<ul class="patlist">' + items.join('') + '</ul><p class="hint" style="margin:0">Something to notice, not a rule. What do you make of it? Only shown when the difference is clear enough not to be chance.</p></section>';
   }
   function barChart(H) {
     var series = M.weeklySeries(S.habit).slice(-8); if (!series.length) return '';
