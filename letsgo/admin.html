@@ -71,10 +71,12 @@ select { font: inherit; padding: 8px 10px; border-radius: 6px; border: 1px solid
       sb.rpc('showup_pilot_summary'),
       sb.rpc('showup_usage_summary', { since_days: days }),
       sb.rpc('showup_feedback_admin', { since_days: days }),
-      sb.rpc('showup_new_starters', { since_days: days })
+      sb.rpc('showup_new_starters', { since_days: days }),
+      sb.rpc('lg_pilot_summary')
     ]);
     var people = r[0].data || [], usage = r[1].data || [], fb = r[2].data;
     if (r[2].error) { var raw = await sb.from('showup_feedback').select('question,answer,created_at').order('created_at', { ascending: false }).limit(200); fb = (raw.data || []).map(function (x) { return Object.assign({ email: '' }, x); }); }
+    window.__v2 = r[4] && !r[4].error ? (r[4].data || []) : null;
     render(days, people, usage, fb || [], r[3].error ? null : (r[3].data || []));
   }
   // Tester feedback: grouped by the "how would you feel" answer, the way Superhuman read theirs. Part 1 is first look and setup, Part 2 is living with it.
@@ -112,6 +114,15 @@ select { font: inherit; padding: 8px 10px; border-radius: 6px; border: 1px solid
     return h + '<p class="hint">Look for themes that come up 3 or more times, and compare what people say with what they actually did.</p></section>';
   }
   // New starters: everyone who added their email in this period, newest first. People who finish setup but never add an email have no email to show.
+  // V2 plans (Let's Go! V2, its own storage): one row per current focus.
+  function v2Section(list) {
+    if (!list) return '';
+    var h = '<section class="card"><h2>V2 plans</h2><p class="hint">People using V2, from its own storage. Show-ups count the full and lighter versions; nudges show what they have switched on.</p>';
+    if (!list.length) return h + '<p class="hint">Nobody on V2 yet.</p></section>';
+    h += '<div class="scroll"><table><tr><th>Email</th><th>Focus</th><th class="n">Actions</th><th>Started</th><th class="n">Show-ups</th><th class="n">Lighter</th><th>Last</th><th>Nudges</th></tr>';
+    list.forEach(function (p) { h += '<tr><td>' + esc(p.email) + '</td><td>' + esc((p.mode === 'less' ? 'Break: ' : 'Build: ') + (p.focus || '')) + '</td><td class="n">' + p.actions + '</td><td>' + esc(p.start_date) + '</td><td class="n">' + p.show_ups + '</td><td class="n">' + p.lighter + '</td><td>' + (p.last_tick ? esc(when(p.last_tick)) : '<span class="hint">none yet</span>') + '</td><td>' + esc(p.nudges) + '</td></tr>'; });
+    return h + '</table></div></section>';
+  }
   function startersSection(st) {
     if (!st) return '';
     var h = '<section class="card"><h2>New starters</h2><p class="hint">Everyone who added their email in this period, newest first. Someone who finishes setup but skips the email step won’t show here.</p>';
@@ -138,7 +149,7 @@ select { font: inherit; padding: 8px 10px; border-radius: 6px; border: 1px solid
       '<div class="tile"><b>' + opens + '</b><span>app opens (people)</span></div>' +
       '<div class="tile"><b>' + (opens ? Math.round(focus / opens * 100) : 0) + '%</b><span>using Focused view</span></div>' +
       '<div class="tile"><b>' + checks.length + '</b><span>weekly check-ins</span></div></div>';
-    h += startersSection(starters);
+    h += v2Section(window.__v2) + startersSection(starters);
     h += testerSection(testers);
     // Check-ins and feedback
     h += '<section class="card"><h2>Check-ins and feedback</h2>';

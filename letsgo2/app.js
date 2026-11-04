@@ -602,6 +602,7 @@
         barChart(90) + '<p class="hint">Green is the full version, amber the lighter one. Both count. The dashed outline is what was planned.</p></section>';
       else h += '<section class="sec full-only">' + secHead('chart', 'Your progress') + '<p class="hint" style="margin:0">Your first planned action is ready. Your progress will show here.</p></section>';
       var na = nudgeAsk(); h += stuDay(t) + (na || (signInCard() + extraCards(t)));
+      if (t <= 5 && !S.viewTipDone) h += '<div class="card soft small"><b style="font-weight:600">Prefer fewer details on screen?</b><span>Focused view shows just today, calmly. You can switch back any time.</span><div class="row" style="gap:12px;justify-content:flex-start"><button class="chip" data-act="tryfocus">Try Focused view</button><button class="link" data-act="viewtipno" style="font-size:14px">No thanks</button></div></div>';
       return h + '</section>';
     },
     progress: function () {
@@ -703,7 +704,7 @@
       var h = '<section class="screen"><h1>The science behind it</h1>' +
         '<div class="author"><img src="../letsgo/stuart.jpg" alt="Stuart Fairbairns" loading="lazy"><div class="body">' +
         '<span class="eyebrow">Created by</span><span class="name">Stuart Fairbairns PCC</span>' +
-        '<p>Executive coach with over 5,000 hours helping people change how they live and lead. Every part of this tool is there because research shows it works.</p></div></div><ul class="science">';
+        '<p>Executive coach with over 5,000 hours helping people change how they live and lead. Built using research on planning, tracking progress and coming back after setbacks.</p></div></div><ul class="science">';
       SCIENCE.forEach(function (x) { h += '<li><b>' + esc(x[0]) + '</b><p>' + esc(x[1]) + '</p><a href="' + x[3] + '" target="_blank" rel="noopener">' + esc(x[2]) + '</a></li>'; });
       return h + '</ul><h2 style="margin-top:12px;font-size:24px">More about Stuart</h2>' +
         '<div class="facts"><div><b>5,000+</b><span>hours of one-to-one and group coaching</span></div>' +
@@ -781,7 +782,8 @@
         h += installSteps(ios ? 'ios' : 'android');
         h += '<details class="ask"><summary>' + (ios ? 'On Android instead?' : 'On an iPhone instead?') + '</summary>' + installSteps(ios ? 'android' : 'ios') + '</details>';
       } else {
-        h += '<div class="card qrcard"><img src="../letsgo/qr.svg" width="132" height="132" alt="QR code for the Let’s Go! app"><div><b>Point your phone’s camera here</b><span class="hint">Then tap the link that pops up.</span><button class="chip" data-act="copylink">Or copy the link</button></div></div>' +
+        h += '<div class="card qrcard"><img src="qr.svg" width="132" height="132" alt="QR code for the Let’s Go! app"><div><b>Point your phone’s camera here</b><span class="hint">Then tap the link that pops up.</span><button class="chip" data-act="copylink">Or copy the link</button></div></div>' +
+          (user ? '<p class="hint">On your phone, sign in with ' + esc(user.email) + ' and your plan will be there.</p>' : '<p class="hint">The code opens the app, not your plan. To bring your plan to your phone, <button class="link inline" data-account="install">add your email here first</button>, then sign in with it on your phone.</p>') +
           '<details class="ask"><summary>Then what?</summary><span class="eyebrow" style="display:block;margin:10px 0 6px">iPhone</span>' + installSteps('ios') + '<span class="eyebrow" style="display:block;margin:16px 0 6px">Android</span>' + installSteps('android') + '</details>' +
           (deferredInstall ? '<button class="btn outline" data-act="doinstall">Or install it on this computer</button>' : '');
       }
@@ -1711,20 +1713,13 @@
   function openWin(id) {
     var w = (S.wins || []).filter(function (x) { return x.id === id; })[0]; if (!w) return;
     var q2 = w.outcome === 'did' ? 'How does it feel, looking back on it now?' : 'What got in the way, and what would you do differently?';
-    var el = document.createElement('div'); el.className = 'sheet-bg';
-    el.innerHTML = '<div class="sheet" role="dialog" aria-label="' + esc(w.name) + '"><div class="row"><span><span class="wo ' + w.outcome + '">' + esc(OUTCOME[w.outcome]) + '</span><b style="display:block;font-size:20px;font-weight:600;margin-top:6px">' + esc(w.name) + '</b></span><button class="link" data-x="close">Close</button></div>' +
+    var el = openSheet(w.name, '<div class="row"><span><span class="wo ' + w.outcome + '">' + esc(OUTCOME[w.outcome]) + '</span><b style="display:block;font-size:20px;font-weight:600;margin-top:6px">' + esc(w.name) + '</b></span><button class="link" data-x="close">Close</button></div>' +
       '<div class="field"><label class="label" for="whelped">What helped?</label><textarea id="whelped" rows="2" placeholder="Even small things count">' + esc(w.helped || '') + '</textarea></div>' +
       '<div class="field"><label class="label" for="wfelt">' + q2 + '</label><textarea id="wfelt" rows="2" placeholder="A few words is plenty">' + esc(w.felt || '') + '</textarea></div>' +
-      '<button class="btn" data-x="save">Save</button><button class="link center" data-x="remove" style="font-size:14px">Remove this one</button></div>';
-    app.appendChild(el);
-    el.querySelectorAll('textarea').forEach(grow);
-    el.addEventListener('input', function (ev) { if (ev.target.tagName === 'TEXTAREA') grow(ev.target); });
-    el.addEventListener('click', function (ev) {
-      if (ev.target === el) return el.remove();
-      var b = ev.target.closest('button'); if (!b) return;
-      if (b.dataset.x === 'close') return el.remove();
-      if (b.dataset.x === 'save') { w.helped = el.querySelector('#whelped').value.trim(); w.felt = el.querySelector('#wfelt').value.trim(); syncWins(); el.remove(); toast('Saved.'); return render(); }
-      if (b.dataset.x === 'remove') { S.wins = S.wins.filter(function (x) { return x.id !== id; }); syncWins(); el.remove(); return render(); }
+      '<button class="btn" data-x="save">Save</button><button class="link center" data-x="remove" style="font-size:14px">Remove this one</button>', function (ev, b, close) {
+      if (b.dataset.x === 'close') return close();
+      if (b.dataset.x === 'save') { w.helped = el.querySelector('#whelped').value.trim(); w.felt = el.querySelector('#wfelt').value.trim(); syncWins(); close(); toast('Saved.'); return render(); }
+      if (b.dataset.x === 'remove') { S.wins = S.wins.filter(function (x) { return x.id !== id; }); syncWins(); close(); return render(); }
     });
   }
   function findAct(a, b) {
@@ -2051,6 +2046,8 @@
       case 'reopen': S.habit.finishedOn = null; S.habit.length = Math.max(S.habit.length, todayNum() + 29); touchF(); save(); toast('Keep going. Your next look back is in ' + (S.habit.length - todayNum() + 1) + ' days.'); return render();
       case 'logextra': return logExtraSheet();
       case 'syncnow': syncRetry = 0; return void syncAll();
+      case 'tryfocus': S.viewTipDone = true; S.settings.view = 'focus'; save(); toast('Focused view on. Switch back in Settings, under How it looks.'); return render();
+      case 'viewtipno': S.viewTipDone = true; save(false); return render();
       case 'lensave': { var lc2 = document.getElementById('lencustom'), cv = lc2 && +lc2.value, L2 = cv ? Math.max(7, Math.min(730, Math.round(cv))) : (ui.lenPick || (S.habit ? S.habit.length : S.draft.length)); ui.lenPick = null; if (S.habit) { S.habit.length = L2; touchF(); } else S.draft.length = L2; save(); return appBack(); }
       case 'actsave': return saveActEdit();
       case 'actremove': return confirmSheet('Take this out of your plan?', 'It stops from today. Everything you’ve already logged for it is kept.', 'Take it out', function () { var ra = actById(ui.edit.id); ra.until = addDays(todayStr(), -1) < (ra.from || S.habit.start) ? (ra.from || S.habit.start) : addDays(todayStr(), -1); if (!Object.keys(ra.entries).some(function (k) { return counted(ra.entries[k]); }) && ra.until <= S.habit.start) { ra.extra = Object.assign({}, ra.extra, { retired: true }); } touchA(ra); save(); ui.edit = null; toast('Taken out of your plan.'); go('plan'); });
@@ -2319,32 +2316,23 @@
     if (!url) return toast('Link coming soon.');
     stat('support', what); try { window.open(url, '_blank', 'noopener'); } catch (e) { location.href = url; }
   }
+
+
+  function confirmSheet(title, body, yes, fn) {
+    openSheet(title.replace(/Let’s Go(?!!)/g, 'Let’s Go!'), '<b style="font-size:20px;font-weight:600">' + brand(title) + '</b><p class="hint">' + esc(body) + '</p><button class="btn" data-c="yes">' + esc(yes) + '</button><button class="link center" data-c="no">Cancel</button>',
+      function (ev, b, close) { if (!b.dataset.c) return; close(); if (b.dataset.c === 'yes') fn(); });
+  }
   function tlrBridge() {
     stat('support', 'tlr-bridge');
-    var el = document.createElement('div'); el.className = 'sheet-bg';
-    el.innerHTML = '<div class="sheet" role="dialog" aria-label="The Living Room"><div class="row" style="justify-content:space-between"><span class="eyebrow">Ongoing support</span><button class="link" data-c="close">Close</button></div>' +
+    openSheet('The Living Room', '<div class="row" style="justify-content:space-between"><span class="eyebrow">Ongoing support</span><button class="link" data-c="close">Close</button></div>' +
       '<b style="font-family:var(--display);font-weight:400;font-size:28px;line-height:1.15">The Living Room (TLR)</b>' +
       '<p class="hint" style="margin:0">Stu’s coaching community, for people whose life works on paper but doesn’t quite feel like theirs.</p>' +
       '<ul class="tlrlist"><li>Regular live group sessions with Stu</li><li>A practical new tool for each theme</li><li>People doing the same work, so you’re not doing it alone</li></ul>' +
       (SUPPORT.tlrPrice ? '<p style="margin:0;font-weight:600">' + esc(SUPPORT.tlrPrice) + '</p>' : '') +
       '<p class="hint" style="margin:0">Try it for 30 days. If it’s not for you, email Stu and get every penny back.</p>' +
-      '<button class="btn" data-c="join">Join now</button><button class="link center" data-c="info">Find out more first</button></div>';
-    app.appendChild(el);
-    el.addEventListener('click', function (ev) {
-      var b = ev.target.closest('[data-c]'); if (!b && ev.target !== el) return;
-      el.remove(); if (!b) return;
-      if (b.dataset.c === 'join') openLink(SUPPORT.tlrJoin, 'tlr-join');
-      if (b.dataset.c === 'info') openLink(SUPPORT.tlrInfo, 'tlr-info');
-    });
+      '<button class="btn" data-c="join">Join now</button><button class="link center" data-c="info">Find out more first</button>',
+      function (ev, b, close) { var c = b.dataset.c; if (!c) return; close(); if (c === 'join') openLink(SUPPORT.tlrJoin, 'tlr-join'); if (c === 'info') openLink(SUPPORT.tlrInfo, 'tlr-info'); });
   }
-  function confirmSheet(title, body, yes, fn) {
-    var el = document.createElement('div'); el.className = 'sheet-bg';
-    el.innerHTML = '<div class="sheet" role="dialog" aria-label="' + esc(title.replace(/Let’s Go/g, 'Let’s Go!')) + '"><b style="font-size:20px;font-weight:600">' + brand(title) + '</b><p class="hint">' + esc(body) + '</p><button class="btn" data-c="yes">' + esc(yes) + '</button><button class="link center" data-c="no">Cancel</button></div>';
-    app.appendChild(el);
-    el.addEventListener('click', function (ev) { var b = ev.target.closest('[data-c]'); if (!b && ev.target !== el) return; el.remove(); if (b && b.dataset.c === 'yes') fn(); });
-  }
-
-
   async function saveReflect() {
     var q = ui.reflect, h = S.habit; if (!q || !q.next) return;
     h.extra = Object.assign({}, h.extra, { lookback: { noticed: q.noticed, next: q.next, at: nowISO() } }); touchF();
