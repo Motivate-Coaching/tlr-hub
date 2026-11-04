@@ -2297,7 +2297,7 @@
     priceMember: '£45', priceStandard: '£75',
     tlrJoin: 'https://buy.stripe.com/4gMdR966MgM41hcdTjebu00', // The Living Room payment page
     tlrInfo: 'https://www.motivate-coaching.com/thelivingroom',  // The Living Room landing page
-    tlrPrice: ''         // e.g. '£XX a month'
+    tlrPrice: '£69 a month, the founding member rate'
   };
   function supportLive() { return !!(SUPPORT.boosterMember || SUPPORT.boosterStandard || SUPPORT.tlrJoin); }
   function supportCard() {
@@ -2326,7 +2326,7 @@
     stat('support', 'tlr-bridge');
     openSheet('The Living Room', '<div class="row" style="justify-content:space-between"><span class="eyebrow">Ongoing support</span><button class="link" data-c="close">Close</button></div>' +
       '<b style="font-family:var(--display);font-weight:400;font-size:28px;line-height:1.15">The Living Room (TLR)</b>' +
-      '<p class="hint" style="margin:0">Stu’s coaching community, for people whose life works on paper but doesn’t quite feel like theirs.</p>' +
+      '<p class="hint" style="margin:0">Less overthinking. More getting on with it. Stu’s membership for people who want to make real progress, with others doing the same.</p>' +
       '<ul class="tlrlist"><li>Regular live group sessions with Stu</li><li>A practical new tool for each theme</li><li>People doing the same work, so you’re not doing it alone</li></ul>' +
       (SUPPORT.tlrPrice ? '<p style="margin:0;font-weight:600">' + esc(SUPPORT.tlrPrice) + '</p>' : '') +
       '<p class="hint" style="margin:0">Try it for 30 days. If it’s not for you, email Stu and get every penny back.</p>' +
