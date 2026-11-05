@@ -389,7 +389,7 @@
   var screens = {
     landing: function () {
       return '<section class="screen landing v2land">' +
-        '<div class="v2with"><img src="../letsgo/stuart.jpg" alt="" width="40" height="40"><span>with Stuart Fairbairns PCC</span></div>' +
+        '<div class="v2with"><img src="stuart.jpg" alt="" width="40" height="40"><span>with Stuart Fairbairns PCC</span></div>' +
         '<div class="hero"><h1>Build a habit you want. Or break one you don’t.</h1>' +
         '<p class="sub">Wherever you’re starting from, we’ll help you shape a plan that fits your life, and help you stick with it.</p></div>' +
         '<div class="btns"><button class="btn" data-act="startplan" data-mode="more">Build a habit</button>' +
@@ -399,7 +399,7 @@
         '<div class="spacer"></div>' +
         '<p class="hint" style="text-align:center;margin:0">A few minutes to set up. One tap a day after that.</p>' +
         '<p class="foot">' +
-        '<a class="link inline" href="../letsgo/privacy.html">Privacy</a> · <a class="link inline" href="../letsgo/terms.html">Terms</a></p>' +
+        '<a class="link inline" href="privacy.html">Privacy</a> · <a class="link inline" href="terms.html">Terms</a></p>' +
         (isTester() ? '<button class="link center" data-act="testerreset" style="font-size:13px;color:var(--muted)">Testing: start again from scratch</button>' : '') + landPreview() + '</section>';
     },
     say: function () {
@@ -706,7 +706,7 @@
     },
     science: function () {
       var h = '<section class="screen"><h1>The science behind it</h1>' +
-        '<div class="author"><img src="../letsgo/stuart.jpg" alt="Stuart Fairbairns" loading="lazy"><div class="body">' +
+        '<div class="author"><img src="stuart.jpg" alt="Stuart Fairbairns" loading="lazy"><div class="body">' +
         '<span class="eyebrow">Created by</span><span class="name">Stuart Fairbairns PCC</span>' +
         '<p>Executive coach with over 5,000 hours helping people change how they live and lead. Built using research on planning, tracking progress and coming back after setbacks.</p></div></div><ul class="science">';
       SCIENCE.forEach(function (x) { h += '<li><b>' + esc(x[0]) + '</b><p>' + esc(x[1]) + '</p><a href="' + x[3] + '" target="_blank" rel="noopener">' + esc(x[2]) + '</a></li>'; });
@@ -727,7 +727,7 @@
       var sect = function (title, body, open) { return '<details class="sect"' + (open ? ' open' : '') + '><summary>' + title + '</summary><div class="sbody">' + body + '</div></details>'; };
       var h = '<section class="screen settings"><div><h1>Settings</h1><p class="hint" id="syncStatus" style="margin:4px 0 0">' + syncLabel() + '</p></div>';
       // Stuart's own tools sit at the top so they're one tap away.
-      if (isTester()) h += '<div class="card soft small"><span class="eyebrow">Your tools (only you see this)</span><a class="btn" href="../letsgo/admin.html">Analytics</a><a class="btn outline" href="../letsgo/admin.html#feedback">Feedback responses</a>' +
+      if (isTester()) h += '<div class="card soft small"><span class="eyebrow">Your tools (only you see this)</span><a class="btn" href="https://motivate-coaching.github.io/tlr-hub/letsgo/admin.html">Analytics</a><a class="btn outline" href="https://motivate-coaching.github.io/tlr-hub/letsgo/admin.html#feedback">Feedback responses</a>' +
         '<button class="btn outline" data-act="copyfeedback">Copy the feedback link</button></div>';
       if (isTester()) h += '<div class="card soft small"><span class="eyebrow">For testing</span><span>Wipes everything, including your account, so you can go through it all again as a new person. Sign in again with the same email and you start blank.</span><button class="btn outline" data-act="testerreset">Start again from scratch</button><button class="btn outline" data-act="testerreload">Reload the latest version</button></div>';
       // The essentials: your nudge, described as it really is.
@@ -765,7 +765,7 @@
         (user ? '<button class="switch" role="switch" aria-checked="' + !!s.marketing + '" data-toggle="marketing"><span><b>Ideas and updates from Stuart</b><span class="hint">Occasional emails. Off unless you choose.</span></span><span class="track"></span></button>' : '') +
         '<p class="hint">Your notes are private to you. During the pilot, Stuart can see your plan and how often you show up, never your notes. Words you type into the AI helper are sent to our AI provider, Anthropic, only to suggest ideas, and we don’t keep them.</p>' +
         '<div class="row" style="flex-wrap:wrap;gap:8px;justify-content:flex-start"><button class="chip" data-act="exportdata">Download my data</button><button class="chip" data-act="deletedata">Delete my <span class="brand">Let’s Go<span class="bang">!</span></span> data</button></div>' +
-        '<a class="link" href="../letsgo/privacy.html" style="align-self:flex-start">Privacy notice</a>' + '<a class="link" href="../letsgo/terms.html" style="align-self:flex-start">Terms of use</a>' +
+        '<a class="link" href="privacy.html" style="align-self:flex-start">Privacy notice</a>' + '<a class="link" href="terms.html" style="align-self:flex-start">Terms of use</a>' +
         '<button class="switch" role="switch" aria-checked="' + !!s.tlrMember + '" data-act="tlrtoggle"><span><b>I’m in The Living Room</b><span class="hint">Shows member prices for booster calls.</span></span><span class="track"></span></button>' + (user ? '<button class="link" data-act="signout" style="align-self:flex-start">Sign out</button>' : ''));
       if (!isStandalone()) h += sect('Get the app', '<span>Put it on your home screen so it opens like an app.</span><button class="btn outline" data-act="install">Show me how</button>');
       h += sect('About', '<button class="link" data-go="science" style="align-self:flex-start">The science behind it</button><a class="link tlr-link" href="https://www.motivate-coaching.com/thelivingroom" target="_blank" rel="noopener" style="align-self:flex-start">About The Living Room (TLR) <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a><p class="hint" style="margin:4px 0 0">Let’s Go!™ is a trade mark of Stuart Fairbairns, trading as Motivate Coaching.</p>');
@@ -800,13 +800,13 @@
       return '<section class="screen"><div><div class="eyebrow">Your plan is ready</div><h1>Who should we send your plan to?</h1></div>' +
         '<p class="lede">We’ll email you your plan and a 6-digit code to activate it. No password needed.</p>' +
         '<div class="field"><label class="label" for="aemail">Email</label><input class="input" id="aemail" type="email" autocomplete="email" inputmode="email" value="' + esc(ui.authEmail || '') + '"></div>' +
-        (S.consentAt ? '' : '<label class="consent"><input type="checkbox" id="aconsent"><span>I agree to <span class="brand">Let’s Go<span class="bang">!</span></span> storing my habit, progress and notes so it can run for me. <a href="../letsgo/privacy.html">Privacy</a></span></label>') +
+        (S.consentAt ? '' : '<label class="consent"><input type="checkbox" id="aconsent"><span>I agree to <span class="brand">Let’s Go<span class="bang">!</span></span> storing my habit, progress and notes so it can run for me. <a href="privacy.html">Privacy</a></span></label>') +
         '<p class="err" id="aerr" hidden></p><button class="btn" data-act="sendcode">Send my plan</button>' +
         '<button class="link center" data-act="plannotnow">Not now</button>' +
-        '<p class="hint">Your plan is saved to your account, so it’s backed up and your morning nudge can reach you. <a href="../letsgo/privacy.html">How we look after your data</a></p></section>';
+        '<p class="hint">Your plan is saved to your account, so it’s backed up and your morning nudge can reach you. <a href="privacy.html">How we look after your data</a></p></section>';
     },
     account: function () {
-      var priv = '<p class="hint">Saving to an account backs up your progress and lets your nudges reach you. <a href="../letsgo/privacy.html">How we look after your data</a></p>';
+      var priv = '<p class="hint">Saving to an account backs up your progress and lets your nudges reach you. <a href="privacy.html">How we look after your data</a></p>';
       var pl = ui.authFrom === 'plan';
       if (ui.authStep === 'code') return '<section class="screen"><div><div class="eyebrow">' + (pl ? 'Activate your plan' : 'Save my progress') + '</div><h1>Check your email</h1></div>' +
         '<p class="lede">' + (pl ? 'We’ve sent your plan and a 6-digit code to <b>' + esc(ui.authEmail) + '</b>. Pop the code in below to activate your plan and get started today.' : 'We’ve sent a 6-digit code to <b>' + esc(ui.authEmail) + '</b>.') + '</p>' +
@@ -817,7 +817,7 @@
       return '<section class="screen"><div><div class="eyebrow">Save my progress</div><h1>Sign in or create your account</h1></div>' +
         '<p class="lede">Just your email. We’ll send you a 6-digit code, so there’s no password to remember.</p>' +
         '<div class="field"><label class="label" for="aemail">Email</label><input class="input" id="aemail" type="email" autocomplete="email" inputmode="email" value="' + esc(ui.authEmail || '') + '"></div>' +
-        (S.consentAt ? '' : '<label class="consent"><input type="checkbox" id="aconsent"><span>I agree to <span class="brand">Let’s Go<span class="bang">!</span></span> storing my habit, progress and notes so it can run for me. <a href="../letsgo/privacy.html">Privacy</a></span></label>') +
+        (S.consentAt ? '' : '<label class="consent"><input type="checkbox" id="aconsent"><span>I agree to <span class="brand">Let’s Go<span class="bang">!</span></span> storing my habit, progress and notes so it can run for me. <a href="privacy.html">Privacy</a></span></label>') +
         '<p class="err" id="aerr" hidden></p><button class="btn" data-act="sendcode">Send my code</button>' + priv + '</section>';
     }
   };
@@ -1043,14 +1043,14 @@
   };
   function wideGuide(s) {
     var t = GUIDE[s] || 'Do It Your Way. Hold It Lightly.';
-    return '<aside class="wideguide" aria-hidden="true"><img src="../letsgo/stuart.jpg" alt="" width="72" height="72"><b>Stu</b><p>' + esc(t) + '</p><span class="wg-brand">Let’s Go<span class="bang">!</span></span></aside>';
+    return '<aside class="wideguide" aria-hidden="true"><img src="stuart.jpg" alt="" width="72" height="72"><b>Stu</b><p>' + esc(t) + '</p><span class="wg-brand">Let’s Go<span class="bang">!</span></span></aside>';
   }
   function sideFoot() {
     var el = document.getElementById('sideFoot'); if (!el) return;
     if (!S.habit) { el.innerHTML = ''; return; }
     var t = todayNum(), L = S.habit.length, left = Math.max(0, L - t + 1);
     el.innerHTML = '<div class="sf-focus"><span class="eyebrow">' + (S.habit.mode === 'less' ? 'Cutting back on' : 'My focus') + '</span><b>' + esc(habitName()) + '</b><span>' + (S.habit.finishedOn ? 'Finished' : t > L ? 'Ready for your look back' : 'Day ' + t + ' of ' + L + ' · review in ' + left + ' day' + (left === 1 ? '' : 's')) + '</span></div>' +
-      '<div class="sf-stu"><img src="../letsgo/stuart.jpg" alt="" width="40" height="40"><span>with Stuart Fairbairns PCC</span></div>';
+      '<div class="sf-stu"><img src="stuart.jpg" alt="" width="40" height="40"><span>with Stuart Fairbairns PCC</span></div>';
   }
 
   // ══ V2 engine: actions, schedules, check-ins and progress ═════════════════
@@ -1322,7 +1322,7 @@
 
   // ── Stu as the guide ──────────────────────────────────────────────────────
   function stuCard(text, extraHtml) {
-    return '<div class="stu"><img src="../letsgo/stuart.jpg" alt="Stuart" width="44" height="44"><div class="stutxt"><b>Stu</b><span>' + text + '</span>' + (extraHtml || '') + '</div></div>';
+    return '<div class="stu"><img src="stuart.jpg" alt="Stuart" width="44" height="44"><div class="stutxt"><b>Stu</b><span>' + text + '</span>' + (extraHtml || '') + '</div></div>';
   }
   // Moments that scale with the length they chose, rather than assuming 30 days.
   function stuMsg(t) {
@@ -2115,7 +2115,7 @@
       case 'lifesave': { var lv = ((document.getElementById('lifenote') || {}).value || '').trim(), lx = extra(), td = todayStr(); lx.noticed = lx.noticed || {}; var cur = lx.noticed[td] || { why: [] }; cur.why = cur.why || []; if (cur.why.indexOf('Plans changed') < 0) cur.why.push('Plans changed'); if (lv) cur.note = lv; cur.at = nowISO(); lx.noticed[td] = cur; touchF(); save(); ui.struggle = null; toast('Noted. See you next time.'); return go('tracker'); }
       case 'calics': calRead(); downloadICS(); return;
       case 'testerreload': return void (async function () { try { if (window.caches) { var ks = await caches.keys(); await Promise.all(ks.filter(function (k) { return k.indexOf('letsgo-v2-') === 0; }).map(function (k) { return caches.delete(k); })); } } catch (e) {} location.reload(); })();
-      case 'copyfeedback': { var fl = location.origin + location.pathname.replace(/[^/]*$/, '') + '../letsgo/feedback.html'; try { navigator.clipboard.writeText(fl).then(function () { toast('Copied. Paste it anywhere to share.'); }, function () { toast(fl); }); } catch (e) { toast(fl); } return; }
+      case 'copyfeedback': { var fl = location.origin + location.pathname.replace(/[^/]*$/, '') + 'https://motivate-coaching.github.io/tlr-hub/letsgo/feedback.html'; try { navigator.clipboard.writeText(fl).then(function () { toast('Copied. Paste it anywhere to share.'); }, function () { toast(fl); }); } catch (e) { toast(fl); } return; }
       case 'walktimer': {
         var wt = document.getElementById('walktimer'); if (!wt) return;
         wt.innerHTML = '<div class="tbar"><i></i></div><span class="hint" id="wtl">One minute. Take your time.</span>';
