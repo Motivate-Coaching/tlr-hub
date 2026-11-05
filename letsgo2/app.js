@@ -2565,6 +2565,12 @@
   if (S.settings.tz !== tzGuess()) { S.settings.tz = tzGuess(); save(); }
   render();
   stat('open', S.habit ? 'has_habit' : 'new');
+  if (/[?&]from=moved\b/.test(location.search) && !S.movedSeen) {
+    S.movedSeen = true; save(false);
+    setTimeout(function () {
+      openSheet('Let’s Go! has a new home', '<h2>Let’s Go! has a new home</h2><p>Same app, new address: <b style="white-space:nowrap">letsgo.motivate-coaching.com</b>. ' + (S.habit ? 'Your plan came with you.' : 'Start from here from now on.') + '</p><p class="hint">Had it on your home screen? Add it again from here, then you can remove the old one. ' + (S.habit ? 'Sign in again with your email code to keep your phones in step.' : '') + '</p><div class="spacer"></div>' + (isStandalone() ? '' : '<button class="btn" data-c="install">Add to home screen</button>') + '<button class="btn' + (isStandalone() ? '' : ' outline') + '" data-c="ok">Got it</button>', function (ev, b, close) { close(); if (b.getAttribute('data-c') === 'install') { ui.installFrom = null; go('install'); } });
+    }, 400);
+  }
   clearBadge();
   (async function () {
     if (!sb) { greet(); return; }

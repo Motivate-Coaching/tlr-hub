@@ -1,6 +1,32 @@
 <!doctype html>
 <html lang="en-GB">
 <head>
+<script>
+/* Let's Go! moved to its own address (5 Nov 2026). Old addresses send people there, with the plan saved on this phone, so nothing is lost even if they never signed in.
+   The plan travels in the part of the link after #, which browsers never send to any server. Sign-in details are not carried; people sign in again with their email code. */
+(function () {
+  var HOME = 'letsgo.motivate-coaching.com';
+  if (location.hostname === HOME || location.hostname === 'localhost' || location.hostname === '127.0.0.1') return;
+  
+  var d = {}, n = 0;
+  try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (/^(showup-|letsgo-)/.test(k) && !/auth|token/i.test(k)) { d[k] = localStorage.getItem(k); n++; } } } catch (e) {}
+  var hash = '';
+  if (n) { try { var enc = btoa(unescape(encodeURIComponent(JSON.stringify(d)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); if (enc.length < 150000) hash = '#move=' + enc; } catch (e) {} }
+  location.replace('https://' + HOME + '/?from=moved' + hash);
+})();
+</script>
+<script>
+/* Arriving from an old address: keep the plan it carried, but never over anything already saved here. */
+(function () {
+  if (location.hash.indexOf('#move=') !== 0) return;
+  try {
+    var s = location.hash.slice(6).replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '=';
+    var d = JSON.parse(decodeURIComponent(escape(atob(s))));
+    Object.keys(d).forEach(function (k) { if (/^(showup-|letsgo-)/.test(k) && typeof d[k] === 'string' && localStorage.getItem(k) === null) localStorage.setItem(k, d[k]); });
+  } catch (e) {}
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+})();
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Let’s Go! V2</title>
@@ -723,6 +749,6 @@ h1[tabindex="-1"]:focus { outline: none; }
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="model.js?v=v3a3"></script>
-<script src="app.js?v=v3b0"></script>
+<script src="app.js?v=v3b1"></script>
 </body>
 </html>
