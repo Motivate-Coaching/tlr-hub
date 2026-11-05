@@ -1,6 +1,20 @@
 <!doctype html>
 <html lang="en-GB">
 <head>
+<script>
+/* Let's Go! moved to its own address (5 Nov 2026). Old addresses send people there, with the plan saved on this phone, so nothing is lost even if they never signed in.
+   The plan travels in the part of the link after #, which browsers never send to any server. Sign-in details are not carried; people sign in again with their email code. */
+(function () {
+  var HOME = 'letsgo.motivate-coaching.com';
+  if (location.hostname === HOME || location.hostname === 'localhost' || location.hostname === '127.0.0.1') return;
+  try { var q = new URLSearchParams(location.search); if (q.get('v1') === '0') localStorage.removeItem('lg-v1-test'); else if (q.has('v1')) localStorage.setItem('lg-v1-test', '1'); if (localStorage.getItem('lg-v1-test')) return; } catch (e) {} /* Stu's V1 testing ground: add ?v1 to stay here, ?v1=0 to stop */
+  var d = {}, n = 0;
+  try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (/^(showup-|letsgo-)/.test(k) && !/auth|token/i.test(k)) { d[k] = localStorage.getItem(k); n++; } } } catch (e) {}
+  var hash = '';
+  if (n) { try { var enc = btoa(unescape(encodeURIComponent(JSON.stringify(d)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); if (enc.length < 150000) hash = '#move=' + enc; } catch (e) {} }
+  location.replace('https://' + HOME + '/?from=moved' + hash);
+})();
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Let’s Go! · Build a habit you want</title>
