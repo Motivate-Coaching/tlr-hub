@@ -13,7 +13,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const FROM = '"Let\'s Go!" <letsgo@motivate-coaching.com>'
 const REPLY_TO = 'letsgo@motivate-coaching.com'
-const APP_URL = 'https://motivate-coaching.github.io/tlr-hub/letsgo2/'
+const APP_URL = 'https://letsgo.motivate-coaching.com/'
 const WINDOW_MINS = 60
 
 const LINES = [
@@ -81,7 +81,7 @@ function emailHtml(o: { focus: string; less: boolean; items: { text: string; sma
     <p style="margin:0;font-family:'Playfair Display',Georgia,serif;font-size:19px;line-height:1.4;color:#1A1A1A;text-align:center;">${esc(o.line)}</p>
   </td></tr>
   <tr><td style="background:#EDE8DF;border-radius:0 0 10px 10px;padding:18px 32px;text-align:center;">
-    <p style="margin:0;font-size:12px;color:#4A4A4A;line-height:1.7;">You chose this nudge. Change the time, take a break or switch it off any time in <a href="${APP_URL}" style="color:#0F1215;">Settings</a>. <a href="https://motivate-coaching.github.io/tlr-hub/letsgo/privacy.html" style="color:#0F1215;">Privacy</a><br>© ${year} Motivate Coaching</p>
+    <p style="margin:0;font-size:12px;color:#4A4A4A;line-height:1.7;">You chose this nudge. Change the time, take a break or switch it off any time in <a href="${APP_URL}" style="color:#0F1215;">Settings</a>. <a href="https://letsgo.motivate-coaching.com/privacy.html" style="color:#0F1215;">Privacy</a><br>© ${year} Motivate Coaching</p>
   </td></tr>
 </table></td></tr></table></body></html>`
 }

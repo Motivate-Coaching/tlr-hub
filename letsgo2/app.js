@@ -2140,7 +2140,7 @@
       case 'install': ui.installFrom = null; return go('install');
       case 'readydone': if (!isStandalone() && !S.installShown) { S.installShown = true; save(false); ui.installFrom = 'tracker'; return go('install'); } return go('tracker');
       case 'installdone': ui.installFrom = null; S.installDismissed = true; save(false); return go('tracker');
-      case 'copylink': try { navigator.clipboard.writeText(location.origin + location.pathname); toast('Link copied. Open it on your phone.'); } catch (e) { toast(location.origin + location.pathname); } return;
+      case 'copylink': try { navigator.clipboard.writeText(APPLINK); toast('Link copied. Open it on your phone.'); } catch (e) { toast(APPLINK); } return;
       case 'doinstall': if (deferredInstall) { var dp = deferredInstall; dp.prompt(); (dp.userChoice || Promise.resolve({})).then(function (c) { if (c && c.outcome === 'accepted') { deferredInstall = null; render(); } }); } return;
       case 'push': return void togglePush();
       case 'quoteok': ui.reflect.ok = !ui.reflect.ok; return render();
@@ -2226,7 +2226,7 @@
     when: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>'
   };
   // ── Calendar: a repeating reminder in their own calendar, in their own words ──
-  var APPLINK = 'https://motivate-coaching.github.io/tlr-hub/letsgo2/';
+  var APPLINK = 'https://letsgo.motivate-coaching.com/';
   function iconCal() { return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>'; }
   function calRead() { var t = document.getElementById('caltime'), d = document.getElementById('calstart'); ui.cal = ui.cal || {}; if (t && t.value) ui.cal.time = t.value; if (d && d.value) ui.cal.start = d.value; }
   function icsEsc(x) { return String(x).replace(/\\/g, '\\\\').replace(/;/g, '\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n'); }

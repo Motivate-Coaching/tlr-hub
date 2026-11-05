@@ -1,8 +1,8 @@
 /* Let's Go! V2 preview service worker. Its own scope (its folder, or the site root on its own address), so it installs as a separate app from V1.
    Network first so updates land straight away; the saved copy is only used offline. Only touches its own caches. */
-const CACHE = 'letsgo-v2-e23';
+const CACHE = 'letsgo-v2-e24';
 // The app shell, saved on install so it opens offline after one visit. Keep these versions in step with index.html.
-const SHELL = ['./', 'index.html', 'model.js?v=v3a3', 'app.js?v=v3a9', 'manifest.webmanifest', 'icons/icon-192.png', 'stuart.jpg'];
+const SHELL = ['./', 'index.html', 'model.js?v=v3a3', 'app.js?v=v3b0', 'manifest.webmanifest', 'icons/icon-192.png', 'stuart.jpg'];
 self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then((c) => Promise.all(SHELL.map((u) => c.add(u).catch(() => {}))))); });
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k.startsWith('letsgo-v2-') && k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
