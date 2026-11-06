@@ -714,7 +714,7 @@
         '<p class="hint">Good if you like to see the full picture. Prefer fewer words on screen? Try Focused.</p>' + go + '</section>';
     },
     name: function () {
-      return '<section class="screen">' + stuCard('Lovely start. I’m Stu, and I’ll be checking in with you along the way.') + '<h1>What should Stu call you?</h1>' +
+      return '<section class="screen">' + stuCard('Hi, I’m Stu. I’ll be checking in with you along the way.') + '<h1>What should Stu call you?</h1>' +
         '<div class="field"><label class="label" for="firstname">Your name</label><textarea id="firstname" rows="1" autocomplete="given-name" autocapitalize="words" spellcheck="false" enterkeyhint="next" maxlength="40" placeholder="First name, or a nickname">' + esc(firstName()) + '</textarea></div>' +
         '<div class="spacer"></div><button class="btn" data-namego="go">Continue</button><button class="link center" data-namego="skip">Skip for now</button></section>';
     },
