@@ -84,7 +84,7 @@
       habit: null, // the focus: { id, mode, title, towards, feel, gives, length, start, status, pauses, finishedOn, later, extra, createdAt, u, actions: [] }
       archive: [], // past focuses, whole
       dirty: { f: {}, a: {}, c: {}, p: false }, // what still needs saving to the account
-      settings: { tz: tzGuess(), time: '07:00', email: false, push: false, view: 'full', text: 'standard', calm: false, buzz: true, marketing: false, name: '' },
+      settings: { tz: tzGuess(), time: '07:00', email: false, push: false, view: 'full', text: 'standard', calm: false, buzz: true, marketing: false, name: '', rhythm: 'all' },
       fb: {}, later: false, installDismissed: false, updatedAt: 0, pu: ''
     };
   }
@@ -274,7 +274,7 @@
   function profileRow() {
     var s = S.settings;
     return { user_id: user.id, name: s.name || '', timezone: s.tz, reminder_time: s.time, remind_email: !!s.email, remind_push: !!s.push, paused_until: null, marketing_opt_in: !!s.marketing, consent_at: S.consentAt || null,
-      settings: { view: s.view, text: s.text, calm: !!s.calm, buzz: !!s.buzz, walkWhen: s.walkWhen || null, tlrMember: s.tlrMember == null ? null : !!s.tlrMember, analytics: s.analytics !== false }, wins: S.wins || [], updated_at: S.pu || nowISO() };
+      settings: { view: s.view, text: s.text, calm: !!s.calm, buzz: !!s.buzz, walkWhen: s.walkWhen || null, rhythm: s.rhythm || 'all', tlrMember: s.tlrMember == null ? null : !!s.tlrMember, analytics: s.analytics !== false }, wins: S.wins || [], updated_at: S.pu || nowISO() };
   }
   async function syncAll() {
     if (!user || !sb) return;
@@ -328,7 +328,7 @@
       if (pr && (!S.pu || new Date(pr.updated_at) > new Date(S.pu))) {
         var st = pr.settings || {};
         S.settings = Object.assign(S.settings, { tz: pr.timezone || S.settings.tz, time: String(pr.reminder_time || '07:00').slice(0, 5), email: !!pr.remind_email, push: !!pr.remind_push, marketing: !!pr.marketing_opt_in,
-          name: pr.name || S.settings.name, view: st.view || S.settings.view, text: st.text || S.settings.text, calm: !!st.calm, buzz: st.buzz !== false, walkWhen: st.walkWhen || S.settings.walkWhen, tlrMember: st.tlrMember == null ? S.settings.tlrMember : st.tlrMember, analytics: st.analytics !== false });
+          name: pr.name || S.settings.name, view: st.view || S.settings.view, text: st.text || S.settings.text, calm: !!st.calm, buzz: st.buzz !== false, walkWhen: st.walkWhen || S.settings.walkWhen, rhythm: st.rhythm || S.settings.rhythm || 'all', tlrMember: st.tlrMember == null ? S.settings.tlrMember : st.tlrMember, analytics: st.analytics !== false });
         if (pr.consent_at) S.consentAt = pr.consent_at;
         if (Array.isArray(pr.wins) && pr.wins.length) S.wins = pr.wins;
         S.pu = pr.updated_at; S.dirty.p = false;
@@ -760,6 +760,7 @@
         (user || !sb || !authChecked ? '' : '<div class="card soft small" style="padding:12px 14px"><span>Nudges need somewhere to go. Add your email and you can switch them on.</span><button class="chip" data-account="settings" style="align-self:flex-start;background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Add my email</button></div>') +
         '<div class="row"><label class="label" for="rtime" style="margin:0">Time</label><input class="input" id="rtime" type="time" step="900" value="' + esc(s.time) + '" style="max-width:160px"></div>' +
         '<span class="hint" style="margin-top:-4px">Sent only on days something is planned, and not once you’ve logged it.</span>' +
+        '<span class="label" style="margin-top:6px">How often</span><div class="chips">' + [['all', 'Every planned day'], ['some', 'A few times a week'], ['quiet', 'Only if I go quiet']].map(function (o) { return '<button class="chip" data-rhythm="' + o[0] + '" aria-pressed="' + ((s.rhythm || 'all') === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>' +
         '<button class="switch" role="switch" aria-checked="' + !!(user && s.email) + '" data-toggle="email"' + (user ? '' : ' aria-disabled="true"') + '><span><b>Email</b><span class="hint">' + (user ? esc(user.email) : 'Add your email first') + '</span></span><span class="track"></span></button>' +
         '<button class="switch" role="switch" aria-checked="' + !!s.push + '" data-act="push"><span><b>Phone notification</b><span class="hint" id="pushHint">' + pushHint() + '</span></span><span class="track"></span></button>' +
         '<button class="link" data-cal="settings" style="align-self:flex-start;margin-top:8px;display:inline-flex;gap:8px;align-items:center">' + iconCal() + 'Add it to my calendar</button></div>';
@@ -1399,7 +1400,8 @@
   }
   function reminderLine() {
     var st = reminderState(), t = fmtTime(S.settings.time);
-    return { paused: 'Nudges paused while you’re on a break', setup: 'Nudges are off until you add your email', push: 'Phone nudge at ' + t + ' on planned days', email: 'Email nudge at ' + t + ' on planned days', off: 'Nudges are off' }[st];
+    var when = { all: ' on planned days', some: ', a few times a week', quiet: ', only if you go quiet' }[S.settings.rhythm || 'all'] || ' on planned days';
+    return { paused: 'Nudges paused while you’re on a break', setup: 'Nudges are off until you add your email', push: 'Phone nudge at ' + t + when, email: 'Email nudge at ' + t + when, off: 'Nudges are off' }[st];
   }
   function nextNudge() {
     var st = reminderState(); if (st !== 'email' && st !== 'push') return '';
@@ -1962,7 +1964,7 @@
   async function togglePush() {
     if (S.settings.push) {
       try { var reg = swReg || await navigator.serviceWorker.ready; var sub = await reg.pushManager.getSubscription(); if (sub) { if (user) await sb.from('lg_push_subscriptions').delete().eq('endpoint', sub.endpoint); await sub.unsubscribe(); } } catch (e) {}
-      S.settings.push = false; save(); return render();
+      S.settings.push = false; save(); stat('nudges', 'push-off'); return render();
     }
     if (!user) { toast('Sign in first, so we know where to send it.'); ui.returnTo = 'settings'; return go('account'); }
     if (isIOS() && !isStandalone()) { return go('install'); }
@@ -2083,6 +2085,7 @@
     if (d.winidea) { var wt = document.getElementById('winname'); if (wt) { wt.value = d.winidea; ui.winDraft = d.winidea; grow(wt); wt.focus(); } return; }
     if (d.walkdid) { var yw = walks()[addDays(todayStr(), -1)]; if (yw) { yw.did = d.walkdid; save(); stat('walkdid', d.walkdid); } if (d.walkdid !== 'no') toast(d.walkdid === 'yes' ? 'Good. That’s how it builds.' : 'Partly still counts.'); else toast('Noted. Today’s a fresh go.'); return render(); }
     if (d.walkwhen) { S.settings.walkWhen = d.walkwhen; save(); return render(); }
+    if (d.rhythm) { S.settings.rhythm = d.rhythm; save(); stat('rhythm', d.rhythm); return render(); }
     if (d.signex) { var sg = document.getElementById('sign'); if (sg) { sg.value = d.signex; sg.dispatchEvent(new Event('input', { bubbles: true })); grow(sg); } return; }
     if (d.sayex) { var st0 = document.getElementById('sayans'); st0.value = (st0.value.trim() ? st0.value.trim() + '. ' : (S.draft.mode === 'less' ? 'I’d like to stop ' : 'I’d like to ')) + d.sayex; st0.dispatchEvent(new Event('input', { bubbles: true })); grow(st0); return; }
     if (d.focus != null && S.screen === 'hearing') return pickFocus(+d.focus);
@@ -2117,7 +2120,7 @@
     if (d.toggle) {
       if (d.toggle === 'email' && !user) { ui.returnTo = 'settings'; return go('account'); }
       if (d.toggle === 'analytics') { S.settings.analytics = S.settings.analytics === false; if (!S.settings.analytics) statQ = []; save(); return render(); }
-      S.settings[d.toggle] = !S.settings[d.toggle]; applyComfort(); save(); return render();
+      S.settings[d.toggle] = !S.settings[d.toggle]; if (d.toggle === 'email') stat('nudges', S.settings.email ? 'email-on' : 'email-off'); applyComfort(); save(); return render();
     }
     if (d.pause) { S.habit.pauses = (S.habit.pauses || []).concat([{ from: todayStr(), to: addDays(todayStr(), +d.pause - 1) }]); touchF(); save(); stat('pause', d.pause); toast('Enjoy the break. Back on ' + prettyDate(addDays(todayStr(), +d.pause)) + '.'); return render(); }
     if (d.rnext) { ui.reflect.next = d.rnext; return render(); }
@@ -2607,6 +2610,7 @@
   if (S.settings.tz !== tzGuess()) { S.settings.tz = tzGuess(); save(); }
   render();
   stat('open', S.habit ? 'has_habit' : 'new');
+  (function () { var q = location.search, fm = q.match(/[?&]from=(push|email)\b/), mm = q.match(/[?&]m=([a-z0-9]{1,8})\b/); if (fm) setTimeout(function () { stat('nudgeopen', fm[1] + (mm ? ':' + mm[1] : '')); }, 1500); })();
   if (/[?&]from=moved\b/.test(location.search) && !S.movedSeen) {
     S.movedSeen = true; save(false);
     setTimeout(function () {

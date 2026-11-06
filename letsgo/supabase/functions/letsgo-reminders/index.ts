@@ -3,6 +3,9 @@
 // Each person gets at most one nudge per channel per local day, at the time they chose, in their own time zone,
 // and only on days something in their plan is due (or a weekly target is still open) and not yet logged.
 // Never during a break, before the plan starts, after it ends, or once it's finished. Links open V2.
+// Wording rotates from a pool in Stu's voice and never repeats within 14 days (lg_reminder_log.msg). Rhythm (lg_profiles.settings.rhythm):
+// 'all' every planned day, 'some' at most 3 in any 7 days, 'quiet' only a come-back note after they go quiet.
+// Their own why appears only in a come-back note, word for word, at most once in 7 days. Evidence: Let's Go! planning doc, Nudges section.
 // Secret: RESEND_API_KEY lives in Supabase secrets. The phone-notification key pair lives in showup_server_keys (server-made).
 
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4'
@@ -16,15 +19,58 @@ const REPLY_TO = 'letsgo@motivate-coaching.com'
 const APP_URL = 'https://letsgo.motivate-coaching.com/'
 const WINDOW_MINS = 60
 
-const LINES = [
-  'Showing up beats consistency.',
-  'Follow the plan, not the feeling.',
-  'On any given day, if you only have 20% to give and you give that 20%, you’re giving 100%.',
-  'It’s a dimmer switch, not a light switch. Some days a 10, some days a 1. Both count.',
-  'You don’t need to feel like it. You just need to start.',
-  'Small and done beats big and someday.',
-  'Missed one? The next one is a comeback, and comebacks count.',
+type Ctx = { action: string; cue: string; small: string; week: number; total: number; day: number; length: number; why: string; weekday: number; less: boolean }
+type Msg = { id: string; ok?: (c: Ctx) => boolean; text: (c: Ctx) => string }
+const low = (t: string) => t ? t.charAt(0).toLowerCase() + t.slice(1) : t
+// Everyday nudges. Every one is Stu's voice; edits come from his review table.
+const EVERYDAY: Msg[] = [
+  { id: 'e01', ok: (c) => !!c.cue && !c.less, text: (c) => `${c.cue}. That’s your moment today.` },
+  { id: 'e02', ok: (c) => c.week >= 1, text: (c) => `${c.week} show-up${c.week === 1 ? '' : 's'} this week so far. Today could make it ${c.week + 1}.` },
+  { id: 'e03', ok: (c) => c.total >= 5, text: (c) => `${c.total} show-ups so far. That’s not luck, that’s you.` },
+  { id: 'e04', ok: (c) => c.day >= 1 && c.day <= c.length, text: (c) => `Day ${c.day} of ${c.length}. One small step, then get on with your day.` },
+  { id: 'e05', text: () => 'Follow the plan, not the feeling.' },
+  { id: 'e06', text: () => 'If you’ve only got 20% today, give the 20%. That’s you giving 100%.' },
+  { id: 'e07', text: () => 'It’s a dimmer switch, not a light switch. Some days a 10, some days a 1. Both count.' },
+  { id: 'e08', text: () => 'You don’t need to feel like it. You just need to start.' },
+  { id: 'e09', text: () => 'Small and done beats big and someday.' },
+  { id: 'e10', text: () => 'Five minutes counts. So does two.' },
+  { id: 'e11', text: () => 'No need to be brilliant today. Just be there.' },
+  { id: 'e12', text: () => 'Here’s your nudge. You did ask for it, to be fair.' },
+  { id: 'e13', text: (c) => `Quick one: ${low(c.action)}. Then tick it off and enjoy feeling slightly smug.` },
+  { id: 'e14', text: () => 'The hardest part is the first minute. It gets easier from there.' },
+  { id: 'e15', text: () => 'Done beats perfect. Every single time.' },
+  { id: 'e16', ok: (c) => c.weekday === 0 || c.weekday === 6, text: () => 'Weekend. Do today’s bit early and the rest of the day is yours.' },
+  { id: 'e17', ok: (c) => c.weekday === 1, text: () => 'New week. Same you, one small step.' },
+  { id: 'e18', text: () => 'Showing up beats consistency.' },
+  { id: 'e19', text: () => 'Your plan, your way. Today’s bit is a small one.' },
+  { id: 'e20', text: () => 'Hold it lightly. Just do today’s bit.' },
 ]
+// Come-back notes, only after they've gone quiet. w* quote their own why, word for word.
+const COMEBACK: Msg[] = [
+  { id: 'w1', ok: (c) => !!c.why, text: (c) => `You said this matters because: “${c.why}”. One small step today brings you back.` },
+  { id: 'w2', ok: (c) => !!c.why, text: (c) => `Remember why you started: “${c.why}”. The lighter version counts.` },
+  { id: 'c1', text: (c) => `It’s been a couple of days. No guilt and no catching up. Just today: ${low(c.small || c.action)}.` },
+  { id: 'c2', text: () => 'Life gets busy. Your plan is still here. One tap today is a comeback.' },
+  { id: 'c3', text: () => 'Comebacks count. Today could be one.' },
+  { id: 'c4', text: (c) => `No need to start over. Just pick it back up: ${low(c.small || c.action)}.` },
+  { id: 'c5', text: () => 'Still here, still on your side. Today’s step is a small one.' },
+  { id: 'c6', text: (c) => `Whenever you’re ready: ${low(c.small || c.action)}. That’s all it takes to be back.` },
+]
+function hash(t: string) { let h = 0; for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) | 0; return Math.abs(h) }
+// Never a message used in the last 14 days; their why at most once in 7. If everything has been used, the least recently used wins.
+function choose(pool: Msg[], c: Ctx, recent: { msg: string; date: string }[], today: string, seed: string): Msg | null {
+  const whyRecent = recent.some((r) => r.msg.startsWith('w') && diffDays(today, r.date) < 7)
+  const elig = pool.filter((m) => (!m.ok || m.ok(c)) && !(m.id.startsWith('w') && whyRecent))
+  if (!elig.length) return null
+  const fresh = elig.filter((m) => !recent.some((r) => r.msg === m.id && diffDays(today, r.date) < 14))
+  if (fresh.length) {
+    const why = fresh.filter((m) => m.id.startsWith('w')) // when their why is allowed, it leads the come-back note
+    const from = why.length ? why : fresh
+    return from[hash(seed + today) % from.length]
+  }
+  const last = (m: Msg) => recent.filter((r) => r.msg === m.id).map((r) => r.date).sort().pop() || ''
+  return elig.slice().sort((a, b) => (last(a) < last(b) ? -1 : 1))[0]
+}
 
 type Rule = { from: string; type: 'days' | 'every' | 'weekly'; days?: number[]; n?: number; anchor?: string; times?: number }
 type Action = { id: string; focus_id: string; text: string; small: string; cue: string; schedules: Rule[]; active_from: string | null; until: string | null; extra: { retired?: boolean } }
@@ -56,7 +102,7 @@ function isDue(f: Focus, a: Action, k: string) {
   return false
 }
 
-function emailHtml(o: { focus: string; less: boolean; items: { text: string; small: string; cue: string; weekly?: string }[]; line: string; mine?: string; day: number; length: number }) {
+function emailHtml(o: { focus: string; less: boolean; items: { text: string; small: string; cue: string; weekly?: string }[]; line: string; mine?: string; day: number; length: number; href: string }) {
   const year = new Date().getUTCFullYear()
   const list = o.items.map((i) => `<tr><td style="padding:14px 18px;border-bottom:1px solid #E5DDD1;">
       <p style="margin:0 0 4px;font-size:17px;font-weight:600;color:#1A1A1A;">${esc(i.text)}</p>
@@ -76,7 +122,7 @@ function emailHtml(o: { focus: string; less: boolean; items: { text: string; sma
     ${o.mine ? `<p style="margin:0 0 16px;font-size:16px;line-height:1.5;color:#1A1A1A;border-left:3px solid #C9930A;padding-left:12px;">“${esc(o.mine)}”</p>` : ''}
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F1EB;border-radius:6px;margin-bottom:24px;">${list}</table>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr><td align="center">
-      <a href="${APP_URL}?from=email" style="display:inline-block;background:#0F1215;color:#FFFFFF;text-decoration:none;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:16px 36px;border-radius:4px;">Open my plan</a>
+      <a href="${o.href}" style="display:inline-block;background:#0F1215;color:#FFFFFF;text-decoration:none;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:16px 36px;border-radius:4px;">Open my plan</a>
     </td></tr></table>
     <p style="margin:0;font-family:'Playfair Display',Georgia,serif;font-size:19px;line-height:1.4;color:#1A1A1A;text-align:center;">${esc(o.line)}</p>
   </td></tr>
@@ -94,14 +140,14 @@ Deno.serve(async () => {
   const VPRIV = vk?.find((r: { name: string }) => r.name === 'vapid_private')?.value || ''
   if (VPRIV) webpush.setVapidDetails('mailto:stuart@motivate-coaching.com', VPUB, VPRIV)
 
-  const { data: profiles, error } = await admin.from('lg_profiles').select('user_id,timezone,reminder_time,remind_email,remind_push').or('remind_email.eq.true,remind_push.eq.true')
+  const { data: profiles, error } = await admin.from('lg_profiles').select('user_id,timezone,reminder_time,remind_email,remind_push,settings').or('remind_email.eq.true,remind_push.eq.true')
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 })
-  const due: { uid: string; email: boolean; push: boolean; date: string }[] = []
+  const due: { uid: string; email: boolean; push: boolean; date: string; rhythm: string }[] = []
   for (const p of profiles || []) {
     const local = localParts(now, p.timezone || 'Europe/London')
     const [h, m] = String(p.reminder_time || '07:00').split(':').map(Number)
     const since = local.minutes - (h * 60 + m)
-    if (since >= 0 && since < WINDOW_MINS) due.push({ uid: p.user_id, email: p.remind_email, push: p.remind_push, date: local.date })
+    if (since >= 0 && since < WINDOW_MINS) due.push({ uid: p.user_id, email: p.remind_email, push: p.remind_push, date: local.date, rhythm: String(p.settings?.rhythm || 'all') })
   }
   if (!due.length) return new Response(JSON.stringify({ due: 0 }), { headers: { 'Content-Type': 'application/json' } })
 
@@ -110,13 +156,15 @@ Deno.serve(async () => {
     admin.from('lg_focuses').select('id,user_id,title,mode,start_date,length_days,pauses,finished_on,matters,extra').in('user_id', ids).eq('status', 'active'),
     admin.from('lg_actions').select('id,focus_id,text,small,cue,schedules,active_from,until,extra').in('user_id', ids),
   ])
+  const since = addDays(due.map((d) => d.date).sort()[0], -14)
+  const { data: logRows } = await admin.from('lg_reminder_log').select('user_id,local_date,msg').in('user_id', ids).gte('local_date', since)
   let emails = 0, pushes = 0, skipped = 0
   for (const d of due) {
     const f = ((focuses || []) as Focus[]).filter((x) => x.user_id === d.uid).sort((a, b) => (a.start_date < b.start_date ? 1 : -1))[0]
     if (!f) { skipped++; continue }
     const acts = ((actions || []) as Action[]).filter((a) => a.focus_id === f.id && !a.extra?.retired)
     const ws = weekStart(d.date)
-    const { data: checks } = await admin.from('lg_checkins').select('action_id,day,kind').in('action_id', acts.map((a) => a.id)).gte('day', ws)
+    const { data: checks } = await admin.from('lg_checkins').select('action_id,day,kind').in('action_id', acts.map((a) => a.id)).gte('day', addDays(d.date, -14) < ws ? addDays(d.date, -14) : ws)
     const counted = (aid: string, day: string) => (checks || []).some((c: { action_id: string; day: string; kind: string }) => c.action_id === aid && c.day === day && (c.kind === 'full' || c.kind === 'small'))
     const items: { text: string; small: string; cue: string; weekly?: string }[] = []
     const cue = (c: string) => { const x = String(c || '').trim(); return x ? (f.mode === 'less' ? 'Usually ' + x : /^when /i.test(x) ? x : 'After I ' + x) : '' }
@@ -130,21 +178,43 @@ Deno.serve(async () => {
     }
     if (!items.length) { skipped++; continue }
     const day = diffDays(d.date, f.start_date) + 1
-    // Their own why in nudges is paused (Stu, 6 Nov 2026) until the notification research decides how often, if at all.
-    const why = String(f.extra?.deeper || f.matters || '').trim().slice(0, 160)
-    const whyDay = false && !!why && day % 3 === 0
-    const line = whyDay ? `Why it matters to you: “${why}”` : LINES[(day - 1 + LINES.length) % LINES.length]
-    const subject = items.length === 1 ? `Today: ${items[0].text}` : `Today: ${items.length} things in your plan`
+    const anyCounted = (k: string) => acts.some((a) => counted(a.id, k))
+    // Gone quiet: nothing logged on the last 2 planned days before today (or, for weekly-only plans, nothing in 4 days). Never in the first 3 days.
+    let quiet = false
+    if (day > 3) {
+      const dueDays: string[] = []
+      for (let i = 1; i <= 14 && dueDays.length < 2; i++) { const k = addDays(d.date, -i); if (k < f.start_date) break; if (acts.some((a) => isDue(f, a, k))) dueDays.push(k) }
+      if (dueDays.length === 2) quiet = !dueDays.some(anyCounted)
+      else { quiet = true; for (let i = 1; i <= 4; i++) if (anyCounted(addDays(d.date, -i))) quiet = false }
+    }
+    const recentAll = ((logRows || []) as { user_id: string; local_date: string; msg: string | null }[]).filter((r) => r.user_id === d.uid)
+    const sentDays = [...new Set(recentAll.map((r) => r.local_date))]
+    const sentWithin = (n: number) => sentDays.filter((k) => diffDays(d.date, k) < n && k !== d.date).length
+    if (d.rhythm === 'quiet' && (!quiet || sentWithin(3) > 0)) { skipped++; continue }
+    if (d.rhythm === 'some' && sentWithin(7) >= 3) { skipped++; continue }
+    // Long quiet spells: no more than one note every 3 days, so we never nag.
+    let longQuiet = day > 10
+    for (let i = 1; i <= 10 && longQuiet; i++) if (anyCounted(addDays(d.date, -i))) longQuiet = false
+    if (longQuiet && sentWithin(3) > 0) { skipped++; continue }
+    let week = 0; for (let i = 0; i < 7; i++) { const k = addDays(ws, i); if (k <= d.date) acts.forEach((a) => { if (counted(a.id, k)) week++ }) }
+    const { count: total } = await admin.from('lg_checkins').select('action_id', { count: 'exact', head: true }).in('action_id', acts.map((a) => a.id)).in('kind', ['full', 'small'])
+    const first = items[0]
+    const ctx: Ctx = { action: first.text, cue: first.cue, small: first.small, week, total: total || 0, day, length: f.length_days, why: String(f.extra?.deeper || f.matters || '').trim().slice(0, 160), weekday: weekday(d.date), less: f.mode === 'less' }
+    const recent = recentAll.filter((r) => r.msg).map((r) => ({ msg: r.msg as string, date: r.local_date }))
+    const pick = choose(quiet ? COMEBACK : EVERYDAY, ctx, recent, d.date, d.uid) || EVERYDAY[4]
+    const line = pick.text(ctx)
+    const subject = quiet ? 'Ready when you are' : items.length === 1 ? `Today: ${items[0].text}` : `Today: ${items.length} things in your plan`
+    const link = (from: string) => `${APP_URL}?from=${from}&m=${pick.id}`
 
     if (d.email) {
-      const { error: logErr } = await admin.from('lg_reminder_log').insert({ user_id: d.uid, local_date: d.date, channel: 'email' })
+      const { error: logErr } = await admin.from('lg_reminder_log').insert({ user_id: d.uid, local_date: d.date, channel: 'email', msg: pick.id })
       if (!logErr) {
         const { data: u } = await admin.auth.admin.getUserById(d.uid)
         const to = u?.user?.email
         if (to) {
           const res = await fetch('https://api.resend.com/emails', {
             method: 'POST', headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ from: FROM, reply_to: REPLY_TO, to: [to], subject, html: emailHtml({ focus: f.title, less: f.mode === 'less', items, line, mine: String(f.extra?.mine || '').trim(), day, length: f.length_days }) }),
+            body: JSON.stringify({ from: FROM, reply_to: REPLY_TO, to: [to], subject, html: emailHtml({ focus: f.title, less: f.mode === 'less', items, line, mine: String(f.extra?.mine || '').trim(), day, length: f.length_days, href: link('email') }) }),
           })
           if (res.ok) emails++
           else { console.error('[letsgo-reminders] Resend', res.status); await admin.from('lg_reminder_log').delete().match({ user_id: d.uid, local_date: d.date, channel: 'email' }) }
@@ -152,11 +222,10 @@ Deno.serve(async () => {
       }
     }
     if (d.push && VPRIV) {
-      const { error: logErr } = await admin.from('lg_reminder_log').insert({ user_id: d.uid, local_date: d.date, channel: 'push' })
+      const { error: logErr } = await admin.from('lg_reminder_log').insert({ user_id: d.uid, local_date: d.date, channel: 'push', msg: pick.id })
       if (!logErr) {
         const { data: subs } = await admin.from('lg_push_subscriptions').select('*').eq('user_id', d.uid)
-        const first = items[0]
-        const payload = JSON.stringify({ title: subject, body: whyDay ? `Why it matters to you: “${why}”` : (first.cue && f.mode !== 'less' ? first.cue + '. ' : '') + (first.small ? `Tough day? ${first.small}` : 'One tap when it’s done.'), url: APP_URL + '?from=push' })
+        const payload = JSON.stringify({ title: subject, body: line, url: link('push') })
         for (const s of subs || []) {
           try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload, { TTL: 3 * 3600 }); pushes++ }
           catch (e) { const code = (e as { statusCode?: number }).statusCode; if (code === 404 || code === 410) await admin.from('lg_push_subscriptions').delete().eq('endpoint', s.endpoint); else console.error('[letsgo-reminders] push', code) }
