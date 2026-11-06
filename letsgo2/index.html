@@ -559,6 +559,27 @@ html.has-tabs .screen { padding-bottom: 110px; }
 .meter i { display: block; height: 100%; background: var(--amber); border-radius: 3px; }
 .patlist { margin: 0 0 10px; padding: 0; list-style: none; display: grid; gap: 10px; }
 .patlist li { background: var(--cream); border-left: 3px solid var(--amber); border-radius: 6px; padding: 10px 12px; font-size: 15px; line-height: 1.5; color: var(--text-dark); }
+.task { position: relative; display: flex; align-items: flex-start; gap: 12px; padding: 10px 2px; border-bottom: 1px solid var(--border); touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.task:last-of-type { border-bottom: 0; }
+.tbox { flex: 0 0 26px; width: 26px; height: 26px; margin-top: 1px; border-radius: 6px; border: 2px solid #9A907F; background: var(--white); display: grid; place-items: center; padding: 0; cursor: pointer; }
+.task.tdone.tick .tbox { background: var(--green); border-color: var(--green); }
+.task.tdone.tick .tbox svg { width: 15px; height: 15px; }
+.task.tdone.strike .tbox { border-color: var(--cream-deep); }
+.ttext { position: relative; flex: 1; font-size: 16px; line-height: 1.45; color: var(--text); cursor: pointer; padding: 1px 0; }
+.task.tdone .ttext { color: var(--text-mid); }
+.tink { -webkit-box-decoration-break: clone; box-decoration-break: clone; background-repeat: no-repeat; background-size: 100% 100%; padding: 0 3px; margin: 0 -3px; }
+.tstrike { position: absolute; left: -4px; right: -4px; top: 0; width: calc(100% + 8px); height: 100%; overflow: visible; pointer-events: none; }
+.tstrike path { fill: none; stroke: #3A3A38; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; opacity: .85; }
+.tstrike path.grain { stroke-width: 1; opacity: .35; }
+.task.striking { background: var(--cream); border-radius: 6px; }
+.tmore { flex: 0 0 32px; height: 32px; border: 0; background: none; font-size: 20px; color: var(--text-mid); cursor: pointer; border-radius: 4px; line-height: 1; }
+.tgroup { display: flex; flex-direction: column; gap: 2px; }
+.tgroup .eyebrow { margin-bottom: 2px; }
+.whyfor { margin: 0; font-size: 14px; color: var(--text-mid); border-left: 3px solid var(--amber); padding-left: 10px; }
+.taskadd { display: flex; flex-direction: column; gap: 10px; border-top: 1px dashed var(--cream-deep); padding-top: 12px; }
+.chip.addbtn { background: var(--navy); color: var(--white); border-color: var(--navy); font-weight: 600; margin-left: auto; }
+.listline { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; background: var(--white); border: 1px solid var(--border); border-radius: 6px; font-size: 15px; color: var(--text-mid); }
+.listline.btnline { width: 100%; font: inherit; cursor: pointer; color: var(--text); text-align: left; }
 .sec.finish { gap: 10px; }
 .sec.finish .row { display: flex; justify-content: space-between; align-items: center; }
 .finrow { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; font: inherit; color: var(--text); cursor: pointer; min-height: 56px; }
@@ -765,6 +786,6 @@ h1[tabindex="-1"]:focus { outline: none; }
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="model.js?v=v3a3"></script>
-<script src="app.js?v=v3c0"></script>
+<script src="app.js?v=v3c1"></script>
 </body>
 </html>
