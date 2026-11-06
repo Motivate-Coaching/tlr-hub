@@ -156,8 +156,8 @@ Deno.serve(async () => {
     admin.from('lg_focuses').select('id,user_id,title,mode,start_date,length_days,pauses,finished_on,matters,extra').in('user_id', ids).eq('status', 'active'),
     admin.from('lg_actions').select('id,focus_id,text,small,cue,schedules,active_from,until,extra').in('user_id', ids),
   ])
-  const since = addDays(due.map((d) => d.date).sort()[0], -14)
-  const { data: logRows } = await admin.from('lg_reminder_log').select('user_id,local_date,msg').in('user_id', ids).gte('local_date', since)
+  const logSince = addDays(due.map((d) => d.date).sort()[0], -14)
+  const { data: logRows } = await admin.from('lg_reminder_log').select('user_id,local_date,msg').in('user_id', ids).gte('local_date', logSince)
   let emails = 0, pushes = 0, skipped = 0
   for (const d of due) {
     const f = ((focuses || []) as Focus[]).filter((x) => x.user_id === d.uid).sort((a, b) => (a.start_date < b.start_date ? 1 : -1))[0]
