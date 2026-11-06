@@ -28,7 +28,7 @@ const LINES = [
 
 type Rule = { from: string; type: 'days' | 'every' | 'weekly'; days?: number[]; n?: number; anchor?: string; times?: number }
 type Action = { id: string; focus_id: string; text: string; small: string; cue: string; schedules: Rule[]; active_from: string | null; until: string | null; extra: { retired?: boolean } }
-type Focus = { id: string; user_id: string; title: string; mode: string; start_date: string; length_days: number; pauses: { from: string; to?: string }[]; finished_on: string | null; extra: { mine?: string } }
+type Focus = { id: string; user_id: string; title: string; mode: string; start_date: string; length_days: number; pauses: { from: string; to?: string }[]; finished_on: string | null; matters?: string; extra: { mine?: string; deeper?: string } }
 
 function localParts(now: Date, tz: string): { date: string; minutes: number } {
   try {
@@ -107,7 +107,7 @@ Deno.serve(async () => {
 
   const ids = due.map((d) => d.uid)
   const [{ data: focuses }, { data: actions }] = await Promise.all([
-    admin.from('lg_focuses').select('id,user_id,title,mode,start_date,length_days,pauses,finished_on,extra').in('user_id', ids).eq('status', 'active'),
+    admin.from('lg_focuses').select('id,user_id,title,mode,start_date,length_days,pauses,finished_on,matters,extra').in('user_id', ids).eq('status', 'active'),
     admin.from('lg_actions').select('id,focus_id,text,small,cue,schedules,active_from,until,extra').in('user_id', ids),
   ])
   let emails = 0, pushes = 0, skipped = 0
@@ -130,7 +130,10 @@ Deno.serve(async () => {
     }
     if (!items.length) { skipped++; continue }
     const day = diffDays(d.date, f.start_date) + 1
-    const line = LINES[(day - 1 + LINES.length) % LINES.length]
+    // Every third day, their own why (word for word, never reworded) replaces the quote, to bring the feeling back.
+    const why = String(f.extra?.deeper || f.matters || '').trim().slice(0, 160)
+    const whyDay = !!why && day % 3 === 0
+    const line = whyDay ? `Why it matters to you: “${why}”` : LINES[(day - 1 + LINES.length) % LINES.length]
     const subject = items.length === 1 ? `Today: ${items[0].text}` : `Today: ${items.length} things in your plan`
 
     if (d.email) {
@@ -153,7 +156,7 @@ Deno.serve(async () => {
       if (!logErr) {
         const { data: subs } = await admin.from('lg_push_subscriptions').select('*').eq('user_id', d.uid)
         const first = items[0]
-        const payload = JSON.stringify({ title: subject, body: (first.cue && f.mode !== 'less' ? first.cue + '. ' : '') + (first.small ? `Tough day? ${first.small}` : 'One tap when it’s done.'), url: APP_URL + '?from=push' })
+        const payload = JSON.stringify({ title: subject, body: whyDay ? `Why it matters to you: “${why}”` : (first.cue && f.mode !== 'less' ? first.cue + '. ' : '') + (first.small ? `Tough day? ${first.small}` : 'One tap when it’s done.'), url: APP_URL + '?from=push' })
         for (const s of subs || []) {
           try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload, { TTL: 3 * 3600 }); pushes++ }
           catch (e) { const code = (e as { statusCode?: number }).statusCode; if (code === 404 || code === 410) await admin.from('lg_push_subscriptions').delete().eq('endpoint', s.endpoint); else console.error('[letsgo-reminders] push', code) }

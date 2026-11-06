@@ -80,7 +80,7 @@
   function fresh() {
     return {
       v: 3, screen: 'landing',
-      draft: { mode: 'more', what: '', reduce: '', gives: [], instead: '', feel: [], ownFeel: '', dimmer: '', driveOwn: '', anchor: '', mine: '', mineQ: '', hardStart: '', hardOff: '', hardSpark: '', length: 30, sched: null },
+      draft: { mode: 'more', what: '', reduce: '', gives: [], instead: '', feel: [], ownFeel: '', matters: '', deeper: '', sign: '', dimmer: '', driveOwn: '', anchor: '', mine: '', mineQ: '', hardStart: '', hardOff: '', hardSpark: '', length: 30, sched: null },
       habit: null, // the focus: { id, mode, title, towards, feel, gives, length, start, status, pauses, finishedOn, later, extra, createdAt, u, actions: [] }
       archive: [], // past focuses, whole
       dirty: { f: {}, a: {}, c: {}, p: false }, // what still needs saving to the account
@@ -192,6 +192,16 @@
     if (!due) return { s: 'rest', note: note };
     return { s: d === now ? 'today' : 'unlogged', note: note };
   }
+  // The why (long term, quoted back for feeling) and the sign (near term, what progress is judged on). Always their own words, never reworded.
+  function whyLine(h) { h = h || S.habit || S.draft; return ((h && (h.deeper || '').trim()) || (h && (h.matters || '').trim()) || ''); }
+  function signExamples(d) { var f = ((d.coach && d.coach.focuses) || [])[d.focusIdx || 0] || {}; return (f.outcome_examples || []).slice(0, 3); }
+  function signAsk(d) {
+    var ex = signExamples(d);
+    return '<details class="ask"' + ((d.sign || '').trim() ? ' open' : '') + '><summary>Add a sign it’s working</summary><div class="field"><label class="label" for="sign">What would you notice in the next few weeks that tells you it’s working?</label>' +
+      '<textarea id="sign" rows="1" data-bind="sign" placeholder="e.g. I’m not out of breath on the stairs">' + esc(d.sign || '') + '</textarea>' +
+      (ex.length ? '<div class="starters">' + ex.map(function (x) { return '<button class="chip" data-signex="' + esc(x) + '">' + esc(x) + '</button>'; }).join('') + '</div>' : '') +
+      '<span class="hint">Something small and real. Your look back checks in on this.</span></div></details>';
+  }
   function words() { var h = S.habit || S.draft; var w = (h.feel || []).slice(), own = h.towards != null ? h.towards : h.ownFeel; if ((own || '').trim()) w.push(own.trim()); return w.length ? w : ['Proud']; }
   function habitName() { var h = S.habit; if (h) return (h.title || '').trim() || (acts()[0] ? acts()[0].text : 'My focus'); var d = S.draft; return ((d.mode === 'less' ? d.reduce : (d.focusTitle || d.what)) || '').trim() || (d.mode === 'less' ? 'Cutting back' : 'My habit'); }
   function actText(a) { return a ? a.text : (S.draft.what || '').trim(); }
@@ -247,9 +257,9 @@
     return '<span class="saved-dot"></span>Saved to your account.';
   }
   function focusRow(f) {
-    return { id: f.id, user_id: user.id, title: f.title || '', mode: f.mode === 'less' ? 'less' : 'more', intent: '', towards: f.towards || '', outcome: '', matters: '',
+    return { id: f.id, user_id: user.id, title: f.title || '', mode: f.mode === 'less' ? 'less' : 'more', intent: '', towards: f.towards || '', outcome: f.sign || '', matters: f.matters || '',
       later: f.later || [], start_date: f.start, length_days: f.length, pauses: f.pauses || [], tasks: [],
-      extra: Object.assign({}, f.extra || {}, { feel: f.feel || [], gives: f.gives || [] }), status: f.status === 'active' ? 'active' : 'archived', finished_on: f.finishedOn || null,
+      extra: Object.assign({}, f.extra || {}, { feel: f.feel || [], gives: f.gives || [], deeper: f.deeper || '' }), status: f.status === 'active' ? 'active' : 'archived', finished_on: f.finishedOn || null,
       created_at: f.createdAt || nowISO(), updated_at: f.u || nowISO() };
   }
   function actionRow(f, a) {
@@ -329,8 +339,8 @@
       var newer = function (remoteAt, localAt) { return !localAt || new Date(remoteAt) > new Date(localAt); };
       (res[1].data || []).forEach(function (x) {
         var f = local[x.id], ex = x.extra || {};
-        var fields = { mode: x.mode, title: x.title, towards: x.towards, feel: ex.feel || [], gives: ex.gives || [], length: x.length_days, start: x.start_date, status: x.status, pauses: x.pauses || [], finishedOn: x.finished_on, later: x.later || [], createdAt: x.created_at, u: x.updated_at };
-        var exx = Object.assign({}, ex); delete exx.feel; delete exx.gives;
+        var fields = { mode: x.mode, title: x.title, towards: x.towards, matters: x.matters || '', sign: x.outcome || '', deeper: ex.deeper || '', feel: ex.feel || [], gives: ex.gives || [], length: x.length_days, start: x.start_date, status: x.status, pauses: x.pauses || [], finishedOn: x.finished_on, later: x.later || [], createdAt: x.created_at, u: x.updated_at };
+        var exx = Object.assign({}, ex); delete exx.feel; delete exx.gives; delete exx.deeper;
         if (!f) { f = Object.assign({ id: x.id, actions: [], extra: exx }, fields); local[x.id] = f; (x.status === 'active' ? (S._incoming = S._incoming || []) : (S._arch = S._arch || [])).push(f); }
         else if (newer(x.updated_at, f.u)) { Object.assign(f, fields); f.extra = exx; delete S.dirty.f[f.id]; }
         else if (new Date(x.updated_at) < new Date(f.u)) S.dirty.f[f.id] = 1;
@@ -494,6 +504,10 @@
       return '<section class="screen">' + progress('feel') + '<h1>Picture it going well a month from now. What’s different?</h1>' +
         '<p class="lede">One line is plenty. This is what you’re moving towards.' + (d.ownFeelFromCoach && d.ownFeel === d.ownFeelFromCoach ? ' We’ve started it from what you shared. Change anything that doesn’t sound like you.' : '') + '</p>' +
         '<div class="field"><textarea id="own" rows="2" data-bind="ownFeel" placeholder="I feel lighter, I’ve got energy for the kids and I trust myself again">' + esc(d.ownFeel) + '</textarea></div>' +
+        '<div class="field"><label class="label" for="matters">Why does that matter to you?</label><textarea id="matters" rows="1" data-bind="matters" placeholder="e.g. I want to keep up with the people I love">' + esc(d.matters || '') + '</textarea>' +
+        '<span class="hint">Your real reason, in your own words. We’ll bring it back on the tough days.</span></div>' +
+        '<details class="ask"' + ((d.deeper || '').trim() ? ' open' : '') + '><summary>Go a layer deeper</summary><div class="field"><label class="label" for="deeper">And what would that give you?</label><textarea id="deeper" rows="1" data-bind="deeper" placeholder="e.g. Feeling like myself again">' + esc(d.deeper || '') + '</textarea></div></details>' +
+        signAsk(d) +
         '<div class="spacer"></div>' + stepButton('feel') + '</section>';
     },
     dimmer: function () {
@@ -646,7 +660,7 @@
       var L = S.habit.length, st = stats(), nexts = { 10: 30, 30: 60, 60: 90, 90: 180, 180: 365 }, next = nexts[L] || L + 90;
       var q = ui.reflect || (ui.reflect = { noticed: '', next: '', pmf: '', quote: '', ok: false, shareNoticed: false });
       var h = '<section class="screen"><div><div class="eyebrow">Your look back</div><h1>' + (L === 365 ? 'A year' : L + ' days') + '. ' + st.done + ' show-up' + (st.done === 1 ? '' : 's') + '.</h1></div>' +
-        stuCard('However many show-ups, you kept coming back. No marks out of ten here. Just what you noticed.') +
+        stuCard('However many show-ups, you kept coming back. No marks out of ten here. Just what you noticed.') + startedCard() +
         '<div class="field"><label class="label" for="noticed">What did you notice?</label><textarea id="noticed" rows="2" data-rbind="noticed" placeholder="About the habit, about you, about your days">' + esc(q.noticed) + '</textarea>' +
         '<span class="hint">Private to you, unless you choose to share it below.</span></div>' +
         '<p class="hint">Worth knowing: in one well-known study, new habits took anywhere from 18 to 254 days to feel automatic. Needing longer is normal, not a sign it didn’t work.</p>' +
@@ -1433,7 +1447,7 @@
     if (mineLine()) L.push('My words: ' + mineLine());
     if (a.small) L.push('Tough day? ' + a.small + '. That counts too.');
     L.push('');
-    L.push('Why it matters to you: ' + (w.length > 1 ? w.slice(0, -1).join(', ') + ' and ' + w[w.length - 1] : w[0]) + '.');
+    L.push(whyLine(S.habit) ? 'Why it matters to you: “' + whyLine(S.habit) + '”' : 'What you’re moving towards: ' + (w.length > 1 ? w.slice(0, -1).join(', ') + ' and ' + w[w.length - 1] : w[0]) + '.');
     if ((hard.start || '').trim()) L.push('When you can’t get started, you said: “' + hard.start.trim() + '”');
     if ((hard.spark || '').trim()) L.push('What reminds you why it matters: “' + hard.spark.trim() + '”');
     L.push('');
@@ -1480,6 +1494,8 @@
     var out = '<div class="pA"><div class="plancard">' + row(PICON.what, less ? 'I’m cutting back on' : 'My focus', '<b>' + esc(habitName()) + '</b>', focus ? '' : '<button class="pedit" data-act="editfocus">Edit</button>');
     if (mineLine()) out += row(PICON.why, 'My words', '<b>“' + esc(mineLine()) + '”</b>', '');
     if (!focus) out += row(PICON.why, less ? 'What I’m moving towards' : 'What I’m moving towards', chips, '');
+    if (whyLine(h)) out += row(PICON.why, 'Why it matters to me', '<b>“' + esc(whyLine(h)) + '”</b>', '');
+    if (!focus && (h.sign || '').trim()) out += row(PICON.why, 'A sign it’s working', '<b>' + esc(h.sign.trim()) + '</b>', '');
     out += '</div></div><div class="pB">';
     out += '<div class="sec-h" style="margin-top:4px"><h2 style="font-size:20px">' + (less ? 'What I’ll do instead' : 'My actions') + '</h2></div><div class="plancard">';
     liveActs().forEach(function (a) {
@@ -1492,6 +1508,14 @@
     var hp = extra().helpers || [];
     if (hp.length) out += '<div class="card soft"><span class="eyebrow">Might help you get started</span>' + hp.map(function (x) { return '<a class="link" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + encodeURIComponent(x) + '" style="align-self:flex-start">' + esc(x) + ' <span aria-hidden="true">↗</span><span class="sr"> (opens a search in a new tab)</span></a>'; }).join('') + '</div>';
     return out + '</div>';
+  }
+  // Look back: where they started, in their words. Progress is judged on the near layers (the picture and the sign); the why is only quoted.
+  function startedCard() {
+    var h = S.habit, L = [];
+    if ((h.towards || '').trim()) L.push('<span class="eyebrow">What you pictured</span><p class="quote">“' + esc(h.towards.trim()) + '”</p>');
+    if ((h.sign || '').trim()) L.push('<span class="eyebrow">The sign you were looking for</span><p class="quote">“' + esc(h.sign.trim()) + '”</p>');
+    if (whyLine(h)) L.push('<span class="eyebrow">Why it mattered to you</span><p class="quote">“' + esc(whyLine(h)) + '”</p>');
+    return L.length ? '<div class="card heard"><b style="font-weight:600">Where you started</b>' + L.join('') + '</div>' : '';
   }
   function laterCard() {
     var L = (S.habit.later || []).filter(function (x) { return !x.used; }); if (!L.length) return '';
@@ -1528,7 +1552,10 @@
     var w = '<section class="screen"><div><div class="eyebrow">My plan</div><h1>Change your focus</h1></div><div class="qcard">' +
       '<div class="field"><label class="label" for="ftitle">' + (less ? 'I’m cutting back on...' : 'My focus') + '</label><textarea id="ftitle" rows="1" data-fbind="title">' + esc(h.title || '') + '</textarea></div>' +
       (ex.mineQ ? '<div class="field"><label class="label" for="emine">' + esc(ex.mineQ) + '</label><textarea id="emine" rows="2" data-xbind="mine">' + esc(ex.mine || '') + '</textarea></div>' : '') +
-      '<div class="field"><label class="label" for="ftow">What I’m moving towards</label><textarea id="ftow" rows="2" data-fbind="towards" placeholder="One line about how life feels when it’s going well">' + esc(h.towards || '') + '</textarea></div>';
+      '<div class="field"><label class="label" for="ftow">What I’m moving towards</label><textarea id="ftow" rows="2" data-fbind="towards" placeholder="One line about how life feels when it’s going well">' + esc(h.towards || '') + '</textarea></div>' +
+      '<div class="field"><label class="label" for="fmat">Why it matters to me</label><textarea id="fmat" rows="1" data-fbind="matters" placeholder="Your real reason, in your own words">' + esc(h.matters || '') + '</textarea></div>' +
+      '<div class="field"><label class="label" for="fdeep">And what that would give me</label><textarea id="fdeep" rows="1" data-fbind="deeper" placeholder="Optional">' + esc(h.deeper || '') + '</textarea></div>' +
+      '<div class="field"><label class="label" for="fsign">A sign it’s working</label><textarea id="fsign" rows="1" data-fbind="sign" placeholder="Something small you’d notice in the next few weeks">' + esc(h.sign || '') + '</textarea></div>';
     return w + '</div><div class="spacer"></div><button class="btn" data-act="focusdone">Done</button></section>';
   }
   function addActionFrom(x) {
@@ -1832,7 +1859,8 @@
     var hb = S.habit, k = ui.struggle, ex = extra(), worked = ex.worked || [], hard = ex.hard || {};
     var h = '<section class="screen"><div><div class="eyebrow">Support</div><h1>' + (k === 'life' ? 'Life happens.' : k ? esc(STRUGGLE[k].label) + '.' : 'Make today easier.') + '</h1></div>';
     if (!k) {
-      h += stuCard('Thanks for saying so. Let’s work out what would help today. Which feels closest?') + '<div style="display:flex;flex-direction:column;gap:10px">';
+      h += (whyLine(hb) ? '<div class="card heard"><span class="eyebrow">Why this matters to you</span><p class="quote">“' + esc(whyLine(hb)) + '”</p></div>' : '') +
+        stuCard('Thanks for saying so. Let’s work out what would help today. Which feels closest?') + '<div style="display:flex;flex-direction:column;gap:10px">';
       Object.keys(STRUGGLE).forEach(function (key) { h += '<button class="choice" style="min-height:62px" data-struggle="' + key + '"><b>' + esc(STRUGGLE[key].label) + '</b></button>'; });
       h += '<button class="choice" style="min-height:62px" data-struggle="life"><b>Something came up</b></button></div>';
       return h + '</section>';
@@ -2044,6 +2072,7 @@
     if (d.winidea) { var wt = document.getElementById('winname'); if (wt) { wt.value = d.winidea; ui.winDraft = d.winidea; grow(wt); wt.focus(); } return; }
     if (d.walkdid) { var yw = walks()[addDays(todayStr(), -1)]; if (yw) { yw.did = d.walkdid; save(); stat('walkdid', d.walkdid); } if (d.walkdid !== 'no') toast(d.walkdid === 'yes' ? 'Good. That’s how it builds.' : 'Partly still counts.'); else toast('Noted. Today’s a fresh go.'); return render(); }
     if (d.walkwhen) { S.settings.walkWhen = d.walkwhen; save(); return render(); }
+    if (d.signex) { var sg = document.getElementById('sign'); if (sg) { sg.value = d.signex; sg.dispatchEvent(new Event('input', { bubbles: true })); grow(sg); } return; }
     if (d.sayex) { var st0 = document.getElementById('sayans'); st0.value = (st0.value.trim() ? st0.value.trim() + '. ' : (S.draft.mode === 'less' ? 'I’d like to stop ' : 'I’d like to ')) + d.sayex; st0.dispatchEvent(new Event('input', { bubbles: true })); grow(st0); return; }
     if (d.focus != null && S.screen === 'hearing') return pickFocus(+d.focus);
     if (d.coachans) { var dq = S.draft, q0 = (dq.coachQs || [])[0]; dq.coachAnswers = (dq.coachAnswers || []).concat([{ q: q0 ? q0.q : '', a: d.coachans }]); dq.coachQs = []; save(false); return void coachActions(); }
@@ -2259,7 +2288,7 @@
     var title = less ? (dr.reduce || dr.focusTitle || '').trim() : (dr.focusTitle || dr.what || '').trim();
     var ex = Object.assign({ hard: { start: (dr.hardStart || '').trim(), off: (dr.hardOff || '').trim(), spark: (dr.hardSpark || '').trim() } }, dr.found ? { found: dr.found } : {}, dr.barriers && dr.barriers.length ? { barriers: dr.barriers.slice() } : {},
       dr.mineQ && (dr.mine || '').trim() ? { mine: dr.mine.trim(), mineQ: dr.mineQ } : {}, dr.coachHelpers && dr.coachHelpers.length ? { helpers: dr.coachHelpers.slice() } : {});
-    S.habit = { id: uuid(), mode: less ? 'less' : 'more', title: title, towards: (dr.ownFeel || '').trim(), feel: dr.feel.slice(), gives: dr.gives.concat((dr.driveOwn || '').trim() ? [dr.driveOwn.trim()] : []),
+    S.habit = { id: uuid(), mode: less ? 'less' : 'more', title: title, towards: (dr.ownFeel || '').trim(), matters: (dr.matters || '').trim(), deeper: (dr.deeper || '').trim(), sign: (dr.sign || '').trim(), feel: dr.feel.slice(), gives: dr.gives.concat((dr.driveOwn || '').trim() ? [dr.driveOwn.trim()] : []),
       length: dr.length || 30, start: start, status: 'active', pauses: [], finishedOn: null, later: later, extra: ex, createdAt: nowISO(), u: nowISO(), actions: [act] };
     S.later = false; S.fb = {}; S.catchup = []; S.stuSeen = {};
     markAll(S, S.habit); save();
