@@ -209,13 +209,20 @@
   function checkIcon(c) { return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'; }
   function pencil() { return '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>'; }
   // Setup steps: a numbered label, a bar that fills as you go, and the newest segment animates in.
-  function steps() { var st = S.draft.mode === 'less' ? ['feel', 'what', 'when', 'less', 'often', 'dimmer'] : ['feel', 'what', 'when', 'often', 'dimmer']; return S.draft.whyDone ? st.slice(1) : st; }
+  function steps() {
+    if (ui.finishing) return [ui.finishing];
+    var d = S.draft, st = d.mode === 'less' ? ['feel', 'what', 'less', 'often'] : ['feel', 'what', 'often'];
+    if (d.whyDone) st = st.slice(1);
+    if (d.mode !== 'less' && d.fromCoach && (d.what || '').trim()) st = st.filter(function (k) { return k !== 'what'; }); // the first step they picked is already their words
+    return st;
+  }
   var STEP_LABEL = { what: 'Your first action', less: 'What you’ll do instead', feel: 'How it’ll feel', dimmer: 'Your tough-day plan', hard: 'When it gets hard', when: 'When', often: 'How often' };
   function stepLabel(k) { return k === 'feel' ? 'Picture it' : k === 'what' && S.draft.mode === 'less' ? 'What you’re cutting back on' : STEP_LABEL[k]; }
   function nextStep(k) { var st = steps(); return st[st.indexOf(k) + 1]; }
   function stepValid(k) { var d = S.draft; return k === 'what' ? !!(d.mode === 'less' ? (d.reduce || '') : d.what).trim() : k === 'feel' ? !!(d.feel.length || d.ownFeel.trim()) : k === 'less' ? !!d.what.trim() : k === 'often' ? !!(d.sched && (d.sched.type !== 'days' || d.sched.days.length)) : k === 'dimmer' ? !!d.dimmer.trim() : true; }
-  function stepButton(k) { var nx = nextStep(k); return '<button class="btn" data-step-next="' + k + '" ' + (stepValid(k) ? '' : 'disabled') + '>' + (nx ? 'Next: ' + stepLabel(nx).toLowerCase() : 'Finish setup') + '</button>'; }
+  function stepButton(k) { var nx = ui.finishing ? null : nextStep(k); return '<button class="btn" data-step-next="' + k + '" ' + (stepValid(k) ? '' : 'disabled') + '>' + (ui.finishing ? 'Save' : nx ? 'Next: ' + stepLabel(nx).toLowerCase() : 'Start my plan') + '</button>'; }
   function progress(key) {
+    if (ui.finishing) return '<div class="stepper"><span class="eyebrow">Finish setting up · ' + esc(stepLabel(key)) + '</span></div>';
     var st = steps(), n = st.indexOf(key) + 1, T = st.length;
     var h = '<div class="stepper"><div class="progress" style="grid-template-columns:repeat(' + T + ',1fr)" role="progressbar" aria-valuemin="1" aria-valuemax="' + T + '" aria-valuenow="' + n + '">';
     for (var i = 1; i <= T; i++) h += '<span class="' + (i < n ? 'on' : (i === n ? 'on now' : '')) + '"></span>';
@@ -390,9 +397,9 @@
   var BACK = {
     say: 'landing', hearing: function () { var d = S.draft; if (d.whyDone) { d.whyDone = false; d.acts = null; d.pick = null; save(false); return 'hearing'; } if (d.focusIdx != null && ((d.coach && d.coach.focuses) || []).length > 1) { d.focusIdx = null; d.acts = null; d.pick = null; save(false); return 'hearing'; } return 'say'; },
     what: function () { return S.draft.mineQ ? 'mine' : S.draft.whyDone ? 'hearing' : 'feel'; }, mine: 'find', walk: 'tracker', name: function () { return S.draft.coach ? 'hearing' : 'landing'; }, viewpick: function () { return S.nameAsked ? 'landing' : 'name'; }, wins: 'tracker', less: 'when',
-    find: function () { var f = S.find || {}; if (f.step > 0) { f.step--; save(false); return 'find'; } return 'landing'; }, feel: function () { return S.draft.coach ? 'hearing' : S.draft.found ? 'find' : 'landing'; }, when: 'what', dimmer: 'often', hard: 'dimmer',
+    find: function () { var f = S.find || {}; if (f.step > 0) { f.step--; save(false); return 'find'; } return 'landing'; }, feel: function () { return S.draft.coach ? 'hearing' : S.draft.found ? 'find' : 'landing'; }, when: function () { return ui.finishing ? 'tracker' : 'what'; }, dimmer: function () { return ui.finishing ? 'tracker' : 'often'; }, hard: 'dimmer',
     often: function () { return S.draft.mode === 'less' ? 'less' : 'when'; }, actedit: 'plan', length: function () { return ui.returnTo || 'ready'; }, progress: 'tracker', note: 'tracker', slipped: 'tracker', share: 'tracker', science: function () { return S.habit ? 'settings' : 'landing'; },
-    words: function () { return ui.wordsFrom || 'tracker'; }, sendplan: 'ready', settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', calendar: function () { return ui.calFrom === 'install' ? 'install' : ui.calFrom || 'tracker'; }, install: function () { return ui.installFrom || (S.habit ? 'settings' : 'landing'); }, account: function () { return ui.returnTo || 'tracker'; }
+    words: function () { return ui.wordsFrom || 'tracker'; }, sendplan: 'tracker', settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', calendar: function () { return ui.calFrom === 'install' ? 'install' : ui.calFrom || 'tracker'; }, install: function () { return ui.installFrom || (S.habit ? 'settings' : 'landing'); }, account: function () { return ui.returnTo || 'tracker'; }
   };
 
 
@@ -621,7 +628,7 @@
         '<div class="focushero"><span class="pill">' + (S.habit.finishedOn ? 'Finished' : t > L ? L + ' days' : 'Day ' + t + ' of ' + L) + '</span><div class="eyebrow">' + (S.habit.mode === 'less' ? 'Cutting back on' : 'My focus') + '</div><h1>' + esc(habitName()) + '</h1>' +
         (mineLine() ? '<p class="fh-line">“' + esc(mineLine()) + '”</p>' : '') +
         '<div class="meter" role="img" aria-label="Review period: day ' + Math.min(t, L) + ' of ' + L + '"><i style="width:' + Math.round(Math.min(t, L) / L * 100) + '%"></i></div><span class="fh-cap">Review in ' + Math.max(0, L - t + 1) + ' day' + (L - t + 1 === 1 ? '' : 's') + '</span></div>';
-      h += '<div class="colL"><section class="sec today">' + secHead('today', 'Today') + todaySection(false) + '</section>';
+      h += '<div class="colL"><section class="sec today">' + secHead('today', 'Today') + todaySection(false) + '</section>' + finishCard(false);
       h += catchUpCard() + '</div><div class="colR">';
       h += '<section class="sec">' + secHead('week', 'This week', '<button class="link" data-go="progress" style="min-height:0;font-size:13px">Progress</button>') + weekHTML() +
         '<div class="legend2"><span><i style="background:var(--green)"></i>Done</span><span><i style="background:var(--amber)"></i>Lighter</span><span><i class="rest"></i>Rest day</span></div></section>';
@@ -873,8 +880,52 @@
     return n ? n.charAt(0).toUpperCase() + n.slice(1).toLowerCase() : '';
   }
   // Ask their name once, right after they choose to begin (skipped if we already know it).
+
+  // ── Finish setting up: what used to come before the app now waits on Today, one small piece at a time ──
+  function finishItems() {
+    if (!S.habit) return [];
+    var a = mainAct(), less = S.habit.mode === 'less', items = [];
+    items.push({ k: 'plan', label: 'Your plan', done: true });
+    if (a) items.push({ k: 'when', label: less ? 'When it usually happens' : 'When you’ll do it', hint: less ? 'So you’re ready for it.' : 'Linking it to something you already do.', done: !!(a.cue || '').trim() });
+    if (a) items.push({ k: 'dimmer', label: 'Your tough-day version', hint: 'The lighter version that still counts.', done: !!(a.small || '').trim() });
+    if (sb) items.push({ k: 'save', label: 'Back up your plan', hint: 'Add your email. No password.', done: !!user });
+    items.push({ k: 'nudges', label: 'Your nudges', hint: 'When and how we remind you.', done: !!(S.settings.email || S.settings.push || S.nudgesChosen) });
+    items.push({ k: 'name', label: 'What should we call you?', hint: 'So it feels like yours.', done: !!firstName() || !!S.nameAsked });
+    if (!isStandalone()) items.push({ k: 'home', label: 'Add it to your home screen', hint: 'Opens like an app.', done: !!S.homeDone });
+    return items;
+  }
+  function finishCard(compact) {
+    if (!S.habit || !S.finishSetupStart || S.finishAllDone || S.finishLater === todayStr()) return ''; // only for plans made with the shorter setup
+    var it = finishItems(), left = it.filter(function (x) { return !x.done; });
+    if (!left.length) { S.finishAllDone = true; save(false); return ''; }
+    var n = it.length - left.length, T = it.length;
+    var bar = '<div class="progress" style="grid-template-columns:repeat(' + T + ',1fr)" role="progressbar" aria-valuemin="0" aria-valuemax="' + T + '" aria-valuenow="' + n + '">' + it.map(function (x, i) { return '<span class="' + (i < n ? 'on' : '') + '"></span>'; }).join('') + '</div>';
+    var row = function (x) { return '<button class="finrow' + (x.done ? ' done' : '') + '" data-finish-item="' + x.k + '"' + (x.done ? ' aria-label="' + esc(x.label) + ', done"' : '') + '><span class="fintick" aria-hidden="true">' + (x.done ? checkIcon('#FFFFFF') : '') + '</span><span class="fintxt"><b>' + esc(x.label) + '</b>' + (!x.done && x.hint ? '<span>' + esc(x.hint) + '</span>' : '') + '</span>' + (x.done ? '' : '<span class="chev" aria-hidden="true">›</span>') + '</button>'; };
+    var list = compact ? row(left[0]) : left.map(row).join('') + '<div class="findone">' + it.filter(function (x) { return x.done; }).map(function (x) { return '<span>' + checkIcon('#3B6D11') + esc(x.label) + '</span>'; }).join('') + '</div>';
+    return '<section class="sec finish" aria-label="Finish setting up"><div class="row"><span class="eyebrow">Finish setting up · ' + n + ' of ' + T + ' done</span><button class="link" data-act="finishlater" style="min-height:0;font-size:13px">Later</button></div>' + bar +
+      '<p class="hint" style="margin:0">About a minute each, whenever suits you.</p>' + list + '</section>';
+  }
+  function finishItemOpen(k) {
+    var a = mainAct(), hb = S.habit;
+    if (k === 'when' || k === 'dimmer') {
+      if (!a) return;
+      var d = S.draft = fresh().draft; d.mode = hb.mode; d.what = a.text; d.anchor = a.cue || ''; d.dimmer = a.small || ''; d.reduce = hb.mode === 'less' ? hb.title : '';
+      ui.finishing = k; ui.finishAct = a.id; save(false); return go(k);
+    }
+    if (k === 'save') { ui.authFrom = 'plan'; ui.authStep = null; ui.returnTo = 'tracker'; return go('sendplan'); }
+    if (k === 'nudges') { S.nudgesChosen = true; save(false); go('settings'); return setTimeout(function () { var r = document.getElementById('reminders'); if (r) r.scrollIntoView({ block: 'start' }); }, 60); }
+    if (k === 'name') { ui.afterName = 'tracker'; S.viewChosen = true; save(false); return go('name'); }
+    if (k === 'home') { S.homeDone = true; save(false); ui.installFrom = 'tracker'; return go('install'); }
+  }
+  function finishItemSave(k) {
+    var a = acts().filter(function (x) { return x.id === ui.finishAct; })[0] || mainAct(), d = S.draft;
+    if (a) { if (k === 'when') a.cue = (d.anchor || '').trim(); if (k === 'dimmer') a.small = (d.dimmer || '').trim(); touchA(a); }
+    ui.finishing = null; ui.finishAct = null; S.draft = fresh().draft; save();
+    toast('Saved. That’s part of your plan now.'); go('tracker');
+  }
   function askNameThen(next) {
     ui.afterName = next;
+    if (!S.habit) { var st = steps(); return go(st.indexOf(next) >= 0 ? next : st[0] || next); } // setup goes straight on; name and view are offered on Today
     if (firstName() || S.nameAsked) return go(S.viewChosen ? next : 'viewpick');
     return go('name');
   }
@@ -1257,7 +1308,7 @@
   function focusTracker() {
     var t = todayNum(), L = S.habit.length;
     var h = '<section class="screen focus fmin"><h1>' + esc(habitName()) + '</h1><p class="hint c">' + (t > L ? 'All ' + L + ' days done' : 'Day ' + t + ' of ' + L) + '</p>' + (mineLine() && t <= L ? '<p class="mineline c">“' + esc(mineLine()) + '”</p>' : '');
-    h += '<div class="big">' + todaySection(true) + '</div>';
+    h += '<div class="big">' + todaySection(true) + '</div>' + finishCard(true);
     if (t <= L) h += stuDay(t);
     var catchUp = catchDays().length;
     h += '<div class="spacer"></div><div class="fminfoot"><details class="ask"' + (catchUp ? ' open' : '') + '><summary>' + (catchUp ? 'Fill in a past day' : 'My days') + '</summary><div class="card" style="padding:16px">' + (catchUp ? catchUpCard() : '') + gridHTML(t, true) + '<p class="hint" style="margin:0">Tap any day to fill it in, change it or add a note.</p></div></details>' +
@@ -1379,6 +1430,7 @@
       '<div class="row" style="gap:12px;justify-content:flex-start"><button class="chip" data-act="nudgeyes" style="background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">' + (user ? 'Turn on' : 'Add my email') + '</button><button class="link" data-act="nudgeno">Not now</button></div></div>';
   }
   function signInCard() {
+    if (S.habit && S.finishSetupStart && !S.finishAllDone) return ''; // Finish setting up already offers it
     if (user || !sb || !authChecked || S.signinLater === todayStr() || (S.habit && todayNum() < 2)) return '';
     return '<div class="card soft small"><b style="font-weight:600">Save your progress?</b><span>Right now it’s only on this phone. Add your email so it’s backed up, your nudges can reach you, and you can use it on another device.</span>' +
       '<div class="row" style="gap:12px;justify-content:flex-start"><button class="chip" data-account="tracker" style="background:var(--navy);color:var(--white);border-color:var(--navy);font-weight:600">Save my progress</button><button class="link" data-act="signinlater" style="font-size:14px">Not now</button></div></div>';
@@ -2099,7 +2151,8 @@
     if (d.namego) return nameDone(d.namego === 'skip');
     if (d.dimidea) { S.draft.dimmer = d.dimidea; save(false); render(); var dt = document.getElementById('dim'); if (dt) { dt.focus(); dt.setSelectionRange(dt.value.length, dt.value.length); } return; }
     if (d.starter) { S.draft.what = d.starter; save(false); return render(); }
-    if (d.stepNext) { if (!stepValid(d.stepNext)) return; var nx = nextStep(d.stepNext); if (nx) return go(nx); return finishSetup(); }
+    if (d.finishItem) return finishItemOpen(d.finishItem);
+    if (d.stepNext) { if (!stepValid(d.stepNext)) return; if (ui.finishing) return finishItemSave(d.stepNext); var nx = nextStep(d.stepNext); if (nx) return go(nx); return finishSetup(); }
     if (d.give) { var gi = S.draft.gives.indexOf(d.give); gi >= 0 ? S.draft.gives.splice(gi, 1) : S.draft.gives.push(d.give); save(false); b.setAttribute('aria-pressed', gi < 0); view.querySelectorAll('[data-loop="gives"]').forEach(function (lg) { lg.textContent = S.draft.gives.length ? S.draft.gives.join(', ') : 'Tap above'; }); view.querySelectorAll('[data-give="' + d.give + '"]').forEach(function (x) { x.setAttribute('aria-pressed', gi < 0); }); return; }
     if (d.feel) { var fi = S.draft.feel.indexOf(d.feel); fi >= 0 ? S.draft.feel.splice(fi, 1) : S.draft.feel.push(d.feel); save(false); b.setAttribute('aria-pressed', fi < 0); var nb = view.querySelector('[data-step-next]'); if (nb) nb.disabled = !stepValid(nb.dataset.stepNext); return; }
     if (d.len) { var lc = document.getElementById('lencustom'); if (lc) lc.value = ''; view.querySelectorAll('[data-len]').forEach(function (x) { x.setAttribute('aria-pressed', x === b); }); ui.lenPick = +d.len; return; }
@@ -2128,6 +2181,7 @@
     switch (d.act) {
       case 'ideas': ui.ideasOpen = true; return render();
       case 'closeideas': if (e.target.closest('[data-stop]') && !b.matches('button')) return; ui.ideasOpen = false; return render();
+      case 'finishlater': S.finishLater = todayStr(); save(false); toast('It’ll be here tomorrow.'); return render();
       case 'startplan': S.draft = fresh().draft; S.draft.mode = b.dataset.mode || 'more'; save(false); return go('say');
       case 'shape': return void coachUnderstand();
       case 'whydone': if (!(S.draft.ownFeel || '').trim()) return; S.draft.whyDone = true; save(false); return void coachActions();
@@ -2197,7 +2251,7 @@
       case 'sendcode': return void sendCode();
       case 'verifycode': return void verifyCode();
       case 'authback': ui.authStep = null; return render();
-      case 'plannotnow': ui.authFrom = null; ui.authStep = null; stat('sendplan', 'later'); return go('ready');
+      case 'plannotnow': ui.authFrom = null; ui.authStep = null; stat('sendplan', 'later'); return go(S.habit ? 'tracker' : 'landing');
       case 'nudgeyes': stat('nudgeask', user ? 'yes' : 'email'); if (!user) { ui.returnTo = 'tracker'; return go('account'); } var pa2 = S.pushAsk || { n: 0 }; S.pushAsk = { n: (pa2.n || 0) + 1, at: todayStr() }; save(false); return void togglePush();
       case 'nudgeno': var pa = S.pushAsk || { n: 0 }; S.pushAsk = { n: (pa.n || 0) + 1, at: todayStr() }; save(false); stat('nudgeask', 'not now'); return render();
       case 'stuok': S.stuSeen = S.stuSeen || {}; S.stuSeen[todayStr()] = true; save(false); return render();
@@ -2382,10 +2436,10 @@
     el.innerHTML = confettiHTML(70) +
       '<div class="burst"><span class="ring"></span><div class="disc"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div></div>' +
       '<div><div class="t">Your plan is ready.</div><div class="s">' + esc(acts()[0].text) + ', ' + esc(describeRule(ruleNow(acts()[0])).toLowerCase()) + '. In your words.</div></div>' +
-      '<button class="btn" style="max-width:320px;background:var(--amber);color:var(--navy)" data-finish="1">See my plan</button>';
+      '<button class="btn" style="max-width:320px;background:var(--amber);color:var(--navy)" data-finish="1">Go to today</button>';
     buzz();
     app.appendChild(el);
-    var done = function () { if (el.parentNode) { el.remove(); if (!user && sb) { ui.authFrom = 'plan'; ui.authStep = null; ui.returnTo = 'ready'; return go('sendplan'); } go('ready'); } };
+    var done = function () { if (el.parentNode) { el.remove(); S.finishSetupStart = todayStr(); save(false); go('tracker'); } };
     el.addEventListener('click', function (ev) { if (ev.target.closest('[data-finish]')) done(); });
     var b = el.querySelector('[data-finish]'); if (b) b.focus({ preventScroll: true });
   }
