@@ -209,7 +209,7 @@
   function checkIcon(c) { return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'; }
   function pencil() { return '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1215" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>'; }
   // Setup steps: a numbered label, a bar that fills as you go, and the newest segment animates in.
-  function steps() { return S.draft.mode === 'less' ? ['feel', 'what', 'when', 'less', 'often', 'dimmer'] : ['feel', 'what', 'when', 'often', 'dimmer']; }
+  function steps() { var st = S.draft.mode === 'less' ? ['feel', 'what', 'when', 'less', 'often', 'dimmer'] : ['feel', 'what', 'when', 'often', 'dimmer']; return S.draft.whyDone ? st.slice(1) : st; }
   var STEP_LABEL = { what: 'Your first action', less: 'What you’ll do instead', feel: 'How it’ll feel', dimmer: 'Your tough-day plan', hard: 'When it gets hard', when: 'When', often: 'How often' };
   function stepLabel(k) { return k === 'feel' ? 'Picture it' : k === 'what' && S.draft.mode === 'less' ? 'What you’re cutting back on' : STEP_LABEL[k]; }
   function nextStep(k) { var st = steps(); return st[st.indexOf(k) + 1]; }
@@ -388,8 +388,8 @@
 
   // ── Screens ───────────────────────────────────────────────────────────────
   var BACK = {
-    say: 'landing', hearing: function () { var d = S.draft; if (d.focusIdx != null && ((d.coach && d.coach.focuses) || []).length > 1) { d.focusIdx = null; d.acts = null; d.pick = null; save(false); return 'hearing'; } return 'say'; },
-    what: function () { return S.draft.mineQ ? 'mine' : 'feel'; }, mine: 'find', walk: 'tracker', name: function () { return S.draft.coach ? 'hearing' : 'landing'; }, viewpick: function () { return S.nameAsked ? 'landing' : 'name'; }, wins: 'tracker', less: 'when',
+    say: 'landing', hearing: function () { var d = S.draft; if (d.whyDone) { d.whyDone = false; d.acts = null; d.pick = null; save(false); return 'hearing'; } if (d.focusIdx != null && ((d.coach && d.coach.focuses) || []).length > 1) { d.focusIdx = null; d.acts = null; d.pick = null; save(false); return 'hearing'; } return 'say'; },
+    what: function () { return S.draft.mineQ ? 'mine' : S.draft.whyDone ? 'hearing' : 'feel'; }, mine: 'find', walk: 'tracker', name: function () { return S.draft.coach ? 'hearing' : 'landing'; }, viewpick: function () { return S.nameAsked ? 'landing' : 'name'; }, wins: 'tracker', less: 'when',
     find: function () { var f = S.find || {}; if (f.step > 0) { f.step--; save(false); return 'find'; } return 'landing'; }, feel: function () { return S.draft.coach ? 'hearing' : S.draft.found ? 'find' : 'landing'; }, when: 'what', dimmer: 'often', hard: 'dimmer',
     often: function () { return S.draft.mode === 'less' ? 'less' : 'when'; }, actedit: 'plan', length: function () { return ui.returnTo || 'ready'; }, progress: 'tracker', note: 'tracker', slipped: 'tracker', share: 'tracker', science: function () { return S.habit ? 'settings' : 'landing'; },
     words: function () { return ui.wordsFrom || 'tracker'; }, sendplan: 'ready', settings: 'tracker', edit: function () { return ui.returnTo || 'settings'; }, plan: 'tracker', reflect: 'tracker', calendar: function () { return ui.calFrom === 'install' ? 'install' : ui.calFrom || 'tracker'; }, install: function () { return ui.installFrom || (S.habit ? 'settings' : 'landing'); }, account: function () { return ui.returnTo || 'tracker'; }
@@ -436,8 +436,18 @@
           '<div class="spacer"></div></section>';
       }
       var f = fs[d.focusIdx || 0] || { title: d.say }, acts = d.acts || [];
-      return top + '<div class="eyebrow">Your focus</div><h1>' + esc(f.title) + '</h1>' +
+      if (!d.whyDone) return top + '<div class="eyebrow">Your focus</div><h1>' + esc(f.title) + '</h1>' +
         (fs.length < 2 && c.reply ? '<p class="lede">' + esc(c.reply) + '</p>' : '') +
+        '<div class="field"><label class="label" for="own">Picture it going well a month from now. What’s different?</label><textarea id="own" rows="2" data-bind="ownFeel" placeholder="I feel lighter, I’ve got more energy and I trust myself again">' + esc(d.ownFeel || '') + '</textarea>' +
+        (d.ownFeelFromCoach && d.ownFeel === d.ownFeelFromCoach ? '<span class="hint">We’ve started it from what you shared. Change anything that doesn’t sound like you.</span>' : '') + '</div>' +
+        '<div class="field"><label class="label" for="matters">Why does that matter to you?</label><textarea id="matters" rows="1" data-bind="matters" placeholder="e.g. I want to keep up with the people I love">' + esc(d.matters || '') + '</textarea>' +
+        '<span class="hint">Your real reason, in your own words. We’ll bring it back on the tough days.</span></div>' +
+        '<details class="ask"' + ((d.deeper || '').trim() ? ' open' : '') + '><summary>Go a layer deeper</summary><div class="field"><label class="label" for="deeper">And what would that give you?</label><textarea id="deeper" rows="1" data-bind="deeper" placeholder="e.g. Feeling like myself again">' + esc(d.deeper || '') + '</textarea></div></details>' +
+        signAsk(d) +
+        '<div class="spacer"></div><button class="btn" data-act="whydone"' + ((d.ownFeel || '').trim() ? '' : ' disabled') + '>Next: find a first step</button></section>';
+      var wl = whyLine(d);
+      return top.replace('<i></i></div>', '<i class="on"></i></div>') + '<div class="eyebrow">Your focus</div><h1>' + esc(f.title) + '</h1>' +
+        (wl ? '<div class="card soft small"><span class="eyebrow">Why it matters to you</span><span>“' + esc(wl) + '”</span><button class="link" data-act="whyedit" style="align-self:flex-start;font-size:14px;min-height:36px">Change</button></div>' : '') +
         '<div class="allgood"><span class="bigstar" style="width:18px;height:18px"></span>That gives us something clear to work with.</div>' +
         ((d.coachQs || []).length ? '<div class="qcard"><span class="eyebrow">One quick question</span><b style="font-weight:600;font-size:18px">' + esc(d.coachQs[0].q) + '</b><div class="chips">' + d.coachQs[0].options.map(function (o) { return '<button class="chip" data-coachans="' + esc(o) + '">' + esc(o) + '</button>'; }).join('') + '</div><span class="hint">So the plan fits what you meant.</span></div>' : '') +
         (acts.length ? '<h2>Pick a first small step</h2><p class="hint" style="margin-top:-6px">Start with one. The others wait in Later, ready to add when you want.</p>' + acts.map(function (x, i) { return '<button class="pickcard" data-act1="' + i + '" aria-pressed="' + (d.pick === i) + '"><b>' + esc(x.text) + '</b><span class="psched">' + esc(describeRule(x.schedule)) + (x.schedule_from_user ? '' : ' (suggested)') + '</span>' + (x.why ? '<span>' + esc(x.why) + '</span>' : '') + '</button>'; }).join('') +
@@ -1046,7 +1056,7 @@
   // Wide screens only: a short guide beside each setup step, with Stu.
   var GUIDE = {
     say: 'Messy is fine. We pick out what matters, and you choose what to work on.',
-    hearing: 'One focus at a time is what makes it stick. Everything else waits in Later.',
+    hearing: 'Knowing what you want and why it matters comes first. Then the first step fits you, not the other way round.',
     feel: 'Picturing it going well, then planning for what gets in the way, helps people follow through.',
     what: 'Start with what you’ll actually do. Small and specific beats big and vague.',
     when: 'Linking it to something you already do gives you a reliable cue to remember it.',
@@ -2018,6 +2028,7 @@
     if (t.dataset.bind) {
       S.draft[t.dataset.bind] = t.value; save(false);
       var pn = document.getElementById('previewName'); if (pn && t.dataset.bind === 'what') { pn.textContent = t.value.trim() || 'Your habit'; var pw = document.getElementById('previewWrap'); if (pw) pw.style.display = t.value.trim() ? 'flex' : 'none'; }
+      if (t.dataset.bind === 'ownFeel') { var wb = view.querySelector('[data-act="whydone"]'); if (wb) wb.disabled = !t.value.trim(); }
       if (t.dataset.bind === 'mine') { var mb = view.querySelector('[data-act="minedone"]'); if (mb) mb.disabled = !t.value.trim(); }
       if (t.dataset.bind === 'instead') { view.querySelectorAll('[data-loop="instead"]').forEach(function (li) { li.textContent = t.value.trim() || 'Your instead'; }); }
       var next = view.querySelector('[data-step-next]');
@@ -2076,7 +2087,7 @@
     if (d.sayex) { var st0 = document.getElementById('sayans'); st0.value = (st0.value.trim() ? st0.value.trim() + '. ' : (S.draft.mode === 'less' ? 'I’d like to stop ' : 'I’d like to ')) + d.sayex; st0.dispatchEvent(new Event('input', { bubbles: true })); grow(st0); return; }
     if (d.focus != null && S.screen === 'hearing') return pickFocus(+d.focus);
     if (d.coachans) { var dq = S.draft, q0 = (dq.coachQs || [])[0]; dq.coachAnswers = (dq.coachAnswers || []).concat([{ q: q0 ? q0.q : '', a: d.coachans }]); dq.coachQs = []; save(false); return void coachActions(); }
-    if (d.act1 != null) { if (d.act1 === 'own') { S.draft.pick = -1; S.draft.what = ''; S.draft.dimmer = ''; save(false); return askNameThen('feel'); } S.draft.pick = +d.act1; save(false); return render(); }
+    if (d.act1 != null) { if (d.act1 === 'own') { S.draft.pick = -1; S.draft.what = ''; S.draft.dimmer = ''; save(false); return askNameThen(S.draft.whyDone ? 'what' : 'feel'); } S.draft.pick = +d.act1; save(false); return render(); }
     if (d.mic) { if (S.screen === 'say') { var sa = document.getElementById('sayans'); return toggleMic(b, sa, function () { S.draft.say = sa.value; save(false); var sb3 = view.querySelector('[data-act="shape"]'); if (sb3) sb3.disabled = !sa.value.trim(); }); } if (S.screen === 'walk') { var wpt = document.getElementById('walkplan'); return toggleMic(b, wpt, function () { ui.walkPlan = wpt.value; }); } if (S.screen === 'mine') { var mt = document.getElementById('mine'); return toggleMic(b, mt, function () { S.draft.mine = mt.value; save(false); var mb = view.querySelector('[data-act="minedone"]'); if (mb) mb.disabled = !mt.value.trim(); }); } return toggleMic(b); }
     if (d.horizon) { findSave(); S.find.horizon = d.horizon; save(false); return render(); }
     if (d.struggleBack) { ui.struggle = null; return render(); }
@@ -2116,6 +2127,8 @@
       case 'closeideas': if (e.target.closest('[data-stop]') && !b.matches('button')) return; ui.ideasOpen = false; return render();
       case 'startplan': S.draft = fresh().draft; S.draft.mode = b.dataset.mode || 'more'; save(false); return go('say');
       case 'shape': return void coachUnderstand();
+      case 'whydone': if (!(S.draft.ownFeel || '').trim()) return; S.draft.whyDone = true; save(false); return void coachActions();
+      case 'whyedit': S.draft.whyDone = false; S.draft.acts = null; S.draft.pick = null; save(false); return render();
       case 'coachacts': return void coachActions();
       case 'hearingnext': return hearingNext();
       case 'finish': return finishSetup();
@@ -2480,7 +2493,7 @@
   function guessMode(text) { return /\b(stop|quit|cut (back|down)|less|no more|give up|fewer)\b/i.test(text || '') ? 'less' : 'more'; }
   async function coachUnderstand() {
     var d = S.draft; if (!(d.say || '').trim()) return;
-    d.coach = null; d.focusIdx = null; d.acts = null; d.pick = null; d.later = []; d.coachQs = []; d.coachAnswers = [];
+    d.coach = null; d.focusIdx = null; d.whyDone = false; d.acts = null; d.pick = null; d.later = []; d.coachQs = []; d.coachAnswers = [];
     ui.coachBusy = 'understand'; save(false); go('hearing');
     try {
       var r = await coachCall({ kind: 'understand', said: d.say, mode: d.mode });
@@ -2499,14 +2512,14 @@
     d.focusIdx = i; d.later = fs.filter(function (x, j) { return j !== i; }).map(function (x) { return x.title; });
     d.focusTitle = f.title || ''; if (f.towards && !d.ownFeel) { d.ownFeel = f.towards; d.ownFeelFromCoach = f.towards; }
     if (f.mode) d.mode = f.mode; else if (!d.mode) d.mode = guessMode((f.heard || '') + ' ' + (d.say || ''));
-    if (d.mode === 'less') d.reduce = f.title || d.reduce; d.barriers = f.barriers || []; save(false);
-    return void coachActions();
+    if (d.mode === 'less') d.reduce = f.title || d.reduce; d.barriers = f.barriers || []; d.whyDone = false; d.acts = null; save(false);
+    return render();
   }
   async function coachActions() {
     var d = S.draft, f = ((d.coach && d.coach.focuses) || [])[d.focusIdx || 0] || {};
     ui.coachBusy = 'actions'; render();
     try {
-      var r = await coachCall({ kind: 'actions', said: d.say, mode: d.mode, title: f.title || d.say, towards: f.towards || '', outcome: (f.outcome_examples || [])[0] || '', why: '', barriers: (f.barriers || []).join('; '), answers: d.coachAnswers || [] });
+      var r = await coachCall({ kind: 'actions', said: d.say, mode: d.mode, title: f.title || d.say, towards: (d.ownFeel || '').trim() || f.towards || '', outcome: (d.sign || '').trim(), why: [(d.matters || '').trim(), (d.deeper || '').trim()].filter(Boolean).join('. '), barriers: (f.barriers || []).join('; '), answers: d.coachAnswers || [] });
       if (r.at_risk) d.coach = { care: r.care };
       else { d.acts = (r.actions || []).slice(0, 4); d.coachHelpers = r.helpers || []; d.coachNote = r.note || ''; d.coachQs = (r.questions || []).slice(0, 2); d.pick = d.acts.length === 1 ? 0 : null; }
     } catch (e) { d.acts = []; toast('Couldn’t reach the AI helper just now. You can write your own first step.'); }
@@ -2518,7 +2531,7 @@
       d.what = x.text; d.dimmer = x.small || d.dimmer; d.upVersion = x.up || ''; d.sched = x.schedule || null; d.schedFromUser = !!x.schedule_from_user; d.fromCoach = true; d.coachWhy = x.why || '';
       d.laterActs = (d.acts || []).filter(function (y, j) { return j !== d.pick; }).map(function (y) { return { text: y.text, small: y.small, up: y.up, schedule: y.schedule }; });
     }
-    save(false); askNameThen('feel');
+    save(false); askNameThen(d.whyDone ? 'what' : 'feel');
   }
 
   async function ensureGuest() {
