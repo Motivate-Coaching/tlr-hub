@@ -123,7 +123,7 @@
     if (s.settings) delete s.settings.pausedUntil;
     s.v = 3; return s;
   }
-  function markAll(s, f) { s.dirty.f[f.id] = 1; (f.actions || []).forEach(function (a) { s.dirty.a[a.id] = 1; Object.keys(a.entries || {}).forEach(function (d) { s.dirty.c[a.id + '|' + d] = 1; }); }); }
+  function markAll(s, f) { s.dirty.f[f.id] = 1; (f.actions || []).concat(f.tasks || []).forEach(function (a) { s.dirty.a[a.id] = 1; Object.keys(a.entries || {}).forEach(function (d) { s.dirty.c[a.id + '|' + d] = 1; }); }); }
   var S = fresh();
   // First open of V2: start from the V1 plan on this phone, so nothing has to be set up twice. V1's own copy is never changed.
   try { if (!localStorage.getItem(KEY) && localStorage.getItem('showup-v1')) localStorage.setItem(KEY, localStorage.getItem('showup-v1')); } catch (e) {}
@@ -171,6 +171,7 @@
   function dayNumOf(d) { return daysBetween(S.habit.start, d) + 1; }
   function lastDate() { return addDays(S.habit.start, S.habit.length - 1); }
   // Actions that are part of the plan (an action removed from the plan keeps its history but stops showing).
+  function allActs(f) { return (f.actions || []).concat(f.tasks || []); }
   function acts(f) { f = f || S.habit; return f ? (f.actions || []).filter(function (a) { return !(a.extra && a.extra.retired); }).sort(function (x, y) { return (x.sort || 0) - (y.sort || 0); }) : []; }
   function liveActs(f, d) { d = d || todayStr(); return acts(f).filter(function (a) { return (!a.until || a.until >= d); }); }
   function mainAct() { var l = liveActs(); if (!l.length) return null; var due = l.filter(function (a) { return M.isDue(S.habit, a, todayStr()) || M.isWeekly(a, todayStr()); }); return due[0] || l[0]; }
@@ -292,14 +293,14 @@
       var F = [], A = [], C = [];
       allFocuses().forEach(function (f) {
         if (sent.f[f.id]) { F.push(focusRow(f)); stamp['f' + f.id] = f.u; }
-        (f.actions || []).forEach(function (a) {
+        allActs(f).forEach(function (a) {
           if (sent.a[a.id]) { A.push(actionRow(f, a)); stamp['a' + a.id] = a.u; }
           Object.keys(a.entries || {}).forEach(function (day) { var k = a.id + '|' + day; if (sent.c[k]) { C.push(checkRow(a, day)); stamp['c' + k] = a.entries[day].u; } });
         });
         // A check-in or action can't arrive before its focus: send the parents too.
-        if ((A.length || C.length) && !sent.f[f.id] && f.actions.some(function (a) { return sent.a[a.id] || Object.keys(a.entries || {}).some(function (day) { return sent.c[a.id + '|' + day]; }); })) F.push(focusRow(f));
+        if ((A.length || C.length) && !sent.f[f.id] && allActs(f).some(function (a) { return sent.a[a.id] || Object.keys(a.entries || {}).some(function (day) { return sent.c[a.id + '|' + day]; }); })) F.push(focusRow(f));
       });
-      allFocuses().forEach(function (f) { (f.actions || []).forEach(function (a) { if (!sent.a[a.id] && C.some(function (c) { return c.action_id === a.id; })) A.push(actionRow(f, a)); }); });
+      allFocuses().forEach(function (f) { allActs(f).forEach(function (a) { if (!sent.a[a.id] && C.some(function (c) { return c.action_id === a.id; })) A.push(actionRow(f, a)); }); });
       if (F.length || A.length || C.length) { var r = await sb.rpc('lg_push', { focuses: F, actions: A, checkins: C }); if (r.error) throw r.error; }
       if (sent.p) { var p = await sb.from('lg_profiles').upsert(profileRow(), { onConflict: 'user_id' }); if (p.error) throw p.error; }
       // Someone moving over from V1: once V2's nudges are on, V1's stop, so they never get two.
@@ -307,7 +308,7 @@
       // Clear only what hasn't changed again while we were sending.
       allFocuses().forEach(function (f) {
         if (sent.f[f.id] && stamp['f' + f.id] === f.u) delete d.f[f.id];
-        (f.actions || []).forEach(function (a) {
+        allActs(f).forEach(function (a) {
           if (sent.a[a.id] && stamp['a' + a.id] === a.u) delete d.a[a.id];
           Object.keys(a.entries || {}).forEach(function (day) { var k = a.id + '|' + day; if (sent.c[k] && stamp['c' + k] === a.entries[day].u) delete d.c[k]; });
         });
@@ -342,7 +343,7 @@
       } else if (!pr) S.dirty.p = true;
       // Index what's on this phone.
       var local = {}; allFocuses().forEach(function (f) { local[f.id] = f; });
-      var actsBy = {}; allFocuses().forEach(function (f) { (f.actions || []).forEach(function (a) { actsBy[a.id] = { a: a, f: f }; }); });
+      var actsBy = {}; allFocuses().forEach(function (f) { allActs(f).forEach(function (a) { actsBy[a.id] = { a: a, f: f }; }); });
       var newer = function (remoteAt, localAt) { return !localAt || new Date(remoteAt) > new Date(localAt); };
       (res[1].data || []).forEach(function (x) {
         var f = local[x.id], ex = x.extra || {};
@@ -356,7 +357,7 @@
         if (x.extra && x.extra.retired && !actsBy[x.id]) return;
         var have = actsBy[x.id], f = local[x.focus_id]; if (!f) return;
         var fields = { text: x.text, small: x.small, up: x.up, cue: x.cue, schedules: x.schedules || [], sort: x.sort, from: x.active_from, until: x.until, extra: x.extra || {}, createdAt: x.created_at, u: x.updated_at };
-        if (!have) { var a = Object.assign({ id: x.id, entries: {} }, fields); f.actions = f.actions || []; f.actions.push(a); actsBy[x.id] = { a: a, f: f }; }
+        if (!have) { var a = Object.assign({ id: x.id, entries: {} }, fields), arr = fields.extra.task ? 'tasks' : 'actions'; f[arr] = f[arr] || []; f[arr].push(a); actsBy[x.id] = { a: a, f: f }; }
         else if (newer(x.updated_at, have.a.u)) { Object.assign(have.a, fields); delete S.dirty.a[x.id]; }
         else if (new Date(x.updated_at) < new Date(have.a.u)) S.dirty.a[x.id] = 1;
       });
@@ -379,7 +380,7 @@
       S.archive.sort(function (x, y) { return new Date(y.createdAt || 0) - new Date(x.createdAt || 0); });
       // Anything on this phone the account doesn't have yet gets sent.
       var onServer = {}; (res[1].data || []).forEach(function (x) { onServer['f' + x.id] = 1; }); (res[2].data || []).forEach(function (x) { onServer['a' + x.id] = 1; }); (res[3].data || []).forEach(function (x) { onServer['c' + x.action_id + '|' + x.day] = 1; });
-      allFocuses().forEach(function (f) { if (!onServer['f' + f.id]) S.dirty.f[f.id] = 1; (f.actions || []).forEach(function (a) { if (!onServer['a' + a.id]) S.dirty.a[a.id] = 1; Object.keys(a.entries || {}).forEach(function (day) { if (!onServer['c' + a.id + '|' + day]) S.dirty.c[a.id + '|' + day] = 1; }); }); });
+      allFocuses().forEach(function (f) { if (!onServer['f' + f.id]) S.dirty.f[f.id] = 1; allActs(f).forEach(function (a) { if (!onServer['a' + a.id]) S.dirty.a[a.id] = 1; Object.keys(a.entries || {}).forEach(function (day) { if (!onServer['c' + a.id + '|' + day]) S.dirty.c[a.id + '|' + day] = 1; }); }); });
       if (!S.settings.name && user.user_metadata && user.user_metadata.first_name) S.settings.name = user.user_metadata.first_name;
       if (!S.dirty.p) ui.lastSig = profSig();
       try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
@@ -604,7 +605,7 @@
     plan: function () {
       if (!S.habit) return screens.landing();
       if (ui.planEdit) return focusEditor();
-      return '<section class="screen"><div><div class="eyebrow">My plan</div><h1>' + esc(habitName()) + '</h1></div><div class="plangrid">' + planCard('plan') + '</div>' + archiveCard() +
+      return '<section class="screen"><div><div class="eyebrow">My plan</div><h1>' + esc(habitName()) + '</h1></div><div class="plangrid">' + planCard('plan') + '</div>' + listSection() + archiveCard() +
         '<div class="spacer"></div><button class="btn" data-go="tracker">Back to today</button></section>';
     },
     actedit: function () { if (!S.habit || !ui.edit) return screens.plan(); return actEditor(); },
@@ -628,7 +629,7 @@
         '<div class="focushero"><span class="pill">' + (S.habit.finishedOn ? 'Finished' : t > L ? L + ' days' : 'Day ' + t + ' of ' + L) + '</span><div class="eyebrow">' + (S.habit.mode === 'less' ? 'Cutting back on' : 'My focus') + '</div><h1>' + esc(habitName()) + '</h1>' +
         (mineLine() ? '<p class="fh-line">“' + esc(mineLine()) + '”</p>' : '') +
         '<div class="meter" role="img" aria-label="Review period: day ' + Math.min(t, L) + ' of ' + L + '"><i style="width:' + Math.round(Math.min(t, L) / L * 100) + '%"></i></div><span class="fh-cap">Review in ' + Math.max(0, L - t + 1) + ' day' + (L - t + 1 === 1 ? '' : 's') + '</span></div>';
-      h += '<div class="colL"><section class="sec today">' + secHead('today', 'Today') + todaySection(false) + '</section>' + finishCard(false);
+      h += '<div class="colL"><section class="sec today">' + secHead('today', 'Today') + todaySection(false) + '</section>' + finishCard(false) + listToday(false);
       h += catchUpCard() + '</div><div class="colR">';
       h += '<section class="sec">' + secHead('week', 'This week', '<button class="link" data-go="progress" style="min-height:0;font-size:13px">Progress</button>') + weekHTML() +
         '<div class="legend2"><span><i style="background:var(--green)"></i>Done</span><span><i style="background:var(--amber)"></i>Lighter</span><span><i class="rest"></i>Rest day</span></div></section>';
@@ -648,7 +649,7 @@
       return '<section class="screen widegrid"><div class="wtitle"><div class="eyebrow">Progress</div><h1>How it’s going</h1></div><div class="colL">' +
         '<section class="sec">' + secHead('chart', 'Running total') + '<div><span class="bignum">' + st.done + '</span> <span class="hint" style="display:inline">show-up' + (st.done === 1 ? '' : 's') + ', from ' + st.planned + ' planned so far</span></div>' + lineChart() +
         '<div class="legend2"><span><i style="background:var(--green)"></i>Show-ups</span><span><i style="border:1.5px dashed #9A907F"></i>Planned</span></div></section>' +
-        '<section class="sec">' + secHead('week', 'Week by week') + barChart(120) + '<div class="legend2"><span><i style="background:var(--green)"></i>Full version</span><span><i style="background:var(--amber)"></i>Lighter version</span><span><i style="border:1.5px dashed #9A907F"></i>Planned</span></div></section>' + optional('Patterns worth noticing', patternsHTML()) + '</div><div class="colR">' +
+        '<section class="sec">' + secHead('week', 'Week by week') + barChart(120) + '<div class="legend2"><span><i style="background:var(--green)"></i>Full version</span><span><i style="background:var(--amber)"></i>Lighter version</span><span><i style="border:1.5px dashed #9A907F"></i>Planned</span></div></section>' + struckSection() + optional('Patterns worth noticing', patternsHTML()) + '</div><div class="colR">' +
         '<section class="sec">' + secHead('task', 'Every day') + gridHTML(todayNum(), true) + '<p class="hint">Tap any day to fill it in, change it or add a note. Days not logged stay plain, never red. Rest days are part of the plan.</p></section>' +
         '<div class="tiles"><div class="tile"><b>' + st.full + '</b><span>full versions</span></div><div class="tile"><b>' + st.light + '</b><span>lighter versions</span></div><div class="tile"><b>' + st.backs + '</b><span>comebacks</span></div></div>' +
         (st.unlogged ? '<p class="hint">' + st.unlogged + ' planned ' + (st.unlogged === 1 ? 'day isn’t' : 'days aren’t') + ' logged. If you did them, tap the day to fill it in.</p>' : '') +
@@ -786,7 +787,8 @@
         '<button class="choice" data-view="focus" aria-pressed="' + (s.view === 'focus') + '"><b>Focused</b><small>Just the essentials, calmer screens</small></button></div>' +
         '<span class="label">Text size</span><div class="chips">' + [['standard', 'Standard'], ['large', 'Large'], ['larger', 'Larger']].map(function (o) { return '<button class="chip" data-text="' + o[0] + '" aria-pressed="' + (s.text === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>' +
         (s.view === 'focus' ? '' : '<button class="switch" role="switch" aria-checked="' + !!s.calm + '" data-toggle="calm"><span><b>Less movement</b></span><span class="track"></span></button>') +
-        '<button class="switch" role="switch" aria-checked="' + !!s.buzz + '" data-toggle="buzz"><span><b>Buzz when I tick</b></span><span class="track"></span></button>');
+        '<button class="switch" role="switch" aria-checked="' + !!s.buzz + '" data-toggle="buzz"><span><b>Buzz when I tick</b></span><span class="track"></span></button>' +
+        '<span class="label">Marking things off your list</span><div class="chips">' + [['strike', 'Strike through'], ['tick', 'Tick']].map(function (o) { return '<button class="chip" data-mark="' + o[0] + '" aria-pressed="' + (markStyle() === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div><p class="hint">For a tap. A finger drawn across always strikes it through.</p>');
       if (S.habit) h += sect('My plan', '<b style="font-weight:600">' + esc(habitName()) + '</b>' +
         '<button class="btn outline" data-go="plan">See and change my plan</button>' +
         '<button class="btn outline" data-length="settings">Review after: ' + (S.habit.length === 365 ? '1 year' : S.habit.length + ' days') + '</button>' +
@@ -881,6 +883,157 @@
   }
   // Ask their name once, right after they choose to begin (skipped if we already know it).
 
+
+  // ── Your list: one-off things to do, never deleted. Ticked or struck through, they stay where they were, like paper. ──
+  // Each task is its own record (lg_actions with extra.task), so it syncs like everything else. Linked tasks serve the focus and its why; "everything else" holds the milk and the dentist.
+  function tasks(f, loose) { f = f || S.habit; return f ? (f.tasks || []).filter(function (t) { return !(t.extra && t.extra.retired) && (loose == null || !!(t.extra && t.extra.loose) === loose); }).sort(function (x, y) { return (x.sort || 0) - (y.sort || 0); }) : []; }
+  function taskDone(t) { return !!(t.extra && t.extra.doneAt); }
+  function taskById(id) { return (S.habit && (S.habit.tasks || []).filter(function (t) { return t.id === id; })[0]) || null; }
+  function markStyle() { return S.settings.mark === 'tick' ? 'tick' : 'strike'; }
+  function addTask(text, loose) {
+    text = (text || '').replace(/\s+/g, ' ').trim(); if (!text || !S.habit) return;
+    var all = S.habit.tasks = S.habit.tasks || [], top = all.reduce(function (m, t) { return Math.max(m, t.sort || 0); }, 0);
+    var t = { id: uuid(), text: text.slice(0, 200), small: '', up: '', cue: '', schedules: [], sort: top + 1, from: todayStr(), until: null, entries: {}, extra: { task: true, loose: !!loose }, createdAt: nowISO() };
+    all.push(t); touchA(t); save(); stat('task', loose ? 'add-loose' : 'add');
+  }
+  function setTaskDone(t, mark) {
+    t.extra = Object.assign({}, t.extra, { doneAt: nowISO(), how: mark ? 'strike' : markStyle(), mark: mark || null });
+    touchA(t); save(); buzz(); stat('task', 'done');
+  }
+  function undoTask(t) { var e = Object.assign({}, t.extra); delete e.doneAt; delete e.mark; delete e.how; t.extra = e; touchA(t); save(); }
+  // A pencil line: their own finger path when they struck it, otherwise a hand-drawn wobble that is always the same for that task.
+  function strikeInk(t) {
+    var pts = t.extra && t.extra.mark;
+    if (!pts || pts.length < 2) {
+      var seed = 0; for (var i = 0; i < t.id.length; i++) seed = (seed * 31 + t.id.charCodeAt(i)) >>> 0;
+      var rnd = function () { seed = (seed * 1103515245 + 12345) >>> 0; return (seed % 1000) / 1000; };
+      pts = []; for (var k = 0; k <= 8; k++) pts.push([0.01 + k * 0.1225 + (rnd() - 0.5) * 0.03, 0.55 + (rnd() - 0.5) * 0.18 + (k - 4) * 0.01]);
+    } else {
+      // Their own line, fitted to the words so every line of text gets struck the same way.
+      var xs = pts.map(function (q) { return q[0]; }), lo = Math.min.apply(null, xs), hi = Math.max.apply(null, xs), ys = pts.map(function (q) { return q[1]; }), my = ys.reduce(function (a, b) { return a + b; }, 0) / ys.length;
+      pts = pts.map(function (q) { return [(q[0] - lo) / Math.max(0.01, hi - lo) * 0.98 + 0.01, 0.55 + (q[1] - my) * 0.6]; });
+    }
+    var d = 'M' + pts.map(function (p) { return (p[0] * 100).toFixed(1) + ' ' + (p[1] * 20).toFixed(1); }).join(' L');
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20" preserveAspectRatio="none"><g fill="none" stroke="#3A3A38" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"><path d="' + d + '" stroke-width="2.3" opacity=".85" vector-effect="non-scaling-stroke"/><path d="' + d + '" transform="translate(0.6 0.8)" stroke-width="1" opacity=".35" vector-effect="non-scaling-stroke"/></g></svg>';
+    return 'url(&quot;data:image/svg+xml,' + encodeURIComponent(svg).replace(/'/g, '%27') + '&quot;)';
+  }
+  function taskRow(t) {
+    var done = taskDone(t), how = done ? (t.extra.how || markStyle()) : '';
+    return '<div class="task' + (done ? ' tdone ' + how : '') + '" data-task="' + t.id + '">' +
+      '<button class="tbox" data-tick="' + t.id + '" aria-pressed="' + done + '" aria-label="' + esc((done ? 'Done: ' : 'Tick off: ') + t.text) + '">' + (done && how === 'tick' ? checkIcon('#FFFFFF') : '') + '</button>' +
+      '<span class="ttext" data-tick="' + t.id + '">' + (done && how === 'strike' ? '<span class="tink" style="background-image:' + strikeInk(t) + '">' + esc(t.text) + '</span>' : esc(t.text)) + '</span>' +
+      '<button class="tmore" data-tmenu="' + t.id + '" aria-label="Options for ' + esc(t.text) + '">⋯</button></div>';
+  }
+  function taskGroup(list) {
+    var weekAgo = addDays(todayStr(), -7), recent = [], older = [];
+    list.forEach(function (t) { (taskDone(t) && t.extra.doneAt.slice(0, 10) < weekAgo ? older : recent).push(t); });
+    return recent.map(taskRow).join('') + (older.length ? '<details class="ask"><summary>Done earlier (' + older.length + ')</summary>' + older.map(taskRow).join('') + '</details>' : '');
+  }
+  function addTaskField(where) {
+    var loose = ui.taskLoose === true;
+    return '<div class="taskadd"><div class="field" style="margin:0"><label class="label" for="newtask-' + where + '">Add to your list</label><textarea id="newtask-' + where + '" rows="1" data-newtask="' + where + '" placeholder="' + (loose ? 'e.g. Book the dentist' : 'e.g. Find a walking route near home') + '"></textarea></div>' +
+      '<div class="row" style="gap:8px;justify-content:flex-start;flex-wrap:wrap"><button class="chip" data-taskfor="focus" aria-pressed="' + !loose + '">For my focus</button><button class="chip" data-taskfor="loose" aria-pressed="' + loose + '">Something else</button>' +
+      '<button class="chip addbtn" data-addtask="' + where + '">Add</button></div></div>';
+  }
+  function listSection() {
+    if (!S.habit) return '';
+    var mine = tasks(null, false), loose = tasks(null, true), wl = whyLine(), hp = (extra().helpers || []).filter(function (x) { return !(S.habit.tasks || []).some(function (t) { return t.text === x; }); });
+    var h = '<section class="sec" id="yourlist">' + secHead('task', 'Your list') + (S.settings.view === 'focus' ? '' : '<p class="hint" style="margin:-6px 0 0">Tap to tick, or draw a line through it with your finger.</p>') +
+      (wl ? '<p class="whyfor">What it’s all for: “' + esc(wl) + '”</p>' : '') +
+      '<div class="tgroup"><span class="eyebrow">For ' + esc(habitName()) + '</span>' + (mine.length ? taskGroup(mine) : '<p class="hint" style="margin:0">One-off things that move this forward. Done ones stay on the list, so you can see how far you’ve come.</p>') + '</div>' +
+      (loose.length ? '<div class="tgroup"><span class="eyebrow">Everything else</span>' + taskGroup(loose) + '</div>' : '') +
+      (hp.length ? '<div class="tgroup"><span class="eyebrow">Ideas from your plan</span><div class="starters">' + hp.slice(0, 4).map(function (x) { return '<button class="chip" data-helpertask="' + esc(x) + '">+ ' + esc(x) + '</button>'; }).join('') + '</div></div>' : '') +
+      addTaskField('plan') + '</section>';
+    return h;
+  }
+  // Today: a light touch. The next few to do, tickable, and the way to the whole list.
+  function listToday(compact) {
+    if (!S.habit) return '';
+    var all = tasks(), todo = all.filter(function (t) { return !taskDone(t); }), doneToday = all.filter(function (t) { return taskDone(t) && t.extra.doneAt.slice(0, 10) === todayStr(); });
+    if (!all.length) return compact ? '' : '<div class="listline"><span>Got one-off things to do for this? Keep them in your list.</span><button class="link" data-golist="1">Start my list</button></div>';
+    if (compact) return '<button class="listline btnline" data-golist="1"><span><b>Your list</b> · ' + todo.length + ' to do</span><span class="chev" aria-hidden="true">›</span></button>';
+    var show = todo.filter(function (t) { return !t.extra.loose; }).concat(todo.filter(function (t) { return t.extra.loose; })).slice(0, 3).concat(doneToday.slice(0, 2));
+    return '<section class="sec listsec">' + secHead('task', 'Your list', '<button class="link" data-golist="1" style="min-height:0;font-size:13px">See all (' + all.length + ')</button>') + show.map(taskRow).join('') +
+      (todo.length > 3 ? '<p class="hint" style="margin:0">' + (todo.length - 3) + ' more on your list.</p>' : !todo.length ? '<p class="hint" style="margin:0">All done. Nice work.</p>' : '') + '</section>';
+  }
+  function weekStruck() {
+    var ws = M.weekStart(todayStr()); return tasks().filter(function (t) { return taskDone(t) && t.extra.doneAt.slice(0, 10) >= ws; });
+  }
+  function taskMenu(id) {
+    var t = taskById(id); if (!t) return;
+    var body = '<div class="row"><b style="font-size:18px;font-weight:600">' + esc(t.text) + '</b><button class="link" data-c="close">Close</button></div>' +
+      '<div class="field"><label class="label" for="tedit">Change the words</label><textarea id="tedit" rows="1">' + esc(t.text) + '</textarea></div>' +
+      '<button class="btn" data-c="save">Save</button>' +
+      '<button class="btn outline" data-c="move">' + (t.extra.loose ? 'Move to: for my focus' : 'Move to: everything else') + '</button>' +
+      (taskDone(t) ? '<button class="btn outline" data-c="undo">Put it back on the list</button>' : '') +
+      '<button class="link center" data-c="remove">Take it off the list</button>';
+    var el = openSheet('Task options', body, function (ev, b, close) {
+      var c = b.dataset.c; if (!c) return;
+      if (c === 'close') return close();
+      if (c === 'save') { var v = el.querySelector('#tedit').value.replace(/\s+/g, ' ').trim(); if (v) { t.text = v.slice(0, 200); touchA(t); save(); } close(); return render(); }
+      if (c === 'move') { t.extra = Object.assign({}, t.extra, { loose: !t.extra.loose }); touchA(t); save(); close(); return render(); }
+      if (c === 'undo') { undoTask(t); close(); return render(); }
+      if (c === 'remove') { t.extra = Object.assign({}, t.extra, { retired: true }); touchA(t); save(); close(); toast('Taken off your list.'); return render(); }
+    });
+  }
+  function taskTap(id) {
+    var t = taskById(id); if (!t) return;
+    if (taskDone(t)) { undoTask(t); toast('Back on your list.'); }
+    else setTaskDone(t, null);
+    render();
+  }
+  function addFromField(where) {
+    var el = document.querySelector('[data-newtask="' + where + '"]'); if (!el || !el.value.trim()) { if (el) el.focus(); return; }
+    addTask(el.value, ui.taskLoose === true); render();
+    var again = document.querySelector('[data-newtask="' + where + '"]'); if (again) again.focus({ preventScroll: true });
+  }
+  // Striking through with a finger: a sideways drag over a task draws a pencil line that follows it. Up and down still scrolls.
+  (function () {
+    var st = null;
+    document.addEventListener('pointerdown', function (ev) {
+      var row = ev.target.closest && ev.target.closest('.task'); if (!row || row.classList.contains('tdone') || ev.target.closest('.tmore')) return;
+      var tx = row.querySelector('.ttext'); if (!tx) return;
+      st = { row: row, tx: tx, x: ev.clientX, y: ev.clientY, id: ev.pointerId, on: false, pts: [], r: tx.getBoundingClientRect() };
+    }, true);
+    document.addEventListener('pointermove', function (ev) {
+      if (!st || ev.pointerId !== st.id) return;
+      var dx = ev.clientX - st.x, dy = ev.clientY - st.y;
+      if (!st.on) {
+        if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) { st = null; return; }
+        if (Math.abs(dx) < 10 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+        st.on = true; st.row.classList.add('striking'); try { st.row.setPointerCapture(ev.pointerId); } catch (e) {}
+        st.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); st.svg.setAttribute('class', 'tstrike live'); st.svg.setAttribute('viewBox', '0 0 100 20'); st.svg.setAttribute('preserveAspectRatio', 'none');
+        st.path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); st.svg.appendChild(st.path); st.tx.appendChild(st.svg);
+        st.pts.push([(st.x - st.r.left) / st.r.width, (st.y - st.r.top) / st.r.height]);
+      }
+      ev.preventDefault();
+      var p = [Math.max(-0.05, Math.min(1.05, (ev.clientX - st.r.left) / st.r.width)), Math.max(0, Math.min(1, (ev.clientY - st.r.top) / st.r.height))];
+      var last = st.pts[st.pts.length - 1]; if (Math.abs(p[0] - last[0]) + Math.abs(p[1] - last[1]) < 0.015) return;
+      st.pts.push(p); st.path.setAttribute('d', 'M' + st.pts.map(function (q) { return (q[0] * 100).toFixed(1) + ' ' + (q[1] * 20).toFixed(1); }).join(' L'));
+    }, { capture: true, passive: false });
+    var end = function (ev) {
+      if (!st || ev.pointerId !== st.id) return;
+      var s0 = st; st = null; if (!s0.on) return;
+      ui.skipClick = Date.now();
+      var xs = s0.pts.map(function (q) { return q[0]; }), span = Math.max.apply(null, xs) - Math.min.apply(null, xs);
+      var t = taskById(s0.row.dataset.task);
+      if (t && span >= 0.45) {
+        var step = Math.max(1, Math.ceil(s0.pts.length / 24));
+        setTaskDone(t, s0.pts.filter(function (q, i) { return i % step === 0 || i === s0.pts.length - 1; }).map(function (q) { return [Math.round(q[0] * 100) / 100, Math.round(q[1] * 100) / 100]; }));
+      }
+      render();
+    };
+    document.addEventListener('pointerup', end, true);
+    document.addEventListener('pointercancel', function (ev) { if (st && ev.pointerId === st.id) { if (st.svg) st.svg.remove(); if (st.row) st.row.classList.remove('striking'); st = null; } }, true);
+  })();
+
+  // The weekly mirror: what got struck off, and what it was for. Moving forward, not just busy.
+  function struckSection() {
+    var w = weekStruck(); if (!w.length) return '';
+    var forIt = w.filter(function (t) { return !t.extra.loose; }).length;
+    return '<section class="sec">' + secHead('task', 'Struck off this week') + '<div><span class="bignum">' + w.length + '</span> <span class="hint" style="display:inline">' + (forIt === w.length ? 'all for ' + esc(habitName()) : forIt + ' for ' + esc(habitName()) + ', ' + (w.length - forIt) + ' everything else') + '</span></div>' +
+      w.slice(0, 6).map(taskRow).join('') + (whyLine() ? '<p class="whyfor">What it’s all for: “' + esc(whyLine()) + '”</p>' : '') + '</section>';
+  }
   // ── Finish setting up: what used to come before the app now waits on Today, one small piece at a time ──
   function finishItems() {
     if (!S.habit) return [];
@@ -1308,7 +1461,7 @@
   function focusTracker() {
     var t = todayNum(), L = S.habit.length;
     var h = '<section class="screen focus fmin"><h1>' + esc(habitName()) + '</h1><p class="hint c">' + (t > L ? 'All ' + L + ' days done' : 'Day ' + t + ' of ' + L) + '</p>' + (mineLine() && t <= L ? '<p class="mineline c">“' + esc(mineLine()) + '”</p>' : '');
-    h += '<div class="big">' + todaySection(true) + '</div>' + finishCard(true);
+    h += '<div class="big">' + todaySection(true) + '</div>' + finishCard(true) + listToday(true);
     if (t <= L) h += stuDay(t);
     var catchUp = catchDays().length;
     h += '<div class="spacer"></div><div class="fminfoot"><details class="ask"' + (catchUp ? ' open' : '') + '><summary>' + (catchUp ? 'Fill in a past day' : 'My days') + '</summary><div class="card" style="padding:16px">' + (catchUp ? catchUpCard() : '') + gridHTML(t, true) + '<p class="hint" style="margin:0">Tap any day to fill it in, change it or add a note.</p></div></details>' +
@@ -2097,7 +2250,7 @@
     if (t.id === 'finddo' && S.find) { S.find.daily = t.value; save(false); }
     if (t.id === 'findbig' && S.find) { S.find.own = t.value; save(false); }
   });
-  view.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.id === 'firstname') { e.preventDefault(); nameDone(false); } if (e.key === 'Enter' && e.target.id === 'aemail') { e.preventDefault(); void sendCode(); } if (e.key === 'Enter' && e.target.id === 'acode') { e.preventDefault(); void verifyCode(); } });
+  view.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey && e.target.dataset && e.target.dataset.newtask) { e.preventDefault(); return addFromField(e.target.dataset.newtask); } if (e.key === 'Enter' && e.target.id === 'firstname') { e.preventDefault(); nameDone(false); } if (e.key === 'Enter' && e.target.id === 'aemail') { e.preventDefault(); void sendCode(); } if (e.key === 'Enter' && e.target.id === 'acode') { e.preventDefault(); void verifyCode(); } });
   function paintOtp() {
     var c = document.getElementById('acode'); if (!c) return;
     var v = c.value.replace(/\D/g, '').slice(0, 6); if (c.value !== v) c.value = v;
@@ -2113,7 +2266,7 @@
     if (e.target.id === 'rtime' && e.target.value) { S.settings.time = e.target.value; save(); toast('Nudge moved to ' + fmtTime(S.settings.time) + '.'); }
   });
   app.addEventListener('click', function (e) {
-    var b = e.target.closest('button, [data-act="closeideas"]'); if (!b || b.closest('.celebrate')) return;
+    var b = e.target.closest('button, [data-act="closeideas"], .ttext[data-tick]'); if (!b || b.closest('.celebrate')) return;
     var d = b.dataset;
     var dk = Object.keys(d)[0]; if (dk) stat('tap', dk + ':' + d[dk]); else if (b.id) stat('tap', b.id);
     if (d.go) { if (d.go === 'reflect') ui.reflect = null; if (d.go === 'note') ui.noteDay = null; if (d.go === 'install') ui.installFrom = null; if (d.go === 'slipped') ui.struggle = null; return go(d.go); }
@@ -2151,6 +2304,13 @@
     if (d.namego) return nameDone(d.namego === 'skip');
     if (d.dimidea) { S.draft.dimmer = d.dimidea; save(false); render(); var dt = document.getElementById('dim'); if (dt) { dt.focus(); dt.setSelectionRange(dt.value.length, dt.value.length); } return; }
     if (d.starter) { S.draft.what = d.starter; save(false); return render(); }
+    if (d.tick) { if (ui.skipClick && Date.now() - ui.skipClick < 400) return; return taskTap(d.tick); }
+    if (d.tmenu) return taskMenu(d.tmenu);
+    if (d.taskfor) { ui.taskLoose = d.taskfor === 'loose'; var keep = view.querySelector('[data-newtask]'), kv = keep ? keep.value : ''; render(); var nk = view.querySelector('[data-newtask]'); if (nk) { nk.value = kv; nk.focus({ preventScroll: true }); } return; }
+    if (d.addtask) return addFromField(d.addtask);
+    if (d.helpertask) { addTask(d.helpertask, false); toast('Added to your list.'); return render(); }
+    if (d.golist) { go('plan'); return setTimeout(function () { var l = document.getElementById('yourlist'); if (l) l.scrollIntoView({ block: 'start' }); }, 60); }
+    if (d.mark) { S.settings.mark = d.mark; save(); return render(); }
     if (d.finishItem) return finishItemOpen(d.finishItem);
     if (d.stepNext) { if (!stepValid(d.stepNext)) return; if (ui.finishing) return finishItemSave(d.stepNext); var nx = nextStep(d.stepNext); if (nx) return go(nx); return finishSetup(); }
     if (d.give) { var gi = S.draft.gives.indexOf(d.give); gi >= 0 ? S.draft.gives.splice(gi, 1) : S.draft.gives.push(d.give); save(false); b.setAttribute('aria-pressed', gi < 0); view.querySelectorAll('[data-loop="gives"]').forEach(function (lg) { lg.textContent = S.draft.gives.length ? S.draft.gives.join(', ') : 'Tap above'; }); view.querySelectorAll('[data-give="' + d.give + '"]').forEach(function (x) { x.setAttribute('aria-pressed', gi < 0); }); return; }
@@ -2361,6 +2521,7 @@
     S.habit = { id: uuid(), mode: less ? 'less' : 'more', title: title, towards: (dr.ownFeel || '').trim(), matters: (dr.matters || '').trim(), deeper: (dr.deeper || '').trim(), sign: (dr.sign || '').trim(), feel: dr.feel.slice(), gives: dr.gives.concat((dr.driveOwn || '').trim() ? [dr.driveOwn.trim()] : []),
       length: dr.length || 30, start: start, status: 'active', pauses: [], finishedOn: null, later: later, extra: ex, createdAt: nowISO(), u: nowISO(), actions: [act] };
     S.later = false; S.fb = {}; S.catchup = []; S.stuSeen = {};
+    if (S.carryTasks && S.carryTasks.length) { S.habit.tasks = S.carryTasks; } S.carryTasks = null; // unfinished to-dos come with you to the next plan
     markAll(S, S.habit); save();
     // Let Stuart know someone new has started (no words they wrote, and only if usage stats are on). Not for his own test runs.
     stat('setup_done', less ? 'less' : 'more'); flushStats();
@@ -2369,7 +2530,7 @@
   }
   // A new plan: the current one is put away whole (on this phone, and in the account when signed in), never deleted.
   function archiveAndReset() {
-    if (S.habit) { S.habit.status = 'archived'; touchF(); S.archive = [S.habit].concat(S.archive || []); }
+    if (S.habit) { var keepT = (S.habit.tasks || []).filter(function (t) { return !taskDone(t) && !(t.extra && t.extra.retired); }); S.carryTasks = keepT; S.habit.tasks = (S.habit.tasks || []).filter(function (t) { return keepT.indexOf(t) < 0; }); S.habit.status = 'archived'; touchF(); S.archive = [S.habit].concat(S.archive || []); }
     S.habit = null; S.fb = {}; S.later = false; S.catchup = []; S.stuSeen = {}; S.draft = fresh().draft; save();
   }
   function reopenFocus(i) {
