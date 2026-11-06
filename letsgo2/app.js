@@ -1142,6 +1142,7 @@
     tabsEl.hidden = !showTabs; document.documentElement.classList.toggle('has-tabs', showTabs);
     tabsEl.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-current', b.dataset.tab === s ? 'page' : 'false'); });
     view.innerHTML = screens[s]();
+    view.querySelectorAll('textarea').forEach(function (t) { t.setAttribute('spellcheck', 'true'); t.setAttribute('autocorrect', 'on'); if (!t.hasAttribute('autocapitalize')) t.setAttribute('autocapitalize', 'sentences'); });
     // V2 design layer: on setup question screens, the question and its answer sit together in one clear card.
     if (['feel', 'what', 'when', 'less', 'often', 'dimmer', 'hard', 'mine', 'say', 'name', 'note', 'sendplan', 'account', 'length'].indexOf(s) >= 0) {
       var sec = view.querySelector('section.screen'), h1 = sec && sec.querySelector(':scope > h1, :scope > div > h1');
@@ -2225,6 +2226,102 @@
       if (e.target.closest('[data-act="whole"]')) { card.innerHTML = '<div class="why"><div class="eyebrow">The whole picture</div><div style="font-family:var(--display);font-size:24px;line-height:1.35">It’s an ordinary morning. You’ve done it: ' + esc(habitName().toLowerCase()) + '. You feel ' + esc(w.join(', ').toLowerCase()) + '.</div><div class="soft" style="font-size:14px">And on the tough days: ' + esc((S.habit || S.draft).dimmer) + '.</div></div>'; e.stopPropagation(); }
     });
   }
+
+  // ── Answer check ──────────────────────────────────────────────────────────
+  // On the setup screens, when someone taps Next, the letsgo-check function reads each written answer against its question.
+  // A clear non-answer ("cheese", "asdf") gets a kind "Just checking" card; a spelling slip gets "Small fix? [Use this] [Keep mine]".
+  // It never blocks: "Keep it and carry on" always goes through, and if the check is slow, offline or out of allowance, Next just works.
+  // Their words are only changed when they tap "Use this". Nothing is stored by the check.
+  var chk = { seen: {}, busy: false, pass: false };
+  var CHK_PURPOSE = {
+    sayans: 'what they want to change or build', findans: 'their answer to a reflection question', ownfocus: 'the focus they want, in their own words',
+    own: 'how life looks a month from now if this goes well', matters: 'why this matters to them', deeper: 'what that would give them, one layer deeper',
+    sign: 'an early sign it is working', what: 'the small action or habit they will do', reduce: 'what they want to do less of',
+    instead: 'what they will do instead', anchor: 'the everyday moment that will remind them ("After I...")', driveown: 'what drives them, in their own words',
+    dim: 'a much smaller version for a tough day', mine: 'the content they decided for their challenge',
+    hstart: 'what gets them started on a tough day', hoff: 'what gets them back on track', hspark: 'what reminds them why it matters'
+  };
+  function chkGated(b) {
+    var d = b.dataset;
+    return d.stepNext != null || ['shape', 'whydone', 'minedone'].indexOf(d.act) >= 0 || ['next', 'themeown'].indexOf(d.find) >= 0;
+  }
+  function chkQuestion(t) {
+    var l = t.id && view.querySelector('label[for="' + t.id + '"]'), q = l ? l.textContent.trim() : '', h = view.querySelector('h1'), ht = h ? h.textContent.trim() : '';
+    if (ht && ht !== q) q = q ? ht + ' ' + q : ht; // e.g. "What will you do? I'm going to..."
+    return (q || t.getAttribute('placeholder') || '').slice(0, 300);
+  }
+  function chkFields() {
+    return Array.prototype.filter.call(view.querySelectorAll('textarea'), function (t) {
+      return t.id && t.value.trim() && t.offsetParent !== null && t.id !== 'walkplan';
+    });
+  }
+  function chkKey(t) { return t.id + '|' + t.value.trim(); }
+  function chkClear() { view.querySelectorAll('.chkcard').forEach(function (c) { c.remove(); }); }
+  function chkCard(t, html) {
+    var c = document.createElement('div'); c.className = 'chkcard'; c.setAttribute('role', 'status'); c.dataset.for = t.id; c.innerHTML = html;
+    t.insertAdjacentElement('afterend', c); return c;
+  }
+  function chkContinue(b) { chk.pass = true; try { b.click(); } finally { chk.pass = false; } }
+  async function chkRun(b) {
+    var fields = chkFields().filter(function (t) { return !chk.seen[chkKey(t)]; });
+    if (!fields.length || !sb || !sb.functions || navigator.onLine === false) return chkContinue(b);
+    chk.busy = true; var label = b.textContent; b.textContent = 'Checking…'; b.setAttribute('aria-busy', 'true');
+    var items = fields.map(function (t) { return { id: t.id, question: chkQuestion(t), purpose: CHK_PURPOSE[t.id] || '', answer: t.value.trim() }; });
+    var ctx = [S.habit && S.habit.title, S.draft && S.draft.say, S.draft && S.draft.what].filter(function (x) { return x && String(x).trim(); }).join(' / ');
+    var res = null;
+    try {
+      if (await ensureGuest()) {
+        var call = sb.functions.invoke('letsgo-check', { body: { context: ctx, items: items } });
+        var r = await Promise.race([call, new Promise(function (ok) { setTimeout(function () { ok(null); }, 6000); })]);
+        if (r && !r.error && r.data) res = r.data;
+      }
+    } catch (e) { res = null; }
+    chk.busy = false; b.textContent = label; b.removeAttribute('aria-busy');
+    if (!document.body.contains(b)) return;
+    fields.forEach(function (t) { chk.seen[chkKey(t)] = 1; });
+    if (!res) { stat('check', 'skipped'); return chkContinue(b); }
+    chkClear();
+    if (res.at_risk) {
+      stat('check', 'care');
+      var care = careText(res) || 'It sounds like a lot is weighing on you. Please talk to someone you trust, your doctor or a local helpline today.';
+      var cc = chkCard(fields[0], '<span class="eyebrow">Before anything else</span><p>' + esc(care) + '</p><div class="chkbtns"><button class="btn outline" data-chk="go">Carry on</button></div>');
+      cc.classList.add('care'); return;
+    }
+    var shown = 0;
+    (res.results || []).forEach(function (x) {
+      var t = document.getElementById(x.id); if (!t || fields.indexOf(t) < 0) return;
+      if (x.fits === false && x.note) {
+        shown++; chkCard(t, '<p>' + esc(x.note) + '</p><div class="chkbtns"><button class="btn outline" data-chk="again" data-f="' + esc(t.id) + '">Have another go</button><button class="linkbtn" data-chk="go">Keep it and carry on</button></div>');
+      } else if (x.corrected && x.corrected.trim() !== t.value.trim()) {
+        shown++; var c = chkCard(t, '<p>Small fix? “' + esc(x.corrected) + '”</p><div class="chkbtns"><button class="btn outline" data-chk="use" data-f="' + esc(t.id) + '">Use this</button><button class="linkbtn" data-chk="keep">Keep mine</button></div>');
+        c.dataset.fix = x.corrected;
+      }
+    });
+    stat('check', shown ? 'flagged:' + shown : 'ok');
+    if (!shown) return chkContinue(b);
+    var first = view.querySelector('.chkcard'); if (first && first.scrollIntoView) first.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+  function chkGateClick(e) {
+    var c = e.target.closest('[data-chk]');
+    if (c) {
+      e.preventDefault(); e.stopPropagation();
+      var card = c.closest('.chkcard'), t = card && document.getElementById(card.dataset.for), how = c.dataset.chk, nb = chkNextBtn();
+      stat('check', how);
+      if (how === 'use' && t) { t.value = card.dataset.fix; chk.seen[chkKey(t)] = 1; t.dispatchEvent(new Event('input', { bubbles: true })); grow(t); }
+      if (how === 'again' && t) { t.focus(); t.select && t.select(); }
+      if (card) card.remove();
+      if (how === 'go') { chkClear(); if (nb) chkContinue(nb); }
+      else if (!view.querySelector('.chkcard') && how !== 'again' && nb && !nb.disabled) chkContinue(nb);
+      return;
+    }
+    var b = e.target.closest('button'); if (!b || chk.pass || !chkGated(b) || b.disabled) return;
+    if (chk.busy) { e.preventDefault(); e.stopPropagation(); return; }
+    if (!chkFields().some(function (t) { return !chk.seen[chkKey(t)]; })) return;
+    e.preventDefault(); e.stopPropagation();
+    chkRun(b);
+  }
+  function chkNextBtn() { return Array.prototype.find.call(view.querySelectorAll('button'), function (x) { return chkGated(x); }); }
+  app.addEventListener('click', chkGateClick, true);
 
   // ── Events ────────────────────────────────────────────────────────────────
   view.addEventListener('input', function (e) {

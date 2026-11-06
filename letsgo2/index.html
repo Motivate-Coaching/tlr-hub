@@ -106,6 +106,14 @@ textarea::placeholder, .input::placeholder { color: var(--muted-text); }
 .btn:disabled { opacity: 0.4; cursor: default; }
 .btn.outline { background: transparent; color: var(--navy); border: 2px solid var(--navy); min-height: 52px; }
 .btn.grey { background: var(--muted); color: var(--navy); }
+.chkcard { margin-top: 10px; background: var(--white); border-radius: 6px; border-left: 4px solid var(--amber); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; animation: chkin .25s ease; }
+.chkcard p { margin: 0; font-size: 16px; line-height: 1.45; color: var(--text); }
+.chkcard.care { border-left-color: var(--navy); }
+.chkbtns { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.chkbtns .btn { width: auto; min-height: 44px; padding: 0 16px; font-size: 14px; }
+.linkbtn { background: none; border: 0; padding: 10px 2px; color: var(--navy); font: inherit; font-size: 15px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+@keyframes chkin { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.focus-mode .chkcard { animation: none; }
 .link { align-self: flex-start; min-height: 44px; padding: 0; border: 0; background: transparent; font-weight: 600; color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
 .link.center { align-self: center; }
 .link.inline { min-height: 0; font-size: inherit; color: var(--text); display: inline; }
@@ -786,6 +794,6 @@ h1[tabindex="-1"]:focus { outline: none; }
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="model.js?v=v3a3"></script>
-<script src="app.js?v=v3c1"></script>
+<script src="app.js?v=v3d1"></script>
 </body>
 </html>
