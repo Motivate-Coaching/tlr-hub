@@ -130,9 +130,9 @@ Deno.serve(async () => {
     }
     if (!items.length) { skipped++; continue }
     const day = diffDays(d.date, f.start_date) + 1
-    // Every third day, their own why (word for word, never reworded) replaces the quote, to bring the feeling back.
+    // Their own why in nudges is paused (Stu, 6 Nov 2026) until the notification research decides how often, if at all.
     const why = String(f.extra?.deeper || f.matters || '').trim().slice(0, 160)
-    const whyDay = !!why && day % 3 === 0
+    const whyDay = false && !!why && day % 3 === 0
     const line = whyDay ? `Why it matters to you: “${why}”` : LINES[(day - 1 + LINES.length) % LINES.length]
     const subject = items.length === 1 ? `Today: ${items[0].text}` : `Today: ${items.length} things in your plan`
 
