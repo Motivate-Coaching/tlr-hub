@@ -559,6 +559,22 @@ html.has-tabs .screen { padding-bottom: 110px; }
 .meter i { display: block; height: 100%; background: var(--amber); border-radius: 3px; }
 .patlist { margin: 0 0 10px; padding: 0; list-style: none; display: grid; gap: 10px; }
 .patlist li { background: var(--cream); border-left: 3px solid var(--amber); border-radius: 6px; padding: 10px 12px; font-size: 15px; line-height: 1.5; color: var(--text-dark); }
+.sec.finish { gap: 10px; }
+.sec.finish .row { display: flex; justify-content: space-between; align-items: center; }
+.finrow { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; font: inherit; color: var(--text); cursor: pointer; min-height: 56px; }
+.finrow:hover { border-color: var(--navy); }
+.finrow.done { background: transparent; border-style: dashed; cursor: default; }
+.finrow.done b { font-weight: 500; color: var(--text-mid); }
+.fintick { flex: 0 0 26px; width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--cream-deep); display: grid; place-items: center; }
+.finrow.done .fintick { background: var(--green); border-color: var(--green); }
+.finrow.done .fintick svg { width: 14px; height: 14px; }
+.fintxt { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.fintxt b { font-weight: 600; font-size: 16px; }
+.fintxt span { font-size: 14px; color: var(--text-mid); }
+.findone { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; color: var(--text-mid); }
+.findone span { display: inline-flex; align-items: center; gap: 6px; }
+.findone svg { width: 14px; height: 14px; }
+.finrow .chev { font-size: 22px; color: var(--text-mid); }
 .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .tile { background: var(--cream); border-radius: 6px; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; }
 .tile b { font-family: var(--display); font-weight: 400; font-size: 30px; line-height: 1; }
@@ -749,6 +765,6 @@ h1[tabindex="-1"]:focus { outline: none; }
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="model.js?v=v3a3"></script>
-<script src="app.js?v=v3b5"></script>
+<script src="app.js?v=v3c0"></script>
 </body>
 </html>
