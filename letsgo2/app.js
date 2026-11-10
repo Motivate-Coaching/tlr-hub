@@ -442,7 +442,7 @@
       var d = S.draft, c = d.coach || {};
       var top = '<section class="screen"><div class="sdots" aria-label="Getting started"><i class="on"></i><i class="on"></i><i></i></div>';
       if (ui.coachBusy) return top + '<div class="thinking" role="status"><span class="tdots" aria-hidden="true"><i></i><i></i><i></i></span><p class="lede" style="margin:0">' + (ui.coachBusy === 'actions' ? 'Finding a good first step…' : 'Reading what you wrote…') + '</p></div>' + (d.quickSetup ? '<button class="link center" data-act="ownstart">I’ll write my own step</button>' : '') + '</section>';
-      if (c.care) return top + '<h1>Before anything else</h1>' + stuCard(esc(c.care)) + '<button class="btn outline" data-go="say">Back</button></section>';
+      if (c.care) return top + safeHTML(true) + '<button class="btn outline" data-go="say">Back</button></section>';
       var fs = c.focuses || [];
       if (d.focusIdx == null && fs.length > 1) {
         return top + '<h1>Here’s what I’m hearing</h1>' + (c.reply ? '<p class="lede">' + esc(c.reply) + '</p>' : '') +
@@ -1939,7 +1939,7 @@
     var src = (f.answers[FIND_QS()[0].key] || '').trim();
     if (f.themes && f.themesFor !== src) f.themes = null;
     var th = f.themes;
-    if (th && careText(th)) return top + '<h1>Before anything else.</h1></div><div class="why"><span>' + esc(careText(th)) + '</span></div></section>';
+    if (th && careText(th)) return top + '</div>' + safeHTML(true) + '</section>';
     if (!th || !(th.themes || []).length) {
       if (!user && !guest) {
         if (authChecked && !ui.guestFailed && !ui.guestTrying) { ui.guestTrying = true; ensureGuest().then(function (ok) { ui.guestTrying = false; if (!ok) ui.guestFailed = true; render(); }); }
@@ -1969,11 +1969,12 @@
   }
   // After the questions: the AI pulls out the areas, they pick one, check it rings true, then choose a challenge.
   // A care message only counts if it has real words in it (an early version could save an empty "" and show a blank card).
-  function careText(ai) { var c = String((ai && ai.care) || '').replace(/^["'“”‘’\s]+|["'“”‘’\s]+$/g, ''); return /[a-z]{3}/i.test(c) ? c : ''; }
+  // Any sign of risk from the AI shows the fixed message; the AI's own words are never shown.
+  function careText(ai) { return ai && (ai.at_risk || /[a-z]{3}/i.test(String(ai.care || ''))) ? BEYOND : ''; }
   function ideasScreen(f) {
     var top = '<section class="screen"><span class="eyebrow">Ideas for you · AI suggestions</span>';
     var controls = '<div class="chips discovery-controls"><button class="chip" data-find="easier">Too demanding</button><button class="chip" data-find="different">Different approach</button><button class="chip" data-find="editanswer">Edit my answer</button></div>';
-    if (f.ai && careText(f.ai)) return top + '<h1>Before anything else.</h1><div class="why"><p>' + esc(careText(f.ai)) + '</p></div><button class="link" data-find="editanswer">Edit my answer</button></section>';
+    if (f.ai && careText(f.ai)) return top + safeHTML(true) + '<button class="link" data-find="editanswer">Edit my answer</button></section>';
     var areas = f.ai && f.ai.areas || [];
     if (!areas.length) {
       if (!f.aiTried && !ui.aiBusy) setTimeout(reflectAI, 0);
@@ -1990,7 +1991,7 @@
   }
   function aiCard(f, n) {
     if (!n || !sb) return '';
-    if (careText(f.ai)) return '<div class="why"><span class="eyebrow">Before anything else</span><span>' + esc(careText(f.ai)) + '</span></div>';
+    if (careText(f.ai)) return safeHTML(true);
     if (f.ai && f.ai.heard) {
       var h = '<div class="card heard"><span class="eyebrow">What I’m hearing</span><p>' + esc(f.ai.heard) + '</p>' +
         (f.ai.themes && f.ai.themes.length ? '<div class="chips">' + f.ai.themes.map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('') + '</div>' : '') + '</div>';
@@ -2027,7 +2028,7 @@
       }).filter(function (ar) { return ar.name && ar.challenges.length; });
       if (!careText(raw) && !areas.length) throw new Error('unavailable');
       if (f.ai) (f.rounds || (f.rounds = [])).push({ at: nowISO(), answer: f.answer, ideas: f.ai });
-      f.ai = { areas: areas, care: careText(raw) }; f.aiFor = key; f.area = 0; f.r = 'ideas'; save(false);
+      f.ai = { areas: areas, care: careText(raw), at_risk: !!(raw && raw.at_risk) }; f.aiFor = key; f.area = 0; f.r = 'ideas'; save(false);
     } catch (e) {
       if (!current()) return;
       toast(e.message === 'limit' ? 'The AI helper’s limit is reached. Your words are kept and you can write your own action.' : 'Couldn’t reach the idea helper. Your words are kept.');
@@ -2299,7 +2300,10 @@
   ui.stu = { busy: {}, chat: [], chatBusy: false, chatEnded: false, left: null, crisis: false, help: {} };
   BACK.askstu = function () { return ui.stuFrom || 'tracker'; };
   var AI_TAG = '<span class="aitag" title="An AI version of Stu, not Stu himself">AI</span>';
+  // A last guard on Stu's rules: drop any sentence that says it can wait or suggests skipping (a smaller version is still showing up).
+  function tidyStu(t) { var parts = String(t || '').split(/(?<=[.?])\s+/), kept = parts.filter(function (x) { return !/\b(can|could|will) wait\b|\bskip(ping)?\b|\bmiss(ed)?\b/i.test(x); }); return (kept.length ? kept : parts).join(' '); }
   function stuSays(text, more, cls) {
+    text = tidyStu(text);
     return '<div class="stuai' + (cls ? ' ' + cls : '') + '"><img src="stuart.jpg" alt="" width="36" height="36"><div class="stuai-body"><div class="stuai-name">Stu ' + AI_TAG + '</div><p>' + esc(text) + '</p>' + (more || '') + '</div></div>';
   }
   function stuCtx(a) {
@@ -2323,38 +2327,28 @@
       return r.data || null;
     } catch (e) { return null; }
   }
-  // Country-aware helplines, chosen from the phone's time zone. Fixed text: never written by the AI.
-  function helplines() {
-    var tz = (S.settings && S.settings.tz) || tzGuess() || '';
-    if (/^Europe\/(London|Belfast|Guernsey|Jersey|Isle_of_Man)$/.test(tz)) return [['Samaritans', '116 123', 'tel:116123'], ['Emergency', '999', 'tel:999']];
-    if (tz === 'Europe/Dublin') return [['Samaritans', '116 123', 'tel:116123'], ['Emergency', '112', 'tel:112']];
-    if (tz === 'Africa/Johannesburg') return [['SADAG Suicide Crisis Line', '0800 567 567', 'tel:0800567567'], ['Emergency from a mobile', '112', 'tel:112']];
-    if (/^America\//.test(tz)) return [['988 Suicide and Crisis Lifeline', '988', 'tel:988'], ['Emergency', '911', 'tel:911']];
-    if (/^Australia\//.test(tz)) return [['Lifeline', '13 11 14', 'tel:131114'], ['Emergency', '000', 'tel:000']];
-    if (tz === 'Pacific/Auckland') return [['Need to talk?', '1737', 'tel:1737'], ['Emergency', '111', 'tel:111']];
-    return [];
+  // Anything sensitive gets fixed words, never AI-written ones (Stu, 10 Nov 2026). Let's Go! is a habit coach, not therapy or a crisis service.
+  var BEYOND = 'Sorry, that’s beyond what I can help with here.';
+  function safeHTML(crisis) {
+    return '<div class="crisiscard" role="status"><p>' + BEYOND + '</p>' + (crisis ? '<p>If you’re not safe right now, you can find free, confidential help in your country at <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a>.</p>' : '') + '</div>';
   }
-  function crisisCard() {
-    var lines = helplines();
-    return '<div class="crisiscard" role="alert"><b>You don’t have to carry this on your own.</b><p>What you’ve written sounds really heavy. Please talk to someone now: someone you trust, your doctor, or a helpline. If you’re in danger, call your local emergency number.</p>' +
-      (lines.length ? '<div class="crisislines">' + lines.map(function (l) { return '<a class="btn" href="' + l[2] + '">' + esc(l[0]) + ' · ' + esc(l[1]) + '</a>'; }).join('') + '</div>' : '') +
-      '<a class="link" href="https://findahelpline.com" target="_blank" rel="noopener">Find a free helpline in your country</a></div>';
-  }
-  function careCard(text) { return '<div class="crisiscard" role="status"><p>' + esc(text) + '</p><a class="link" href="https://findahelpline.com" target="_blank" rel="noopener">Find a free helpline in your country</a></div>'; }
+  function crisisCard() { return safeHTML(true); }
+  function careCard() { return safeHTML(true); }
 
   // 1. After a note: one optional tweak, shown on Today until they answer it.
   async function stuAfterNote(a, d, note) {
     if (S.settings.stuNotes === false || !a || !note || note.trim().length < 12 || a.extra && a.extra.task) return;
     var r = await askStu('note', Object.assign(stuCtx(a), { note: note }));
     if (!r || r.error) return;
-    if (r.at_risk) { S.stuTip = { care: r.care, at: nowISO() }; save(false); if (S.screen === 'tracker') render(); return; }
+    if (r.blocked === 'crisis' || r.at_risk) { S.stuTip = { care: true, at: nowISO() }; save(false); if (S.screen === 'tracker') render(); return; }
+    if (r.blocked) return;
     if (!r.suggest || !r.change) return;
     S.stuTip = { line: r.line, change: r.change, act: a.id, at: nowISO() }; save(false); stat('stu', 'note-tip');
     if (S.screen === 'tracker') render();
   }
   function stuTipHTML() {
     var t = S.stuTip; if (!t) return '';
-    if (t.care) return '<div class="stutip">' + careCard(t.care) + '<button class="link" data-stu="tipno">Close</button></div>';
+    if (t.care) return '<div class="stutip">' + safeHTML(true) + '<button class="link" data-stu="tipno">Close</button></div>';
     var a = actById(t.act); if (!a) return '';
     var what = t.change.type === 'cue' ? 'New moment: “' + t.change.value + '”' : t.change.type === 'small' ? 'Smaller version: “' + t.change.value + '”' : 'Add to your list: “' + t.change.value + '”';
     return '<div class="stutip">' + stuSays(t.line, '<div class="stuai-change">' + esc(what) + '</div><div class="stuai-btns"><button class="btn" data-stu="tipyes">Yes, change it</button><button class="link" data-stu="tipno">Not now</button></div>') + '</div>';
@@ -2371,7 +2365,7 @@
   // 2. "I'm struggling": what's going on, in their words, becomes a smaller version for today.
   function stuStruggleHTML(a, k) {
     var got = ui.stu.help[a.id + '|' + k];
-    if (got && got.care) return careCard(got.care);
+    if (got && got.blocked) return safeHTML(got.blocked === 'crisis');
     if (got && got.line) {
       var done = counted(a.entries[todayStr()]);
       return '<div class="stuhelp">' + stuSays(got.line, '<div class="stuai-change">Today: “' + esc(got.today) + '”</div>' + (done ? '' : '<div class="stuai-btns"><button class="btn" data-stu="didsmall" data-a="' + a.id + '" data-k="' + k + '">I did this</button></div>')) + '</div>';
@@ -2386,7 +2380,7 @@
     var r = await askStu('struggle', Object.assign(stuCtx(a), { situation: k, text: text }));
     ui.stu.busy.help = false;
     if (!r || r.error) ui.stu.helpErr = r && r.error === 'limit' ? 'Stu’s had a lot of questions today. Try the smaller version below.' : 'Stu can’t reply just now. The smaller version below still counts.';
-    else { ui.stu.help[a.id + '|' + k] = r.at_risk ? { care: r.care } : { line: r.line, today: r.today }; stat('stu', 'struggle'); }
+    else { ui.stu.help[a.id + '|' + k] = r.blocked || r.at_risk ? { blocked: r.at_risk ? 'crisis' : r.blocked } : { line: r.line, today: r.today }; stat('stu', r.blocked ? 'struggle-' + r.blocked : 'struggle'); }
     if (S.screen === 'slipped') render();
   }
 
@@ -2395,7 +2389,7 @@
   function stuWeekHTML() {
     var key = lastWeekKey(), w = (S.stuWeek || {})[key];
     if (w && w.line) return '<section class="sec stuweek">' + stuSays(w.line, w.try ? '<div class="stuai-change">Try this week: “' + esc(w.try) + '”</div>' : '') + '</section>';
-    if (w && w.care) return careCard(w.care);
+    if (w && w.blocked === 'crisis') return safeHTML(true);
     return '';
   }
   async function maybeStuWeek() {
@@ -2410,7 +2404,7 @@
     var r = await askStu('weekly', Object.assign(stuCtx(), { counts: { full: t.full, small: t.small, comebacks: cb }, notes: notes }));
     ui.stu.busy.week = false;
     if (!r || r.error) return;
-    S.stuWeek[key] = r.at_risk ? { care: r.care } : { line: r.line, try: r.try, at: nowISO() };
+    S.stuWeek[key] = r.blocked || r.at_risk ? { blocked: r.at_risk ? 'crisis' : r.blocked } : { line: r.line, try: r.try, at: nowISO() };
     Object.keys(S.stuWeek).sort().slice(0, -8).forEach(function (k) { delete S.stuWeek[k]; });
     save(false); stat('stu', 'weekly'); if (S.screen === 'progress') render();
   }
@@ -2418,14 +2412,14 @@
   // 4. The look back: a first draft of "What did you notice?" from their own notes, for them to edit.
   function stuReflectBtn() {
     if (!S.habit) return '';
-    return '<button class="chip studraft" data-stu="draft"' + (ui.stu.busy.draft ? ' disabled' : '') + '>' + (ui.stu.busy.draft ? 'Stu’s drafting…' : 'Draft it with Stu') + ' ' + AI_TAG + '</button>' + (ui.stu.draftErr ? '<span class="hint">' + esc(ui.stu.draftErr) + '</span>' : '');
+    return '<button class="chip studraft" data-stu="draft"' + (ui.stu.busy.draft ? ' disabled' : '') + '>' + (ui.stu.busy.draft ? 'Stu’s drafting…' : 'Draft it with Stu') + ' ' + AI_TAG + '</button>' + (ui.stu.draftBlocked ? safeHTML(ui.stu.draftBlocked === 'crisis') : '') + (ui.stu.draftErr ? '<span class="hint">' + esc(ui.stu.draftErr) + '</span>' : '');
   }
   async function stuDraft() {
     var st = stats(); ui.stu.busy.draft = true; ui.stu.draftErr = ''; render();
     var r = await askStu('reflect', Object.assign(stuCtx(), { counts: { full: st.full, small: st.small, comebacks: comebacks() }, notes: recentNotes(400) }));
     ui.stu.busy.draft = false;
-    if (!r || r.error || !(r.draft || r.care)) ui.stu.draftErr = 'Stu can’t draft this just now. A few words of your own is plenty.';
-    else if (r.at_risk) ui.stu.draftErr = r.care;
+    if (r && (r.blocked || r.at_risk)) { ui.stu.draftErr = ''; ui.stu.draftBlocked = r.at_risk ? 'crisis' : r.blocked; }
+    else if (!r || r.error || !r.draft) ui.stu.draftErr = 'Stu can’t draft this just now. A few words of your own is plenty.';
     else { ui.reflect = ui.reflect || {}; ui.reflect.noticed = r.draft; stat('stu', 'reflect'); toast('Here’s a first draft. Make it yours.'); }
     if (S.screen === 'reflect') render();
   }
@@ -2439,7 +2433,8 @@
     if (!c.length) h += stuSays('What’s on your mind? Ask me anything about your plan, a tough day or getting going again.');
     c.forEach(function (m) {
       if (m.role === 'user') h += '<div class="chatme"><p>' + esc(m.text) + '</p></div>';
-      else if (m.crisis) h += crisisCard();
+      else if (m.crisis) h += safeHTML(true);
+      else if (m.blocked) h += safeHTML(false);
       else h += stuSays(m.text, m.takeaway && !m.saved ? '<div class="stuai-btns"><button class="chip" data-stu="keep" data-i="' + c.indexOf(m) + '">Save to my list: “' + esc(m.takeaway) + '”</button></div>' : (m.saved ? '<span class="hint">Saved to your list.</span>' : ''));
     });
     if (ui.stu.chatBusy) h += '<div class="stuai typing"><img src="stuart.jpg" alt="" width="36" height="36"><div class="stuai-body"><div class="stuai-name">Stu ' + AI_TAG + '</div><p>…</p></div></div>';
@@ -2458,9 +2453,10 @@
     var el = document.getElementById('stumsg'), text = el ? el.value.trim() : '';
     if (!text || ui.stu.chatBusy) return;
     var c = ui.stu.chat; c.push({ role: 'user', text: text.slice(0, 700) }); ui.stu.draftMsg = ''; ui.stu.chatBusy = true; render();
-    var r = await askStu('chat', stuCtx(), { messages: c.filter(function (m) { return !m.crisis; }).map(function (m) { return { role: m.role, text: m.text }; }) });
+    var r = await askStu('chat', stuCtx(), { messages: c.filter(function (m) { return !m.crisis && !m.blocked; }).map(function (m) { return { role: m.role, text: m.text }; }) });
     ui.stu.chatBusy = false;
-    if (r && r.crisis) { c.push({ role: 'stu', crisis: true }); ui.stu.crisis = true; stat('stu', 'chat-care'); }
+    if (r && (r.crisis || r.blocked === 'crisis')) { c.push({ role: 'stu', crisis: true }); ui.stu.crisis = true; stat('stu', 'chat-care'); }
+    else if (r && r.blocked) { c.push({ role: 'stu', blocked: true }); stat('stu', 'chat-beyond'); }
     else if (!r || r.error) {
       var msg = r && r.error === 'limit' ? 'That’s all my chats for today. Come back tomorrow, and in the meantime, the smaller version still counts.' : 'I can’t reply just now. Try again in a minute. If things feel heavy, please talk to someone you trust.';
       c.push({ role: 'stu', text: msg }); if (r && r.error === 'limit') ui.stu.chatEnded = true;
@@ -2544,8 +2540,8 @@
     chkClear();
     if (res.at_risk) {
       stat('check', 'care');
-      var care = careText(res) || 'It sounds like a lot is weighing on you. Please talk to someone you trust, your doctor or a local helpline today.';
-      var cc = chkCard(fields[0], '<span class="eyebrow">Before anything else</span><p>' + esc(care) + '</p><div class="chkbtns"><button class="btn outline" data-chk="go">Carry on</button></div>');
+      var care = BEYOND;
+      var cc = chkCard(fields[0], safeHTML(true) + '<div class="chkbtns"><button class="btn outline" data-chk="go">Carry on</button></div>');
       cc.classList.add('care'); return;
     }
     var shown = 0;
@@ -3086,7 +3082,7 @@
     try {
       var r = await coachCall({ kind: 'understand', said: d.say, mode: d.mode });
       if (!setupCurrent(d, ticket, said)) return;
-      d.coach = r.at_risk ? { care: r.care } : { reply: r.reply || '', focuses: r.focuses || [] };
+      d.coach = r.at_risk ? { care: true } : { reply: r.reply || '', focuses: r.focuses || [] };
       stat('coach', r.at_risk ? 'care' : 'focuses:' + (r.focuses || []).length);
     } catch (e) {
       if (!setupCurrent(d, ticket, said)) return;
@@ -3113,7 +3109,7 @@
     try {
       var r = await coachCall({ kind: 'actions', said: d.say, mode: d.mode, title: f.title || d.say, towards: (d.ownFeel || '').trim() || f.towards || '', outcome: (d.sign || '').trim(), why: [(d.matters || '').trim(), (d.deeper || '').trim()].filter(Boolean).join('. '), barriers: (f.barriers || []).join('; '), answers: d.coachAnswers || [] });
       if (!setupCurrent(d, ticket, said)) return;
-      if (r.at_risk) d.coach = { care: r.care };
+      if (r.at_risk) d.coach = { care: true };
       else { d.acts = (r.actions || []).slice(0, 4); d.coachHelpers = r.helpers || []; d.coachNote = r.note || ''; d.coachQs = (r.questions || []).slice(0, 2); d.pick = d.acts.length === 1 ? 0 : null; }
     } catch (e) { if (!setupCurrent(d, ticket, said)) return; d.acts = []; toast('Couldn’t reach the AI helper just now. You can write your own first step.'); }
     ui.coachBusy = null; save(false); render();

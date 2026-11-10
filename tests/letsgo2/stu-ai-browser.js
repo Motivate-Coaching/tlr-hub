@@ -7,7 +7,7 @@ functions:{invoke:function(n,o){var b=o&&o.body||{};window.__calls.push(n+':'+(b
   if(k==='struggle')return Promise.resolve({data:{at_risk:false,line:'Work has been mad, and that’s fair. A smaller version still counts.',today:'Walk round the block in your trainers.'}});
   if(k==='weekly')return Promise.resolve({data:{at_risk:false,line:'You showed up twice in full and once smaller, and came back after a gap. Evenings seem to suit you.',try:'Try one evening run next week.'}});
   if(k==='reflect')return Promise.resolve({data:{at_risk:false,draft:'Mornings were tough for me. Evenings felt easier, and I ran 3k without stopping.'}});
-  if(k==='chat'){var last=b.messages[b.messages.length-1].text;if(/better off without me/.test(last))return Promise.resolve({data:{crisis:true}});return Promise.resolve({data:{reply:'Tie it to something you already do, like your first cup of tea. Which part of your day gets away from you first?',takeaway:'Pick a time for your run and note it down.',last:false,left:9}})}
+  if(k==='chat'){var last=b.messages[b.messages.length-1].text;if(/better off without me/.test(last))return Promise.resolve({data:{crisis:true,blocked:'crisis'}});if(/knee/.test(last))return Promise.resolve({data:{blocked:'sensitive'}});return Promise.resolve({data:{reply:'Tie it to something you already do, like your first cup of tea. Which part of your day gets away from you first?',takeaway:'Pick a time for your run and note it down.',last:false,left:9}})}
  }
  if(n==='letsgo-check'){var res=b.items.map(function(i){if(/get fit/i.test(i.answer))return {id:i.id,fits:true,corrected:'',sharpen:{question:'“Get fit” is a big one. What would a first step look like?',options:['Walk 10 minutes after dinner','Do 5 squats after brushing my teeth']}};return {id:i.id,fits:true,corrected:''}});return Promise.resolve({data:{at_risk:false,results:res}})}
  return new Promise(function(){})}}};}};`;
@@ -50,6 +50,8 @@ functions:{invoke:function(n,o){var b=o&&o.body||{};window.__calls.push(n+':'+(b
   await seed('tracker', 'full'); const en = await p.$('[data-stu="open"]'); out.push('5 Ask Stu entry on Today: ' + !!en);
   if (en) { await en.click(); await p.waitForTimeout(400); await p.fill('#stumsg', 'I keep putting my runs off. Any ideas?'); await p.click('[data-stu="send"]'); await p.waitForTimeout(700); out.push('   reply shown: ' + ((await p.$$('.chatlog .stuai')).length)); await p.screenshot({ path: OUT + 'stu-5-chat.png' });
     const keep = await p.$('[data-stu="keep"]'); if (keep) { await keep.click(); await p.waitForTimeout(300); out.push('   saved task: ' + await p.evaluate(() => (JSON.parse(localStorage.getItem('letsgo-v2-state')).habit.tasks || []).map(t => t.text).join('|'))); }
+    await p.fill('#stumsg', 'My knee hurts, should I keep running?'); await p.click('[data-stu="send"]'); await p.waitForTimeout(600);
+    out.push('   sensitive: ' + (await p.innerText('.chatlog .crisiscard:last-of-type')).replace(/\s+/g, ' '));
     await p.fill('#stumsg', 'Honestly everyone would be better off without me'); await p.click('[data-stu="send"]'); await p.waitForTimeout(700);
     out.push('   crisis card: ' + ((await p.$('.crisiscard')) ? (await p.innerText('.crisiscard')).replace(/\s+/g, ' ').slice(0, 160) : 'NONE') + ' | input left: ' + !!(await p.$('#stumsg')));
     await p.screenshot({ path: OUT + 'stu-6-crisis.png' }); }

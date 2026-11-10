@@ -5,10 +5,10 @@
 //   weekly:   once a week on Progress, a short look back from their own notes and counts, and one thing to try.
 //   reflect:  at the look back, a first draft of "What did you notice?" from their notes, for them to edit.
 //   chat:     "Ask Stu (AI)". Short conversations (6 of their messages), 10 messages a day. Every message is screened for risk first by a
-//             separate call; crisis wording never reaches the chat model and the app shows its fixed helpline card instead. If the
-//             screen can't run, the reply is withheld (fails safe). A content-free event (no words, no user id) is logged for Stu.
+//             separate call. Crisis, heavier emotional or health matters and anything outside habits never reach the chat model:
+//             the app shows its own fixed message. If the screen can't run, no reply is given. Content-free events are logged.
 // Always shown labelled as AI. Never stored here. Each kind has its own daily allowance (app_metadata.letsgo_stu).
-// Crisis wording anywhere returns a care message instead of coaching. Secret: ANTHROPIC_API_KEY (Supabase secrets).
+// Anything sensitive returns only a flag (blocked: crisis | sensitive); the AI never writes advice or comfort on those. Secret: ANTHROPIC_API_KEY.
 
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4'
 
@@ -29,7 +29,8 @@ const VOICE = `You are writing as "Stu (AI)", an AI version of Stuart Fairbairns
 How Stu sounds: warm, direct, grounded, plain British English, a light touch of dry humour only when it fits. Short sentences. Talks like a person, not a programme.
 His beliefs: do it your way; hold it lightly; showing up is a dimmer switch, not a light switch, so a smaller version still counts; if you only have 20% and give 20%, that is 100%; follow the plan, not the feeling; comebacks matter more than perfect runs.
 Rules: never shame or lecture. Say "tough day", never "hard day". Never use "fail", "failed", "failure", "miss", "missed" or "streak" in any form; a gap is a gap and coming back is a comeback. Never suggest skipping or that it can wait: on a tough day the smaller version is still showing up. No em dashes, no exclamation marks, no emojis, no hashtags. Never assume anything about their life (children, partner, age, job, health) that they haven't written. When you refer to their own words, quote them exactly. Never give medical, diet, money or legal advice; never diagnose or label feelings. Never promise results. Keep it to what is asked.
-If anything they wrote suggests they may harm themselves, are in danger or in crisis, set at_risk to true and write "care": two short kind sentences encouraging them to talk to someone they trust, their doctor or a local helpline today. In that case leave everything else empty.`
+You are a habit and performance coach, like a supportive sports coach: plans, getting going, tough days and comebacks. Nothing beyond that.
+If anything they wrote suggests they may harm themselves, are in danger or in crisis, or shows hopelessness (nothing feels worth it, feeling like a burden), set at_risk to true. If it is about physical or mental health, emotions heavier than an ordinary tough day, abuse, medication, diet targets, legal or money matters, set out_of_scope to true. In either case leave every other field empty and write nothing: the app shows its own fixed message.`
 
 const TASKS: Record<string, { prompt: string; schema: Record<string, unknown>; required: string[] }> = {
   chat: { prompt: '', schema: {}, required: [] },
@@ -58,7 +59,6 @@ If suggesting: "line" is one or two sentences in Stu's voice that reflect their 
 }
 
 const clean = (s: unknown, n = 500) => String(s ?? '').replace(/\s*[–—]\s*/g, ', ').replace(/\bafter a miss\b/gi, 'after a gap').replace(/\bmissed\b/gi, 'quiet').replace(/!/g, '.').replace(/\.\.+/g, '.').trim().slice(0, n)
-const CARE_DEFAULT = "It sounds like a lot is weighing on you right now. Please talk to someone you trust, your doctor or a local helpline today. You don't have to sort this out on your own."
 const str = (x: unknown, n: number) => String(x ?? '').trim().slice(0, n)
 
 Deno.serve(async (req) => {
@@ -112,19 +112,22 @@ Deno.serve(async (req) => {
     // 1. Safety screen on the last few messages, separate from the persona. It can only raise concern, never clear it.
     let risk = 'none', scope = 'in'
     try {
-      const sc = await ask('You screen messages sent to an AI habit helper. Read the conversation and classify the latest user message in context. risk: "crisis" if there is any sign of suicidal thoughts, self-harm, wanting to not be here, being a burden, harm to others, abuse or immediate danger, even if hinted or joking; "concern" for heavy distress, hopelessness, eating disorder signs, or mental health struggles beyond everyday low mood; otherwise "none". scope: "out" if they ask for medical, medication, diet or calorie targets, legal or financial advice, or something unrelated to habits, plans, motivation and everyday life; otherwise "in". When unsure about risk, choose the higher level.',
+      const sc = await ask('You screen messages sent to an AI habit helper. Read the conversation and classify the latest user message in context. risk: "crisis" if there is any sign of suicidal thoughts, self-harm, wanting to not be here, being a burden, harm to others, abuse or immediate danger, even if hinted or joking; "concern" for heavy distress, hopelessness, eating disorder signs, or mental health struggles beyond everyday low mood; otherwise "none". scope: "out" if they raise physical or mental health (symptoms, injuries, conditions), medication, diet or calorie targets, legal or financial matters, or something unrelated to habits, plans, motivation and everyday life; otherwise "in". When unsure about risk, choose the higher level.',
         { name: 'screen', description: 'Risk screen', input_schema: { type: 'object', properties: { risk: { type: 'string', enum: ['none', 'concern', 'crisis'] }, scope: { type: 'string', enum: ['in', 'out'] } }, required: ['risk', 'scope'] } },
         [{ role: 'user', content: msgs.slice(-4).map((m) => (m.role === 'user' ? 'User: ' : 'Helper: ') + m.text).join('\n') }], 60)
       risk = String(sc.risk || 'crisis'); scope = String(sc.scope || 'in')
     } catch (e) { console.error(e); return json({ error: 'screen_failed' }, 503) }
     if (!['none', 'concern', 'crisis'].includes(risk)) risk = 'crisis'
-    if (risk === 'crisis') { await logCare('crisis'); counts.chat = (counts.chat || 0) + 1; await admin.auth.admin.updateUserById(user.id, { app_metadata: { ...(user.app_metadata || {}), letsgo_stu: { day: today, n: counts } } }); return json({ crisis: true }) }
-    if (risk === 'concern') await logCare('concern')
+    if (risk !== 'none' || scope === 'out') {
+      await logCare(risk === 'crisis' ? 'crisis' : risk === 'concern' ? 'concern' : 'scope')
+      counts.chat = (counts.chat || 0) + 1
+      await admin.auth.admin.updateUserById(user.id, { app_metadata: { ...(user.app_metadata || {}), letsgo_stu: { day: today, n: counts } } })
+      // Crisis and heavy distress (concern) both show the helpline link; out-of-scope topics show the plain line only.
+      return json(risk !== 'none' ? { crisis: true, blocked: 'crisis' } : { blocked: 'sensitive' })
+    }
     // 2. Stu (AI) reply, grounded in their own plan.
     const last = theirs >= CHAT_TURNS
     const sys = VOICE + `\n\nThis moment: they are chatting with you in "Ask Stu (AI)" inside the app. Help with their plan, habits, tough days, motivation and getting going again. Reply in at most 90 words, conversational, one idea at a time, and usually end with a small question or one doable next step. Use their plan details below when relevant; never invent other details.` +
-      (scope === 'out' ? `\nTheir latest message asks for something outside what you help with (medical, medication, diet targets, legal, money or unrelated). Say warmly you can't help with that here, point them to the right kind of person (their GP, a pharmacist, a registered dietitian, a qualified adviser), and if it fits, bring it back to their plan.` : '') +
-      (risk === 'concern' ? `\nThey may be going through something heavy. Acknowledge it plainly and kindly, don't coach through it, don't diagnose, and gently suggest talking to someone they trust or their GP; mention that a helpline is a tap away in the app if things feel too much. Keep the plan out of it unless they bring it up.` : '') +
       (last ? `\nThis is the last message in this conversation. Wrap up warmly in one or two sentences with one thing to do next, and say they can come back tomorrow.` : '') +
       `\n\nTheir plan (their own words):\n${material}\n\nIf there is one concrete thing worth keeping from this conversation, put it in "takeaway" as a short one-off task starting with a verb (under 12 words); otherwise leave it empty.`
     let rep: Record<string, unknown>
@@ -134,12 +137,12 @@ Deno.serve(async (req) => {
     } catch (e) { console.error(e); return json({ error: 'ai_failed' }, 502) }
     counts.chat = (counts.chat || 0) + 1
     await admin.auth.admin.updateUserById(user.id, { app_metadata: { ...(user.app_metadata || {}), letsgo_stu: { day: today, n: counts } } })
-    return json({ reply: clean(rep.reply, 700), takeaway: risk === 'none' ? clean(rep.takeaway, 120) : '', last, left: Math.max(0, LIMITS.chat - counts.chat), concern: risk === 'concern' })
+    return json({ reply: clean(rep.reply, 700), takeaway: clean(rep.takeaway, 120), last, left: Math.max(0, LIMITS.chat - counts.chat) })
   }
 
   const TOOL = {
     name: 'reply', description: 'Stu (AI) reply.',
-    input_schema: { type: 'object', properties: { ...task.schema, at_risk: { type: 'boolean' }, care: { type: 'string' } }, required: [...task.required, 'at_risk'] },
+    input_schema: { type: 'object', properties: { ...task.schema, at_risk: { type: 'boolean' }, out_of_scope: { type: 'boolean' } }, required: [...task.required, 'at_risk'] },
   }
   let x: Record<string, unknown> | undefined
   try {
@@ -158,7 +161,9 @@ Deno.serve(async (req) => {
   }
 
   let out: Record<string, unknown>
-  if (x.at_risk) out = { at_risk: true, care: clean(x.care, 600) || CARE_DEFAULT }
+  // Never AI-written words on anything sensitive: the app shows its own fixed message (Stu, 10 Nov 2026).
+  if (x.at_risk) out = { at_risk: true, blocked: 'crisis' }
+  else if (x.out_of_scope) out = { blocked: 'sensitive' }
   else if (kind === 'note') {
     const ch = (x.change || {}) as Record<string, unknown>, type = String(ch.type || ''), value = clean(ch.value, 120)
     out = x.suggest && ['cue', 'small', 'task'].includes(type) && value && clean(x.line, 300)
