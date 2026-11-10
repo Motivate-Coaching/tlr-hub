@@ -56,32 +56,42 @@ function dayState(f, a, k, now = today()) {
 function weeklyProgress(f, a, k, now = today()) {
   const ws = weekStart(k), r = ruleFor(a, k); if (!r || r.type !== 'weekly') return null;
   let done = 0, open = 0;
-  for (let i = 0; i < 7; i++) { const d = addDays(ws, i); if (!inRange(f, a, d) || isPaused(f, d)) continue; open++; if (counted(entry(a, d))) done++; }
+  for (let i = 0; i < 7; i++) {
+    const d = addDays(ws, i);
+    // A dated schedule change never claims completions from another schedule segment.
+    if (!inRange(f, a, d) || isPaused(f, d) || ruleFor(a, d) !== r) continue;
+    open++; if (d <= now && counted(entry(a, d))) done++;
+  }
   return { target: open ? Math.min(r.times, open) : 0, done };
 }
 
-// Planned opportunities in a date range, up to "now". Weekly targets count as their target per week.
+// Count dated activity independently from planned opportunities. An extra never becomes planned.
+// Fixed schedules count up to yesterday (today once logged). Flexible targets count once per finished week, and what's done so far this week.
 function tally(f, from, to, now = today()) {
   const out = { planned: 0, full: 0, small: 0, skip: 0, unlogged: 0, rest: 0, paused: 0 };
   const last = to < now ? to : now;
   for (const a of f.actions) {
-    const weeks = new Set();
+    const weeks = new Map();
     for (let k = from; k <= last; k = addDays(k, 1)) {
       if (!inRange(f, a, k)) continue;
-      const s = dayState(f, a, k, now);
-      if (s === 'paused') { out.paused++; continue; }
-      if (isWeekly(a, k)) { weeks.add(weekStart(k)); continue; }
-      if (s === 'rest') { if (counted(entry(a, k))) { out[entry(a, k).kind]++; } else out.rest++; continue; }
-      out.planned++;
-      if (s === 'full' || s === 'small') out[s]++; else if (s === 'skip') out.skip++; else if (s === 'unlogged') out.unlogged++;
+      const e = entry(a, k), s = dayState(f, a, k, now);
+      if (counted(e)) out[e.kind]++;
+      if (isPaused(f, k)) { out.paused++; continue; }
+      if (isWeekly(a, k)) { weeks.set(weekStart(k) + '|' + ruleFor(a, k).from, k); if (e && e.kind === 'skip') out.skip++; continue; }
+      if (isDue(f, a, k)) {
+        // Today only counts as planned once it's logged: an unticked today is never held against anyone (Stu, 10 Nov 2026).
+        if (k >= now && !counted(e) && !(e && e.kind === 'skip')) continue;
+        out.planned++;
+        if (e && e.kind === 'skip') out.skip++;
+        else if (!counted(e) && k < now) out.unlogged++;
+      } else if (!counted(e)) out.rest++;
     }
-    for (const ws of weeks) {
-      const p = weeklyProgress(f, a, ws, now); if (!p) continue;
-      const weekOver = addDays(ws, 6) < now;
-      let full = 0, small = 0;
-      for (let i = 0; i < 7; i++) { const e = entry(a, addDays(ws, i)); if (e && e.kind === 'full') full++; if (e && e.kind === 'small') small++; }
-      out.planned += p.target; out.full += Math.min(full, p.target); out.small += Math.max(0, Math.min(small, p.target - full));
-      const short = p.target - Math.min(p.done, p.target); if (short > 0) { if (weekOver) out.unlogged += short; else out.planned -= short; }
+    for (const [key, ref] of weeks) {
+      const ws = key.split('|')[0];
+      const p = weeklyProgress(f, a, ref, now); if (!p) continue;
+      // A week still in progress only counts what's been done so far; a finished week counts its whole target.
+      if (addDays(ws, 6) < now) { out.planned += p.target; out.unlogged += Math.max(0, p.target - p.done); }
+      else out.planned += Math.min(p.done, p.target);
     }
   }
   out.done = out.full + out.small;
@@ -118,13 +128,26 @@ function nextDue(f, a, after = today()) {
 
 // A comeback: a counted day after at least one planned day that wasn't counted, having counted before.
 function isComeback(f, a, k, now = today()) {
+  if (!counted(entry(a, k))) return false;
+  if (isWeekly(a, k)) {
+    const ws = weekStart(k);
+    for (let d = ws; d < k; d = addDays(d, 1)) if (counted(entry(a, d))) return false;
+    let gap = false;
+    for (let w = addDays(ws, -7), n = 0; n < 104 && addDays(w, 6) >= f.start; w = addDays(w, -7), n++) {
+      let ref = null, did = false;
+      for (let i = 0; i < 7; i++) { const d = addDays(w, i); if (!inRange(f, a, d) || isPaused(f, d)) continue; if (isWeekly(a, d)) ref = d; if (counted(entry(a, d))) did = true; }
+      if (did && gap) return true;
+      if (ref) { const p = weeklyProgress(f, a, ref, now); if (p.target && p.done < p.target) gap = true; else if (p.done >= p.target && p.target) return false; }
+    }
+    return false;
+  }
   let gap = 0, before = false;
   for (let d = addDays(k, -1), i = 0; i < 60 && d >= f.start; d = addDays(d, -1), i++) {
     if (!isDue(f, a, d)) continue;
     if (counted(entry(a, d))) { before = true; break; }
     gap++;
   }
-  return gap > 0 && before && counted(entry(a, k));
+  return gap > 0 && before;
 }
 
 // Change an action's schedule from a date onwards. Past days keep the rule that applied then.

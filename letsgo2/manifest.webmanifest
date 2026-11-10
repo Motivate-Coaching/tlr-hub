@@ -1,7 +1,7 @@
 {
-  "name": "Let’s Go! V2 preview",
-  "short_name": "Let’s Go! V2",
-  "description": "Version 2 preview of Let’s Go!",
+  "name": "Let’s Go!",
+  "short_name": "Let’s Go!",
+  "description": "Make your next move.",
   "id": "./",
   "start_url": "./?source=app",
   "scope": "./",
