@@ -47,6 +47,6 @@ function result(name='Energy'){return {data:{areas:[{name,insight:'It sounds lik
  reset();app.state.find={step:1,answers:{years:'Learn to paint',proud:'Finish my first painting'}};f=app.discoveryState();assert.match(f.answer,/Learn to paint/);assert.match(f.answer,/Finish my first painting/);assert.equal(f.legacyAnswers.years,'Learn to paint');
  // Unusable output and care do not turn into challenge plans.
  f=resetFinder();app.setBackend({functions:{invoke:async()=>({data:{areas:[{name:'Bad shape',challenges:'not an array'}]}})}});await app.reflectAI();assert.match(app.findScreen(),/couldn’t find ideas/);
- f=resetFinder();app.setBackend({functions:{invoke:async()=>({data:{care:'Please talk to someone you trust.',areas:[]}})}});await app.reflectAI();assert.match(app.findScreen(),/Before anything else/);assert.doesNotMatch(app.findScreen(),/data-find="take"/);
+ f=resetFinder();app.setBackend({functions:{invoke:async()=>({data:{care:'Please talk to someone you trust.',areas:[]}})}});await app.reflectAI();assert.match(app.findScreen(),/beyond what I can help with here/);assert.match(app.findScreen(),/findahelpline.com/);assert.doesNotMatch(app.findScreen(),/talk to someone you trust/);assert.doesNotMatch(app.findScreen(),/data-find="take"/);
  console.log('Passed: single opening question, direct actionable ideas, refinements, source editing/history, Build/Break, manual fallback, no invented schedules/activity, original words on dashboard, stale-response guards and care handling.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
