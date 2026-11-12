@@ -13,7 +13,10 @@ const ZOOM_WEDNESDAY           = Deno.env.get('ZOOM_WEDNESDAY')!
 const ZOOM_THURSDAY            = Deno.env.get('ZOOM_THURSDAY')!
 const ZOOM_MASTERCLASS         = Deno.env.get('ZOOM_MASTERCLASS')!
 
-const FROM = 'The Living Room <stuart@motivate-coaching.com>'
+// Sends from the TLR domain; falls back to the long-verified Motivate address if Resend ever refuses the new one.
+const FROM = 'The Living Room <hello@mail.the-living-room.com>'
+const FROM_FALLBACK = 'The Living Room <stuart@motivate-coaching.com>'
+const REPLY_TO = 'stuart@motivate-coaching.com'
 const HUB_URL = 'https://motivate-coaching.github.io/tlr-hub/dashboard.html'
 // Served by GitHub Pages from email/tlr-logo-email.png (240x196, shown at 120x98 for retina sharpness)
 const LOGO_URL = 'https://motivate-coaching.github.io/tlr-hub/email/tlr-logo-email.png'
@@ -312,13 +315,17 @@ Deno.serve(async (_req) => {
     const CHUNK = 50
     for (let i = 0; i < emails.length; i += CHUNK) {
       const chunk   = emails.slice(i, i + CHUNK)
-      const payload = chunk.map(to => ({ from: FROM, to: [to], subject, html }))
-
-      const res = await fetch('https://api.resend.com/emails/batch', {
+      const post = (from: string) => fetch('https://api.resend.com/emails/batch', {
         method:  'POST',
         headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body:    JSON.stringify(payload),
+        body:    JSON.stringify(chunk.map((to: string) => ({ from, reply_to: REPLY_TO, to: [to], subject, html }))),
       })
+
+      let res = await post(FROM)
+      if (res.status === 403 || res.status === 422) {
+        console.error('[session-reminders] TLR sender refused, using fallback:', await res.text())
+        res = await post(FROM_FALLBACK)
+      }
 
       if (res.ok) {
         totalSent += chunk.length
