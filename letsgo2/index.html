@@ -7,6 +7,8 @@
 (function () {
   var HOME = 'letsgo.motivate-coaching.com';
   if (location.hostname === HOME || location.hostname === 'localhost' || location.hostname === '127.0.0.1') return;
+  // Branch previews for Stu's review (Vercel '-git-' addresses, Cloudflare preview subdomains) stay where they are.
+  if (/-git-.*\.vercel\.app$/.test(location.hostname) || /^[a-z0-9-]+\.letsgo-18g\.pages\.dev$/.test(location.hostname)) return;
   
   var d = {}, n = 0;
   try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (/^(showup-|letsgo-)/.test(k) && !/auth|token/i.test(k)) { d[k] = localStorage.getItem(k); n++; } } } catch (e) {}
@@ -29,7 +31,7 @@
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Let’s Go! V2</title>
+<title>Let’s Go!</title>
 <meta name="robots" content="noindex">
 <meta name="description" content="Build a habit you want, or break one you don't. One minute to set up, one tap a day.">
 <meta name="theme-color" content="#0F1215">
@@ -771,6 +773,7 @@ h1[tabindex="-1"]:focus { outline: none; }
   .sf-stu img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
 }
 </style>
+<link rel="stylesheet" href="next.css?v=n4">
 </head>
 <body>
 <div class="app" id="app">
@@ -780,6 +783,7 @@ h1[tabindex="-1"]:focus { outline: none; }
       <button class="icon-btn ghost" id="fwd" aria-label="Forward"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
     </div>
     <button class="home-btn" id="homeBtn" aria-label="Home"><span class="wordmark">Let’s Go<span class="bang">!</span><sup class="tm" aria-hidden="true">™</sup></span></button>
+    <button class="header-signin" id="headerSignin" data-account="landing" hidden>Sign in</button>
     <button class="icon-btn ghost" id="settingsBtn" aria-label="Settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </header>
   <main id="view"></main>
@@ -793,7 +797,7 @@ h1[tabindex="-1"]:focus { outline: none; }
   </nav>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="model.js?v=v3a3"></script>
-<script src="app.js?v=v3d1"></script>
+<script src="model.js?v=n1"></script>
+<script src="app.js?v=n4"></script>
 </body>
 </html>
