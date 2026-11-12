@@ -2744,7 +2744,7 @@
       case 'lifesave': { var lv = ((document.getElementById('lifenote') || {}).value || '').trim(), lx = extra(), td = todayStr(); lx.noticed = lx.noticed || {}; var cur = lx.noticed[td] || { why: [] }; cur.why = cur.why || []; if (cur.why.indexOf('Plans changed') < 0) cur.why.push('Plans changed'); if (lv) cur.note = lv; cur.at = nowISO(); lx.noticed[td] = cur; touchF(); save(); ui.struggle = null; toast('Noted. See you next time.'); return go('tracker'); }
       case 'calics': calRead(); downloadICS(); return;
       case 'testerreload': return void (async function () { try { if (window.caches) { var ks = await caches.keys(); await Promise.all(ks.filter(function (k) { return k.indexOf('letsgo-v2-') === 0; }).map(function (k) { return caches.delete(k); })); } } catch (e) {} location.reload(); })();
-      case 'copyfeedback': { var fl = location.origin + location.pathname.replace(/[^/]*$/, '') + 'https://motivate-coaching.github.io/tlr-hub/letsgo/feedback.html'; try { navigator.clipboard.writeText(fl).then(function () { toast('Copied. Paste it anywhere to share.'); }, function () { toast(fl); }); } catch (e) { toast(fl); } return; }
+      case 'copyfeedback': { var fl = APPLINK + 'feedback.html'; try { navigator.clipboard.writeText(fl).then(function () { toast('Copied. Paste it anywhere to share.'); }, function () { toast(fl); }); } catch (e) { toast(fl); } return; }
       case 'walktimer': {
         var wt = document.getElementById('walktimer'); if (!wt) return;
         wt.innerHTML = '<div class="tbar"><i></i></div><span class="hint" id="wtl">One minute. Take your time.</span>';
