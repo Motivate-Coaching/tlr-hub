@@ -65,6 +65,22 @@ body { font-family: 'Poppins', sans-serif; background: var(--navy); color: var(-
 }
 .sign-out-btn:hover { color: var(--cream); }
 
+
+/* ── CLARITY SCORECARD ── */
+.sc-panel { background:#161D24; border:1px solid rgba(255,255,255,0.08); border-radius:8px; margin-bottom:2rem; overflow:hidden; }
+.sc-head { display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+.sc-scroll { overflow-x:auto; }
+.sc-table { width:100%; border-collapse:collapse; font-size:0.8rem; min-width:760px; }
+.sc-table th { text-align:left; font-size:0.65rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); font-weight:500; padding:0.7rem 1rem; border-bottom:1px solid rgba(255,255,255,0.08); }
+.sc-table td { padding:0.75rem 1rem; border-bottom:1px solid rgba(255,255,255,0.05); vertical-align:top; }
+.sc-name { color:var(--cream); font-weight:500; }
+.sc-email { color:var(--muted); font-size:0.72rem; }
+.sc-bar { height:6px; background:rgba(255,255,255,0.08); border-radius:3px; margin-top:0.35rem; }
+.sc-bar span { display:block; height:6px; border-radius:3px; background:var(--gold); }
+.sc-lvl { font-size:0.68rem; color:var(--cream); }
+.sc-lvl.low { color:#E0A86A; }
+.sc-edge { font-size:0.68rem; color:var(--gold); }
+
 /* ── STAT CARDS ── */
 .stats-grid {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;
@@ -242,6 +258,13 @@ body { font-family: 'Poppins', sans-serif; background: var(--navy); color: var(-
     </div>
   </div>
 
+  <!-- CLARITY SCORECARD -->
+  <div class="sc-panel">
+    <div class="panel-header sc-head"><span>Clarity Scorecard results</span>
+      <button class="feed-ctrl-btn" onclick="downloadScorecardCSV()" style="border-color:var(--gold);color:var(--gold);">⬇ Download CSV</button></div>
+    <div class="sc-scroll"><div id="sc-body"><div class="loading">Loading…</div></div></div>
+  </div>
+
   <!-- PANELS -->
   <div class="panels">
     <div class="panel">
@@ -325,10 +348,50 @@ sb.auth.getSession().then(({ data: { session } }) => {
 });
 
 // ── DATA ──
-const ADMIN_EMAIL = 'stuart.fairbairns@gmail.com';
+// ADMIN_EMAIL is declared once, above with the sign-in code.
+
+
+// ── CLARITY SCORECARD ──
+// Rows are readable only by the admin email (RLS on public.scorecard_responses).
+const SC_AREAS = ['Mental Clarity', 'Energy & Agency', 'Self-Trust', 'Direction', 'Support'];
+const SC_LVL = s => s <= 3 ? ['low', 'Asking for attention'] : s <= 6 ? ['mid', 'Room to grow'] : ['high', 'Working well'];
+const scEsc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+let scRows = [];
+
+async function loadScorecard() {
+  const el = document.getElementById('sc-body');
+  const { data, error } = await sb.from('scorecard_responses')
+    .select('created_at, first_name, email, scores, source')
+    .order('created_at', { ascending: false }).limit(500);
+  if (error) { el.innerHTML = '<div class="loading">Could not load scorecard results: ' + scEsc(error.message) + '</div>'; return; }
+  scRows = data || [];
+  if (!scRows.length) { el.innerHTML = '<div class="loading">No scorecards yet. They appear here as soon as someone finishes the quiz.</div>'; return; }
+  el.innerHTML = '<table class="sc-table"><thead><tr><th>Person</th><th>Taken</th>' +
+    SC_AREAS.map(a => '<th>' + scEsc(a) + '</th>').join('') + '<th>Growth edge</th></tr></thead><tbody>' +
+    scRows.map(r => {
+      const sc = Array.isArray(r.scores) ? r.scores : [];
+      const edge = sc.length ? SC_AREAS[sc.indexOf(Math.min(...sc))] : '';
+      return '<tr><td><div class="sc-name">' + scEsc(r.first_name) + '</div><div class="sc-email">' + scEsc(r.email) + '</div></td>' +
+        '<td>' + scEsc(formatTime(r.created_at)) + '</td>' +
+        sc.map(v => { const [k, label] = SC_LVL(v); return '<td><div class="sc-lvl ' + k + '">' + label + '</div><div class="sc-bar"><span style="width:' + Math.max(v, 0.5) * 10 + '%"></span></div></td>'; }).join('') +
+        '<td class="sc-edge">' + scEsc(edge) + '</td></tr>';
+    }).join('') + '</tbody></table>';
+}
+
+function downloadScorecardCSV() {
+  if (!scRows.length) return;
+  const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const lines = [['Taken', 'First name', 'Email', ...SC_AREAS, 'Source'].map(q).join(',')]
+    .concat(scRows.map(r => [r.created_at, r.first_name, r.email, ...(r.scores || []).map(v => SC_LVL(v)[1] + ' (' + v + '/10)'), r.source].map(q).join(',')));
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }));
+  a.download = 'clarity-scorecards-' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+}
 
 async function loadAll() {
   document.getElementById('last-updated').textContent = 'Loading…';
+  loadScorecard();
   const { data, error } = await sb.from('activity_log')
     .select('*')
     .neq('user_email', ADMIN_EMAIL)
