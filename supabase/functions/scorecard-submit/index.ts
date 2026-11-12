@@ -8,7 +8,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const FROM = Deno.env.get('TLR_EMAIL_FROM') ?? 'The Living Room <stuart@motivate-coaching.com>'
+// Sends from the TLR domain; falls back to the long-verified Motivate address if Resend ever refuses the new one.
+const FROM = 'The Living Room <hello@mail.the-living-room.com>'
+const FROM_FALLBACK = 'The Living Room <stuart@motivate-coaching.com>'
 const REPLY_TO = 'stuart@motivate-coaching.com'
 const SITE = 'https://the-living-room.com'
 const ALLOWED = ['https://the-living-room.com', 'https://www.the-living-room.com', 'https://tlr-the-living-room.netlify.app', 'http://localhost:8765']
@@ -119,11 +121,13 @@ Deno.serve(async (req) => {
   if (error) { console.error('[scorecard-submit] insert failed', error.message); return json({ error: 'save_failed' }, 500) }
 
   let emailed = false
-  const res = await fetch('https://api.resend.com/emails', {
+  const send = (from: string) => fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: FROM, reply_to: REPLY_TO, to: [email], subject: 'Your Clarity Scorecard results', html: emailHtml(name, cats) }),
+    body: JSON.stringify({ from, reply_to: REPLY_TO, to: [email], subject: 'Your Clarity Scorecard results', html: emailHtml(name, cats) }),
   })
+  let res = await send(FROM)
+  if (res.status === 403 || res.status === 422) { console.error('[scorecard-submit] TLR sender refused, using fallback', await res.text()); res = await send(FROM_FALLBACK) }
   if (res.ok) emailed = true; else console.error('[scorecard-submit] Resend error', await res.text())
   return json({ ok: true, emailed })
 })
