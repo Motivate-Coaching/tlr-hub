@@ -114,13 +114,30 @@ select { font: inherit; padding: 8px 10px; border-radius: 6px; border: 1px solid
     return h + '<p class="hint">Look for themes that come up 3 or more times, and compare what people say with what they actually did.</p></section>';
   }
   // New starters: everyone who added their email in this period, newest first. People who finish setup but never add an email have no email to show.
+  // Pilot measures: who set up, who showed up, comebacks, and who is still showing up at days 7, 14, 21 and 28.
+  // "Still showing up at day N" = logged a show-up on day N of their plan or later, out of plans that are at least N days old.
+  function pilotMeasures(list) {
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    function age(p) { var d = new Date(p.start_date + 'T00:00:00'); return Math.floor((today - d) / 86400000) + 1; }
+    var started = list.filter(function (p) { return Number(p.show_ups) > 0; }).length;
+    var back = list.reduce(function (a, p) { return a + Number(p.comebacks || 0); }, 0);
+    var h = '<div class="tiles"><div class="tile"><b>' + list.length + '</b><span>set up a plan</span></div>' +
+      '<div class="tile"><b>' + started + ' of ' + list.length + '</b><span>showed up at least once</span></div>' +
+      '<div class="tile"><b>' + back + '</b><span>comebacks (a show-up after 3 or more days with none)</span></div></div>';
+    h += '<div class="tiles">' + [7, 14, 21, 28].map(function (n) {
+      var old = list.filter(function (p) { return age(p) >= n; }), still = old.filter(function (p) { return (p.last_day || 0) >= n; }).length;
+      return '<div class="tile"><b>' + (old.length ? still + ' of ' + old.length : '–') + '</b><span>still showing up at day ' + n + (old.length ? '' : ' (no plans that old yet)') + '</span></div>';
+    }).join('') + '</div>';
+    return h;
+  }
   // V2 plans (Let's Go! V2, its own storage): one row per current focus.
   function v2Section(list) {
     if (!list) return '';
     var h = '<section class="card"><h2>V2 plans</h2><p class="hint">People using V2, from its own storage. Show-ups count the full and lighter versions; nudges show what they have switched on.</p>';
     if (!list.length) return h + '<p class="hint">Nobody on V2 yet.</p></section>';
-    h += '<div class="scroll"><table><tr><th>Email</th><th>Focus</th><th class="n">Actions</th><th>Started</th><th class="n">Show-ups</th><th class="n">Lighter</th><th>Last</th><th>Nudges</th></tr>';
-    list.forEach(function (p) { h += '<tr><td>' + esc(p.email) + '</td><td>' + esc((p.mode === 'less' ? 'Break: ' : 'Build: ') + (p.focus || '')) + '</td><td class="n">' + p.actions + '</td><td>' + esc(p.start_date) + '</td><td class="n">' + p.show_ups + '</td><td class="n">' + p.lighter + '</td><td>' + (p.last_tick ? esc(when(p.last_tick)) : '<span class="hint">none yet</span>') + '</td><td>' + esc(p.nudges) + '</td></tr>'; });
+    h += pilotMeasures(list);
+    h += '<div class="scroll"><table><tr><th>Email</th><th>Focus</th><th class="n">Actions</th><th>Started</th><th class="n">Show-ups</th><th class="n">Lighter</th><th class="n">Comebacks</th><th>Last</th><th>Nudges</th></tr>';
+    list.forEach(function (p) { h += '<tr><td>' + esc(p.email) + '</td><td>' + esc((p.mode === 'less' ? 'Break: ' : 'Build: ') + (p.focus || '')) + '</td><td class="n">' + p.actions + '</td><td>' + esc(p.start_date) + '</td><td class="n">' + p.show_ups + '</td><td class="n">' + p.lighter + '</td><td class="n">' + (p.comebacks || 0) + '</td><td>' + (p.last_tick ? esc(when(p.last_tick)) + (p.last_day ? ' <span class="hint">(day ' + p.last_day + ')</span>' : '') : '<span class="hint">none yet</span>') + '</td><td>' + esc(p.nudges) + '</td></tr>'; });
     return h + '</table></div></section>';
   }
   function startersSection(st) {
