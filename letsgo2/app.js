@@ -390,15 +390,27 @@
       applyComfort();
     } catch (e) { console.warn('[letsgo] load failed', e && e.message); setSync('error'); }
   }
-  async function feedback(question, answer) {
+  async function feedback(question, answer, quiet) {
     if (!sb || !answer) return false;
-    if (!user && !guest && !(await ensureGuest())) { toast('Couldn’t send. Your words are still here.'); return false; }
+    if (!user && !guest && !(await ensureGuest())) { if (!quiet) toast('Couldn’t send. Your words are still here.'); return false; }
     var who = user || guest; if (!who) return false;
     try {
       var result = await sb.from('showup_feedback').insert({ user_id: who.id, habit_id: null, question: question, answer: String(answer).slice(0, 4000) });
       if (result.error) throw result.error;
       S.fb[question] = true; save(false); return true;
-    } catch (e) { toast('Couldn’t send. Your words are still here. Try again.'); return false; }
+    } catch (e) { if (!quiet) toast('Couldn’t send. Your words are still here. Try again.'); return false; }
+  }
+  // Words someone chose to share with Stu at the look back wait in S.outbox until they have actually reached him.
+  // Each try is awaited; anything that fails stays queued and is retried when the app opens or comes back online.
+  function queueFeedback(question, answer) { S.outbox = S.outbox || []; S.outbox.push({ id: uuid(), question: question, answer: answer, at: nowISO() }); save(false); }
+  async function flushOutbox() {
+    if (ui.outboxBusy || !S.outbox || !S.outbox.length) return (S.outbox || []).length;
+    ui.outboxBusy = true;
+    try {
+      var left = [];
+      for (var i = 0; i < S.outbox.length; i++) { var it = S.outbox[i]; if (!(await feedback(it.question, it.answer, true))) left.push(it); }
+      S.outbox = left; save(false); return left.length;
+    } finally { ui.outboxBusy = false; }
   }
   async function sendDayFeedback() {
     if (ui.feedbackSending) return;
@@ -684,7 +696,7 @@
         '<div class="field"><label class="label" for="quote">In a sentence, what would you tell a friend about it?</label><textarea id="quote" rows="1" data-rbind="quote">' + esc(q.quote) + '</textarea></div>' +
         '<button class="switch" role="switch" aria-checked="' + q.ok + '" data-act="quoteok"><span><b>Happy for Stuart to share that</b><span class="hint">With your first name only.</span></span><span class="track"></span></button>' +
         '<button class="switch" role="switch" aria-checked="' + q.shareNoticed + '" data-act="sharenoticed"><span><b>Send Stuart what I noticed too</b><span class="hint">Off unless you choose.</span></span><span class="track"></span></button></div>' +
-        '<div class="spacer"></div><button class="btn" data-act="savereflect" ' + (q.next ? '' : 'disabled') + '>Save my look back</button><button class="link center" data-go="share">Share that I did it</button></section>';
+        '<div class="spacer"></div><button class="btn" data-act="savereflect" ' + (q.next && !ui.reflectSaving ? '' : 'disabled') + '>' + (ui.reflectSaving ? 'Saving…' : 'Save my look back') + '</button><button class="link center" data-go="share">Share that I did it</button></section>';
       return h;
     },
     calendar: function () {
@@ -3040,16 +3052,20 @@
       function (ev, b, close) { var c = b.dataset.c; if (!c) return; close(); if (c === 'join') openLink(SUPPORT.tlrJoin, 'tlr-join'); if (c === 'info') openLink(SUPPORT.tlrInfo, 'tlr-info'); });
   }
   async function saveReflect() {
-    var q = ui.reflect, h = S.habit; if (!q || !q.next) return;
+    var q = ui.reflect, h = S.habit; if (!q || !q.next || ui.reflectSaving) return;
     h.extra = Object.assign({}, h.extra, { lookback: { noticed: q.noticed, next: q.next, at: nowISO() } }); touchF();
     S.fb.reflect = true;
     // Only what they chose to send goes to Stuart. What they noticed stays theirs unless they switch it on.
-    if (q.pmf) void feedback('pmf', q.pmf);
-    if (q.quote.trim()) void feedback(q.ok ? 'quote_ok' : 'quote_private', q.quote.trim());
-    if (q.shareNoticed && q.noticed.trim()) void feedback('noticed', q.noticed.trim());
-    if (q.next === 'extend') { var nexts = { 10: 30, 30: 60, 60: 90, 90: 180, 180: 365 }; h.length = nexts[h.length] || h.length + 90; touchF(); save(); toast('Keep going. Your next look back is on ' + prettyDate(lastDate()) + '.'); return go('tracker'); }
-    if (q.next === 'new') { save(); archiveAndReset(); return go('landing'); }
-    h.finishedOn = todayStr(); touchF(); save(); toast('Saved. Well done for giving it a proper go.'); go('tracker');
+    var sharing = 0;
+    if (q.pmf) { queueFeedback('pmf', q.pmf); sharing++; }
+    if (q.quote.trim()) { queueFeedback(q.ok ? 'quote_ok' : 'quote_private', q.quote.trim()); sharing++; }
+    if (q.shareNoticed && q.noticed.trim()) { queueFeedback('noticed', q.noticed.trim()); sharing++; }
+    save(); // the look back is saved on the phone before anything is sent
+    var sendNote = '';
+    if (sharing) { ui.reflectSaving = true; render(); var left = await flushOutbox(); ui.reflectSaving = false; sendNote = left ? ' Your words for Stu will send next time you’re online.' : ' Sent to Stu, thank you.'; }
+    if (q.next === 'extend') { var nexts = { 10: 30, 30: 60, 60: 90, 90: 180, 180: 365 }; h.length = nexts[h.length] || h.length + 90; touchF(); save(); toast('Keep going. Your next look back is on ' + prettyDate(lastDate()) + '.' + sendNote); return go('tracker'); }
+    if (q.next === 'new') { save(); archiveAndReset(); if (sendNote) toast(sendNote.trim()); return go('landing'); }
+    h.finishedOn = todayStr(); touchF(); save(); toast('Saved. Well done for giving it a proper go.' + sendNote); go('tracker');
   }
 
   // Guest sign-in: lets the AI ideas run (and stay rate-limited per person) without asking for an email yet.
@@ -3225,7 +3241,8 @@
     } catch (e) { authChecked = true; greet(); }
     sb.auth.onAuthStateChange(function (ev, session) { if (ev === 'SIGNED_OUT') { user = null; guest = null; } else if (session) sessionUser(session); });
   })();
-  window.addEventListener('online', function () { if (user) queueSync(); });
+  window.addEventListener('online', function () { if (user) queueSync(); flushOutbox(); });
+  setTimeout(flushOutbox, 3000); // anything shared at a look back that didn't reach Stu last time
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && S.habit && S.screen === 'tracker') render(); });
 
   // Test hook (used by automated tests only): shift the start date.

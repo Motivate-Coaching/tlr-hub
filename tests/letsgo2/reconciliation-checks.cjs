@@ -13,7 +13,7 @@ const context = { console,Date,Intl,Math,JSON,Set,Map,Promise,String,Number,Obje
 context.window=context;
 let source=fs.readFileSync('../../letsgo2/app.js','utf8');
 const end=source.lastIndexOf('})();');
-source=source.slice(0,end)+`window.testAPI = { get state(){return S;}, get ui(){return ui;}, screens, fresh, feedback, setBackend(x){sb=x;}, setUser(x){user=x;}, setGuest(x){guest=x;}, archiveView, render, todaySection, supportCard, stats, catchDay, testerReset };\n`+source.slice(end);
+source=source.slice(0,end)+`window.testAPI = { get state(){return S;}, get ui(){return ui;}, screens, fresh, feedback, setBackend(x){sb=x;}, setUser(x){user=x;}, setGuest(x){guest=x;}, archiveView, render, todaySection, supportCard, stats, catchDay, testerReset, saveReflect, flushOutbox };\n`+source.slice(end);
 vm.createContext(context); vm.runInContext(source,context);
 const app=context.testAPI;
 const today=M.today(), day=M.addDays;
@@ -34,6 +34,9 @@ setup();app.state.habit.actions[0].entries[today]={kind:'none',note:'Keep this n
 // Feedback has no success receipt when persistence fails; marks sent only on acknowledgement.
 (async()=>{app.setGuest({id:'test-guest'});let inserts=0;app.setBackend({from(){return {insert:async()=>{inserts++;return {error:{message:'rejected'}};}};}});assert.equal(await app.feedback('day3','A test'),false);assert.notEqual(app.state.fb.day3,true);
 app.setBackend({from(){return {insert:async()=>{inserts++;return {error:null};}};}});assert.equal(await app.feedback('day3','A test'),true);assert.equal(app.state.fb.day3,true);assert.equal(inserts,2);
+// Look back sharing: saved on the phone first; what fails to send waits in the outbox and goes on the next try.
+setup();app.state.outbox=[];app.ui.reflect={noticed:'Mornings work',next:'extend',pmf:'Very disappointed',quote:'',ok:false,shareNoticed:true};app.setBackend({from(){return {insert:async()=>({error:{message:'offline'}})};}});await app.saveReflect();assert.equal(app.state.habit.extra.lookback.noticed,'Mornings work');assert.equal(app.state.outbox.length,2);
+let sentQ=[];app.setBackend({from(){return {insert:async(r)=>{sentQ.push(r.question);return {error:null};}};}});assert.equal(await app.flushOutbox(),0);assert.deepEqual(sentQ.sort(),['noticed','pmf']);assert.equal(app.state.outbox.length,0);
 // Resetting the browser fixture signs out; it must never invoke account deletion.
 let signedOut=0;app.setUser({id:'test-user'});app.setBackend({auth:{signOut:async()=>signedOut++},functions:{invoke(){throw new Error('Account deletion must not run');}}});await app.testerReset();assert.equal(signedOut,1);assert.equal(app.state.habit,null);
 console.log('Passed: restored feature reachability in both views, contextual support, legacy notes, future start, read-only archives, feedback acknowledgements and safe local reset.');})().catch(e=>{console.error(e);process.exitCode=1;});
