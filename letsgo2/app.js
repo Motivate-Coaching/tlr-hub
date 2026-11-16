@@ -13,6 +13,10 @@
 
   var sb = null;
   try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch (e) { sb = null; }
+  // Invite-only founding pilot (Stu, 16 Nov 2026): only people on the invite list (lg_invites) get past the front door.
+  // The sign-in code server checks the list too, so a forwarded link is no use without the invited person's inbox.
+  var INVITE_ONLY = true, ACCESS_KEY = 'letsgo-v2-access';
+  var access = (function () { try { return JSON.parse(localStorage.getItem(ACCESS_KEY) || 'null'); } catch (e) { return null; } })();
 
   // ── Content ───────────────────────────────────────────────────────────────
   var FEELINGS = ['Proud', 'Strong', 'Calm', 'Alive', 'Like I trust myself', 'Free', 'Clear-headed', 'Like me again', 'Lighter', 'In control', 'Grounded', 'Brave'];
@@ -741,7 +745,7 @@
     settings: function () {
       var s = S.settings;
       var sect = function (title, body, open) { return '<details class="sect"' + (open ? ' open' : '') + '><summary>' + title + '</summary><div class="sbody">' + body + '</div></details>'; };
-      var h = '<section class="screen settings"><div><h1>Settings</h1><p class="hint" id="syncStatus" style="margin:4px 0 0">' + syncLabel() + '</p></div>';
+      var h = '<section class="screen settings"><div><h1>Settings</h1><p class="hint" id="syncStatus" style="margin:4px 0 0">' + syncLabel() + '</p></div>' + foundingCard();
       // Stuart's own tools sit at the top so they're one tap away.
       if (isTester()) h += '<div class="card soft small"><span class="eyebrow">Your tools (only you see this)</span><a class="btn" href="https://motivate-coaching.github.io/tlr-hub/letsgo/admin.html">Analytics</a><a class="btn outline" href="https://motivate-coaching.github.io/tlr-hub/letsgo/admin.html#feedback">Feedback responses</a>' +
         '<button class="btn outline" data-act="copyfeedback">Copy the feedback link</button></div>';
@@ -824,10 +828,20 @@
         '<button class="link center" data-act="plannotnow">Not now</button>' +
         '<p class="hint">Your plan is on this device. Sign in to back it up and choose reminders. <a href="privacy.html">How we look after your data</a></p></section>';
     },
+    door: function () {
+      if (sb && !authChecked) return '<section class="screen"><p class="hint" style="text-align:center;margin-top:40px">Opening…</p></section>';
+      if (ui.authStep === 'code') return screens.account();
+      return '<section class="screen"><div><div class="eyebrow">Founding members</div><h1>Welcome' + (ui.inviteName ? ', ' + esc(ui.inviteName) : '') + '</h1></div>' +
+        '<p class="lede"><span class="brand">Let’s Go<span class="bang">!</span></span> is invite-only for now. Pop in the email your invite came to and we’ll send you a six-digit code. No password.</p>' +
+        '<div class="field"><label class="label" for="aemail">Email</label><input class="input" id="aemail" type="email" autocomplete="email" inputmode="email" value="' + esc(ui.authEmail || '') + '"></div>' +
+        (S.consentAt ? '' : '<label class="consent"><input type="checkbox" id="aconsent"><span>I agree to <span class="brand">Let’s Go<span class="bang">!</span></span> storing my habit, progress and notes so it can run for me. <a href="privacy.html">Privacy</a></span></label>') +
+        '<p class="err" id="aerr"' + (ui.doorMsg ? '' : ' hidden') + '>' + esc(ui.doorMsg || '') + '</p><button class="btn" data-act="sendcode">Send my code</button>' +
+        '<p class="hint">No invite yet? It opens to everyone soon. <a href="privacy.html">How we look after your data</a></p></section>';
+    },
     account: function () {
       var priv = '<p class="hint">This version connects to your existing Let’s Go account. Signed-in plan changes sync to that account. <a href="privacy.html">How we look after your data</a></p>';
       var pl = ui.authFrom === 'plan';
-      if (ui.authStep === 'code') return '<section class="screen"><div><div class="eyebrow">' + (pl ? 'Activate your plan' : 'Save my progress') + '</div><h1>Check your email</h1></div>' +
+      if (ui.authStep === 'code') return '<section class="screen"><div><div class="eyebrow">' + (pl ? 'Activate your plan' : !doorOpen() ? 'Founding members' : 'Save my progress') + '</div><h1>Check your email</h1></div>' +
         '<p class="lede">' + (pl ? 'We’ve sent your plan and a 6-digit code to <b>' + esc(ui.authEmail) + '</b>. Pop the code in below to activate your plan and get started today.' : 'We’ve sent a 6-digit code to <b>' + esc(ui.authEmail) + '</b>.') + '</p>' +
         '<div class="field"><label class="label" for="acode">Your code</label><div class="otp"><input id="acode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" aria-describedby="aerr"><div class="otp-boxes" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div></div></div>' +
         '<p class="err" id="aerr" hidden></p><button class="btn" data-act="verifycode">' + (pl ? 'Activate my plan' : 'Sign in') + '</button>' +
@@ -1181,6 +1195,7 @@
   function render() {
     var s = screens[S.screen] ? S.screen : 'landing';
     if (s === 'tracker' && !S.habit) s = 'landing';
+    if (!doorOpen()) s = 'door';
     document.documentElement.setAttribute('data-screen', s);
     var headerSignin = document.getElementById('headerSignin');
     if (headerSignin) { headerSignin.hidden = s !== 'landing'; headerSignin.textContent = user ? 'My account' : 'Sign in'; }
@@ -1193,9 +1208,9 @@
     view.innerHTML = screens[s]();
     view.querySelectorAll('textarea').forEach(function (t) { if (!t.hasAttribute('aria-label') && !view.querySelector('label[for="' + t.id + '"]')) { var th = view.querySelector('h1'); t.setAttribute('aria-label', t.getAttribute('placeholder') || (th ? th.textContent : 'Your answer')); } t.setAttribute('spellcheck', 'true'); t.setAttribute('autocorrect', 'on'); if (!t.hasAttribute('autocapitalize')) t.setAttribute('autocapitalize', 'sentences'); });
     sideFoot();
-    backBtn.classList.toggle('ghost', !BACK[s] && !ui.hist.length);
-    fwdBtn.classList.toggle('ghost', !ui.fwd.length);
-    settingsBtn.classList.toggle('ghost', s === 'settings' || (!isTester() && (!S.habit || ['what', 'when', 'less', 'feel', 'often', 'dimmer', 'hard'].indexOf(s) >= 0)));
+    backBtn.classList.toggle('ghost', s === 'door' || (!BACK[s] && !ui.hist.length));
+    fwdBtn.classList.toggle('ghost', s === 'door' || !ui.fwd.length);
+    settingsBtn.classList.toggle('ghost', s === 'settings' || s === 'door' || (!isTester() && (!S.habit || ['what', 'when', 'less', 'feel', 'often', 'dimmer', 'hard'].indexOf(s) >= 0)));
     view.querySelectorAll('textarea').forEach(grow);
     if (s === 'words') startSphere();
     window.scrollTo(0, 0);
@@ -3132,6 +3147,29 @@
     askNameThen(d.whyDone ? 'what' : 'feel');
   }
 
+  // Front door: open once this phone knows the signed-in person is on the invite list.
+  function doorOpen() {
+    if (!INVITE_ONLY) return true;
+    if (!access || !access.ok) return false;
+    if (!sb || !authChecked) return true; // trust what this phone already knew until sign-in has been checked
+    return !!user && access.email === String(user.email || '').toLowerCase();
+  }
+  function setAccess(a) { access = a; try { if (a) localStorage.setItem(ACCESS_KEY, JSON.stringify(a)); else localStorage.removeItem(ACCESS_KEY); } catch (e) {} }
+  async function checkAccess() {
+    if (!user) { setAccess(null); return false; }
+    try {
+      var r = await sb.rpc('lg_my_access'); if (r.error) throw r.error;
+      var d = r.data || {};
+      setAccess(d.ok ? { ok: true, email: String(user.email || '').toLowerCase(), kind: d.kind || 'founder', free_until: d.free_until || null } : null);
+    } catch (e) { /* offline or busy: keep what this phone knew */ }
+    return doorOpen();
+  }
+  function foundingCard() {
+    if (!access || access.kind !== 'founder') return '';
+    var until = access.free_until ? new Date(access.free_until + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+    return '<div class="card soft small"><span class="eyebrow">Founding member</span><span>' + (until ? 'Free until ' + esc(until) + '. ' : '') + 'Thank you for helping shape <span class="brand">Let’s Go<span class="bang">!</span></span> with your feedback.</span></div>';
+  }
+
   async function ensureGuest() {
     if (user || guest) return true;
     if (!sb || !sb.auth || !sb.auth.signInAnonymously) return false;
@@ -3153,11 +3191,13 @@
     if (ck) { S.consentAt = new Date().toISOString(); save(false); }
     var btn = view.querySelector('[data-act="sendcode"]'); if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
     var body = { action: 'send', email: email };
+    if (INVITE_ONLY) body.door = true;
+    ui.doorMsg = '';
     if (S.habit && ui.authFrom === 'plan') { var pa = mainAct(); body.plan = { what: pa ? pa.text : habitName(), mine: mineLine(), anchor: anchorLine(pa), dimmer: pa ? pa.small : '', length: S.habit.length, mode: S.habit.mode, name: firstName() || '', app: 'v2' }; }
     var r = await codeCall(body);
     if (r.error) {
       if (btn) { btn.disabled = false; btn.textContent = ui.authFrom === 'plan' ? 'Send my plan' : 'Send my code'; }
-      var msg = r.error === 'wait' ? 'Code just sent. Give it a moment, then check your inbox.' : r.error === 'too_many' ? 'That’s a few codes in a row. Try again in an hour.' : 'Couldn’t send just now. Please try again.';
+      var msg = r.error === 'invite_only' ? 'That email isn’t on the invite list. Use the one your invite came to, or reply to your invite and Stu will sort it.' : r.error === 'wait' ?'Code just sent. Give it a moment, then check your inbox.' : r.error === 'too_many' ? 'That’s a few codes in a row. Try again in an hour.' : 'Couldn’t send just now. Please try again.';
       if (ui.authStep === 'code') return toast(msg);
       if (err) { err.textContent = msg; err.hidden = false; } return;
     }
@@ -3168,7 +3208,7 @@
     var c = document.getElementById('acode'), err = document.getElementById('aerr'), code = ((c && c.value) || '').replace(/\D/g, '');
     if (code.length !== 6) { err.textContent = 'The code is 6 numbers.'; err.hidden = false; return; }
     var btn = view.querySelector('[data-act="verifycode"]'); btn.disabled = true; btn.textContent = 'Checking…';
-    var r = await codeCall({ action: 'verify', email: ui.authEmail, code: code });
+    var r = await codeCall({ action: 'verify', email: ui.authEmail, code: code, door: INVITE_ONLY || undefined });
     var signLabel = ui.authFrom === 'plan' ? 'Activate my plan' : 'Sign in';
     if (r.error || !r.token_hash) {
       btn.disabled = false; btn.textContent = signLabel;
@@ -3178,6 +3218,12 @@
     var v = await sb.auth.verifyOtp({ token_hash: r.token_hash, type: 'email' });
     if (v.error) { btn.disabled = false; btn.textContent = signLabel; err.textContent = 'Couldn’t sign in just now. Please try again.'; err.hidden = false; return; }
     user = v.data.user; guest = null; ui.authStep = null; authChecked = true; var fromPlan = ui.authFrom === 'plan'; ui.authFrom = null;
+    if (INVITE_ONLY) {
+      var wasShut = !access || !access.ok;
+      await checkAccess();
+      if (!doorOpen()) { ui.doorMsg = 'That email isn’t on the invite list. Use the one your invite came to, or reply to your invite and Stu will sort it.'; try { await sb.auth.signOut(); } catch (e) {} user = null; return render(); }
+      if (wasShut) { if (S.settings.name && !(user.user_metadata && user.user_metadata.first_name)) saveName(S.settings.name); await pullRemote(); await syncAll(); toast('You’re in. Welcome to Let’s Go!'); return go(S.habit ? 'tracker' : 'landing'); }
+    }
     if (S.settings.name && !(user.user_metadata && user.user_metadata.first_name)) saveName(S.settings.name);
     await pullRemote(); await syncAll();
     toast(syncState === 'saved' ? 'Signed in. Your plan is backed up.' : 'Signed in. Your plan is here; account sync is still pending.');
@@ -3218,12 +3264,28 @@
     try {
       var sres = await sb.auth.getSession();
       sessionUser(sres.data.session);
-      authChecked = true; if (!user) render();
+      authChecked = true;
+      if (INVITE_ONLY) { if (user) await checkAccess(); else if (sb) setAccess(null); if (!doorOpen()) { greet(); render(); return watchAuth(); } }
+      if (!user) render();
       if (user && user.user_metadata && user.user_metadata.first_name && !S.settings.name) { S.settings.name = user.user_metadata.first_name; save(false); }
       greet(); // after sign-in is known, so the greeting can use their name
       if (user) { await pullRemote(); await syncAll(); render(); }
-    } catch (e) { authChecked = true; greet(); }
-    sb.auth.onAuthStateChange(function (ev, session) { if (ev === 'SIGNED_OUT') { user = null; guest = null; } else if (session) sessionUser(session); });
+    } catch (e) { authChecked = true; greet(); if (INVITE_ONLY) render(); }
+    watchAuth();
+  })();
+  function watchAuth() { sb.auth.onAuthStateChange(function (ev, session) { if (ev === 'SIGNED_OUT') { user = null; guest = null; if (INVITE_ONLY && access) { setAccess(null); render(); } } else if (session) sessionUser(session); }); }
+  // A personal invite link (?invite=<token>) fills in that person's email and first name on the front door.
+  (function () {
+    var m = location.search.match(/[?&]invite=([0-9a-f-]{36})(?=&|$)/i); if (!m) return;
+    try { var q = location.search.replace(/([?&])invite=[^&]*(&|$)/, function (all, a, b) { return b ? a : ''; }); history.replaceState(null, '', location.pathname + (q === '?' ? '' : q) + location.hash); } catch (e) {}
+    if (!sb || !sb.rpc) return;
+    sb.rpc('lg_invite_lookup', { t: m[1] }).then(function (r) {
+      var d = r && r.data; if (!d || !d.email) return;
+      if (!ui.authEmail) ui.authEmail = d.email;
+      ui.inviteName = d.name || '';
+      if (d.name && !S.settings.name) { S.settings.name = d.name; save(false); }
+      if (!doorOpen() && ui.authStep !== 'code') render();
+    }).catch(function () {});
   })();
   window.addEventListener('online', function () { if (user) queueSync(); });
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && S.habit && S.screen === 'tracker') render(); });

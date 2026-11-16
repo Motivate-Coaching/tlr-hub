@@ -66,11 +66,21 @@ async function vapidPublic() {
   const { data: again } = await admin.from('showup_server_keys').select('value').eq('name', 'vapid_public').single()
   return again?.value || keys.publicKey
 }
+// Invite-only (16 Nov 2026): the new app always asks for the check (door: true); the invite_only setting
+// switches it on for every request, whichever version of the app is asking.
+async function invited(email: string) {
+  const { data } = await admin.from('lg_invites').select('email').eq('email', email).maybeSingle()
+  return !!data
+}
+async function inviteOnly() {
+  const { data } = await admin.from('lg_config').select('value').eq('key', 'invite_only').maybeSingle()
+  return data?.value === true
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
   if (req.method !== 'POST') return json({ error: 'method' }, 405)
-  let body: { action?: string; email?: string; code?: string; plan?: Plan }
+  let body: { action?: string; email?: string; code?: string; plan?: Plan; door?: boolean }
   try { body = await req.json() } catch { return json({ error: 'bad_request' }, 400) }
 
   if (body.action === 'vapid') return json({ key: await vapidPublic() })
@@ -87,6 +97,10 @@ Deno.serve(async (req) => {
 
   const email = String(body.email || '').trim().toLowerCase()
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.length > 200) return json({ error: 'email' }, 400)
+
+  if ((body.action === 'send' || body.action === 'verify') && (body.door === true || await inviteOnly()) && !(await invited(email))) {
+    return json({ error: 'invite_only' }, 403)
+  }
 
   if (body.action === 'send') {
     if (!RESEND_API_KEY) return json({ error: 'not_configured' }, 503)
