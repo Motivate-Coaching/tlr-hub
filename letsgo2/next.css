@@ -78,3 +78,33 @@ html[data-screen="landing"] .bar .home-btn{grid-row:1}
 .crisiscard{display:flex;flex-direction:column;gap:10px;background:#fff7e6;border:1px solid #e8cf94;border-radius:18px;padding:18px}.crisiscard p{margin:0;font-size:14px;line-height:1.6}.crisislines{display:flex;flex-direction:column;gap:8px}.crisislines .btn{text-decoration:none;justify-content:center}
 .chkcard.sharpen .chips{display:flex;flex-wrap:wrap;gap:8px}.chkcard .stuai-name img{border-radius:50%}
 .crisiscard a{color:var(--text);text-decoration:underline;text-underline-offset:3px;font-weight:600}
+/* v3 feedback pass (Stu, 17 Nov 2026): dark top bar everywhere, green for go, amber for Stu (AI) and support, a colour per section. */
+:root{--go:#22684f;--go-dark:#1b5640;--stu:#f3bc45;--stu-dark:#e3a92c;--ink:#191e24;--sec:#22684f}
+html[data-screen="progress"]{--sec:#285d9b}html[data-screen="plan"]{--sec:#6a4c9c}html[data-screen="slipped"],html[data-screen="askstu"]{--sec:#b7840c}
+.bar{background:var(--ink)!important;color:#fff;border-bottom:3px solid var(--sec)!important}
+.bar .wordmark,.bar .home-btn,.bar .icon-btn,.bar .header-signin{color:#fff!important}.bar .wordmark .bang{color:var(--stu)!important}
+.bar .icon-btn:hover,.bar .home-btn:hover{background:#2a323c!important}.bar button:focus-visible{outline-color:#f1cc70}
+html[data-screen="landing"] .bar{border-bottom:1px solid #303741!important}
+@media(min-width:900px){html.has-tabs .bar{height:60px;background:var(--ink)!important}html.has-tabs .bar .nav{display:flex}html.has-tabs .bar #settingsBtn{margin-top:0}html.has-tabs .screen{min-height:calc(100dvh - 60px)}}
+.btn{background:var(--go);border-color:var(--go);color:#fff}.btn:hover{background:var(--go-dark);border-color:var(--go-dark)}
+.btn.outline{background:transparent;color:var(--text);border-color:#cfd6c8}.btn.outline:hover{background:#eaf0e4}
+.btn:disabled,.btn:disabled:hover{background:#e1e5db;border-color:#e1e5db;color:#7f887a}
+.showup-btn{background:var(--go)!important;border-color:var(--go)!important;color:#fff!important}.showup-btn svg{stroke:#fff!important}.showup-btn:hover{background:var(--go-dark)!important}
+.btn.amber,.askstu-entry,.support-inline{background:var(--stu)!important;border-color:var(--stu)!important;color:var(--ink)!important}
+.btn.amber:hover,.askstu-entry:hover,.support-inline:hover{background:var(--stu-dark)!important}
+.askstu-entry small,.support-inline small{color:#4a3d16!important}.support-inline .support-icon{background:#ffffff66}
+.stu{border-left:4px solid var(--stu);border-radius:14px;background:#fffaf0}
+img[src="stuart.jpg"]{object-fit:cover;border-radius:50%;aspect-ratio:1/1;flex-shrink:0}
+.tabs button[aria-current=page]{color:var(--sec)!important}.tabs button[aria-current=page] svg{background:color-mix(in srgb,var(--sec) 16%,white)!important}
+@media(min-width:900px){html.has-tabs .tabs button[aria-current=page]{background:color-mix(in srgb,var(--sec) 14%,white)!important}}
+.screen>div>.eyebrow:first-child,.screen>.eyebrow:first-child,.today-heading .eyebrow,.wtitle .eyebrow{color:var(--sec)}
+.screen>.btn[data-step-next],.screen>.btn[data-act="shape"],.screen>.btn[data-act="whydone"],.screen>.btn[data-act="hearingnext"]{position:sticky;bottom:12px;z-index:5;box-shadow:0 6px 18px #0002}
+.toughday{background:#fff;border:1px solid #e0e5d9;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:10px}.toughday h2{font-size:19px;margin:0;font-weight:700;letter-spacing:-.02em}.toughday .lede{margin:0;font-size:14px}
+.whythis p{font-size:14px;line-height:1.6;color:var(--text-mid);margin:10px 0 4px}
+.supportopt summary{display:flex;flex-direction:column;gap:2px}.supportopt summary:after{position:absolute;right:0}.supportopt{position:relative}.supportopt summary small{font-size:12px;color:var(--text-mid);font-weight:400}.supportopt p{font-size:14px;line-height:1.6;margin:10px 0}.supportopt .btn{width:100%}
+.ready-screen h1 .bang{color:#b7840c}
+.askstu-entry .aitag,.stuai-name .aitag{display:inline-block;width:auto;font-size:10px;font-weight:700;padding:1px 6px;border-radius:6px;background:#191e2422;color:var(--ink);margin-left:6px;vertical-align:middle}
+.askstu-entry>span{display:block}.askstu-entry small{display:block}
+.core-setup .stu b{color:var(--ink)}
+.toughday textarea{font-size:15px!important;font-weight:400!important}
+.ask[open] .ask:not([open])>summary:after{content:'+'}
