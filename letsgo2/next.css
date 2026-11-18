@@ -108,3 +108,32 @@ img[src="stuart.jpg"]{object-fit:cover;border-radius:50%;aspect-ratio:1/1;flex-s
 .core-setup .stu b{color:var(--ink)}
 .toughday textarea{font-size:15px!important;font-weight:400!important}
 .ask[open] .ask:not([open])>summary:after{content:'+'}
+/* Feedback pass 2 (Stu, 18 Nov 2026): clearer questions, tighter Today, expandable plan sections. */
+.core-screen .label,.core-q,.toughday .lede{color:var(--ink)!important;font-weight:600!important;font-size:16px!important}
+.reason-chips{margin-top:-4px}.reason-chips .chip{font-size:13px}
+.back-arrow{display:inline-flex;gap:6px;align-items:center;justify-content:center;color:#8a6408!important;font-weight:600}
+.next-home .next-action{padding:18px!important;gap:10px!important}.next-home .today-heading{margin-bottom:4px}
+.intention-line{display:flex;flex-direction:column;gap:2px;text-align:left;background:none;border:0;padding:0;cursor:pointer;color:var(--ink)}
+.intention-line span{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--sec)}
+.intention-line b{font-size:20px;font-weight:700;letter-spacing:-.02em;line-height:1.25}
+.lighter-link{align-self:center;font-size:14px;color:var(--text-mid)!important;min-height:36px}
+.calline{display:inline-flex;gap:8px;align-items:center;align-self:flex-start;font-size:14px;min-height:36px}
+.toughrow{margin-top:8px}.toughrow summary{font-size:14px}.toughrow p{margin:8px 0;font-size:14px}
+.ask.later,.ask.helpstart,.ask.whycard{background:#fff;border:1px solid #e0e5d9;border-radius:16px;padding:14px 16px}
+.ask.later .laterrow,.ask.helpstart a{margin-top:10px}.ask.later .btn{margin-top:12px;width:100%}
+.whycard ul{margin:10px 0 6px;padding-left:18px;display:flex;flex-direction:column;gap:6px}.whycard li{font-weight:600;color:var(--ink)}
+.remicons{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--text-mid);margin-top:4px}.remicons svg{margin-left:6px}
+.pickcard.own{display:flex;align-items:center;gap:8px;cursor:text}.pickcard.own textarea{flex:1;border:0;background:transparent;font:inherit;font-weight:600;resize:none;outline:none;min-height:24px}
+.pickcard.own textarea::placeholder{color:#9aa39a;font-weight:500}
+.chkown{display:flex;gap:8px;align-items:center;margin:10px 0}.chkown textarea{flex:1;border:1px solid #d5dccd;border-radius:12px;padding:10px 12px;font:inherit;resize:none;min-height:44px;background:#fff}.chkown .btn{width:auto;padding:0 16px;min-height:44px}
+.chkcard.sharpen .chkbtns{flex-wrap:wrap;gap:10px}
+.screen:has(.chkcard.sharpen) .starters{display:none}
+/* Plan ready and My plan: closer to the landing look (note 36). */
+.ready-screen,.next-plan{gap:14px}
+.ready-screen>div:first-child h1{font-size:32px;line-height:1.1}
+.ready-screen .plancard,.next-plan .plancard{border-radius:18px}
+.ready-screen>div:first-child{background:#191e24;border-radius:20px;padding:22px 20px}
+.ready-screen>div:first-child h1{color:#fff}.ready-screen>div:first-child .eyebrow{color:#f3bc45!important}
+.ready-screen .card.soft{background:#191e24;color:#f1f3ee;border-color:#303741}.ready-screen .card.soft b{color:#fff}.ready-screen .calline{color:#f3bc45}
+.next-home .act-t{font-size:24px!important;line-height:1.2!important}
+.chkown{flex-wrap:wrap}.chkown textarea{flex:1 1 100%}.chkown .btn{flex:1}

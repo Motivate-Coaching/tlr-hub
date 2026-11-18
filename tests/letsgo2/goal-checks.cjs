@@ -38,7 +38,7 @@ const revisions=app.state.habit.extra.goalHistory;assert.equal(revisions[revisio
 const count=revisions.length;app.openGoal();app.saveGoal();assert.equal(revisions.length,count);
 app.openGoal();app.state.goalDraft.title='';app.saveGoal();assert.equal(app.state.habit.title,'A goal that fits me now');
 app.state.goalDraft.title='<script>unsafe</script>';assert.doesNotMatch(app.goalScreen(),/<script>unsafe/);
-for(const mode of ['full','focus']){app.state.settings.view=mode;assert.match(app.screens.tracker(),/My goal · Edit/);}
+for(const mode of ['full','focus']){app.state.settings.view=mode;assert.match(app.screens.tracker(),/data-act="goaledit"/);}
 console.log('Passed: goal revision history, resumed drafts, unchanged check-ins, no-op saves, blank validation, escaped text and both dashboard views.');
 (async()=>{
  reset();app.setGuest({id:'local-test'});let calls=[];

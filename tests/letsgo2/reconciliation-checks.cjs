@@ -23,7 +23,7 @@ function setup(view='full'){
 }
 setup();let html=app.screens.tracker();assert.match(html,/A note from Stu/);assert.match(html,/I can begin small/);assert.match(html,/Back up my plan/);assert.match(html,/Past days/);
 setup('focus');html=app.screens.tracker();assert.match(html,/A note from Stu/);assert.match(html,/I can begin small/);assert.match(html,/Detailed view/);assert.match(html,/Past days/);
-setup();html=app.screens.plan();for(const text of ['Two afternoons outside','I can begin small','Walking routes','Review after','Reminders','Later'])assert.ok(html.includes(text),text);
+setup();html=app.screens.plan();for(const text of ['Two afternoons outside','I can begin small','Walking routes','Look back on my plan','Reminders','Other possible actions'])assert.ok(html.includes(text),text);
 html=app.screens.slipped();assert.match(html,/Talk to a real person/);assert.match(html,/My past wins/);assert.match(html,/Choose an action/);assert.match(html,/I want to enjoy the day/);
 app.ui.struggle='start';html=app.screens.slipped();assert.match(html,/Take a friend/);assert.match(html,/data-log="full"/);assert.match(html,/data-log="small"/);
 app.ui.supportAct='read';html=app.screens.slipped();assert.match(html,/Read a chapter/);assert.match(html,/Take a friend/);

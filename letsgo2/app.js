@@ -36,10 +36,10 @@
     if (todayStr() > lastDate()) return h;
     var d = walkDay(); if (d > lastDate()) return h;
     var tom = d > todayStr();
-    if (w[d]) return h + '<p class="walked">' + checkIcon('#3B6D11') + '<span>Walked through' + (tom ? ' for tomorrow' : '') + (w[d].plan ? ': ' + esc(w[d].plan) : '') + '</span></p>';
+    if (w[d]) return h + '<p class="walked">' + checkIcon('#3B6D11') + '<span>Ready' + (tom ? ' for tomorrow' : '') + (w[d].plan ? ': ' + esc(w[d].plan) : '') + '</span></p>';
     if (!tom && anyCountedOn(d)) return h;
     if (!acts().some(function (a) { return M.isDue(S.habit, a, d) || M.isWeekly(a, d); })) return h;
-    return h + '<button class="card askhelp walkcard" data-go="walk"><span class="ahtxt"><b>Walk it through' + (tom ? ' for tomorrow' : '') + '</b><span>About a minute. See yourself doing it.</span></span><span class="chev" aria-hidden="true">›</span></button>';
+    return h + '<button class="card askhelp walkcard" data-go="walk"><span class="ahtxt"><b>Boost your chances' + (tom ? ' for tomorrow' : ' today') + '</b><span>About a minute: picture it, and plan for what might get in the way.</span></span><span class="chev" aria-hidden="true">›</span></button>';
   }
   // The cue for an action ("After I make my morning coffee"). For cutting back, the cue is when the urge usually comes.
   function cueLine(cue, mode) { var c = String(cue || '').trim().replace(/^(after i|usually|when)\b[\s,.:]*/i, function (m) { return /^when/i.test(m) ? 'when ' : ''; }); if (!c) return ''; return mode === 'less' ? 'Usually ' + c : (/^when /i.test(c) ? c.charAt(0).toUpperCase() + c.slice(1) : 'After I ' + c); }
@@ -51,6 +51,8 @@
   var GIVES = ['Autopilot', 'Tired', 'Stressed', 'Bored', 'Comfort', 'A reward', 'A break', 'Not sure'];
   // For cutting back: what you're moving towards (outcomes and feelings together).
   var GAINS = ['Better sleep', 'More energy', 'Better health', 'Lighter', 'Clear-headed', 'In control', 'Proud', 'Calm', 'Money saved', 'Like me again', 'Free', 'More present'];
+  // Tap-to-add reasons on "Why is this habit important to me?" (Stu, 18 Nov 2026). Starting points only; their own words always come first.
+  var REASON_CHIPS = ['I’ll be proud of myself', 'More energy', 'I’ll feel stronger', 'I’ll feel calmer', 'I’ll feel better about myself', 'More time for the people I love', 'I’ll feel more like me'];
   var STARTERS_MORE = ['Go for a 10 minute walk', 'Read before bed', 'Be in bed by 10:30pm', 'Drink more water'];
   var STARTERS_LESS = ['Phone in bed', 'Afternoon snacking', 'Wine on weeknights', 'Mindless scrolling'];
   var IDEAS = [
@@ -209,7 +211,7 @@
       (ex.length ? '<div class="starters">' + ex.map(function (x) { return '<button class="chip" data-signex="' + esc(x) + '">' + esc(x) + '</button>'; }).join('') + '</div>' : '') +
       '<span class="hint">Something small and real. Your look back checks in on this.</span></div></details>';
   }
-  function words() { var h = S.habit || S.draft; var w = (h.feel || []).slice(), own = h.towards != null ? h.towards : h.ownFeel; if ((own || '').trim()) w.push(own.trim()); return w.length ? w : ['Proud']; }
+  function words() { var h = S.habit || S.draft; var w = (h.feel || []).slice(), own = h.towards != null ? h.towards : h.ownFeel; if ((own || '').trim()) w.push(own.trim()); return w; } // Only what they chose: never a default (note 35, 18 Nov 2026).
   function habitName() { var h = S.habit; if (h) return (h.title || '').trim() || (acts()[0] ? acts()[0].text : 'My focus'); var d = S.draft; return ((d.mode === 'less' ? d.reduce : (d.focusTitle || d.what)) || '').trim() || (d.mode === 'less' ? 'Cutting back' : 'My habit'); }
   function actText(a) { return a ? a.text : (S.draft.what || '').trim(); }
   function buzz() { if (!S.settings.buzz) return; try { if (navigator.vibrate) navigator.vibrate([15, 60, 25]); } catch (e) {} }
@@ -483,10 +485,12 @@
         (wl ? '<div class="card soft small"><span class="eyebrow">Why it matters to you</span><span>“' + esc(wl) + '”</span><button class="link" data-act="whyedit" style="align-self:flex-start;font-size:14px;min-height:36px">Change</button></div>' : '') +
         '' +
         ((d.coachQs || []).length ? '<div class="qcard"><span class="eyebrow">One quick question</span><b style="font-weight:600;font-size:18px">' + esc(d.coachQs[0].q) + '</b><div class="chips">' + d.coachQs[0].options.map(function (o) { return '<button class="chip" data-coachans="' + esc(o) + '">' + esc(o) + '</button>'; }).join('') + '</div><span class="hint">So the plan fits what you meant.</span></div>' : '') +
-        (acts.length ? '<h2>Pick a first small step</h2><p class="hint" style="margin-top:-6px">Pick one to start. Keep the others for later.</p>' + acts.map(function (x, i) { return '<button class="pickcard" data-act1="' + i + '" aria-pressed="' + (d.pick === i) + '"><b>' + esc(x.text) + '</b><span class="psched">' + esc(describeRule(x.schedule)) + (x.schedule_from_user ? '' : ' (suggested)') + '</span>' + '' + '</button>'; }).join('') +
-          '<button class="link" data-act1="own">I’ll write my own</button>' : '<button class="btn outline" data-act="coachacts">Suggest a first step</button><button class="btn" data-act1="own">I’ll write my own</button>') +
-        (d.later && d.later.length ? '<p class="hint">Waiting in Later: ' + d.later.map(esc).join(', ') + '</p>' : '') +
-        '<div class="spacer"></div><button class="btn" data-act="hearingnext"' + (d.pick != null ? '' : ' disabled') + '>Next</button></section>';
+        // Up to two actions (notes 28 to 30, 18 Nov 2026): planning for many goals at once tends to backfire, two that work together is fine.
+        (acts.length ? '<h2>Pick your first action</h2><p class="hint" style="margin-top:-6px">Pick one, or two that work together. The rest wait in My plan.</p>' + acts.map(function (x, i) { var on = d.pick === i || d.pick2 === i; return '<button class="pickcard" data-act1="' + i + '" aria-pressed="' + on + '"><b>' + esc(x.text) + '</b><span class="psched">' + esc(describeRule(x.schedule)) + (x.schedule_from_user ? '' : ' (suggested)') + '</span></button>'; }).join('') +
+          '<div class="pickcard own"><textarea id="ownact" rows="1" placeholder="I’ll write my own…" aria-label="Write your own action">' + esc(d.ownAct || '') + '</textarea>' + micButton() + '</div>' +
+          (d.pick2 != null ? stuCard('Good pair. These two work together, so keep them both small to start.') : '')
+          : '<button class="btn outline" data-act="coachacts">Suggest a first step</button><button class="btn" data-act1="own">I’ll write my own</button>') +
+        '<div class="spacer"></div><button class="btn" data-act="hearingnext"' + (d.pick != null || (d.ownAct || '').trim() ? '' : ' disabled') + '>Next</button></section>';
     },
     what: function () {
       var d = S.draft, more = d.mode === 'more';
@@ -512,14 +516,16 @@
     },
     often: function () {
       var d = S.draft, intent = d.say || d.focusTitle || d.reduce || d.found || '';
-      return '<section class="screen plan-review"><div class="eyebrow">Your first step</div><h1>Make it doable.</h1>' +
+      return '<section class="screen plan-review"><div class="eyebrow">Your action</div><h1>Make it doable.</h1>' +
         (intent ? '<div class="intent-summary"><span class="eyebrow">Your words</span><p>“' + esc(intent) + '”</p></div>' : '') +
         '<div class="field"><label class="label" for="what">' + (d.mode === 'less' ? 'What I’ll do differently' : 'My action') + '</label><textarea id="what" rows="1" data-bind="what" placeholder="' + (d.mode === 'less' ? 'e.g. Charge my phone outside the bedroom' : 'e.g. Walk for ten minutes') + '">' + esc(d.what || '') + '</textarea><span class="hint">Something you can actually do. Edit it until it fits.</span></div>' +
+        (d.second && d.second.text ? '<div class="card soft small"><span class="eyebrow">My second action</span><b style="font-weight:600">' + esc(d.second.text) + '</b><span class="hint">' + (d.second.schedule ? esc(describeRule(d.second.schedule)) + '. ' : 'Same days as your first action. ') + 'You can change it in My plan.</span></div>' : '') +
         '<span class="label">How often?</span>' + schedPicker(d.sched, 'draft') +
         toughDayBlock(d, 'dimmer') +
-        '<details class="ask"' + ((d.anchor || '').trim() ? ' open' : '') + '><summary>Make it easier to remember</summary><div class="field"><label class="label" for="anchor">After I <span class="optional-label">optional</span></label><textarea id="anchor" rows="1" data-bind="anchor" placeholder="e.g. have lunch">' + esc(d.anchor || '') + '</textarea><span class="hint">Linking it to something you already do gives you a reliable cue.</span></div>' +
+        '<details class="ask"' + ((d.anchor || '').trim() ? ' open' : '') + '><summary>Make it easier to remember</summary><div class="field"><label class="label" for="anchor">After I <span class="optional-label">optional</span></label><textarea id="anchor" rows="1" data-bind="anchor" placeholder="e.g. have lunch">' + esc(d.anchor || '') + '</textarea></div>' +
+        stuCard('This is called habit stacking. When you link your action to something you already do every day, that moment becomes your reminder, so you’re far more likely to remember it and to do it.') +
         (d.mineQ ? '<div class="field"><label class="label" for="mine">' + esc(d.mineQ) + '</label><textarea id="mine" rows="2" data-bind="mine">' + esc(d.mine || '') + '</textarea></div>' : '') + '</details>' +
-        '<details class="ask review-more"><summary>Review in ' + (d.length || 30) + ' days</summary><div class="field"><label class="label" for="reviewdays">Days until your review</label><input class="input" id="reviewdays" type="number" min="7" max="730" value="' + (d.length || 30) + '"><span class="hint">A point to look back. Change it any time.</span></div></details><div class="spacer"></div>' + stepButton('often') + '</section>';
+        '<details class="ask review-more"><summary>Look back on my plan in ' + (d.length || 30) + ' days</summary><div class="field"><label class="label" for="reviewdays">How many days until you look back?</label><input class="input" id="reviewdays" type="number" min="7" max="730" value="' + (d.length || 30) + '"><span class="hint">On that day you’ll look at how it’s gone and choose what’s next: keep going, change it or try something new. It isn’t a deadline, and you can change it any time.</span></div></details><div class="spacer"></div>' + stepButton('often') + '</section>';
     },
     when: function () {
       var d = S.draft, more = d.mode === 'more', opts = more ? ANCHORS_MORE : ANCHORS_LESS;
@@ -578,7 +584,7 @@
         'Notice how good it feels to have done it.'
       ];
       var field = '<div class="field"><label class="label" for="walkplan">' + (tom ? 'Tomorrow' : 'Today') + ' I will…</label><textarea id="walkplan" rows="1" placeholder="One specific thing. Small is fine.">' + esc(plan) + '</textarea>' + micButton() + '</div>';
-      return '<section class="screen walk"><div><div class="eyebrow">Walk it through · about a minute</div><h1>See yourself doing it ' + day + '.</h1></div>' +
+      return '<section class="screen walk"><div><div class="eyebrow">Boost your chances · about a minute</div><h1>See yourself doing it ' + day + '.</h1></div>' +
         (mine ? '<div class="mineline">Start with your words: “' + esc(mine) + '”</div>' : '') +
         '<ol class="walksteps">' + steps2.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ol>' +
         '<div class="walktimer" id="walktimer"><button class="btn outline" data-act="walktimer">Start a 1 minute timer</button><span class="hint">Close your eyes if you like. It’s fine not to.</span></div>' +
@@ -610,9 +616,9 @@
     ready: function () {
       if (ui.planEdit) return focusEditor();
       // The finish moment (Stu, 17 Nov 2026): a clear "your plan is ready" with Stu before Today, so nothing on Today is mistaken for finishing setup.
-      if (S.finishSetupStart) return '<section class="screen ready-screen"><div><div class="eyebrow">Your plan is ready</div><h1>Well done. You’ve made your plan<span class="bang">.</span></h1></div>' +
-        stuCard((firstName() ? esc(firstName()) + ', that’s' : 'That’s') + ' the hard part done. You’ve made a plan that fits your life. Some days will be a 10, some a 1. Both count. I’ll be with you along the way.') + planCard('ready') +
-        '<div class="card soft"><b style="font-weight:600">What happens next</b><span>Today is your home. Each day, tap <b>I showed up today</b> once you’ve done it. A lighter version counts too.</span></div>' +
+      if (S.finishSetupStart) return '<section class="screen ready-screen"><div><div class="eyebrow">Your plan is ready</div><h1>Well done' + (firstName() ? ', ' + esc(firstName()) : '') + '. You’ve built a solid plan<span class="bang">.</span></h1></div>' +
+        stuCard('That’s the hard part done. You’ve made a plan that fits your life. Some days will be a 10, some a 1. Both count. I’ll be with you along the way.') + planCard('ready') +
+        '<div class="card soft"><b style="font-weight:600">What happens next</b><span>Today is your home. Each day, tap <b>I showed up today</b> once you’ve done it.</span><button class="link calline" data-cal="ready">' + iconCal() + 'Add it to my calendar</button></div>' +
         '<div class="spacer"></div><button class="btn" data-act="readydone">Go to Today</button></section>';
       var a = mainAct(), d = todayStr(), done = anyCountedOn(d), due = a && (M.isDue(S.habit, a, d) || M.isWeekly(a, d)), nx = nextPlanned();
       var h = '<section class="screen"><div><div class="eyebrow">Your plan is ready</div><h1>Here’s your plan.</h1></div>' +
@@ -639,12 +645,12 @@
       if (!S.habit) return screens.landing();
       if (ui.planEdit) return focusEditor();
       var h = S.habit, n = (h.later || []).filter(function (x) { return !x.used; }).length;
-      return '<section class="screen next-plan"><div><span class="eyebrow">Keep it working for you</span><h1>My plan.</h1></div><div class="plan-columns"><div class="plan-main"><section class="sec"><div class="row"><h2>My actions</h2><button class="link" data-editact="new">+ Add</button></div>' + liveActs().map(function (a) { return '<div class="plan-action"><div class="row"><h3>' + esc(a.text) + '</h3><button class="link" data-editact="' + a.id + '">Edit</button></div><span class="schedule-tag">' + esc(describeRule(ruleNow(a))) + '</span>' + (a.cue ? '<p>' + esc(anchorLine(a)) + '</p>' : '') + (a.small ? '<span class="small-label">Smaller: ' + esc(a.small) + '</span>' : '') + '</div>'; }).join('') + '</section>' + (n ? '<details class="ask"><summary>Later · ' + n + '</summary>' + laterCard() + '</details>' : '') + '<details class="ask"><summary>My to-do list</summary>' + listSection() + '</details>' + (S.archive.length ? '<details class="ask"><summary>Past plans · ' + S.archive.length + '</summary>' + archiveCard() + '</details>' : '') + '</div><div class="plan-side"><section class="purpose-card"><div class="row"><span class="eyebrow">My direction</span><button class="link" data-act="editfocus">Edit</button></div><h2>' + esc(habitName()) + '</h2><div class="core-links"><button class="link" data-act="corewhy">My reason</button><button class="link" data-act="corereturn">My way back</button></div>' + (whyLine() ? '<p>“' + esc(whyLine()) + '”</p>' : '') + (h.sign ? '<div class="direction-sign"><span class="eyebrow">A sign it’s working</span><p>' + esc(h.sign) + '</p></div>' : '') + (mineLine() ? '<div class="direction-sign"><span class="eyebrow">My words</span><p>“' + esc(mineLine()) + '”</p></div>' : '') + ((h.towards || '').trim() ? '<details class="ask"><summary>What I pictured</summary><p>' + esc(h.towards) + '</p></details>' : '') + '</section><section class="sec plan-controls"><button class="setup-option" data-length="plan"><span>Review after ' + h.length + ' days</span><span>Change</span></button><button class="setup-option" data-act="startdate"><span>Started ' + esc(prettyDate(h.start)) + '</span><span>Edit</span></button><button class="setup-option" data-act="gosettings"><span>Reminders</span><span>Edit</span></button><button class="setup-option" data-go="calendar"><span>Add to calendar</span><span>+</span></button></section>' + helperResources() + finishCard(false) + '</div></div></section>';
+      return '<section class="screen next-plan"><div><span class="eyebrow">Keep it working for you</span><h1>My plan.</h1></div><div class="plan-columns"><div class="plan-main"><section class="sec"><div class="row"><h2>My actions</h2><button class="link" data-editact="new">+ Add</button></div>' + liveActs().map(function (a) { return '<div class="plan-action"><div class="row"><h3>' + esc(a.text) + '</h3><button class="link" data-editact="' + a.id + '">Edit</button></div><span class="schedule-tag">' + esc(describeRule(ruleNow(a))) + '</span>' + (a.cue ? '<p>' + esc(anchorLine(a)) + '</p>' : '') + '<details class="ask toughrow"><summary>What to do on a tough day</summary>' + (a.small ? '<p>' + esc(a.small) + '</p>' : '<p class="hint">Nothing yet.</p>') + '<button class="link" data-editact="' + a.id + '" style="align-self:flex-start">' + (a.small ? 'Change or add ideas' : 'Add one') + '</button></details></div>'; }).join('') + '</section>' + laterCard() + '<details class="ask"><summary>My to-do list</summary>' + listSection() + '</details>' + (S.archive.length ? '<details class="ask"><summary>Past plans · ' + S.archive.length + '</summary>' + archiveCard() + '</details>' : '') + '</div><div class="plan-side"><section class="purpose-card"><div class="row"><span class="eyebrow">My direction</span><button class="link" data-act="editfocus">Edit</button></div><h2>' + esc(habitName()) + '</h2><div class="core-links"><button class="link" data-act="corewhy">My reason</button><button class="link" data-act="corereturn">My way back</button></div>' + (whyLine() ? '<p>“' + esc(whyLine()) + '”</p>' : '') + (h.sign ? '<div class="direction-sign"><span class="eyebrow">A sign it’s working</span><p>' + esc(h.sign) + '</p></div>' : '') + (mineLine() ? '<div class="direction-sign"><span class="eyebrow">My words</span><p>“' + esc(mineLine()) + '”</p></div>' : '') + ((h.towards || '').trim() ? '<details class="ask"><summary>What I pictured</summary><p>' + esc(h.towards) + '</p></details>' : '') + '</section><section class="sec plan-controls"><button class="setup-option" data-length="plan"><span>Look back on my plan in ' + h.length + ' days</span><span>Change</span></button><button class="setup-option" data-act="startdate"><span>Started ' + esc(prettyDate(h.start)) + '</span><span>Edit</span></button><button class="setup-option" data-act="gosettings"><span>Reminders<small style="display:block;font-size:12px;color:var(--text-mid);font-weight:400">' + esc(reminderLine()) + '</small></span><span>Edit</span></button><button class="setup-option" data-go="calendar"><span>Add to calendar</span><span>+</span></button></section>' + helperResources() + finishCard(false) + '</div></div></section>';
     },
     actedit: function () { if (!S.habit || !ui.edit) return screens.plan(); return actEditor(); },
     length: function () {
       var cur = S.habit ? S.habit.length : S.draft.length, std = [10, 30, 60, 90, 365];
-      var h = '<section class="screen"><h1>How long before you review it?</h1><p class="lede">Pick a point to look back and decide what’s next. It isn’t a deadline, and you can change it any time.</p><div style="display:flex;flex-direction:column;gap:10px">';
+      var h = '<section class="screen"><h1>When would you like to look back on your plan?</h1><p class="lede">Pick a point to look back and decide what’s next. It isn’t a deadline, and you can change it any time.</p><div style="display:flex;flex-direction:column;gap:10px">';
       [[10, 'A test drive'], [30, 'A month, then a look back'], [60, 'Two months'], [90, 'Three months'], [365, 'A year']].forEach(function (o) {
         h += '<button class="choice" style="min-height:66px" data-len="' + o[0] + '" aria-pressed="' + (cur === o[0]) + '"><b>' + (o[0] === 365 ? '1 year' : o[0] + ' days') + '</b><small>' + o[1] + '</small></button>';
       });
@@ -655,7 +661,7 @@
       if (!S.habit) return screens.landing();
       if (S.settings.view === 'focus') return focusTracker();
       var t = todayNum(), st = stats(), nx = nextPlanned();
-      var h = '<section class="screen home next-home"><div class="today-heading"><div><span class="eyebrow">' + esc(new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })) + '</span><h1>' + (firstName() ? 'Today, ' + esc(firstName()) + '.' : 'Today.') + '</h1></div><button class="view-control" data-act="tryfocus" aria-label="Switch to Focused view">Focused view <span aria-hidden="true"><svg class="next-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></span></button></div><div class="colL"><section class="sec today next-action"><div class="row"><span class="eyebrow">' + (S.habit.mode === 'less' ? 'Your new pattern' : 'Your next move') + '</span><button class="link" data-go="plan">Edit plan</button></div>' + intentionLine() + todaySection(false) + (mineLine() ? '<p class="personal-line">“' + esc(mineLine()) + '”</p>' : '') + '</section>' + stuTipHTML() + coreSetupCard() + askStuEntry('today') + listToday(false) + '<button class="support-inline" data-go="slipped"><span class="support-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/></svg></span><span><b>Finding today tough?</b><small>Get support: make it smaller, change the plan or start again.</small></span><span aria-hidden="true">→</span></button>' + '<details class="ask catchup-options"><summary>Past days</summary>' + catchUpCard() + '<button class="link" data-go="progress">Open my calendar</button></details></div><div class="colR"><section class="sec week-card">' + secHead('week', 'Your week', '<button class="link" data-go="progress">View all</button>') + weekHTML() + '<div class="week-stat"><b>' + st.done + '</b><span>show-up' + (st.done === 1 ? '' : 's') + ' so far</span></div><div class="legend2"><span><i style="background:var(--green)"></i>Full</span><span><i style="background:var(--amber)"></i>Smaller</span><span><i class="rest"></i>Rest</span></div></section>' + (whyLine() ? '<section class="purpose-card"><span class="eyebrow">Your reason</span><p>“' + esc(whyLine()) + '”</p><button class="link" data-go="plan">My direction <span aria-hidden="true"><svg class="next-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></span></button></section>' : '') + '<div class="review-meta"><span>Day ' + Math.max(0, Math.min(t, S.habit.length)) + '</span><button class="link" data-go="length">Review in ' + Math.max(0, S.habit.length - t + 1) + ' days</button></div>' + milestoneCard(t) + feedbackCard(t) + backupStatus() + finishCard(false) + '</div></section>';
+      var h = '<section class="screen home next-home"><div class="today-heading"><div><span class="eyebrow">' + esc(new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })) + '</span><h1>' + (firstName() ? 'Today, ' + esc(firstName()) + '.' : 'Today.') + '</h1></div><button class="view-control" data-act="tryfocus" aria-label="Switch to Focused view">Focused view <span aria-hidden="true"><svg class="next-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></span></button></div><div class="colL"><section class="sec today next-action"><div class="row"><span class="eyebrow">' + (S.habit.mode === 'less' ? 'My new pattern' : 'My next move') + '</span><button class="link" data-go="plan">My plan</button></div>' + intentionLine() + todaySection(false) + (mineLine() ? '<p class="personal-line">“' + esc(mineLine()) + '”</p>' : '') + '<button class="link calline" data-cal="tracker">' + iconCal() + 'Add this to my calendar</button></section>' + stuTipHTML() + coreSetupCard() + askStuEntry('today') + listToday(false) + '<button class="support-inline" data-go="slipped"><span class="support-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/></svg></span><span><b>Finding today tough?</b><small>Get support: make it smaller, change the plan or start again.</small></span><span aria-hidden="true">→</span></button>' + '<details class="ask catchup-options"><summary>Past days</summary>' + catchUpCard() + '<button class="link" data-go="progress">Open my calendar</button></details></div><div class="colR"><section class="sec week-card">' + secHead('week', 'Your week', '<button class="link" data-go="progress">View all</button>') + weekHTML() + '<div class="week-stat"><b>' + st.done + '</b><span>show-up' + (st.done === 1 ? '' : 's') + ' so far</span></div><div class="legend2"><span><i style="background:var(--green)"></i>Full</span><span><i style="background:var(--amber)"></i>Lighter</span><span><i class="rest"></i>Rest</span></div></section>' + whyCard() + '<div class="review-meta"><span>Day ' + Math.max(0, Math.min(t, S.habit.length)) + '</span><button class="link" data-go="length">Look back in ' + Math.max(0, S.habit.length - t + 1) + ' days</button></div>' + milestoneCard(t) + feedbackCard(t) + backupStatus() + finishCard(false) + '</div></section>';
       return h;
     },
     progress: function () {
@@ -789,7 +795,7 @@
             '<div class="chips">' + [[1, 'Today'], [3, '3 days'], [7, 'A week'], [14, 'Two weeks']].map(function (o) { return '<button class="chip" data-pause="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>') +
           '<p class="hint">Your history stays exactly as it is.</p>');
       }
-      h += sect('Walk it through', '<span>A minute to see yourself doing it. When suits you?</span><div class="chips">' + [['evening', 'The night before'], ['morning', 'In the morning']].map(function (o) { return '<button class="chip" data-walkwhen="' + o[0] + '" aria-pressed="' + (walkWhen() === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div><p class="hint">The night before suits early habits, like the gym first thing.</p>');
+      h += sect('Boost your chances', '<span>A minute to picture it and plan for what might get in the way. When suits you?</span><div class="chips">' + [['evening', 'The night before'], ['morning', 'In the morning']].map(function (o) { return '<button class="chip" data-walkwhen="' + o[0] + '" aria-pressed="' + (walkWhen() === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div><p class="hint">The night before suits early habits, like the gym first thing.</p>');
       h += sect('How it looks', '<div class="choices">' +
         '<button class="choice" data-view="full" aria-pressed="' + (s.view === 'full') + '"><b>Detailed</b><small>Examples, tips and your full progress</small></button>' +
         '<button class="choice" data-view="focus" aria-pressed="' + (s.view === 'focus') + '"><b>Focused</b><small>Just the essentials, calmer screens</small></button></div>' +
@@ -799,7 +805,7 @@
         '<span class="label">Marking things off your list</span><div class="chips">' + [['strike', 'Strike through'], ['tick', 'Tick']].map(function (o) { return '<button class="chip" data-mark="' + o[0] + '" aria-pressed="' + (markStyle() === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div><p class="hint">For a tap. A finger drawn across always strikes it through.</p>');
       if (S.habit) h += sect('My plan', '<b style="font-weight:600">' + esc(habitName()) + '</b>' +
         '<button class="btn outline" data-go="plan">See and change my plan</button>' +
-        '<button class="btn outline" data-length="settings">Review after: ' + (S.habit.length === 365 ? '1 year' : S.habit.length + ' days') + '</button>' +
+        '<button class="btn outline" data-length="settings">Look back after: ' + (S.habit.length === 365 ? '1 year' : S.habit.length + ' days') + '</button>' +
         '<button class="link" data-act="newhabit" style="align-self:flex-start">Start a new plan</button>');
       h += sect('You and your data', '<div class="field"><label class="label" for="sname">Your first name</label><textarea id="sname" rows="1" data-name="1" autocomplete="given-name" placeholder="So we can say hello">' + esc(firstName()) + '</textarea></div>' +
         (user ? '<span>Signed in as <b>' + esc(user.email) + '</b></span>' : '<span>Saved on this device only.</span><button class="btn" data-account="settings">Save my progress</button>') +
@@ -1097,7 +1103,16 @@
     return html + '</details></section>';
   }
   function intentionLine() {
-    var x = extra().intention; return x ? '<button class="link" data-act="goaledit">My goal · Edit / check in</button><p class="intention-line"><span>Your focus</span>“' + esc(x) + '”</p>' : '';
+    // My focus sits at the top, in their voice; tapping it opens the goal editor (note 48, 18 Nov 2026).
+    var x = extra().intention; return x ? '<button class="intention-line" data-act="goaledit"><span>My focus</span><b>' + esc(x) + '</b></button>' : '';
+  }
+  // "Why this is important to me": every reason they gave, quoted word for word, tucked away until they open it (note 46).
+  function whyCard() {
+    var h = S.habit, x = extra(), L = (x.reasons || []).slice();
+    [h.matters, h.deeper].forEach(function (r) { r = String(r || '').trim(); if (r && L.indexOf(r) < 0) L.push(r); });
+    if (!L.length) return '';
+    return '<details class="ask whycard"><summary>Why this is important to me</summary><ul>' + L.map(function (r) { return '<li>“' + esc(r) + '”</li>'; }).join('') + '</ul>' +
+      ((h.towards || '').trim() ? '<p class="hint">Three months from now: “' + esc(h.towards.trim()) + '”</p>' : '') + '<button class="link" data-act="corewhy" style="align-self:flex-start">Add or change a reason</button></details>';
   }
   function coreStatus() {
     if (!S.habit) return { reason: false, recovery: false, done: 0 };
@@ -1107,7 +1122,7 @@
   function coreSetupCard() {
     if (!S.habit || !extra().coreSetupVersion) return '';
     var c = coreStatus(); if (c.done === 3) return '';
-    return '<section class="core-setup" aria-label="Your start"><div class="row"><span class="eyebrow">Your start</span><span class="core-count">' + c.done + ' of 3</span></div><div class="core-stages"><span>✓ Your plan</span><span>' + (c.reason ? '✓ ' : '') + 'Your reason</span><span>' + (c.recovery ? '✓ ' : '') + 'Your way back</span></div><h2>' + (!c.reason ? 'What makes this worth doing?' : 'Make room for real life.') + '</h2>' + (!c.reason ? stuCard('When it gets tough, your reason is what brings you back. Take a minute to connect this step to what really matters to you.') : '<p>Some days won’t go to plan. Decide now what will help you come back.</p>') + '<button class="btn" data-act="' + (!c.reason ? 'corewhy' : 'corereturn') + '">' + (!c.reason ? 'Add my reason' : 'Plan my way back') + '</button></section>';
+    return '<section class="core-setup" aria-label="Your start"><div class="row"><span class="eyebrow">Your start</span><span class="core-count">' + c.done + ' of 3</span></div><div class="core-stages"><span>✓ Your plan</span><span>' + (c.reason ? '✓ ' : '') + 'Your reason</span><span>' + (c.recovery ? '✓ ' : '') + 'Your way back</span></div><h2>' + (!c.reason ? 'Why is this habit important to me?' : 'How will I come back after a tough day?') + '</h2>' + (!c.reason ? stuCard('When it gets tough, your reason is what brings you back. Take a minute to connect this action to what really matters to you.') : stuCard('Some days won’t go to plan. Decide now what will help you come back.')) + '<button class="btn" data-act="' + (!c.reason ? 'corewhy' : 'corereturn') + '">' + (!c.reason ? 'Add my reason' : 'Plan my way back') + '</button></section>';
   }
   function openCore(kind) {
     if (!S.habit) return;
@@ -1119,9 +1134,14 @@
     if (!S.habit) return screens.landing();
     var d = S.setupDraft; if (!d || d.habitId !== S.habit.id) return screens.tracker();
     var why = d.kind === 'why', field = function (id, key, label, placeholder) { return '<div class="field"><label class="label" for="' + id + '">' + label + '</label><textarea id="' + id + '" rows="2" data-corebind="' + key + '" placeholder="' + placeholder + '">' + esc(d[key] || '') + '</textarea></div>'; };
-    return '<section class="screen core-screen"><span class="eyebrow">Your start · ' + (why ? 'Your reason' : 'Your way back') + '</span><h1>' + (why ? 'What would make this worth doing?' : 'How will you come back?') + '</h1><div class="intent-summary"><span class="eyebrow">Your step</span><p>' + esc(actText(mainAct())) + '</p></div>' +
-      (why ? '<p class="lede">What would this give you, or make more room for? A few honest words are enough.</p>' + field('corereason', 'reason', 'This matters to me because…', 'e.g. I want energy left for my family') + '<details class="ask"><summary>Explore what this could change</summary>' + field('coretowards', 'towards', 'What would life look or feel like?', 'In your own words') + field('coredeeper', 'deeper', 'And what would that mean for you?', 'For you, or the people around you') + field('coresign', 'sign', 'An early sign it’s working', 'Something you would notice') + '</details>' : '<p class="lede">You don’t need a perfect run. Give yourself a practical next move for when life interrupts.</p>' + field('corereturn', 'returnPlan', 'If a planned day slips by, I’ll…', 'e.g. Do the smaller version at my next planned opportunity') + field('coresmall', 'small', 'My smaller version', 'e.g. Put my shoes on and walk for two minutes') + '<p class="hint">Your history stays. Coming back counts.</p>') +
-      '<div class="spacer"></div><button class="btn" data-act="coresave"' + (String(d[why ? 'reason' : 'returnPlan'] || '').trim() ? '' : ' disabled') + '>' + (why ? 'Save my reason' : 'Save my way back') + '</button><button class="link center" data-go="tracker">Back to Today</button></section>';
+    // Notes 46 and 49 (18 Nov 2026): the question reads as dark as a title, tap-to-add reasons, and a picture of three months from now
+    // that hands straight on to the way back (picturing success works when it's paired with what might get in the way).
+    var chips = REASON_CHIPS.map(function (r) { return '<button class="chip" data-reasonchip="' + esc(r) + '">' + esc(r) + '</button>'; }).join('');
+    return '<section class="screen core-screen"><span class="eyebrow">Your start · ' + (why ? 'Your reason' : 'Your way back') + '</span><h1>' + (why ? 'Why is this habit important to me?' : 'How will I come back after a tough day?') + '</h1><div class="intent-summary"><span class="eyebrow">My action</span><p>' + esc(actText(mainAct())) + '</p></div>' +
+      (why ? field('corereason', 'reason', 'This matters to me because…', 'Add as many reasons as you like') + '<div class="chips reason-chips" aria-label="Tap to add a reason">' + chips + '</div>' +
+        '<details class="ask"' + ((d.towards || d.deeper || d.sign) ? ' open' : '') + '><summary>Picture three months from now</summary><p class="core-q">Imagine it’s three months from now and you’ve done it. Look back.</p>' + field('coretowards', 'towards', 'How are you feeling?', 'In your own words') + field('coredeeper', 'deeper', 'What’s changed in your life?', 'For you, or the people around you') + field('coresign', 'sign', 'An early sign it’s working', 'Something you would notice') + '<p class="hint">Next, in Your way back, you’ll plan for what might get in the way.</p></details>'
+        : '<p class="core-q">No perfect run needed. What’s your next move when life gets in the way?</p>' + field('corereturn', 'returnPlan', 'If a planned day slips by, I’ll…', 'e.g. Do my lighter version at the next chance') + field('coresmall', 'small', 'My lighter version on a tough day', 'e.g. Put my shoes on and walk for two minutes')) +
+      '<div class="spacer"></div><button class="btn" data-act="coresave"' + (String(d[why ? 'reason' : 'returnPlan'] || '').trim() ? '' : ' disabled') + '>' + (why ? 'Save my reason' : 'Save my way back') + '</button><button class="link center back-arrow" data-go="tracker"><span aria-hidden="true">←</span> Back to Today</button></section>';
   }
   function saveCore() {
     var d = S.setupDraft, h = S.habit; if (!h || !d || d.habitId !== h.id) return;
@@ -1326,7 +1346,7 @@
   }
   function helperResources() {
     var hp = extra().helpers || []; if (!hp.length) return '';
-    return '<details class="ask"><summary>Ideas to get started</summary><div class="helper-links">' + hp.map(function (x) { return '<a class="link" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + encodeURIComponent(x) + '">' + esc(x) + '<span class="sr"> (opens a search in a new tab)</span></a>'; }).join('') + '</div></details>';
+    return '<details class="ask helpstart"><summary>To help you get started</summary><div class="helper-links">' + hp.map(function (x) { return '<a class="link" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + encodeURIComponent(x) + '">' + esc(x) + '<span class="sr"> (opens a search in a new tab)</span></a>'; }).join('') + '</div><button class="link" data-go="askstu" style="align-self:flex-start">Ask Stu (AI) for help with this</button></details>';
   }
   function humanSupport() {
     return supportLive() ? '<details class="ask human-support"' + (ui.supportOpen ? ' open' : '') + '><summary>Talk to a real person</summary>' + supportCard() + '</details>' : '';
@@ -1349,7 +1369,7 @@
   function landPreview() {
     var dots = ['on', 'on', 'rest', 'on small', 'today', 'ahead', 'ahead'].map(function (c, i) { return '<span class="wd ' + c + '"><span>' + 'MTWTFSS'.charAt(i) + '</span><i></i></span>'; }).join('');
     return '<div class="landprev" aria-hidden="true"><div class="lp-phone">' +
-      '<div class="focushero"><span class="pill">Day 9 of 30</span><div class="eyebrow">My focus</div><h1>Feel fitter and stronger</h1><div class="meter"><i style="width:30%"></i></div><span class="fh-cap">Review in 22 days</span></div>' +
+      '<div class="focushero"><span class="pill">Day 9 of 30</span><div class="eyebrow">My focus</div><h1>Feel fitter and stronger</h1><div class="meter"><i style="width:30%"></i></div><span class="fh-cap">Look back in 22 days</span></div>' +
       '<section class="sec today"><div class="sec-h"><span class="ic"><svg viewBox="0 0 24 24">' + ICON.today + '</svg></span><h2>Today</h2></div>' +
       '<div class="actcard done"><div class="act-top"><b class="act-t">Stretch for 10 minutes</b><span class="act-s">After I make my morning coffee</span></div><div class="act-done"><span class="tickdot">' + checkIcon('#FFFFFF') + '</span><span>Done today</span></div></div>' +
       '<div class="actcard"><div class="act-top"><b class="act-t">Play padel</b><span class="act-s">0 of 1 this week</span></div><span class="btn showup-btn">' + checkIcon('#FFFFFF') + 'Done</span></div></section>' +
@@ -1517,11 +1537,11 @@
     if (wk) sub.push(wk.done + ' of ' + wk.target + ' this week');
     var h = '<div class="actcard' + (done ? ' done' : '') + '" data-actcard="' + a.id + '"><div class="act-top"><b class="act-t">' + esc(a.text) + '</b>' + (sub.length ? '<span class="act-s">' + esc(sub.join(' · ')) + '</span>' : '') + '</div>';
     if (done) {
-      h += '<div class="act-done"><span class="tickdot' + (e.kind === 'small' ? ' small' : '') + '">' + checkIcon('#FFFFFF') + '</span><span>' + (e.kind === 'small' ? 'Lighter version done' : 'Done today') + '</span></div>' +
+      h += '<div class="act-done"><span class="tickdot' + (e.kind === 'small' ? ' small' : '') + '">' + checkIcon('#FFFFFF') + '</span><span>' + 'Showed up today' + '</span></div>' +
         '<div class="row act-tools"><button class="link" data-note="' + a.id + '">' + (e.note ? 'Edit note' : 'Add a note') + '</button><button class="link" data-unlog="' + a.id + '">Undo</button></div>';
     } else {
       h += '<button class="btn showup-btn" data-log="full" data-a="' + a.id + '">' + checkIcon('#FFFFFF') + 'I showed up today' + '</button>' +
-        (a.small ? '<button class="btn outline lighter-btn" data-log="small" data-a="' + a.id + '"><span>I did the smaller version</span><small>' + esc(a.small) + '</small></button>' : '') +
+        (a.small ? '<button class="link lighter-link" data-log="small" data-a="' + a.id + '" title="' + esc(a.small) + '">Tough day? I did my lighter version</button>' : '') +
         (compact ? '' : (e && e.note ? '<button class="link" data-note="' + a.id + '" style="align-self:flex-start">Edit note</button>' : ''));
     }
     return h + '</div>';
@@ -1693,7 +1713,7 @@
   function reminderLine() {
     var st = reminderState(), t = fmtTime(S.settings.time);
     var when = { all: ' on planned days', some: ', a few times a week', quiet: ', only if you go quiet' }[S.settings.rhythm || 'all'] || ' on planned days';
-    return { paused: 'Nudges paused while you’re on a break', setup: 'Nudges are off until you add your email', push: 'Phone nudge at ' + t + when, email: 'Email nudge at ' + t + when, off: 'Nudges are off' }[st];
+    return { paused: 'Nudges paused while you’re on a break', setup: 'Off for now. Choose email or phone reminders', push: 'Phone nudge at ' + t + when, email: 'Email nudge at ' + t + when, off: 'Nudges are off' }[st];
   }
   function nextNudge() {
     var st = reminderState(); if (st !== 'email' && st !== 'push') return '';
@@ -1760,7 +1780,7 @@
     if (mineLine()) L.push('My words: ' + mineLine());
     if (a.small) L.push('Tough day? ' + a.small + '. That counts too.');
     L.push('');
-    L.push(whyLine(S.habit) ? 'Why it matters to you: “' + whyLine(S.habit) + '”' : 'What you’re moving towards: ' + (w.length > 1 ? w.slice(0, -1).join(', ') + ' and ' + w[w.length - 1] : w[0]) + '.');
+    if (whyLine(S.habit)) L.push('Why it matters to you: “' + whyLine(S.habit) + '”'); else if (w.length) L.push('What you’re moving towards: ' + (w.length > 1 ? w.slice(0, -1).join(', ') + ' and ' + w[w.length - 1] : w[0]) + '.');
     if ((hard.start || '').trim()) L.push('When you can’t get started, you said: “' + hard.start.trim() + '”');
     if ((hard.spark || '').trim()) L.push('What reminds you why it matters: “' + hard.spark.trim() + '”');
     L.push('');
@@ -1806,20 +1826,21 @@
     var ws = words(), chips = ws.length === 1 && /\s/.test(ws[0]) ? '<b>' + esc(ws[0].charAt(0).toUpperCase() + ws[0].slice(1)) + '</b>' : '<div class="pchips">' + ws.map(function (w, i) { return '<span' + (i === 0 ? ' class="first"' : '') + '>' + esc(w.toLowerCase()) + '</span>'; }).join('') + '</div>';
     var out = '<div class="pA"><div class="plancard">' + row(PICON.what, less ? 'I’m cutting back on' : 'My focus', '<b>' + esc(habitName()) + '</b>', focus ? '' : '<button class="pedit" data-act="editfocus">Edit</button>');
     if (mineLine()) out += row(PICON.why, 'My words', '<b>“' + esc(mineLine()) + '”</b>', '');
-    if (!focus) out += row(PICON.why, less ? 'What I’m moving towards' : 'What I’m moving towards', chips, '');
+    if (!focus && ws.length) out += row(PICON.why, 'What I’m moving towards', chips, focus ? '' : '<button class="pedit" data-act="editfocus">Edit</button>');
     if (whyLine(h)) out += row(PICON.why, 'Why it matters to me', '<b>“' + esc(whyLine(h)) + '”</b>', '');
     if (!focus && (h.sign || '').trim()) out += row(PICON.why, 'A sign it’s working', '<b>' + esc(h.sign.trim()) + '</b>', '');
     out += '</div></div><div class="pB">';
     out += '<div class="sec-h" style="margin-top:4px"><h2 style="font-size:20px">' + (less ? 'What I’ll do instead' : 'My actions') + '</h2></div><div class="plancard">';
     liveActs().forEach(function (a) {
       out += '<div class="prow act"><span class="pic">' + PICON.when + '</span><div class="pbody"><b>' + esc(a.text) + '</b><span class="psub">' + esc(describeRule(ruleNow(a))) + (anchorLine(a) ? ' · ' + esc(anchorLine(a)) : '') + '</span>' +
-        (a.small ? '<span class="psub">Tough day: ' + esc(a.small) + '</span>' : '') + '</div><button class="pedit" data-editact="' + a.id + '">Edit</button></div>';
+        '<details class="ask toughrow"><summary>What to do on a tough day</summary>' + (a.small ? '<p>' + esc(a.small) + '</p>' : '<p class="hint">Nothing yet.</p>') + '<button class="link" data-editact="' + a.id + '" style="align-self:flex-start">' + (a.small ? 'Change or add ideas' : 'Add one') + '</button></details>' +
+        '</div><button class="pedit" data-editact="' + a.id + '">Edit</button></div>';
     });
     out += '</div><button class="btn outline" data-editact="new">' + (liveActs().length ? 'Add another action' : 'Add an action') + '</button>' + laterCard() + '</div><div class="pC">';
-    out += '<div class="plancard">' + row(PICON.when, 'Review after', '<b>' + h.length + ' days</b><span class="psub">From ' + esc(prettyDate(h.start)) + ' to ' + esc(prettyDate(lastDate())) + '</span><button class="link" data-act="startdate" style="align-self:flex-start;font-size:14px;min-height:36px">Change start date</button>', '<button class="pedit" data-length="' + from + '">Change</button>') +
-      row(iconClock('#0F1215'), 'Nudges', '<b>' + esc(reminderLine()) + '</b>', '<button class="pedit" data-act="gosettings">Change</button>') + '</div>';
+    out += '<div class="plancard">' + row(PICON.when, 'Look back on my plan', '<b>In ' + h.length + ' days</b><span class="psub">On ' + esc(prettyDate(lastDate())) + ' I’ll look at how it’s gone and choose what’s next.</span><button class="link" data-act="startdate" style="align-self:flex-start;font-size:14px;min-height:36px">Change start date</button>', '<button class="pedit" data-length="' + from + '">Change</button>') +
+      row(iconClock('#0F1215'), 'Reminders', '<b>' + esc(reminderLine()) + '</b><span class="remicons" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg> Email <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg> Phone</span>', '<button class="pedit" data-act="gosettings">Change</button>') + '</div>';
     var hp = extra().helpers || [];
-    if (hp.length) out += '<div class="card soft"><span class="eyebrow">Might help you get started</span>' + hp.map(function (x) { return '<a class="link" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + encodeURIComponent(x) + '" style="align-self:flex-start">' + esc(x) + ' <span aria-hidden="true"><svg class="next-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></span><span class="sr"> (opens a search in a new tab)</span></a>'; }).join('') + '</div>';
+    if (hp.length) out += '<details class="ask helpstart"><summary>To help you get started</summary>' + hp.map(function (x) { return '<a class="link" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + encodeURIComponent(x) + '" style="align-self:flex-start">' + esc(x) + ' <span aria-hidden="true"><svg class="next-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></span><span class="sr"> (opens a search in a new tab)</span></a>'; }).join('') + '<button class="link" data-go="askstu" style="align-self:flex-start">Ask Stu (AI) for help with this</button></details>';
     return out + '</div>';
   }
   // Look back: where they started, in their words. Progress is judged on the near layers (the picture and the sign); the why is only quoted.
@@ -1831,14 +1852,16 @@
     return L.length ? '<div class="card heard"><b style="font-weight:600">Where you started</b>' + L.join('') + '</div>' : '';
   }
   function laterCard() {
-    var L = (S.habit.later || []).filter(function (x) { return !x.used; }); if (!L.length) return '';
-    var h = '<div class="card soft later"><span class="eyebrow">Waiting in Later</span><span class="hint" style="margin-top:-4px">Ideas you set aside. Use one whenever you’re ready.</span>';
+    // Other possible actions (note 38): never repeat the focus itself as an idea.
+    var same = function (x) { return String(x.kind === 'action' ? x.text : x.title || '').trim().toLowerCase() === String(habitName() || '').trim().toLowerCase(); };
+    var L = (S.habit.later || []).filter(function (x) { return !x.used && !same(x); });
+    var h = '<details class="ask later"><summary>Other possible actions' + (L.length ? ' (' + L.length + ')' : '') + '</summary><span class="hint">Ideas to add whenever you’re ready.</span>';
     S.habit.later.forEach(function (x, i) {
-      if (x.used) return;
+      if (x.used || same(x)) return;
       h += '<div class="laterrow"><div><b>' + esc(x.kind === 'action' ? x.text : x.title) + '</b><span class="hint">' + (x.kind === 'action' ? 'An action for this focus' + (x.schedule ? ' · ' + esc(describeRule(x.schedule)) : '') : 'Another focus') + '</span></div>' +
         '<div class="row" style="gap:10px;justify-content:flex-start">' + (x.kind === 'action' ? '<button class="chip" data-lateruse="' + i + '">Add to my plan</button>' : '<button class="chip" data-laterfocus="' + i + '">Start this next</button>') + '<button class="link" data-laterdrop="' + i + '" style="font-size:14px">Remove</button></div></div>';
     });
-    return h + '</div>';
+    return h + '<button class="btn amber" data-go="askstu">Ask Stu (AI) for more ideas</button></details>';
   }
   function archiveCard() {
     var A = S.archive || []; if (!A.length) return '';
@@ -2576,7 +2599,7 @@
     try {
       if (await ensureGuest()) {
         var call = sb.functions.invoke('letsgo-check', { body: { context: ctx, items: items } });
-        var r = await Promise.race([call, new Promise(function (ok) { setTimeout(function () { ok(null); }, 6000); })]);
+        var r = await Promise.race([call, new Promise(function (ok) { setTimeout(function () { ok(null); }, 4000); })]); // never hold anyone up for long (note 31)
         if (r && !r.error && r.data) res = r.data;
       }
     } catch (e) { res = null; }
@@ -2591,18 +2614,21 @@
       var cc = chkCard(fields[0], safeHTML(true) + '<div class="chkbtns"><button class="btn outline" data-chk="go">Carry on</button></div>');
       cc.classList.add('care'); return;
     }
-    var shown = 0;
+    var shown = 0, fixed = 0;
     (res.results || []).forEach(function (x) {
       var t = document.getElementById(x.id); if (!t || fields.indexOf(t) < 0) return;
       if (x.fits === false && x.note) {
         shown++; chkCard(t, '<p>' + esc(x.note) + '</p><div class="chkbtns"><button class="btn outline" data-chk="again" data-f="' + esc(t.id) + '">Have another go</button><button class="linkbtn" data-chk="go">Keep it and carry on</button></div>');
       } else if (x.sharpen && x.sharpen.options && x.sharpen.options.length && S.screen === 'say') {
-        shown++; chkCard(t, '<div class="stuai-name"><img src="stuart.jpg" alt="" width="24" height="24"> Stu ' + AI_TAG + '</div><p>' + esc(x.sharpen.question) + '</p><div class="chips">' + x.sharpen.options.map(function (o) { return '<button class="chip" data-chk="pick" data-v="' + esc(o) + '">' + esc(o) + '</button>'; }).join('') + '</div><div class="chkbtns"><button class="linkbtn" data-chk="keep">Keep mine</button></div>').classList.add('sharpen');
+        shown++; chkCard(t, '<div class="stuai-name"><img src="stuart.jpg" alt="" width="24" height="24"> Stu ' + AI_TAG + '</div><p>' + esc(x.sharpen.question) + '</p><div class="chips">' + x.sharpen.options.map(function (o) { return '<button class="chip" data-chk="pick" data-v="' + esc(o) + '">' + esc(o) + '</button>'; }).join('') + '</div>' +
+          '<div class="chkown"><textarea id="chkown" rows="1" placeholder="Or write your own…" aria-label="Write your own first step"></textarea>' + micButton() + '<button class="btn" data-chk="own">Use mine</button></div>' +
+          '<div class="chkbtns"><button class="btn amber" data-chk="go">Give me more ideas</button><button class="linkbtn" data-chk="keep">Keep what I wrote</button></div>').classList.add('sharpen');
       } else if (x.corrected && chkNorm(x.corrected) !== chkNorm(t.value)) {
-        shown++; var c = chkCard(t, '<p>Small fix? “' + esc(x.corrected) + '”</p><div class="chkbtns"><button class="btn outline" data-chk="use" data-f="' + esc(t.id) + '">Use this</button><button class="linkbtn" data-chk="keep">Keep mine</button></div>');
-        c.dataset.fix = x.corrected;
+        // Spelling slips are fixed quietly, with no card (Stu, 18 Nov 2026). The server only ever changes spelling, never words.
+        t.value = x.corrected; t.dispatchEvent(new Event('input', { bubbles: true })); fixed++;
       }
     });
+    if (fixed) toast(fixed === 1 ? 'Tidied a spelling slip.' : 'Tidied some spelling slips.');
     stat('check', shown ? 'flagged:' + shown : 'ok');
     if (!shown) return chkContinue(b);
     var first = view.querySelector('.chkcard'); if (first && first.scrollIntoView) first.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -2615,6 +2641,7 @@
       stat('check', how);
       if (how === 'use' && t) { t.value = card.dataset.fix; chk.seen[chkKey(t)] = 1; t.dispatchEvent(new Event('input', { bubbles: true })); grow(t); }
       if (how === 'again' && t) { t.focus(); t.select && t.select(); }
+      if (how === 'own') { var ow = document.getElementById('chkown'), ov = ow ? ow.value.trim() : ''; if (!ov) { if (ow) ow.focus(); return; } if (t) { t.value = ov; chk.seen[chkKey(t)] = 1; t.dispatchEvent(new Event('input', { bubbles: true })); grow(t); } }
       if (how === 'pick' && t) { t.value = c.dataset.v; chk.seen[chkKey(t)] = 1; t.dispatchEvent(new Event('input', { bubbles: true })); grow(t); }
       if (card) card.remove();
       if (how === 'go') { chkClear(); if (nb) chkContinue(nb); }
@@ -2638,6 +2665,7 @@
     if (t.dataset.goalbind && S.goalDraft && S.habit && S.goalDraft.habitId === S.habit.id) { S.goalDraft[t.dataset.goalbind] = t.value; save(false); }
     if (t.id === 'walkplan') ui.walkPlan = t.value;
     if (t.dataset.corebind && S.setupDraft && S.habit && S.setupDraft.habitId === S.habit.id) { S.setupDraft[t.dataset.corebind] = t.value; save(false); var cb = view.querySelector('[data-act="coresave"]'); if (cb) cb.disabled = !String(S.setupDraft[S.setupDraft.kind === 'why' ? 'reason' : 'returnPlan'] || '').trim(); }
+    if (t.id === 'ownact') { S.draft.ownAct = t.value; save(false); var hn = view.querySelector('[data-act="hearingnext"]'); if (hn) hn.disabled = !(t.value.trim() || S.draft.pick != null); }
     if (t.id === 'sayans') { S.draft.say = t.value; save(false); var sb2 = view.querySelector('[data-act="shape"]'); if (sb2) sb2.disabled = !t.value.trim(); }
     if (t.dataset.bind) {
       S.draft[t.dataset.bind] = t.value; save(false);
@@ -2692,6 +2720,11 @@
     if (d.calgoogle) { calRead(); var ga = actById(d.calgoogle); try { window.open(googleCalURL(ga), '_blank', 'noopener'); } catch (e2) {} stat('calendar', 'google'); return; }
     if (d.reduceidea) { S.draft.reduce = d.reduceidea; save(false); return render(); }
     if (d.supportAction) { ui.supportAct = d.supportAction; return render(); }
+    if (d.reasonchip && S.setupDraft) {
+      var sd = S.setupDraft, cur = String(sd.reason || '').trim();
+      if (cur.toLowerCase().indexOf(d.reasonchip.toLowerCase()) < 0) sd.reason = cur ? cur.replace(/[.,;\s]+$/, '') + '. ' + d.reasonchip + '.' : d.reasonchip + '.';
+      save(false); var y = window.scrollY; render(); window.scrollTo(0, y); return;
+    }
     if (d.struggle) { ui.struggle = d.struggle; try { history.pushState({ lg: 1 }, ''); ui.depth = (ui.depth || 0) + 1; } catch (e) {} return render(); }
     if (d.find) return findAct(d.find, b);
     if (d.winout) return addWin(d.winout);
@@ -2704,7 +2737,14 @@
     if (d.sayex) { var st0 = document.getElementById('sayans'); st0.value = (st0.value.trim() ? st0.value.trim() + '. ' : (S.draft.mode === 'less' ? 'I’d like to stop ' : 'I’d like to ')) + d.sayex; st0.dispatchEvent(new Event('input', { bubbles: true })); grow(st0); return; }
     if (d.focus != null && S.screen === 'hearing') return pickFocus(+d.focus);
     if (d.coachans) { var dq = S.draft, q0 = (dq.coachQs || [])[0]; dq.coachAnswers = (dq.coachAnswers || []).concat([{ q: q0 ? q0.q : '', a: d.coachans }]); dq.coachQs = []; save(false); return void coachActions(); }
-    if (d.act1 != null) { if (d.act1 === 'own') { S.draft.pick = -1; S.draft.what = ''; S.draft.dimmer = ''; save(false); if (S.draft.quickSetup) return go('often'); return askNameThen(S.draft.whyDone ? 'what' : 'feel'); } S.draft.pick = +d.act1; save(false); return render(); }
+    if (d.act1 != null) { if (d.act1 === 'own') { S.draft.pick = -1; S.draft.what = ''; S.draft.dimmer = ''; save(false); if (S.draft.quickSetup) return go('often'); return askNameThen(S.draft.whyDone ? 'what' : 'feel'); } var dd = S.draft, i1 = +d.act1;
+      if (dd.pick === i1) { dd.pick = dd.pick2 != null ? dd.pick2 : null; dd.pick2 = null; }
+      else if (dd.pick2 === i1) dd.pick2 = null;
+      else if (dd.pick == null || dd.pick < 0) dd.pick = i1;
+      else dd.pick2 = i1;
+      save(false); var ys = window.scrollY; render(); window.scrollTo(0, ys); return; }
+    if (d.mic && b.closest('.chkown')) return toggleMic(b, document.getElementById('chkown'), function () {});
+    if (d.mic && b.closest('.pickcard.own')) { var oa = document.getElementById('ownact'); return toggleMic(b, oa, function () { S.draft.ownAct = oa.value; save(false); var hn2 = view.querySelector('[data-act="hearingnext"]'); if (hn2) hn2.disabled = !(oa.value.trim() || S.draft.pick != null); }); }
     if (d.mic) { if (S.screen === 'say') { var sa = document.getElementById('sayans'); return toggleMic(b, sa, function () { S.draft.say = sa.value; save(false); var sb3 = view.querySelector('[data-act="shape"]'); if (sb3) sb3.disabled = !sa.value.trim(); }); } if (S.screen === 'walk') { var wpt = document.getElementById('walkplan'); return toggleMic(b, wpt, function () { ui.walkPlan = wpt.value; }); } if (S.screen === 'mine') { var mt = document.getElementById('mine'); return toggleMic(b, mt, function () { S.draft.mine = mt.value; save(false); var mb = view.querySelector('[data-act="minedone"]'); if (mb) mb.disabled = !mt.value.trim(); }); } return toggleMic(b); }
     if (d.horizon) { findSave(); S.find.horizon = d.horizon; save(false); return render(); }
     if (d.struggleBack) { ui.struggle = null; return render(); }
@@ -2803,7 +2843,7 @@
         var wd = walkDay(), wp = ((document.getElementById('walkplan') || {}).value || '').trim().slice(0, 300);
         walks()[wd] = { at: new Date().toISOString(), plan: wp }; ui.walkPlan = null; save();
         stat('walk', wp ? 'plan' : 'done');
-        toast(wd > todayStr() ? 'Walked through. Tomorrow’s ready.' : 'Walked through. Now go and do it.'); return go('tracker');
+        toast(wd > todayStr() ? 'Done. Tomorrow’s ready.' : 'Done. Now go and do it.'); return go('tracker');
       }
       case 'minedone': stopMic(); if (!(S.draft.mine || '').trim()) return; S.draft.mine = S.draft.mine.trim(); save(false); return go('what');
       case 'testerreset': return confirmSheet('Start again from scratch?', 'Everything on this phone and in your account goes, so you start as a new person.', 'Start again', testerReset);
@@ -2934,7 +2974,9 @@
     var dr = S.draft, start = todayStr(), less = dr.mode === 'less';
     var rule = dr.sched || { type: 'days', days: [0, 1, 2, 3, 4, 5, 6] };
     var act = { id: uuid(), text: dr.what.trim(), small: (dr.dimmer || '').trim(), up: (dr.upVersion || '').trim(), cue: (dr.anchor || '').trim(), schedules: [Object.assign({ from: start }, rule)], sort: 0, from: start, entries: {}, extra: dr.coachWhy ? { why: dr.coachWhy } : {}, createdAt: nowISO() };
-    var later = (dr.laterActs || []).map(function (x) { return { kind: 'action', text: x.text, small: x.small || '', up: x.up || '', schedule: x.schedule || null }; })
+    var acts2 = [act], sec = dr.second && (dr.second.text || '').trim() && dr.second.text.trim() !== act.text ? dr.second : null;
+    if (sec) acts2.push({ id: uuid(), text: sec.text.trim(), small: (sec.small || '').trim(), up: (sec.up || '').trim(), cue: (sec.cue || '').trim(), schedules: [Object.assign({ from: start }, sec.schedule || rule)], sort: 1, from: start, entries: {}, extra: {}, createdAt: nowISO() });
+    var later = (dr.laterActs || []).filter(function (x) { return !sec || x.text !== sec.text; }).map(function (x) { return { kind: 'action', text: x.text, small: x.small || '', up: x.up || '', schedule: x.schedule || null }; })
       .concat((dr.later || []).map(function (t) { return { kind: 'focus', title: t }; }));
     var title = less ? (dr.reduce || dr.focusTitle || '').trim() : (dr.focusTitle || dr.what || '').trim();
     var ex = Object.assign({ hard: { start: (dr.hardStart || '').trim(), off: (dr.hardOff || '').trim(), spark: (dr.hardSpark || '').trim() } }, dr.found ? { found: dr.found } : {}, dr.barriers && dr.barriers.length ? { barriers: dr.barriers.slice() } : {},
@@ -2943,7 +2985,7 @@
     if (dr.discovery) ex.discovery = dr.discovery;
     ex.intention = (dr.say || dr.focusTitle || dr.reduce || dr.found || dr.what || '').trim(); ex.coreSetupVersion = 1;
     S.habit = { id: uuid(), mode: less ? 'less' : 'more', title: title, towards: (dr.ownFeel || '').trim(), matters: (dr.matters || '').trim(), deeper: (dr.deeper || '').trim(), sign: (dr.sign || '').trim(), feel: dr.feel.slice(), gives: dr.gives.concat((dr.driveOwn || '').trim() ? [dr.driveOwn.trim()] : []),
-      length: dr.length || 30, start: start, status: 'active', pauses: [], finishedOn: null, later: later, extra: ex, createdAt: nowISO(), u: nowISO(), actions: [act] };
+      length: dr.length || 30, start: start, status: 'active', pauses: [], finishedOn: null, later: later, extra: ex, createdAt: nowISO(), u: nowISO(), actions: acts2 };
     keepGoal();
     S.later = false; S.fb = {}; S.catchup = []; S.stuSeen = {};
     if (S.carryTasks && S.carryTasks.length) { S.habit.tasks = S.carryTasks; } S.carryTasks = null; // unfinished to-dos come with you to the next plan
@@ -3176,14 +3218,24 @@
     return Object.assign({}, x, { text: text, cue: cue });
   }
   function hearingNext() {
-    var d = S.draft, x = (d.acts || [])[d.pick];
+    var d = S.draft, own = (d.ownAct || '').trim();
+    // Their own words come first; a picked card then becomes the second action. Otherwise first pick, then second pick.
+    var picks = [d.pick, d.pick2].filter(function (i) { return i != null && i >= 0 && (d.acts || [])[i]; });
+    var sec = own ? picks[0] : picks[1];
+    d.second = sec != null ? (function (y) { y = tidyAction(y, d.say); return { text: y.text, small: y.small || '', up: y.up || '', cue: y.cue || '', schedule: y.schedule || null }; })(d.acts[sec]) : null;
+    if (own) {
+      if (d.pickedFrom !== 'own:' + own) { d.pickedFrom = 'own:' + own; d.what = own; d.sched = null; d.fromCoach = false; }
+      d.laterActs = (d.acts || []).filter(function (y, j) { return j !== sec; }).map(function (y) { return { text: y.text, small: y.small, up: y.up, schedule: y.schedule }; });
+      save(false); if (d.quickSetup) return go('often'); return askNameThen(d.whyDone ? 'what' : 'feel');
+    }
+    var x = (d.acts || [])[d.pick];
     if (x && d.pickedFrom === d.pick + ':' + x.text) { save(false); if (d.quickSetup) return go('often'); return askNameThen(d.whyDone ? 'what' : 'feel'); }
     if (x) {
       // Same pick as before: keep whatever they've since typed. New pick: fill from it.
       d.pickedFrom = d.pick + ':' + x.text;
       x = tidyAction(x, d.say); d.anchor = x.cue || d.anchor;
       d.what = x.text; d.dimmer = x.small || d.dimmer; d.upVersion = x.up || ''; d.sched = x.schedule || null; d.schedFromUser = !!x.schedule_from_user; d.fromCoach = true; d.coachWhy = x.why || '';
-      d.laterActs = (d.acts || []).filter(function (y, j) { return j !== d.pick; }).map(function (y) { return { text: y.text, small: y.small, up: y.up, schedule: y.schedule }; });
+      d.laterActs = (d.acts || []).filter(function (y, j) { return j !== d.pick && j !== d.pick2; }).map(function (y) { return { text: y.text, small: y.small, up: y.up, schedule: y.schedule }; });
     }
     save(false); if (d.quickSetup) return go('often');
     askNameThen(d.whyDone ? 'what' : 'feel');
