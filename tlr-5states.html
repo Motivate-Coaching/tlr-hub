@@ -696,6 +696,19 @@ const STATES = [
   }
 ];
 
+
+// ── ANONYMOUS FUNNEL COUNTS (for Angus; no names or emails) ─────────────────
+const QE = { url: 'https://tsusrzkpzevpiuvsppls.supabase.co/rest/v1/quiz_events', key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzdXNyemtwemV2cGl1dnNwcGxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3NDAzMzUsImV4cCI6MjEwMTMxNjMzNX0.UQD9BaOjYWNOEVeV3QCF2sdlNc9SYJ2PrcZgpCtlQ8s' };
+const QSID = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2)).slice(0, 36);
+const QSRC = (new URLSearchParams(location.search).get('utm_source') || new URLSearchParams(location.search).get('src') || (document.referrer ? new URL(document.referrer).hostname : 'direct')).slice(0, 40);
+function quizEvent(event, state) {
+  try {
+    fetch(QE.url, { method: 'POST', keepalive: true, headers: { apikey: QE.key, Authorization: 'Bearer ' + QE.key, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ session: QSID, event, state: state || null, source: QSRC }) }).catch(() => {});
+  } catch (e) {}
+}
+quizEvent('view');
+
 // ── STATE ──────────────────────────────────────────────────────────────────
 let currentQ = 0;
 let answers = new Array(QUESTIONS.length).fill(null);
@@ -707,6 +720,7 @@ function startQuiz(e) {
   e.preventDefault();
   userName = document.getElementById('nameInput').value.trim();
   userEmail = document.getElementById('emailInput').value.trim();
+  quizEvent('start');
   // Subscribe at the results, so their result is saved with them.
   // If they leave part way through, they are still added (without a result).
   showScreen('screenQuiz');
@@ -884,9 +898,10 @@ function showResults() {
   const dominantIdx = scores.indexOf(Math.max(...scores));
   const state = STATES[dominantIdx];
   subscribeMailchimp(userName, userEmail, state.name);
+  quizEvent('result', state.name);
   const gslug = state.name.toLowerCase().replace(/\s+/g, '-');
   const gb = document.getElementById('guideBtn');
-  if (gb) { gb.href = 'guides/' + gslug + '-guide.pdf'; gb.textContent = 'Download your free guide: ' + state.name; }
+  if (gb) { gb.href = 'guides/' + gslug + '-guide.pdf'; gb.textContent = 'Download your free guide: ' + state.name; gb.onclick = () => quizEvent('guide', state.name); }
 
   // Title
   document.getElementById('resultsName').textContent = `${userName ? userName + "'s " : "Your "}5 States Profile`;
