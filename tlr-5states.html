@@ -312,6 +312,12 @@ body {
 .results-cta p { font-size: 15px; color: var(--text-dim); line-height: 1.7; margin-bottom: 24px; max-width: 440px; margin-left: auto; margin-right: auto; }
 .results-cta .btn-primary { max-width: 320px; }
 
+/* State video */
+.state-video { margin: 18px 0 26px; }
+.state-video-label { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+.state-video video { width: 100%; aspect-ratio: 16 / 9; display: block; background: #000; border-radius: 6px; border: 1px solid var(--border); }
+@media print { .state-video { display: none !important; } }
+
 /* Guide download */
 .guide-box { text-align: center; margin: 32px auto 8px; max-width: 520px; }
 .guide-box p { margin: 0 0 14px; }
@@ -431,6 +437,10 @@ body {
     <div class="dominant-section" id="dominantSection">
       <div class="dominant-label">Your strongest pattern right now is</div>
       <div class="dominant-name" id="dominantName"></div>
+      <div class="state-video">
+        <div class="state-video-label">A message from Stu</div>
+        <video id="stateVideo" controls playsinline preload="metadata"></video>
+      </div>
       <div class="dominant-desc" id="dominantDesc"></div>
       <div class="result-block">
         <div class="result-block-title">What this may be costing you</div>
@@ -895,6 +905,8 @@ function showResults() {
   subscribeMailchimp(userName, userEmail, state.name);
   quizEvent('result', state.name);
   const gslug = state.name.toLowerCase().replace(/\s+/g, '-');
+  const sv = document.getElementById('stateVideo');
+  if (sv) { const vs = gslug.replace(/^the-/, 'the-'); sv.poster = 'guides/videos/' + vs + '.jpg'; sv.src = 'guides/videos/' + vs + '.mp4'; }
   const gb = document.getElementById('guideBtn');
   if (gb) { gb.href = 'guides/' + gslug + '-guide.pdf'; gb.textContent = 'Download your free guide: ' + state.name; gb.onclick = () => quizEvent('guide', state.name); }
 
