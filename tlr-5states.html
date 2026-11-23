@@ -326,6 +326,12 @@ body {
 .results-cta p { font-size: 15px; color: var(--text-dim); line-height: 1.7; margin-bottom: 24px; max-width: 440px; margin-left: auto; margin-right: auto; }
 .results-cta .btn-primary { max-width: 320px; }
 
+/* Guide download */
+.guide-box { text-align: center; margin: 32px auto 8px; max-width: 520px; }
+.guide-box p { margin: 0 0 14px; }
+.guide-btn { display: inline-block; text-decoration: none; max-width: 420px; }
+@media print { .guide-box { display: none !important; } }
+
 /* PDF button */
 .pdf-btn {
   display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -443,6 +449,11 @@ body {
         <div class="result-block-title">What this may be showing you</div>
         <div class="insights-grid" id="showingList"></div>
       </div>
+    </div>
+
+    <div class="guide-box">
+      <p>Your two-page guide to <span>your pattern</span>: the signs, what it's costing you, and small steps out of it.</p>
+      <a class="btn-primary guide-btn" id="guideBtn" href="#" download target="_blank" rel="noopener">Download your free guide</a>
     </div>
 
     <div class="results-cta">
@@ -696,19 +707,25 @@ function startQuiz(e) {
   e.preventDefault();
   userName = document.getElementById('nameInput').value.trim();
   userEmail = document.getElementById('emailInput').value.trim();
-  subscribeMailchimp(userName, userEmail);
+  // Subscribe at the results, so their result is saved with them.
+  // If they leave part way through, they are still added (without a result).
   showScreen('screenQuiz');
   currentQ = 0;
   renderQuestion();
 }
 
-function subscribeMailchimp(name, email) {
+let subscribed = false;
+window.addEventListener('pagehide', () => { if (userEmail && !subscribed) subscribeMailchimp(userName, userEmail, ''); });
+
+function subscribeMailchimp(name, email, stateName) {
+  if (subscribed || !email) return;
+  subscribed = true;
   try {
     const parts = name.split(' ');
     const fname = parts[0] || '';
     const lname = parts.slice(1).join(' ') || '';
     const url = CONFIG.mailchimpUrl.replace('/post?', '/post-json?') +
-      `&EMAIL=${encodeURIComponent(email)}&FNAME=${encodeURIComponent(fname)}&LNAME=${encodeURIComponent(lname)}&c=?`;
+      `&EMAIL=${encodeURIComponent(email)}&FNAME=${encodeURIComponent(fname)}&LNAME=${encodeURIComponent(lname)}${stateName ? '&QUIZSTATE=' + encodeURIComponent(stateName) : ''}&c=?`;
     const img = new Image();
     img.src = url;
   } catch(e) {}
@@ -866,6 +883,10 @@ function showResults() {
   const scores = calcScores();
   const dominantIdx = scores.indexOf(Math.max(...scores));
   const state = STATES[dominantIdx];
+  subscribeMailchimp(userName, userEmail, state.name);
+  const gslug = state.name.toLowerCase().replace(/\s+/g, '-');
+  const gb = document.getElementById('guideBtn');
+  if (gb) { gb.href = 'guides/' + gslug + '-guide.pdf'; gb.textContent = 'Download your free guide: ' + state.name; }
 
   // Title
   document.getElementById('resultsName').textContent = `${userName ? userName + "'s " : "Your "}5 States Profile`;
