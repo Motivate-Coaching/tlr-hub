@@ -1,52 +1,38 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1B1A18">
 <title>The 5 Ways We Get Lost</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600&display=swap">
 <style>
 :root {
-  --bg: #0e0e0e;
-  --surface: #161616;
-  --surface2: #1e1e1e;
-  --border: rgba(255,255,255,0.08);
-  --gold: #c8a96e;
-  --gold-light: #e2c99a;
-  --gold-dim: rgba(200,169,110,0.18);
-  --text: #f0ede8;
-  --text-dim: rgba(240,237,232,0.55);
-  --text-muted: rgba(240,237,232,0.35);
+  --bg: #1B1A18;
+  --surface: #24221F;
+  --surface2: #2E2B27;
+  --border: rgba(244,233,220,0.16);
+  --gold: #C9A66B;
+  --gold-light: #DDBF8A;
+  --gold-dim: rgba(201,166,107,0.20);
+  --text: #F4E9DC;
+  --text-dim: rgba(244,233,220,0.82);
+  --text-muted: rgba(244,233,220,0.62);
   --radius: 4px;
   --drift: #7ba7c4;
-  --noise: #c47b7b;
+  --noise: #d38a8a;
   --carry: #8bc47b;
-  --replay: #c4a87b;
-  --whisper: #a87bc4;
-}
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    --bg: #f7f4ef;
-    --surface: #ffffff;
-    --surface2: #f0ede8;
-    --border: rgba(0,0,0,0.08);
-    --text: #1a1815;
-    --text-dim: rgba(26,24,21,0.55);
-    --text-muted: rgba(26,24,21,0.35);
-  }
-}
-:root[data-theme="light"] {
-  --bg: #f7f4ef;
-  --surface: #ffffff;
-  --surface2: #f0ede8;
-  --border: rgba(0,0,0,0.08);
-  --text: #1a1815;
-  --text-dim: rgba(26,24,21,0.55);
-  --text-muted: rgba(26,24,21,0.35);
+  --replay: #d4b47f;
+  --whisper: #b48ad0;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 16px; -webkit-font-smoothing: antialiased; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Jost', system-ui, sans-serif;
-  font-weight: 300;
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-weight: 400;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -65,7 +51,7 @@ body {
   width: 36px; height: 36px;
   border: 1px solid var(--gold);
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Playfair Display', Georgia, serif;
   font-size: 14px; color: var(--gold); letter-spacing: 0.05em;
 }
 .logo-text { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); }
@@ -89,9 +75,9 @@ body {
   color: var(--gold); margin-bottom: 20px;
 }
 .intro-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Playfair Display', Georgia, serif;
   font-size: clamp(2.2rem, 5vw, 3.2rem);
-  font-weight: 300; line-height: 1.1;
+  font-weight: 400; line-height: 1.1;
   color: var(--text); margin-bottom: 20px;
   text-wrap: balance;
 }
@@ -107,7 +93,7 @@ body {
   background: var(--surface2); border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 14px 16px; font-size: 15px; color: var(--text);
-  font-family: 'Jost', sans-serif; font-weight: 300;
+  font-family: 'Poppins', system-ui, sans-serif; font-weight: 400;
   outline: none; transition: border-color 0.2s;
 }
 .form-field input:focus { border-color: var(--gold); }
@@ -119,7 +105,7 @@ body {
   padding: 16px 32px; font-size: 13px; font-weight: 500;
   letter-spacing: 0.12em; text-transform: uppercase;
   cursor: pointer; transition: background 0.2s, transform 0.15s;
-  font-family: 'Jost', sans-serif;
+  font-family: 'Poppins', system-ui, sans-serif;
   margin-top: 8px;
 }
 .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); }
@@ -154,9 +140,9 @@ body {
 .question-box { max-width: 600px; width: 100%; }
 .q-number { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
 .q-text {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Playfair Display', Georgia, serif;
   font-size: clamp(1.5rem, 4vw, 2.1rem);
-  font-weight: 300; line-height: 1.3;
+  font-weight: 400; line-height: 1.3;
   color: var(--text); margin-bottom: 32px;
   text-wrap: balance;
 }
@@ -168,8 +154,8 @@ body {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 16px 20px;
   cursor: pointer; transition: border-color 0.2s, background 0.2s;
-  text-align: left; font-family: 'Jost', sans-serif;
-  font-size: 15px; font-weight: 300; color: var(--text);
+  text-align: left; font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 15px; font-weight: 400; color: var(--text);
   line-height: 1.5;
 }
 .option-btn:hover { border-color: var(--gold); background: var(--gold-dim); }
@@ -187,7 +173,7 @@ body {
 .scale-btn {
   width: 48px; height: 48px; border-radius: 50%;
   border: 1.5px solid var(--border); background: var(--surface);
-  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
+  font-family: 'Poppins', system-ui, sans-serif; font-size: 15px; font-weight: 400;
   color: var(--text-dim); cursor: pointer;
   transition: border-color 0.2s, background 0.2s, color 0.2s;
   display: flex; align-items: center; justify-content: center;
@@ -205,7 +191,7 @@ body {
 .yn-btn {
   flex: 1; padding: 18px; border-radius: var(--radius);
   border: 1px solid var(--border); background: var(--surface);
-  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
+  font-family: 'Poppins', system-ui, sans-serif; font-size: 15px; font-weight: 400;
   color: var(--text); cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
 }
@@ -217,7 +203,7 @@ body {
 .open-textarea {
   background: var(--surface2); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 16px;
-  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 300;
+  font-family: 'Poppins', system-ui, sans-serif; font-size: 15px; font-weight: 400;
   color: var(--text); line-height: 1.6; resize: vertical; min-height: 120px;
   outline: none; transition: border-color 0.2s;
 }
@@ -233,7 +219,7 @@ body {
   border: none; border-radius: var(--radius);
   padding: 14px 36px; font-size: 13px; font-weight: 500;
   letter-spacing: 0.12em; text-transform: uppercase;
-  cursor: pointer; font-family: 'Jost', sans-serif;
+  cursor: pointer; font-family: 'Poppins', system-ui, sans-serif;
   transition: background 0.2s; margin-left: auto;
 }
 .btn-next:hover { background: var(--gold-light); }
@@ -242,7 +228,7 @@ body {
   background: transparent; border: 1px solid var(--border);
   border-radius: var(--radius); padding: 14px 20px;
   font-size: 13px; font-weight: 400; letter-spacing: 0.1em;
-  color: var(--text-dim); cursor: pointer; font-family: 'Jost', sans-serif;
+  color: var(--text-dim); cursor: pointer; font-family: 'Poppins', system-ui, sans-serif;
   transition: border-color 0.2s;
 }
 .btn-back:hover { border-color: var(--text-muted); }
@@ -252,8 +238,8 @@ body {
 .results-hero { text-align: center; margin-bottom: 48px; }
 .results-eyebrow { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
 .results-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(2rem, 5vw, 3rem); font-weight: 300;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(2rem, 5vw, 3rem); font-weight: 400;
   color: var(--text); line-height: 1.1; margin-bottom: 14px;
   text-wrap: balance;
 }
@@ -265,7 +251,7 @@ body {
 #radarSvg { max-width: 380px; width: 100%; height: auto; }
 
 /* State labels on radar */
-.state-label { font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 400; fill: var(--text-dim); }
+.state-label { font-family: 'Poppins', system-ui, sans-serif; font-size: 15px; font-weight: 400; fill: var(--text-dim); }
 .data-dot { fill: var(--gold); stroke: var(--bg); stroke-width: 2; }
 .grid-line { stroke: var(--border); stroke-width: 1; fill: none; }
 .data-polygon { fill: rgba(200,169,110,0.15); stroke: var(--gold); stroke-width: 1.5; }
@@ -280,8 +266,8 @@ body {
 }
 .dominant-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
 .dominant-name {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 300;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 400;
   color: var(--gold); line-height: 1.1; margin-bottom: 20px;
 }
 .dominant-desc { font-size: 15px; line-height: 1.8; color: var(--text-dim); margin-bottom: 32px; }
@@ -319,8 +305,8 @@ body {
   border: 1px solid var(--border); border-radius: var(--radius);
 }
 .results-cta h3 {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(1.4rem, 3.5vw, 1.9rem); font-weight: 300;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.4rem, 3.5vw, 1.9rem); font-weight: 400;
   color: var(--text); margin-bottom: 14px;
 }
 .results-cta p { font-size: 15px; color: var(--text-dim); line-height: 1.7; margin-bottom: 24px; max-width: 440px; margin-left: auto; margin-right: auto; }
@@ -337,7 +323,7 @@ body {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   background: transparent; border: 1px solid var(--border);
   border-radius: var(--radius); padding: 12px 24px;
-  font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 400;
+  font-family: 'Poppins', system-ui, sans-serif; font-size: 12px; font-weight: 400;
   letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim);
   cursor: pointer; margin: 0 auto 36px; transition: border-color 0.2s, color 0.2s;
 }
@@ -353,6 +339,13 @@ body {
   .insight-item { background: #faf6f0; }
 }
 
+@media (max-width: 600px) {
+  .site-header { padding: 12px 16px; padding-top: max(12px, env(safe-area-inset-top)); }
+  .logo-mark { width: 32px; height: 32px; font-size: 12px; }
+  .quiz-label { font-size: 10px; }
+  input, select, textarea { font-size: 16px !important; }
+  button, .btn-primary { min-height: 52px; }
+}
 @media (max-width: 480px) {
   .scale-track { gap: 7px; }
   .scale-btn { width: 40px; height: 40px; font-size: 13px; }
@@ -360,6 +353,8 @@ body {
   .state-bar-name { min-width: 82px; font-size: 12px; }
 }
 </style>
+</head>
+<body>
 
 <!-- HEADER -->
 <header class="site-header">
@@ -425,7 +420,7 @@ body {
 
     <div class="radar-section">
       <div class="radar-container">
-        <svg id="radarSvg" viewBox="0 0 400 380" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="radarSvg" viewBox="-80 0 560 380" xmlns="http://www.w3.org/2000/svg"></svg>
       </div>
     </div>
 
@@ -955,7 +950,7 @@ function drawRadar(scores) {
   const ns = 'http://www.w3.org/2000/svg';
   const def = document.createElementNS(ns, 'defs');
   const style = document.createElementNS(ns, 'style');
-  style.textContent = `.state-label{font-family:'Jost',sans-serif;font-size:11px;fill:var(--text-dim,#888)}`;
+  style.textContent = `.state-label{font-family:'Poppins',sans-serif;font-size:15px;fill:var(--text-dim,#888)}`;
   def.appendChild(style);
   svg.appendChild(def);
 
@@ -1016,3 +1011,5 @@ function drawRadar(scores) {
   });
 }
 </script>
+</body>
+</html>
