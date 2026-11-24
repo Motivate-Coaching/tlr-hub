@@ -308,7 +308,7 @@ body {
 .state-bar-name { font-size: 13px; font-weight: 400; color: var(--text-dim); min-width: 100px; }
 .state-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
 .state-bar-fill { height: 100%; border-radius: 3px; transition: width 1s ease; background: var(--gold); }
-.state-bar-pct { font-size: 12px; color: var(--text-muted); min-width: 36px; text-align: right; font-variant-numeric: tabular-nums; }
+.state-bar-pct { font-size: 12px; color: var(--text-muted); min-width: 56px; text-align: right; letter-spacing: 0.04em; }
 
 /* CTA */
 .results-cta {
@@ -980,7 +980,7 @@ function showResults() {
     row.innerHTML = `
       <div class="state-bar-name">${s.name}</div>
       <div class="state-bar-track"><div class="state-bar-fill" style="width:${scores[i]}%;background:${s.color}"></div></div>
-      <div class="state-bar-pct">${scores[i]}%</div>
+      <div class="state-bar-pct">${scores[i] >= 67 ? 'Strong' : scores[i] >= 34 ? 'Present' : 'Quiet'}</div>
     `;
     barsEl.appendChild(row);
   });

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Balance Wheel — The Living Room</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
   --navy:      #0F1215;
@@ -21,6 +21,31 @@
   --border:    #E2D9CE;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── CLARITY SCORECARD GUIDE (beside the wheel setup) ── */
+#sc-guide:empty, #sc-done:empty { display: none; }
+.scg { font-family: 'Poppins', system-ui, sans-serif; background: #FFFFFF; border: 1px solid rgba(0,0,0,0.1); border-left: 4px solid #C9930A; border-radius: 10px; padding: 1rem 1.1rem; margin: 0 0 1.5rem; }
+.scg-head { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; cursor: pointer; }
+.scg-eyebrow { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #C9930A; }
+.scg-title { font-size: 1rem; font-weight: 600; color: #1A1A1A; }
+.scg-toggle { background: none; border: 0; font: 500 0.8rem 'Poppins', sans-serif; color: #4A4A4A; text-decoration: underline; cursor: pointer; white-space: nowrap; }
+.scg-body { margin-top: 0.85rem; }
+.scg.closed .scg-body { display: none; }
+.scg-rows { display: grid; gap: 0.45rem; margin-bottom: 0.9rem; }
+.scg-row { display: grid; grid-template-columns: 8.5rem 1fr auto; gap: 0.6rem; align-items: center; font-size: 0.85rem; color: #4A4A4A; }
+.scg-bar { height: 6px; background: #E5DDD1; border-radius: 3px; overflow: hidden; }
+.scg-bar span { display: block; height: 100%; background: #0F1215; border-radius: 3px; }
+.scg-lvl { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4A4A4A; white-space: nowrap; }
+.scg-lvl.low { color: #C9930A; }
+.scg-prompt { background: #EDE8DF; border-radius: 6px; padding: 0.8rem 0.9rem; font-size: 0.92rem; color: #1A1A1A; line-height: 1.55; }
+.scg-prompt b { font-weight: 600; }
+.scg-note { font-size: 0.78rem; color: #888880; margin-top: 0.6rem; }
+.scd { font-family: 'Poppins', system-ui, sans-serif; background: #0F1215; color: #FFFFFF; border-radius: 10px; padding: 1.1rem 1.2rem; margin: 0 0 1.5rem; display: flex; flex-wrap: wrap; gap: 0.9rem; align-items: center; justify-content: space-between; }
+.scd b { font-weight: 600; font-size: 1.02rem; display: block; }
+.scd small { color: rgba(255,255,255,0.7); font-size: 0.85rem; }
+.scd a { background: #FFFFFF; color: #0F1215; text-decoration: none; font: 500 0.8rem 'Poppins', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.85rem 1.2rem; border-radius: 4px; white-space: nowrap; }
+body.onboarding .page-tabs { display: none; }
+@media (max-width: 520px) { .scg-row { grid-template-columns: 1fr auto; row-gap: 0.3rem; } .scg-row .scg-bar { grid-column: 1 / -1; grid-row: 2; } .scg-rows { gap: 0.75rem; } }
+
 html { scroll-behavior: smooth; overflow-x: clip; }
 body { overflow-x: clip; }
 body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--text-dark); line-height: 1.65; font-size: 17px; }
@@ -306,6 +331,7 @@ header { background: var(--navy); position: relative; border-bottom: 3px solid v
 
 <!-- ════ WIZARD ════ -->
 <div class="wheel-page" id="wheel-wizard">
+<div id="sc-guide"></div>
 
   <!-- STEP 0: Welcome -->
   <div class="wizard-step active" id="step-0">
@@ -425,6 +451,7 @@ header { background: var(--navy); position: relative; border-bottom: 3px solid v
 
 <!-- ════ WHEEL VIEW ════ -->
 <div class="wheel-view" id="wheel-view">
+<div id="sc-done"></div>
 
   <div class="wheel-view-header">
     <div class="wheel-view-eyebrow">Your personal compass</div>
@@ -525,6 +552,8 @@ header { background: var(--navy); position: relative; border-bottom: 3px solid v
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js?v=20260922"></script>
 <script>
 // ── SEGMENT COLOURS ───────────────────────
 const COLORS = ['#E8A800','#E85B3A','#2AB5A0','#7C5CBF','#3A8FD9','#4DB87A','#D95B8F','#E87A3A'];
@@ -1446,6 +1475,67 @@ function renderHistory(data) {
       </div>`;
   });
 }
+</script>
+<script>
+// ── CLARITY SCORECARD → BALANCE WHEEL ──────────────────────────
+// The scorecard measures five inner areas, the wheel measures life areas the member
+// chooses, so we never fill in wheel scores for them. Their latest scorecard is shown
+// beside the setup as a guide, with one prompt from their growth edge.
+(function () {
+  const SC_AREAS = ['Mental Clarity', 'Energy & Agency', 'Self-Trust', 'Direction', 'Support'];
+  const SC_PROMPTS = [
+    'Your mind has been busy. Which areas of life feel most crowded or unfinished right now?',
+    'Your energy has been going to other people’s priorities. Where in your life do you feel that most?',
+    'You’ve been second-guessing yourself. Which areas of life bring that up most?',
+    'What matters and where your time goes have drifted apart. Which areas would you most like to bring back into line?',
+    'Support for your growth has felt thin. Which areas would you most like backing in?'
+  ];
+  const LV = s => s <= 3 ? ['low', 'Asking for attention'] : s <= 6 ? ['mid', 'Room to grow'] : ['high', 'Working well'];
+  const FROM_SC = new URLSearchParams(location.search).get('from') === 'scorecard';
+  let hasWheel = false; try { hasWheel = !!JSON.parse(localStorage.getItem('tlr_wheel_data') || 'null'); } catch (e) {}
+  if (FROM_SC && !hasWheel) document.body.classList.add('onboarding');
+
+  function guideHTML(cats, open) {
+    const idx = cats.map((s, k) => [s, k]);
+    const lo = idx.reduce((a, b) => b[0] < a[0] ? b : a)[1];
+    const rows = cats.map((s, k) => { const [c, l] = LV(s); return `<div class="scg-row"><span>${SC_AREAS[k]}</span><div class="scg-bar"><span style="width:${Math.max(s, 0.5) * 10}%"></span></div><span class="scg-lvl ${c}">${l}</span></div>`; }).join('');
+    return `<div class="scg ${open ? '' : 'closed'}" id="scg">
+      <div class="scg-head" onclick="document.getElementById('scg').classList.toggle('closed')">
+        <div><div class="scg-eyebrow">Your Clarity Scorecard</div><div class="scg-title">A guide while you choose</div></div>
+        <button class="scg-toggle" type="button">Show / hide</button>
+      </div>
+      <div class="scg-body">
+        <div class="scg-rows">${rows}</div>
+        <div class="scg-prompt">Your growth edge is <b>${SC_AREAS[lo]}</b>. ${SC_PROMPTS[lo]}</div>
+        <div class="scg-note">A guide, not a rule. You choose your areas and score them by your own measure.</div>
+      </div></div>`;
+  }
+
+  function doneHTML() {
+    return `<div class="scd"><div><b>Your wheel is set up.</b><small>Next: your dashboard, and the Members’ Lounge.</small></div><a href="index.html?welcome=1">Go to my dashboard →</a></div>`;
+  }
+
+  _supabase.auth.getSession().then(async ({ data: { session } }) => {
+    if (!session) return;
+    const { data } = await _supabase.from('scorecard_responses').select('scores').eq('user_id', session.user.id).order('created_at', { ascending: false }).limit(1);
+    const cats = data && data[0] && Array.isArray(data[0].scores) ? data[0].scores : null;
+    if (cats) document.getElementById('sc-guide').innerHTML = guideHTML(cats, FROM_SC);
+  }).catch(() => {});
+
+  // After the wizard saves, new members get a clear next step to their dashboard.
+  const _save = window.saveWheel;
+  if (typeof _save === 'function') {
+    window.saveWheel = function () {
+      _save.apply(this, arguments);
+      if (FROM_SC) {
+        document.body.classList.remove('onboarding');
+        document.getElementById('sc-done').innerHTML = doneHTML();
+        window.scrollTo(0, 0);
+        try { void logActivity('onboarding_wheel_done', 'my-wheel', {}); } catch (e) {}
+      }
+    };
+  }
+})();
 </script>
 </body>
 </html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clarity Scorecard | The Living Room (TLR)</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0F1215; --navy-mid: #1C2B3A;
+  --cream: #F5F1EB; --cream-dark: #EDE8DF; --cream-deep: #E5DDD1;
+  --text-dark: #1A1A1A; --text-mid: #4A4A4A; --text-muted: #888880;
+  --border: rgba(0,0,0,0.1); --accent: #C9930A; --white: #FFFFFF;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--cream); }
+body { font-family: 'Poppins', system-ui, sans-serif; color: var(--text-dark); line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+.topbar { background: var(--navy); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
+.topbar img { height: 30px; width: auto; display: block; }
+.topbar span { color: rgba(255,255,255,0.6); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+.wrap { max-width: 640px; margin: 0 auto; padding: 40px 20px 64px; }
+.screen { display: none; }
+.screen.active { display: block; animation: fade .25s ease; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+h1 { font-family: 'Playfair Display', Georgia, serif; font-weight: 400; font-size: clamp(30px, 7vw, 42px); line-height: 1.15; margin-bottom: 18px; }
+.lead { font-size: 16px; color: var(--text-mid); margin-bottom: 14px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--text-muted); margin: 22px 0 28px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 26px; border: 0; border-radius: 4px; background: var(--navy); color: var(--white); font: 500 14px 'Poppins', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; text-decoration: none; width: 100%; }
+.btn:hover { background: var(--navy-mid); }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn-ghost { background: transparent; color: var(--text-mid); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--cream-dark); }
+.link { background: none; border: 0; color: var(--text-mid); font: 400 14px 'Poppins', sans-serif; cursor: pointer; text-decoration: underline; padding: 10px 0; }
+.card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 26px 22px; }
+/* Questions */
+.progress { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+.track { height: 4px; background: var(--cream-deep); border-radius: 2px; margin-bottom: 30px; overflow: hidden; }
+.fill { height: 100%; background: var(--navy); width: 0; transition: width .3s ease; }
+.area { font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.qtext { font-size: clamp(20px, 4.6vw, 24px); font-weight: 500; line-height: 1.4; margin-bottom: 24px; }
+.opts { display: flex; flex-direction: column; gap: 10px; }
+.opt { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 54px; padding: 12px 16px; background: var(--white); border: 1px solid var(--border); border-radius: 6px; font: 400 15px 'Poppins', sans-serif; color: var(--text-dark); text-align: left; cursor: pointer; transition: border-color .15s, background .15s; }
+.opt:hover { border-color: var(--navy-mid); }
+.opt .dot { flex: none; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--cream-deep); }
+.opt.sel { border-color: var(--navy); background: var(--cream-dark); }
+.opt.sel .dot { border-color: var(--navy); background: var(--navy); box-shadow: inset 0 0 0 3px var(--white); }
+.qnav { display: flex; justify-content: space-between; align-items: center; margin-top: 22px; min-height: 44px; }
+/* Results */
+.row { padding: 18px 0; border-bottom: 1px solid var(--border); }
+.row:last-child { border-bottom: 0; }
+.row-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+.row-name { font-weight: 600; font-size: 16px; }
+.row-lvl { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-mid); white-space: nowrap; }
+.row-lvl.low { color: var(--accent); }
+.bar { height: 8px; background: var(--cream-deep); border-radius: 4px; overflow: hidden; }
+.bar span { display: block; height: 100%; background: var(--navy); border-radius: 4px; width: 0; transition: width .8s ease; }
+.row-score { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+.row-desc { font-size: 14px; color: var(--text-mid); margin-top: 8px; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 22px 0; }
+.pair .card { padding: 16px; border-top: 4px solid var(--navy); }
+.pair .card.edge { border-top-color: var(--accent); }
+.pair small { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+.pair b { font-size: 16px; font-weight: 600; }
+.bring { background: var(--cream-dark); border-radius: 6px; padding: 20px; margin-bottom: 22px; }
+.bring small { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+.bring p { font-size: 18px; font-weight: 500; line-height: 1.45; }
+.note { font-size: 13px; color: var(--text-muted); text-align: center; margin: 14px 0 0; }
+.stack { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
+.saving { text-align: center; padding: 80px 0; color: var(--text-mid); }
+.err { background: #FBEFEA; border: 1px solid rgba(140,74,47,.3); color: #8C4A2F; border-radius: 6px; padding: 12px 14px; font-size: 14px; margin-bottom: 16px; display: none; }
+@media (max-width: 480px) { .wrap { padding-top: 28px; } .pair { grid-template-columns: 1fr; } }
+@media print { .topbar, .stack, .note, .link { display: none !important; } body, html { background: #fff; } }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <img src="tlr-logo.png" alt="The Living Room (TLR)">
+  <span>Clarity Scorecard</span>
+</header>
+
+<main class="wrap">
+
+  <!-- Loading -->
+  <section class="screen active" id="s-load"><p class="saving">One moment…</p></section>
+
+  <!-- Intro -->
+  <section class="screen" id="s-intro">
+    <div class="eyebrow" id="intro-eyebrow">Before you explore</div>
+    <h1 id="intro-title">Welcome to The Living Room</h1>
+    <p class="lead" id="intro-lead">Before anything else, take five minutes for yourself. Fifteen quick questions look at five areas of life: your mental space, your energy, self-trust, direction and support.</p>
+    <p class="lead">There are no right answers. Go with your first instinct. Your results are private: only you and Stu can see them.</p>
+    <div class="meta"><span>15 questions</span><span>About 5 minutes</span><span>Results straight away</span></div>
+    <button class="btn" id="btn-start" onclick="start()">Start the scorecard</button>
+    <div class="stack" id="intro-extra" style="display:none">
+      <button class="btn btn-ghost" onclick="showLast()">See my last results</button>
+      <button class="link" onclick="history.back()">← Back</button>
+    </div>
+  </section>
+
+  <!-- Questions -->
+  <section class="screen" id="s-q">
+    <div class="progress"><span id="q-count">Question 1 of 15</span><span id="q-pct">0%</span></div>
+    <div class="track"><div class="fill" id="q-fill"></div></div>
+    <div class="area" id="q-area"></div>
+    <div class="qtext" id="q-text"></div>
+    <div class="opts" id="q-opts"></div>
+    <div class="qnav"><button class="link" id="q-back" onclick="back()">← Back</button><span></span></div>
+  </section>
+
+  <!-- Saving -->
+  <section class="screen" id="s-saving"><p class="saving">Putting your results together…</p></section>
+
+  <!-- Results -->
+  <section class="screen" id="s-results">
+    <div class="err" id="r-err"></div>
+    <div class="eyebrow">Your Clarity Scorecard</div>
+    <h1 id="r-title">Here’s what your answers show</h1>
+    <p class="lead">It reflects how things feel today, and it will shift as life does. Nothing here is a pass or a fail: it simply shows where to put your attention first.</p>
+    <div class="card" id="r-rows"></div>
+    <div class="pair">
+      <div class="card"><small>Where you’re strongest</small><b id="r-hi"></b></div>
+      <div class="card edge"><small>Your growth edge</small><b id="r-lo"></b></div>
+    </div>
+    <div class="bring"><small>Your question to bring to The Living Room</small><p id="r-q"></p></div>
+    <p class="lead" id="r-next-lead"></p>
+    <div class="stack" id="r-actions"></div>
+    <p class="note" id="r-note"></p>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js?v=20260922"></script>
+<script>
+// Clarity Scorecard for signed-in members. Same 15 questions and scoring as the
+// scorecard-submit edge function, which saves the result to the member's account
+// and emails them a copy. New members are sent here first (?first=1), on its own,
+// then on to set up their Balance Wheel.
+const FN_URL = SUPABASE_URL + '/functions/v1/scorecard-submit';
+const AREAS = [
+  { name: 'Mental Clarity', q: 'What’s one open loop you could close, or deliberately park, this week?',
+    desc: { low: 'Your answers suggest your mind may be working overtime, carrying open loops and background noise even when nothing urgent is happening.', mid: 'You seem to have moments of real clarity, but they may be fragile, especially when life gets full.', high: 'Your answers suggest the background noise is mostly quiet, leaving room to focus on what matters.' } },
+  { name: 'Energy & Agency', q: 'Where are you saying yes when you’d really like to say no?',
+    desc: { low: 'You may be giving a lot of your energy to obligations and other people’s priorities, and it could be costing more than it looks.', mid: 'You’re making some intentional choices, though old patterns of saying yes may still pull at you.', high: 'Your time and energy seem largely directed by choice rather than obligation.' } },
+  { name: 'Self-Trust', q: 'Think of a decision you got right. What did you know then that you’re doubting now?',
+    desc: { low: 'You may find yourself second-guessing decisions after making them, replaying them or looking for reassurance.', mid: 'You often back yourself, though some decisions may still come with a quiet round of doubt.', high: 'Your answers suggest you generally back your own judgement, even when others see it differently.' } },
+  { name: 'Direction', q: 'If your diary matched what matters most, what would change first?',
+    desc: { low: 'There may be a gap between what you say matters and where your time actually goes, with several things pulling for first place.', mid: 'Parts of your life seem to line up with what matters, and a few key areas may be asking for a rethink.', high: 'What you say matters and how you spend your time seem to be largely in step.' } },
+  { name: 'Support', q: 'Who helps you move forward, not just feel better? Who could?',
+    desc: { low: 'Your support around growth may feel thin right now, or you may tend to keep things to yourself.', mid: 'You seem to have people who reassure you. You may have fewer who also stretch you.', high: 'You seem to have people who both back you and push you forward, and you ask for help when you need it.' } }
+];
+const LIKERT = ['Strongly agree', 'Agree', 'Neutral', 'Disagree', 'Strongly disagree'];
+// t: n = agreeing scores low, p = agreeing scores high, c = choice (scores 5,4,2,1)
+const QS = [
+  { c:0, t:'n', text:'My mind feels busy even when nothing urgent is happening.' },
+  { c:0, t:'n', text:'Unfinished tasks or unresolved issues play on my mind and drain my energy.' },
+  { c:0, t:'n', text:'I struggle to focus on one thing without thinking about everything else I should be doing.' },
+  { c:1, t:'n', text:'I often feel drained by things I’ve agreed to but don’t actually want to be doing.' },
+  { c:1, t:'p', text:'I feel in control of how I choose to spend my time and energy.' },
+  { c:1, t:'n', text:'I regularly say yes to things out of obligation rather than intention.' },
+  { c:2, t:'n', text:'I tend to second-guess my decisions after I make them.' },
+  { c:2, t:'p', text:'I feel confident backing my own judgement, even when others disagree.' },
+  { c:2, t:'c', text:'After making an important decision, I usually feel:', opts:['Clear and settled','Mostly OK, with minor doubts','Unsure and replaying it','Anxious, looking for reassurance'] },
+  { c:3, t:'p', text:'There is clear alignment between what I say matters and how I spend my time.' },
+  { c:3, t:'n', text:'I feel pulled in multiple directions and struggle to prioritise what matters.' },
+  { c:3, t:'c', text:'If I redesigned my current work or life structure from scratch today, I would:', opts:['Keep most of it as it is','Adjust a few key areas','Change several significant parts','Start almost entirely differently'] },
+  { c:4, t:'p', text:'The people in my current support system don’t just reassure me, they help push me forward.' },
+  { c:4, t:'p', text:'When I need help, I ask the right people rather than staying silent.' },
+  { c:4, t:'c', text:'Right now, I would describe my support around growth as:', opts:['Active and challenging in a healthy way','Supportive but mostly reassuring','Inconsistent or unclear','Largely absent'] }
+];
+const CHOICE = [5, 4, 2, 1];
+const LVL = { low: 'Asking for attention', mid: 'Room to grow', high: 'Working well' };
+const lvl = s => s <= 3 ? 'low' : s <= 6 ? 'mid' : 'high';
+const params = new URLSearchParams(location.search);
+const FIRST = params.get('first') === '1';
+let user = null, firstName = '', qi = 0, answers = Array(QS.length).fill(null), last = null, busy = false;
+
+const $ = id => document.getElementById(id);
+function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id)); window.scrollTo(0, 0); }
+function score(ans) { const t = [0,0,0,0,0]; QS.forEach((q, i) => { const a = ans[i]; t[q.c] += q.t === 'n' ? a + 1 : q.t === 'p' ? 5 - a : CHOICE[a]; }); return t.map(x => Math.round(x / 15 * 10)); }
+function nameOf(u) {
+  const m = u.user_metadata || {};
+  let n = m.first_name || m.name || m.full_name || (u.email || '').split('@')[0].split(/[._-]/)[0] || '';
+  n = String(n).trim().split(/\s+/)[0];
+  return n ? n.charAt(0).toUpperCase() + n.slice(1) : '';
+}
+
+requireAuth().then(async u => {
+  if (!u) return;
+  user = u; firstName = nameOf(u);
+  try {
+    const { data } = await _supabase.from('scorecard_responses').select('scores, created_at').eq('user_id', u.id).order('created_at', { ascending: false }).limit(1);
+    last = data && data[0] ? data[0] : null;
+  } catch (e) { last = null; }
+  if (FIRST && last) { renderResults(last.scores, { done: true }); return; } // already done: carry on from results
+  if (FIRST) {
+    $('intro-title').textContent = firstName ? `Welcome to The Living Room, ${firstName}` : 'Welcome to The Living Room';
+  } else {
+    $('intro-eyebrow').textContent = 'Your Clarity Scorecard';
+    $('intro-title').textContent = last ? 'Take your scorecard again' : 'Your Clarity Scorecard';
+    $('intro-lead').textContent = 'Fifteen quick questions look at five areas of life: your mental space, your energy, self-trust, direction and support. Take it again every few months and see what’s moved.';
+    $('intro-extra').style.display = '';
+    if (!last) $('intro-extra').querySelector('.btn-ghost').style.display = 'none';
+  }
+  show('s-intro');
+  void logActivity('scorecard_view', 'clarity-scorecard', { first: FIRST });
+});
+
+function showLast() { if (last) renderResults(last.scores, { done: true, past: last.created_at }); }
+
+function start() {
+  qi = 0; answers = Array(QS.length).fill(null);
+  void logActivity('scorecard_start', 'clarity-scorecard', { first: FIRST });
+  renderQ(); show('s-q');
+}
+
+function renderQ() {
+  const q = QS[qi];
+  $('q-count').textContent = `Question ${qi + 1} of ${QS.length}`;
+  const pct = Math.round(qi / QS.length * 100);
+  $('q-pct').textContent = pct + '%'; $('q-fill').style.width = pct + '%';
+  $('q-area').textContent = AREAS[q.c].name;
+  $('q-text').textContent = q.text;
+  const opts = q.t === 'c' ? q.opts : LIKERT;
+  const box = $('q-opts'); box.innerHTML = '';
+  opts.forEach((label, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'opt' + (answers[qi] === i ? ' sel' : '');
+    b.innerHTML = '<span class="dot"></span><span></span>';
+    b.lastChild.textContent = label;
+    b.onclick = () => pick(i, b);
+    box.appendChild(b);
+  });
+  $('q-back').style.visibility = 'visible';
+}
+
+function pick(i, btn) {
+  if (busy) return; busy = true;
+  answers[qi] = i;
+  $('q-opts').querySelectorAll('.opt').forEach(o => o.classList.remove('sel'));
+  btn.classList.add('sel');
+  setTimeout(() => {
+    busy = false;
+    if (qi < QS.length - 1) { qi++; renderQ(); window.scrollTo(0, 0); }
+    else submit();
+  }, 260);
+}
+
+function back() {
+  if (qi === 0) { show('s-intro'); return; }
+  qi--; renderQ();
+}
+
+async function submit() {
+  show('s-saving');
+  const local = score(answers);
+  let saved = false, emailed = false;
+  try {
+    const { data: { session } } = await _supabase.auth.getSession();
+    const r = await fetch(FN_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (session ? session.access_token : SUPABASE_ANON_KEY) }, body: JSON.stringify({ answers }) });
+    const j = await r.json().catch(() => ({}));
+    saved = r.ok && j.ok; emailed = !!j.emailed;
+  } catch (e) { saved = false; }
+  void logActivity('scorecard_complete', 'clarity-scorecard', { first: FIRST, saved, scores: local });
+  renderResults(local, { saved, emailed, fresh: true });
+}
+
+function renderResults(cats, o = {}) {
+  $('r-title').textContent = firstName ? `${firstName}, here’s what your answers show` : 'Here’s what your answers show';
+  $('r-rows').innerHTML = cats.map((s, k) => `
+    <div class="row">
+      <div class="row-head"><span class="row-name"></span><span class="row-lvl ${lvl(s)}">${LVL[lvl(s)]}</span></div>
+      <div class="bar"><span data-w="${Math.max(s, 0.5) * 10}"></span></div>
+      <div class="row-score">${s} out of 10</div>
+      <div class="row-desc"></div>
+    </div>`).join('');
+  [...$('r-rows').querySelectorAll('.row')].forEach((row, k) => {
+    row.querySelector('.row-name').textContent = AREAS[k].name;
+    row.querySelector('.row-desc').textContent = AREAS[k].desc[lvl(cats[k])];
+  });
+  const idx = cats.map((s, k) => [s, k]);
+  const hi = idx.reduce((a, b) => b[0] > a[0] ? b : a)[1], lo = idx.reduce((a, b) => b[0] < a[0] ? b : a)[1];
+  $('r-hi').textContent = AREAS[hi].name; $('r-lo').textContent = AREAS[lo].name; $('r-q').textContent = AREAS[lo].q;
+
+  const err = $('r-err');
+  if (o.fresh && !o.saved) { err.style.display = 'block'; err.textContent = 'We couldn’t save your results just now. They’re all here on screen, and you can carry on. If you’d like them saved, take the scorecard again later.'; }
+  else err.style.display = 'none';
+  $('r-note').textContent = o.past ? `From ${new Date(o.past).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.` : (o.fresh && o.emailed ? 'We’ve emailed you a copy to keep.' : '');
+
+  const act = $('r-actions'); act.innerHTML = '';
+  if (FIRST) {
+    $('r-next-lead').textContent = 'Next, your Balance Wheel. You’ll choose the areas of life that matter most to you right now, with these results beside you as a guide. It takes about 10 minutes.';
+    act.innerHTML = '<a class="btn" href="my-wheel.html?from=scorecard">Next: build my Balance Wheel →</a><button class="link" onclick="location.href=\'index.html?welcome=1\'">I’ll do my wheel later</button>';
+  } else {
+    $('r-next-lead').textContent = '';
+    act.innerHTML = '<a class="btn" href="my-wheel.html?from=scorecard">See my Balance Wheel</a><button class="btn btn-ghost" onclick="window.print()">Print or save as PDF</button><button class="link" onclick="history.back()">← Back</button>';
+  }
+  show('s-results');
+  requestAnimationFrame(() => setTimeout(() => $('r-rows').querySelectorAll('.bar span').forEach(b => b.style.width = b.dataset.w + '%'), 60));
+}
+</script>
+</body>
+</html>
