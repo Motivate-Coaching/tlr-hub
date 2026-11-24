@@ -389,20 +389,8 @@ body {
       <div class="intro-eyebrow">The 5 States Framework</div>
       <h1 class="intro-title">The 5 Ways We Get Lost</h1>
       <p class="intro-body">Most people experience all five patterns to some degree. This short quiz reveals which ones are having the greatest influence on your life right now — and what they may be trying to show you.</p>
-      <form id="introForm" onsubmit="startQuiz(event)">
-        <div class="form-row">
-          <div class="form-field">
-            <label for="nameInput">Your first name</label>
-            <input type="text" id="nameInput" placeholder="First name" required autocomplete="given-name">
-          </div>
-          <div class="form-field">
-            <label for="emailInput">Email address</label>
-            <input type="email" id="emailInput" placeholder="you@example.com" required autocomplete="email">
-          </div>
-        </div>
-        <button type="submit" class="btn-primary">Begin the Quiz</button>
-      </form>
-      <p class="intro-note">Takes about 4 minutes. 17 questions.</p>
+      <button type="button" class="btn-primary" id="btnStart" onclick="startQuiz(event)">Start the quiz</button>
+      <p class="intro-note">17 questions · about 4 minutes · no sign-up to start</p>
     </div>
   </div>
 </div>
@@ -426,6 +414,32 @@ body {
   </div>
 </div>
 
+<!-- EMAIL SCREEN (after the last question) -->
+<div class="screen" id="screenEmail">
+  <div class="intro-wrap">
+    <div class="intro-box">
+      <div class="intro-eyebrow">All done</div>
+      <h1 class="intro-title">Your results are ready</h1>
+      <p class="intro-body">Where shall we send them? You'll see your full profile straight away, and we'll email you a copy plus your free guide.</p>
+      <form id="emailForm" onsubmit="submitEmail(event)">
+        <div class="form-row">
+          <div class="form-field">
+            <label for="nameInput">Your first name</label>
+            <input type="text" id="nameInput" placeholder="First name" required autocomplete="given-name" maxlength="60">
+          </div>
+          <div class="form-field">
+            <label for="emailInput">Email address</label>
+            <input type="email" id="emailInput" placeholder="you@example.com" required autocomplete="email" maxlength="200">
+          </div>
+        </div>
+        <button type="submit" class="btn-primary">Show my results</button>
+      </form>
+      <p class="intro-note">No spam. Unsubscribe any time.</p>
+      <div class="open-skip" style="text-align:center;margin-top:10px" onclick="goBack()">← Back to the last question</div>
+    </div>
+  </div>
+</div>
+
 <!-- RESULTS SCREEN -->
 <div class="screen" id="screenResults">
   <div class="results-wrap">
@@ -443,7 +457,7 @@ body {
 
     <div class="state-bars" id="stateBars"></div>
 
-    <button class="pdf-btn" onclick="window.print()">↓ Save as PDF</button>
+    <button class="pdf-btn" onclick="quizEvent('pdf', resultState);window.print()">↓ Save as PDF</button>
 
     <div class="dominant-section" id="dominantSection">
       <div class="dominant-label">Your strongest pattern right now is</div>
@@ -475,7 +489,7 @@ body {
     <div class="results-cta">
       <h3>Ready to find your way back?</h3>
       <p>The Living Room is a group coaching community where we do this work together — with honesty, warmth, and a structure that actually holds.</p>
-      <button class="btn-primary" onclick="window.open(CONFIG.joinUrl,'_blank')">Learn about The Living Room</button>
+      <button class="btn-primary" onclick="quizEvent('join_click', resultState);window.open(CONFIG.joinUrl,'_blank')">Learn about The Living Room</button>
     </div>
   </div>
 </div>
@@ -483,7 +497,7 @@ body {
 <script>
 const CONFIG = {
   mailchimpUrl: 'https://motivate-coaching.us18.list-manage.com/subscribe/post?u=575cbfd47d142d3fee69ff0b1&id=75e72f8d2a',
-  joinUrl: 'https://www.motivate-coaching.com/thelivingroom',
+  joinUrl: 'https://the-living-room.com/?utm_source=5states-quiz',
 };
 
 // ── QUESTIONS ──────────────────────────────────────────────────────────────
@@ -717,13 +731,25 @@ const STATES = [
 const QE = { url: 'https://tsusrzkpzevpiuvsppls.supabase.co/rest/v1/quiz_events', key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzdXNyemtwemV2cGl1dnNwcGxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3NDAzMzUsImV4cCI6MjEwMTMxNjMzNX0.UQD9BaOjYWNOEVeV3QCF2sdlNc9SYJ2PrcZgpCtlQ8s' };
 const QSID = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2)).slice(0, 36);
 const QSRC = (new URLSearchParams(location.search).get('utm_source') || new URLSearchParams(location.search).get('src') || (document.referrer ? new URL(document.referrer).hostname : 'direct')).slice(0, 40);
-function quizEvent(event, state) {
+const QDEV = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
+function quizEvent(event, state, q, detail) {
   try {
     fetch(QE.url, { method: 'POST', keepalive: true, headers: { apikey: QE.key, Authorization: 'Bearer ' + QE.key, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-      body: JSON.stringify({ session: QSID, event, state: state || null, source: QSRC }) }).catch(() => {});
+      body: JSON.stringify({ session: QSID, event, state: state || null, source: QSRC, q: (q === undefined ? null : q), detail: detail ? String(detail).slice(0, 40) : null }) }).catch(() => {});
   } catch (e) {}
 }
-quizEvent('view');
+quizEvent('view', null, null, QDEV);
+let resultState = null;
+// Where they were when they left (fires once, when the tab is closed or hidden for good)
+let exitSent = false;
+function where() {
+  const a = document.querySelector('.screen.active'); const id = a ? a.id : '';
+  if (id === 'screenQuiz') return ['question', currentQ + 1];
+  if (id === 'screenEmail') return ['email', null];
+  if (id === 'screenResults') return ['results', null];
+  return ['intro', null];
+}
+window.addEventListener('pagehide', () => { if (exitSent) return; exitSent = true; const [sc, q] = where(); quizEvent('exit', resultState, q, sc); });
 
 // ── STATE ──────────────────────────────────────────────────────────────────
 let currentQ = 0;
@@ -732,20 +758,25 @@ let userName = '';
 let userEmail = '';
 
 // ── INTRO ──────────────────────────────────────────────────────────────────
+let started = false;
 function startQuiz(e) {
-  e.preventDefault();
-  userName = document.getElementById('nameInput').value.trim();
-  userEmail = document.getElementById('emailInput').value.trim();
-  quizEvent('start');
-  // Subscribe at the results, so their result is saved with them.
-  // If they leave part way through, they are still added (without a result).
+  if (e) e.preventDefault();
+  if (!started) { started = true; quizEvent('start', null, 1, QDEV); }
   showScreen('screenQuiz');
   currentQ = 0;
   renderQuestion();
 }
 
+// Email is asked for only after the last question, to send the results.
+function submitEmail(e) {
+  e.preventDefault();
+  userName = document.getElementById('nameInput').value.trim();
+  userEmail = document.getElementById('emailInput').value.trim();
+  quizEvent('email_submit');
+  showResults();
+}
+
 let subscribed = false;
-window.addEventListener('pagehide', () => { if (userEmail && !subscribed) subscribeMailchimp(userName, userEmail, ''); });
 
 function subscribeMailchimp(name, email, stateName) {
   if (subscribed || !email) return;
@@ -765,20 +796,32 @@ function subscribeMailchimp(name, email, stateName) {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
 }
 
 function goBack() {
+  if (document.getElementById('screenEmail').classList.contains('active')) { showScreen('screenQuiz'); renderQuestion(); return; }
+  quizEvent('back', null, currentQ + 1);
   if (currentQ === 0) { showScreen('screenIntro'); return; }
   currentQ--;
   renderQuestion();
 }
 
+function answerLabel(i) {
+  const a = answers[i];
+  if (QUESTIONS[i].type === 'open') return a ? 'written' : 'blank';
+  return a === null ? '' : String(a);
+}
+
 function goNext() {
+  quizEvent('answer', null, currentQ + 1, answerLabel(currentQ));
   if (currentQ < QUESTIONS.length - 1) {
     currentQ++;
     renderQuestion();
   } else {
-    showResults();
+    quizEvent('email_view');
+    showScreen('screenEmail');
+    const n = document.getElementById('nameInput'); if (n && !QDEV.startsWith('mobile')) n.focus();
   }
 }
 
@@ -874,7 +917,7 @@ function renderQuestion() {
     const skip = document.createElement('div');
     skip.className = 'open-skip';
     skip.textContent = 'Skip this question →';
-    skip.onclick = () => { answers[currentQ] = ''; goNext(); };
+    skip.onclick = () => { answers[currentQ] = ''; quizEvent('skip', null, currentQ + 1); goNext(); };
     wrap.appendChild(ta);
     wrap.appendChild(skip);
     area.appendChild(wrap);
@@ -914,10 +957,11 @@ function showResults() {
   const dominantIdx = scores.indexOf(Math.max(...scores));
   const state = STATES[dominantIdx];
   subscribeMailchimp(userName, userEmail, state.name);
+  resultState = state.name;
   quizEvent('result', state.name);
   const gslug = state.name.toLowerCase().replace(/\s+/g, '-');
   const sv = document.getElementById('stateVideo');
-  if (sv) { const vs = gslug.replace(/^the-/, 'the-'); sv.poster = 'guides/videos/' + vs + '.jpg'; sv.src = 'guides/videos/' + vs + '.mp4'; }
+  if (sv) { const vs = gslug.replace(/^the-/, 'the-'); sv.poster = 'guides/videos/' + vs + '.jpg'; sv.src = 'guides/videos/' + vs + '.mp4'; sv.onplay = () => { if (!sv.dataset.logged) { sv.dataset.logged = '1'; quizEvent('video_play', state.name); } }; }
   const gb = document.getElementById('guideBtn');
   if (gb) { gb.href = 'guides/' + gslug + '-guide.pdf'; gb.textContent = 'Download your free guide: ' + state.name; gb.onclick = () => quizEvent('guide', state.name); }
 
