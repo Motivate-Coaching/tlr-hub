@@ -1,6 +1,7 @@
 // scorecard-submit/index.ts
 // Saves a completed Clarity Scorecard and emails the person their results.
-// Called by https://the-living-room.com/scorecard/ (no sign-in). Scores are worked out here, not trusted from the page.
+// Called by the TLR Hub (signed-in members: clarity-scorecard.html) and https://the-living-room.com/scorecard/ (no sign-in).
+// Members are identified from their sign-in token, so the page never sends a name or email for them. Scores are worked out here, not trusted from the page.
 // Secrets (RESEND_API_KEY) live in Supabase secrets, never in this file.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -13,7 +14,8 @@ const FROM = 'The Living Room <hello@mail.the-living-room.com>'
 const FROM_FALLBACK = 'The Living Room <stuart@motivate-coaching.com>'
 const REPLY_TO = 'stuart@motivate-coaching.com'
 const SITE = 'https://the-living-room.com'
-const ALLOWED = ['https://the-living-room.com', 'https://www.the-living-room.com', 'https://tlr-the-living-room.netlify.app', 'http://localhost:8765']
+const HUB = 'https://motivate-coaching.github.io/tlr-hub'
+const ALLOWED = ['https://the-living-room.com', 'https://www.the-living-room.com', 'https://tlr-the-living-room.netlify.app', 'https://motivate-coaching.github.io', 'http://localhost:8765']
 
 const AREAS = [
   { name: 'Mental Clarity', q: 'What’s one open loop you could close, or deliberately park, this week?',
@@ -40,9 +42,9 @@ function scores(ans: number[]): number[] {
   return t.map(x => Math.round((x / 15) * 10))
 }
 
-function emailHtml(name: string, cats: number[]): string {
+function emailHtml(name: string, cats: number[], member = false): string {
   const o = cats.map((s, k) => [s, k]); const lo = o.reduce((a, b) => (b[0] < a[0] ? b : a)); const hi = o.reduce((a, b) => (b[0] > a[0] ? b : a))
-  const link = `${SITE}/scorecard/?s=${cats.join('-')}`
+  const link = member ? `${HUB}/clarity-scorecard.html` : `${SITE}/scorecard/?s=${cats.join('-')}`
   const rows = cats.map((s, k) => `
     <tr><td style="padding:14px 0 4px;font-size:15px;font-weight:600;color:#111111;">${AREAS[k].name}</td>
         <td align="right" style="padding:14px 0 4px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8A6A32;">${LVL[lvl(s)]}</td></tr>
@@ -80,7 +82,7 @@ function emailHtml(name: string, cats: number[]): string {
       <p style="margin:0;font-size:18px;font-weight:600;color:#111111;line-height:1.45;">${AREAS[lo[1]].q}</p>
     </td></tr></table>
     <p style="margin:18px 0 22px;font-size:15px;color:#5E584F;line-height:1.65;">Bring it to a live session and explore it with Stu and the group. You don’t need to have it worked out first.</p>
-    <a href="${link}" style="display:inline-block;background:#BF9A60;color:#000000;text-decoration:none;font-size:15px;font-weight:600;padding:14px 26px;border-radius:4px;">See your full results and charts</a>
+    <a href="${link}" style="display:inline-block;background:#BF9A60;color:#000000;text-decoration:none;font-size:15px;font-weight:600;padding:14px 26px;border-radius:4px;">${member ? 'See your results in your TLR Hub' : 'See your full results and charts'}</a>
   </td></tr>
   <tr><td style="background:#F1EBE1;border-radius:0 0 10px 10px;padding:18px 32px;text-align:center;">
     <p style="margin:0;font-size:12px;color:#5E584F;line-height:1.7;">Your scorecard isn’t a diagnosis or a test you can pass or fail. Take it again in three months and see what’s moved.<br>The Living Room · <a href="${SITE}/privacy" style="color:#5E584F;">Privacy</a></p>
@@ -92,7 +94,7 @@ function cors(origin: string | null) {
   return {
     'Access-Control-Allow-Origin': origin && ALLOWED.includes(origin) ? origin : ALLOWED[0],
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'content-type',
+    'Access-Control-Allow-Headers': 'authorization, apikey, content-type',
     'Vary': 'Origin',
   }
 }
@@ -105,29 +107,43 @@ Deno.serve(async (req) => {
 
   let body: { name?: unknown; email?: unknown; answers?: unknown }
   try { body = await req.json() } catch { return json({ error: 'bad_json' }, 400) }
-  const name = typeof body.name === 'string' ? body.name.trim().slice(0, 60) : ''
-  const email = typeof body.email === 'string' ? body.email.trim().toLowerCase().slice(0, 200) : ''
+  const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { autoRefreshToken: false, persistSession: false } })
+  // Signed-in member? Take their email and name from the account, never from the page.
+  let userId: string | null = null
+  let name = typeof body.name === 'string' ? body.name.trim().slice(0, 60) : ''
+  let email = typeof body.email === 'string' ? body.email.trim().toLowerCase().slice(0, 200) : ''
+  const token = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '')
+  if (token) {
+    const { data: u } = await db.auth.getUser(token)
+    if (u?.user && !u.user.is_anonymous && u.user.email) {
+      userId = u.user.id
+      email = u.user.email.toLowerCase()
+      const m = (u.user.user_metadata || {}) as Record<string, unknown>
+      const metaName = [m.first_name, m.name, m.full_name].find(v => typeof v === 'string' && v.trim()) as string | undefined
+      if (!name) name = (metaName ? metaName.trim().split(/\s+/)[0] : email.split('@')[0].split(/[._-]/)[0]).slice(0, 60)
+      name = name.charAt(0).toUpperCase() + name.slice(1)
+    }
+  }
   const answers = Array.isArray(body.answers) ? body.answers : []
   if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json({ error: 'bad_contact' }, 400)
   if (answers.length !== QS.length || answers.some((a, i) => !Number.isInteger(a) || a < 0 || a > (QS[i][1] === 'c' ? 3 : 4))) return json({ error: 'bad_answers' }, 400)
 
-  const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { autoRefreshToken: false, persistSession: false } })
   const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString()
   const { count } = await db.from('scorecard_responses').select('id', { count: 'exact', head: true }).eq('email', email).gte('created_at', since)
   if ((count ?? 0) >= 5) return json({ error: 'too_many' }, 429)
 
   const cats = scores(answers as number[])
-  const { error } = await db.from('scorecard_responses').insert({ first_name: name, email, answers, scores: cats })
+  const { error } = await db.from('scorecard_responses').insert({ first_name: name, email, answers, scores: cats, user_id: userId, source: userId ? 'hub' : 'welcome' })
   if (error) { console.error('[scorecard-submit] insert failed', error.message); return json({ error: 'save_failed' }, 500) }
 
   let emailed = false
   const send = (from: string) => fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from, reply_to: REPLY_TO, to: [email], subject: 'Your Clarity Scorecard results', html: emailHtml(name, cats) }),
+    body: JSON.stringify({ from, reply_to: REPLY_TO, to: [email], subject: 'Your Clarity Scorecard results', html: emailHtml(name, cats, !!userId) }),
   })
   let res = await send(FROM)
   if (res.status === 403 || res.status === 422) { console.error('[scorecard-submit] TLR sender refused, using fallback', await res.text()); res = await send(FROM_FALLBACK) }
   if (res.ok) emailed = true; else console.error('[scorecard-submit] Resend error', await res.text())
-  return json({ ok: true, emailed })
+  return json({ ok: true, emailed, scores: cats })
 })
